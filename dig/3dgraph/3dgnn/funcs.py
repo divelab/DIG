@@ -141,3 +141,42 @@ def real_sph_harm(k, zero_m_only=True, spherical_coordinates=True):
                     2**0.5 * sph_harm_prefactor(i, -j) * S_m[j] * P_l_m[i][j])
 
     return Y_func_l_m
+
+
+class Point():
+    def __init__(self,x,y,z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def distance(self):
+        xx = (self.x) ** 2
+        yy = (self.y) ** 2
+        zz = (self.z) ** 2
+        return (xx + yy + zz) ** (0.5)
+
+    def vector(self,other):
+        xx = (self.x - other.x)
+        yy = (self.y - other.y)
+        zz = (self.z - other.z)
+        return Point(xx,yy,zz)
+
+    def cross(self,other):
+        return Point(self.x*other.z-self.z*other.y , self.z*other.x-self.x*other.z , self.x*other.y-self.y*other.x)
+
+    def dot(self,other):
+        return (self.x*other.x + self.y*other.y + self.z*other.z)
+    # def dot(self, other):
+    #     return Point((self.x * other.x),
+    #                  (self.y * other.y),
+    #                  (self.z * other.z))
+
+    def angle(self,second,third,forth):
+
+        vertor11 = point1.vector(point2)
+        vertor12 = point1.vector(point3)
+        vertor21 = point4.vector(point2)
+        vertor22 = point4.vector(point3)
+        vertor1 = vertor11.cross(vertor12)
+        vertor2 = vertor21.cross(vertor22)
+        return math.acos(  (vertor1.dot(vertor2)) / ((vertor1.distance())*(vertor2.distance())) )
