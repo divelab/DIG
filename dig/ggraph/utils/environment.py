@@ -8,6 +8,8 @@ import copy
 import networkx as nx
 from .sascorer import calculateScore
 import itertools
+from rdkit import DataStructs
+
 
 def convert_radical_electrons_to_hydrogens(mol):
     """
@@ -219,3 +221,22 @@ def zinc_molecule_filter(mol):
     params.AddCatalog(FilterCatalogParams.FilterCatalogs.ZINC)
     catalog = FilterCatalog(params)
     return not catalog.HasMatch(mol)
+
+
+def reward_target_molecule_similarity(mol, target, radius=2, nBits=2048,
+                                      useChirality=True):
+    """
+    Reward for a target molecule similarity, based on tanimoto similarity
+    between the ECFP fingerprints of the x molecule and target molecule
+    :param mol: rdkit mol object
+    :param target: rdkit mol object
+    :return: float, [0.0, 1.0]
+    """
+    x = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=radius,
+                                                        nBits=nBits,
+                                                        useChirality=useChirality)
+    target = rdMolDescriptors.GetMorganFingerprintAsBitVect(target,
+                                                            radius=radius,
+                                                        nBits=nBits,
+                                                        useChirality=useChirality)
+    return DataStructs.TanimotoSimilarity(x, target)
