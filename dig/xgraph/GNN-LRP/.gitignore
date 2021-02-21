@@ -1,3 +1,5 @@
-./clear_ckpt.py
-./checkpoints/**
-./benchmark/datasets/**
+clear_ckpt.py
+checkpoints/**
+benchmark/datasets/**
+**/__pycache__/**
+__pycache__/**
