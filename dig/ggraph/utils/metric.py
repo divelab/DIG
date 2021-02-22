@@ -5,12 +5,12 @@ import numpy as np
 
 
 
-def metric_random_generation(mols, data_file=None):
+def metric_random_generation(mols, train_smiles):
     """
     Evaluation in random generation task.
     Compute the valid ratio, unique ratio and novel ratio of generated molecules
     param mols: a list of generated molecules reprsented by Chem.RWMol objects
-    param data_file: the path to the training data file, used to compute the novel ratio
+    param train_smiles: a list of smiles strings used for training
     """
     results = {}
     valid_mols = [mol for mol in mols if check_chemical_validity(mol)]
@@ -23,11 +23,9 @@ def metric_random_generation(mols, data_file=None):
         print("Unique Ratio: {}/{} = {:.2f}%".format(len(unique_smiles), len(valid_smiles), len(unique_smiles)/len(valid_smiles)*100))
         results['unique_ratio'] = len(unique_smiles) / len(valid_smiles) * 100
 
-        if data_file is not None:
-            train_smiles = get_smiles(data_file)
-            novels = [1 for smile in valid_smiles if smile not in train_smiles]
-            print("Novel Ratio: {}/{} = {:.2f}%".format(len(novels), len(train_smiles), len(novels)/len(train_smiles)*100))
-            results['novel_ratio'] = len(novels) / len(valid_smiles) * 100
+        novels = [1 for smile in valid_smiles if smile not in train_smiles]
+        print("Novel Ratio: {}/{} = {:.2f}%".format(len(novels), len(valid_smiles), len(novels)/len(valid_smiles)*100))
+        results['novel_ratio'] = len(novels) / len(valid_smiles) * 100
     
     return results
 
