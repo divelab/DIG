@@ -1,6 +1,6 @@
 # GNN-LRP
 
-This is a reproductive code for GNN-LRP following the [Higher-Order Explanations of Graph Neural Networks via Relevant Walks](https://arxiv.org/abs/2006.03589).
+Code for GNN-LRP following the [Higher-Order Explanations of Graph Neural Networks via Relevant Walks](https://arxiv.org/abs/2006.03589).
 
 ## Table of Contents
 
@@ -14,6 +14,7 @@ This is a reproductive code for GNN-LRP following the [Higher-Order Explanations
 ## Requirements
 
 * Ubuntu
+* Anaconda
 * Cuda 10.2 & Cudnn (>=7.0)
 
 ## Installation
@@ -61,8 +62,10 @@ where the `--nolabel` means to remove debug labels on the graph.
 
 The edge view and the path view are:
 
-<img src="./figures/ba_shape.png" alt="ba_shape" style="zoom:50%"/>
-<img src="./figures/ba_shape_edge.png" alt="ba_shape_edge" style="zoom:50%"/>
+<img src="./figures/ba_shape.png" alt="ba_shape" style="zoom:30%"/>
+<img src="./figures/ba_shape_edge.png" alt="ba_shape_edge" style="zoom:30%"/>
+
+where F means Fidelity while S means Sparsity.
 
 ## Customization
 
