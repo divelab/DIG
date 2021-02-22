@@ -7,8 +7,8 @@ Author: Shurui Gui
 """
 
 import os
-import torch
 from definitions import ROOT_DIR
+import torch
 import time
 from benchmark.data import load_dataset, create_dataloader
 from benchmark.models import load_model, config_model, load_explainer
@@ -18,8 +18,8 @@ from benchmark.kernel.explain import XCollector, sample_explain
 from benchmark.args import data_args
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from cilog import fill_table
 import shutil
+
 
 
 # Parse arguments
@@ -86,6 +86,14 @@ elif args['common'].task == 'explain':
             print(f'#IN#explain graph line {loader["explain"].dataset.indices[index] + 2}')
             data = list(loader['explain'])[index]
             sample_explain(explainer, data, explain_collector, sparsity=args['explain'].sparsity)
+
+        explain_tok = time.time()
+
+        print(
+            f'#IM#Explain method {args["explain"].explainer}\'s performance on {args["common"].model_name} with {args["common"].dataset_name}:\n'
+            f'Fidelity: {explain_collector.fidelity:.4f}\n'
+            f'Sparsity: {explain_collector.sparsity:.4f}\n'
+            f'Explain average time: {explain_tok - explain_tik:.4f}s')
     else:
         if data_args.model_level == 'node':
             index = -1
@@ -104,26 +112,13 @@ elif args['common'].task == 'explain':
                 print(f'#IN#explain graph line {loader["explain"].dataset.indices[index] + 2}')
                 sample_explain(explainer, data, explain_collector, sparsity=args['explain'].sparsity)
 
-                if args['explain'].list_sample:
-                    list_name = f'{args["explain"].model_name}_{args["explain"].dataset_name}_{args["explain"].sparsity}'
-                    list_format = [list(range(100)),
-                                   ['GradCAM', 'DeepLIFT', 'GNNExplainer', 'GNN_GI', 'WalkEraser', 'GNN_LRP', 'FlowExplainer']]
-                    fill_table(os.path.join(ROOT_DIR, 'quantitative_results', f'{list_name}.xlsx'),
-                               value=f'{explain_collector.fidelity:.4f}',
-                               x=index, y=args['explain'].explainer,
-                               table_format=list_format)
-                    explain_collector.new()
-
                 if index >= 99:
                     break
 
-    explain_tok = time.time()
+        explain_tok = time.time()
 
 
-    print(f'#IM#Explain method {args["explain"].explainer}\'s performance on {args["common"].model_name} with {args["common"].dataset_name}:\n'
-          f'Fidelity: {explain_collector.fidelity:.4f}\n'
-          f'Infidelity: {explain_collector.infidelity:.4f}\n'
-          f'RegularFidelity: {explain_collector.regular_fidelity:.4f}\n'
-          f'RegularInfidelity: {explain_collector.regular_infidelity:.4f}\n'
-          f'Sparsity: {explain_collector.sparsity:.4f}\n'
-          f'Explain average time: {(explain_tok - explain_tik) / 100.0}s')
+        print(f'#IM#Explain method {args["explain"].explainer}\'s performance on {args["common"].model_name} with {args["common"].dataset_name}:\n'
+              f'Fidelity: {explain_collector.fidelity:.4f}\n'
+              f'Sparsity: {explain_collector.sparsity:.4f}\n'
+              f'Explain average time: {(explain_tok - explain_tik) / 100.0:.4f}s')

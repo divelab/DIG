@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="ssh://citrine@www.citrine.top:3022/home/citrine/anaconda3/envs/torch_v1.5/bin/python" autoUploadExternalChanges="true">
+    <serverData>
+      <paths name="ssh://citrine@www.citrine.top:3022/home/citrine/anaconda3/envs/torch_v1.5/bin/python">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/citrine/Projects/GNN/DIG" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>

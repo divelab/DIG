@@ -42,7 +42,7 @@ def load_dataset(name: str) -> dir:
         data_args.dataset_type = 'mol'
         data_args.model_level = 'graph'
 
-        dataset = MoleculeNet(root=os.path.join(ROOT_DIR, 'benchmark', 'datasets'), name=name)
+        dataset = MoleculeNet(root=os.path.abspath(os.path.join(ROOT_DIR, '..', 'datasets')), name=name)
         dataset.data.x = dataset.data.x.to(torch.float32)
         data_args.dim_node = dataset.num_node_features
         data_args.dim_edge = dataset.num_edge_features
@@ -74,7 +74,7 @@ def load_dataset(name: str) -> dir:
         data_args.dataset_type = 'syn'
         data_args.model_level = 'graph'
 
-        dataset = BA_LRP(root=os.path.join(ROOT_DIR, 'benchmark', 'datasets', 'ba_lrp'),
+        dataset = BA_LRP(root=os.path.join(ROOT_DIR, '..', 'datasets', 'ba_lrp'),
                          num_per_class=10000)
         dataset.data.x = dataset.data.x.to(torch.float32)
         data_args.dim_node = dataset.num_node_features
@@ -106,7 +106,7 @@ def load_dataset(name: str) -> dir:
         data_args.dataset_type = 'syn'
         data_args.model_level = 'node'
 
-        dataset = BA_Shape(root=os.path.join(ROOT_DIR, 'benchmark', 'datasets', 'ba_shape'),
+        dataset = BA_Shape(root=os.path.join(ROOT_DIR, '..', 'datasets', 'ba_shape'),
                          num_base_node=300, num_shape=80)
         dataset.data.x = dataset.data.x.to(torch.float32)
         data_args.dim_node = dataset.num_node_features

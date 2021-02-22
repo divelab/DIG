@@ -3,3 +3,5 @@ checkpoints/**
 benchmark/datasets/**
 **/__pycache__/**
 __pycache__/**
+/log/pipeline.log
+/checkpoints.zip

@@ -1,144 +1,80 @@
-# Brief introduction of GNN_benchmark
+# GNN-LRP
 
-**Statement:** This introduction is only writen for code hacker.
-It is not a **User Cookbook**!
+This is a reproductive code for GNN-LRP following the [Higher-Order Explanations of Graph Neural Networks via Relevant Walks](https://arxiv.org/abs/2006.03589).
 
-## Environment
+## Table of Contents
 
-Please use `environment.yaml`.
+1. [Requirements](#requirements)
+1. [Installation](#installation)
+1. [Usage](#usage)
+1. [Demos](#demos)
+1. [Customization](#customization)
+1. [Citation](#citation)
 
-`conda env create -n GNN_benchmark -f environment.yaml`
+## Requirements
 
-## Project structure
+* Ubuntu
+* Cuda 10.2 & Cudnn (>=7.0)
 
-**Entry point**
+## Installation
 
-benchmark.kernel.pipeline
+* Clone this repo
+* Install the environment `xgraph` requirements
+* Download datasets, then download the pretrained models.
 
-*First-order Dependency*:
-* benchmark.kernel.*
-* benchmark.data.dataset
-* benchmark.models
-    * explainer_manager
-    * model_manager
-* benchmark
-    * args
-    * logger
-
-**Nearly all of the files depend on benchmark.args and
-benchmark.logger.**
-
-**Generally, files depends on utils at the same level.**
-
-**Models and explainers are exposed through their manager.**
-
-
-## Simply start
-
-### Train a model
-
-**First Step**
-
-Please check the `benchmark.data.dataset` first to know what are the supported
-datasets. 
-
-Currently, **Molecule Datasets** ("ESOL", "FreeSolv", "Lipo", "PCBA", "MUV", "HIV",
-    "BACE", "BBPB", "Tox21", "ToxCast", "SIDER", "ClinTox") are supported.
-    
-So that you can choose a `dataset_name` you want to use.
-
-For multi-target dataset, if you only want to choose one target but not
-all of the targets, please keep a `target_idx` that is the target index you want given
-several targets.
-
-**Second Step**
-
-Please check the `benchmark.models.models` for supported model class names.
-
-So you have a `model_name`.
-
-
-**Third Step**
-
-Keep your `learning rate` and `epoch`.
-
-**Other parameters** including batch_size can also be referred in
-`benchmark.args`.
-
-Now run the following command at the root of your project in a shell. Or you can use any
-IDE, but you have to tackle possible problem.
-
-```bash
-python -m benchmark.kernel.pipeline --task train --lr learning rate --model_name model_name --dataset_name dataset_name --target_idx target_idx --epoch epoch
+```shell script
+$ git clone git@github.com:divelab/DIG.git
+$ cd DIG/dig/xgraph/GNN-LRP
+$ ./install.bash
+$ wget https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/Ebwg9j6YHPJDh5nZKrd4x6UBMvz2kJMw2y3wgp8GNLYOVw?e=3cILKu -P ../datasets/
+$ wget https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/ERQCHDEHnq5DiW-XHyiP5C0BE2taSyEmzX_PLwQolMTkkA?e=y6mqtV 
+$ unzip ../datasets/datasets.zip -d ../datasets/
+$ unzip checkpoints.zip
 ```
 
-An example:
-```bash
-python -m benchmark.kernel.pipeline --task train --lr 1e-2 --model_name GCN --dataset_name tox21 --target_idx 2 --epoch 1000
+## Usage
+
+For running GNN-LRP or GNN-GI on the given model and the dataset with the first 100 data:
+
+```shell script
+python -m benchmark.kernel.pipeline --task explain --model_name [GCN_2l/GCN_3l/GIN_2l/GIN_3l] --dataset_name [ba_shape/ba_lrp/tox21/clintox] --target_idx [0/2] --explainer [GNN_LRP/GNN_GI] --sparsity [0.5/...]
 ```
 
-### Test a model
+For running GNN-LRP or GNN-GI with the given data, please add the flag `--debug`, then modify the index at line xx in `benchmark/kernel/pipeline.py` to choose your data in the dataset. Please add the flag `--vis` for important edges visualization while add one more flag `--walk` to visualize the flow view.
 
-A model's checkpoint are default stored at `<filesystem> PROJECT_ROOT/checkpoints/
-dataset_name/model_name/target_idx/`.
+Note that the 2-layer models GCN_2l and GIN_3l only work on dataset ba_shape, while 3-layer models work on the left three datasets. Specially, the tox21's target_idx is 2 while others are 0. You can choose any sparsity between 0 to 1 as you like. Higher sparsity means less important edges to be chosen.
 
-You don't have to select a checkpoint unless you insist.
-GNN_benchmark will automatically load the best(highest val score) checkpoint.
+If you want to save the visualization result in debug mode, please use `--save_fig` flag. Then the output figure will be saved
+in the `./visual_results/` folder.
 
-We assume that you have read [Train a model](#train-a-model)
+## Demos
 
-An example:
-```bash
-python -m benchmark.kernel.pipeline --task test --model_name GCN --dataset_name clintox --target_idx 0
-```
-
-### Explain a model
-
-It's not completed.
-
-Now we only support GNNExplainer for binary Graph level Classification.
-
-If you want to have a try, just do it:
+We provide a visualization example:
 
 ```bash
-python -m benchmark.kernel.pipeline --task explain --model_name GCN --dataset_name clintox --target_idx 0
+python -m benchmark.kernel.pipeline --task explain --model_name GCN_2l --dataset_name ba_shape --target_idx 0 --explainer GNN_LRP --sparsity 0.5 --debug --vis [--walk] --nolabel
+```
+where the `--nolabel` means to remove debug labels on the graph.
+
+The edge view and the path view are:
+
+<img src="./figures/ba_shape.png" alt="ba_shape" style="zoom:50%"/>
+<img src="./figures/ba_shape_edge.png" alt="ba_shape_edge" style="zoom:50%"/>
+
+## Customization
+
+We closely follow the GNN-LRP's forward reproduction, which is very model dependent; thus, please clearly understand the code for your own model design's modification. And of course, you can add your datasets in `benchmark/data/dataset` then retrain our given models.
+
+## Citation
+
+```
+@misc{schnake2020higherorder,
+      title={Higher-Order Explanations of Graph Neural Networks via Relevant Walks}, 
+      author={Thomas Schnake and Oliver Eberle and Jonas Lederer and Shinichi Nakajima and Kristof T. Schütt and Klaus-Robert Müller and Grégoire Montavon},
+      year={2020},
+      eprint={2006.03589},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
 ```
 
-### what to use cilog email function?
-
-* set your mail_setting in config/mail_setting.json
-* Add a `--email` flag in the command line.
-
-## For Developers
-
-### How to add my own dataset?
-
-**First**:
-
-Add your dataset class in benchmark.data.dataset.
-
-**Second**
-
-Annotate benchmark.kernel.utils.Metric, then rewrite your own `Metric` class.
-
-Method `set_loss_func` and `set_score_func` are required.
-
-**Third**
-
-Annotate benchmark.data.dataset.load_dataset, then rewrite your own `load_dataset` function.
-
-**Please use `set_loss_func` and `set_score_func` in this function**
-
-*It's better to use similar variables names of original code.
-It will give me the convenience to merge your code into the benchmark.*
-    
-### How to add my own models?
-
-I recommend you to use the models we GNN_benchmark have currently.
-
-But if you need, just add a model class in benchmark.models.models.
-
-This class name will be used as your `model_name` in the corresponding command's parameter.    
-    
-    
-    

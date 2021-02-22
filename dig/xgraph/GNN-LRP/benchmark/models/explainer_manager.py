@@ -14,7 +14,7 @@ from benchmark.args import XArgs
 from benchmark.data import data_args
 
 
-def load_explainer(explainer_name: str, model: nn.Module, args: XArgs) -> explainers.GNNExplainer:
+def load_explainer(explainer_name: str, model: nn.Module, args: XArgs) -> explainers.GNN_LRP:
     classes = [x for x in dir(explainers) if isclass(getattr(explainers, x))]
 
     try:
