@@ -1,0 +1,15 @@
+{
+    "mailhost": [
+        "***",
+        25
+    ],
+    "fromaddr": "***",
+    "toaddrs": [
+        "***"
+    ],
+    "subject": "GNN_benchmark",
+    "credentials": [
+        "***",
+        "********"
+    ]
+}
