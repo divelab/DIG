@@ -5,7 +5,7 @@ import numpy as np
 
 
 
-def metric_random_generation(mols, train_smiles):
+def metric_random_generation(mols, train_smiles=None):
     """
     Evaluation in random generation task.
     Compute the valid ratio, unique ratio and novel ratio of generated molecules
@@ -23,9 +23,10 @@ def metric_random_generation(mols, train_smiles):
         print("Unique Ratio: {}/{} = {:.2f}%".format(len(unique_smiles), len(valid_smiles), len(unique_smiles)/len(valid_smiles)*100))
         results['unique_ratio'] = len(unique_smiles) / len(valid_smiles) * 100
 
-        novels = [1 for smile in valid_smiles if smile not in train_smiles]
-        print("Novel Ratio: {}/{} = {:.2f}%".format(len(novels), len(valid_smiles), len(novels)/len(valid_smiles)*100))
-        results['novel_ratio'] = len(novels) / len(valid_smiles) * 100
+        if train_smiles is not None:
+            novels = [1 for smile in valid_smiles if smile not in train_smiles]
+            print("Novel Ratio: {}/{} = {:.2f}%".format(len(novels), len(valid_smiles), len(novels)/len(valid_smiles)*100))
+            results['novel_ratio'] = len(novels) / len(valid_smiles) * 100
     
     return results
 
