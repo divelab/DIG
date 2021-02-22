@@ -30,6 +30,61 @@ def get_smiles_props(path):
             prop_list.append(float(prop))
     return smile_list, prop_list
 
+# get smiles from complete zinc250k.csv
+def get_smiles_zinc250k(path):
+    smile_list = []
+    with open(path) as fp:
+        reader = csv.DictReader(fp)
+        columns = reader.fieldnames
+        for row in reader:
+            smile = row[columns[1]]
+            smile_list.append(smile)
+    return smile_list
+
+# get smiles from complete zinc250k.csv
+def get_smiles_props_zinc250k(path, prop_name='qed'):
+    smile_list, prop_list = [], []
+    with open(path) as fp:
+        reader = csv.DictReader(fp)
+        columns = reader.fieldnames
+        if prop_name == 'qed':
+            prop_col = 3
+        else:
+            prop_col = 2
+        for row in reader:
+            smile = row[columns[1]]
+            prop = row[columns[prop_col]]
+            smile_list.append(smile)
+            prop_list.append(float(prop))
+    return smile_list, prop_list
+
+# get smiles from complete qm9_property.csv
+def get_smiles_qm9(path):
+    smile_list = []
+    with open(path) as fp:
+        reader = csv.DictReader(fp)
+        columns = reader.fieldnames
+        for row in reader:
+            smile = row[columns[2]]
+            smile_list.append(smile)
+    return smile_list
+
+# get smiles from complete qm9_property.csv
+def get_smiles_props_zinc250k(path, prop_name='qed'):
+    smile_list, prop_list = [], []
+    with open(path) as fp:
+        reader = csv.DictReader(fp)
+        columns = reader.fieldnames
+        if prop_name == 'qed':
+            prop_col = 0
+        else:
+            prop_col = 1
+        for row in reader:
+            smile = row[columns[2]]
+            prop = row[columns[prop_col]]
+            smile_list.append(smile)
+            prop_list.append(float(prop))
+    return smile_list, prop_list
 
 class MolSet(Dataset):
     def __init__(self, smile_list, use_aug=False, prop_list=None, num_max_node=38, num_bond_type=3, edge_unroll=12, atom_list=[6, 7, 8, 9, 15, 16, 17, 35, 53]):
