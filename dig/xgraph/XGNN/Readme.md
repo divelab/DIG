@@ -35,7 +35,7 @@ Download the dataset and modify corresponding paths.
 
 Place the checkpoint of the GNNs to be explained in checkpoint folder. Also modify corresponding paths if needed.
 
-In "gnn.py" we provide an example showing the training of GNNs, and then the trained GNNs become the target of explanations. 
+In "gnn.py" we provide an example showing the training of GNNs, and then the trained GNNs become the model to be explained. 
 
 Our data and checkpoint are available upon request. 
 
@@ -46,6 +46,8 @@ The policy network of our XGNN is defined in "policy_nn.py". You can modify it a
 The explanation generation stage is defined in "gnn_explain.py". You can tune the hyper-parameters as needed. 
 
 Simply call "main.py" to obtain explanations after proper settings and modifications. 
+
+After training, the generated explanations should maximize the predictions of a certain class (or other targets).
 
 
 ## How to customize?
@@ -61,3 +63,5 @@ Our XGNN is a general framework, you can customize it for your own task.
 - The GNN layer, policy network architectures, and normalize_adj functions can be easily replaced by any suitable functions. 
 
 - Our provided code is based on CPU so you can monitor the explanation generation step by step with IDEs, such as Spyder. 
+
+- You can customize the target of explanations. Currently, our code explain the predictions of different classes. You may modify this to study the what explanations activate other network targets, such as hidden neurons/ channels. 
