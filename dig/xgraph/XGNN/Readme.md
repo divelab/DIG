@@ -56,5 +56,8 @@ Our XGNN is a general framework, you can customize it for your own task.
 
 - Define your own graph rules in "gnn_explain.py". In our example, the check_validity function check whether the generated graph is valid. 
 
-- You can customize the roll_out function in "gnn_explain.py". For simple tasks on synthetic data, roll_out is not necessary. 
+- You can customize the roll_out function in "gnn_explain.py". For simple tasks on synthetic data, roll_out is not necessary. In addition, there are several ways to handle invalid generated graphs in the roll_out. In this example, we simply return a negative pre-defined reward. 
 
+- The GNN layer, policy network architectures, and normalize_adj functions can be easily replaced by any suitable functions. 
+
+- Our provided code is based on CPU so you can monitor the explanation generation step by step with IDEs, such as Spyder. 
