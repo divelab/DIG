@@ -1,15 +1,9 @@
 # XGNN
 
-The code for our paper [XGNN: Towards Model-Level Explanations of Graph Neural Networks](https://arxiv.org/abs/2006.02587)
-
-
-# How to use our code?
-
-
-
+This repository provides the code for our paper [XGNN: Towards Model-Level Explanations of Graph Neural Networks](https://arxiv.org/abs/2006.02587) accepted by KDD-2020. 
 
 # Citations
-
+If using this code , please cite our paper.
 ```
 @inproceedings{yuan2020xgnn,
   title={Xgnn: Towards model-level explanations of graph neural networks},
@@ -29,3 +23,10 @@ The code for our paper [XGNN: Towards Model-Level Explanations of Graph Neural N
   year={2020}
 }
 ```
+
+# How to use our code?
+
+
+
+
+
