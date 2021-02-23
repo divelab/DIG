@@ -7,7 +7,7 @@ import networkx as nx
 
 
 
-def get_smiles(path):
+def get_smiles_moses(path):
     smile_list = []
     with open(path) as fp:
         reader = csv.DictReader(fp)

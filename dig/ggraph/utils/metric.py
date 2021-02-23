@@ -1,5 +1,5 @@
 from .environment import check_chemical_validity, qed, calculate_min_plogp, reward_target_molecule_similarity
-from .data_io import get_smiles, get_smiles_props
+from .data_io import get_smiles_props
 from rdkit import Chem
 import numpy as np
 
