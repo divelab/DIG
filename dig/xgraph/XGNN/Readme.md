@@ -2,6 +2,8 @@
 
 This repository provides the code for our paper [XGNN: Towards Model-Level Explanations of Graph Neural Networks](https://arxiv.org/abs/2006.02587) accepted by KDD-2020. 
 
+Our proposed XGNN algorithm aims at providing model-level explanations for Graph Neural Networks. To the best of our knowledge, this is the first attempt to study the model-level explanations of Graph Neural Networks. 
+
 # Citations
 If using this code , please cite our paper.
 ```
