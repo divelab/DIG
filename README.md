@@ -6,7 +6,7 @@
 ------
 
 # DIG: Dive into Graphs
-'DIG: Dive into Graphs* is a research-oriented library for geometric (*a.k.a.*, graph) deep learning. Please refer to this [doc](https://docs.google.com/document/d/1FfpXGiP1dkRf6BFpXmF2cXzyAGd9o5SFuaJk7rnjPnk/edit?usp=sharing) for development instructions.
+*DIG: Dive into Graphs* is a research-oriented library for geometric (*a.k.a.*, graph) deep learning. Please refer to this [doc](https://docs.google.com/document/d/1FfpXGiP1dkRf6BFpXmF2cXzyAGd9o5SFuaJk7rnjPnk/edit?usp=sharing) for development instructions.
 
 It includes various methods in several significant research directions for geometric deep learning. Our goal is to enable researchers to rerun baselines and implement their new ideas, conveniently. Currently, it consists of the following topics:
 
