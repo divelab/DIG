@@ -3,12 +3,12 @@
 The code for our paper [XGNN: Towards Model-Level Explanations of Graph Neural Networks](https://arxiv.org/abs/2006.02587)
 
 
-#How to use our code?
+# How to use our code?
 
 
 
 
-#Citations
+# Citations
 
 ```
 @inproceedings{yuan2020xgnn,
