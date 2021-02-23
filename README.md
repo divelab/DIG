@@ -20,7 +20,7 @@ In [`ggraph`](https://github.com/divelab/DIG/tree/main/dig/ggraph), the followin
 
 * [`GCPN`](https://github.com/divelab/DIG/tree/main/dig/ggraph/GCPN) from [Graph Convolutional Policy Network for Goal-Directed Molecular Graph Generation](https://arxiv.org/abs/1806.02473)
 * [`JTVAE`](https://github.com/divelab/DIG/tree/main/dig/ggraph/JT-VAE) from [Junction Tree Variational Autoencoder for Molecular Graph Generation](https://arxiv.org/pdf/1802.04364])
-* [`GraphAF`](https://github.com/divelab/DIG/tree/main/dig/ggraph/GraphAF) form [GraphAF: a Flow-based Autoregressive Model for Molecular Graph Generation](https://arxiv.org/abs/2001.09382)
+* [`GraphAF`](https://github.com/divelab/DIG/tree/main/dig/ggraph/GraphAF) from [GraphAF: a Flow-based Autoregressive Model for Molecular Graph Generation](https://arxiv.org/abs/2001.09382)
 * [`GraphDF`](https://github.com/divelab/DIG/tree/main/dig/ggraph/GraphDF) from [GraphDF: A Discrete Flow Model for Molecular Graph Generation](https://arxiv.org/abs/2102.01189)
 * [`GraphEBM`](https://github.com/divelab/DIG/tree/main/dig/ggraph/GraphEBM) from [GraphEBM: Molecular Graph Generation with Energy-Based Models](https://arxiv.org/abs/2102.00546)
 
