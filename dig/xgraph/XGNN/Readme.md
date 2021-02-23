@@ -39,8 +39,10 @@ In “gnn.py” we provide an example showing the training of GNNs, and then the
 
 Our data and checkpoint are available upon request. 
 
-## XGNN Algorithm
+## The XGNN Algorithm
 
+
+## How to customize?
 
 
 
