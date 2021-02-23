@@ -74,13 +74,11 @@ We closely follow the GNN-LRP's forward reproduction, which is very model depend
 ## Citation
 
 ```
-@misc{schnake2020higherorder,
-      title={Higher-Order Explanations of Graph Neural Networks via Relevant Walks}, 
-      author={Thomas Schnake and Oliver Eberle and Jonas Lederer and Shinichi Nakajima and Kristof T. Schütt and Klaus-Robert Müller and Grégoire Montavon},
-      year={2020},
-      eprint={2006.03589},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@article{yuan2020explainability,
+  title={Explainability in Graph Neural Networks: A Taxonomic Survey},
+  author={Yuan, Hao and Yu, Haiyang and Gui, Shurui and Ji, Shuiwang},
+  journal={arXiv preprint arXiv:2012.15445},
+  year={2020}
 }
 ```
 
