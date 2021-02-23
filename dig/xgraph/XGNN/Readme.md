@@ -4,6 +4,7 @@ This repository provides the code for our paper [XGNN: Towards Model-Level Expla
 
 Our proposed XGNN algorithm aims at providing model-level explanations for Graph Neural Networks. To the best of our knowledge, this is the first attempt to study the model-level explanations of Graph Neural Networks. 
 
+
 # Citations
 If using this code , please cite our paper.
 ```
@@ -26,7 +27,9 @@ If using this code , please cite our paper.
 }
 ```
 
-# How to use our code?
+# Usage
+
+## Dataset
 
 
 
