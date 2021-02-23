@@ -29,8 +29,14 @@ If using this code , please cite our paper.
 
 # Usage
 
-## Dataset
+## Dataset and Checkpoint
 
+Download the dataset and modify corresponding paths. 
+Place the checkpoint of the GNNs to be explained in checkpoint folder. 
+In “gnn.py” we provide an example showing the training of GNNs, and then the trained GNNs become the target of explanations. 
+Our data and checkpoint are available upon request. 
+
+## XGNN Algorithm
 
 
 
