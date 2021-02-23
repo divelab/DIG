@@ -73,6 +73,8 @@ We closely follow the GNN-LRP's forward reproduction, which is very model depend
 
 ## Citation
 
+If using our implementation, please cite our work.
+
 ```
 @article{yuan2020explainability,
   title={Explainability in Graph Neural Networks: A Taxonomic Survey},
