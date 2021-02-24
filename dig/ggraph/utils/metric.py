@@ -1,5 +1,5 @@
 from .environment import check_chemical_validity, qed, calculate_min_plogp, reward_target_molecule_similarity
-from .data_io import get_smiles_props
+from .data_io import get_smiles_props_800
 from rdkit import Chem
 import numpy as np
 
@@ -61,7 +61,7 @@ def metric_constrained_optimization(mols_0, mols_2, mols_4, mols_6, data_file=No
     param mols_0, mols_2, mols_4, mols_6: the list of optimized molecules under the similarity threshold 0.0, 0.2, 0.4, 0.6, all represented by Chem.RWMol objects
     """
     assert data_file is not None
-    inp_smiles, inp_props = get_smiles_props(data_file)
+    inp_smiles, inp_props = get_smiles_props_800(data_file)
     inp_mols = [Chem.MolFromSmiles(s) for s in inp_smiles]
 
     results = {}
