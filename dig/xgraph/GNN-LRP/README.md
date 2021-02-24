@@ -24,7 +24,7 @@ Code for GNN-LRP following the [Higher-Order Explanations of Graph Neural Networ
 * Download datasets, then download the pretrained models.
 
 ```shell script
-$ git clone git@github.com:divelab/DIG.git
+$ git clone git@github.com:divelab/DIG.git (or directly clone the xgraph directory by svn)
 $ cd DIG/dig/xgraph/GNN-LRP
 $ source ./install.bash
 ```
