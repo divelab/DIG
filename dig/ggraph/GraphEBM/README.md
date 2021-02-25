@@ -77,12 +77,10 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python generate_compositional.py --runs=1 
 ### Citation
 ```
 @article{liu2021graphebm,
-      title={GraphEBM: Molecular Graph Generation with Energy-Based Models}, 
+      title={{GraphEBM}: Molecular Graph Generation with Energy-Based Models}, 
       author={Meng Liu and Keqiang Yan and Bora Oztekin and Shuiwang Ji},
-      year={2021},
-      eprint={2102.00546},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+      journal={arXiv preprint arXiv:2102.00546},
+      year={2021}
 }
 ```
 
