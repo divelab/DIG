@@ -11,7 +11,7 @@ This is the official implement of Paper
 ```shell script
 $ git clone https://github.com/divelab/DIG.git
 $ cd DIG/xgraph/SubgraphX
-$ source ./install.bash
+$ source ./install.sh
 ```
 
 ## Usage
@@ -19,7 +19,8 @@ $ source ./install.bash
 * Download the [checkpoints](https://mailustceducn-my.sharepoint.com/:u:/g/personal/yhy12138_mail_ustc_edu_cn/EYydmjDKl7xPsqdRaJc-se4BZSea6EI53dMlZHoM9fTvdg?e=I42r6H) to `DIG/xgraph/SubgraphX/checkpoint`
 * run the searching scripts with corresponding dataset
 ```shell script
-$ sh scripts.sh
+$ cd DIG/xgraph/SubgraphX
+$ source ./scripts.sh
 ``` 
 For different dataset, please refer the corresponding hyper-parameters in the script.
 
@@ -28,6 +29,12 @@ If you want to reproduce, you can directly download the
 [results](https://mailustceducn-my.sharepoint.com/:u:/g/personal/yhy12138_mail_ustc_edu_cn/ERxIONDcl8xKswisrsbHo2MBoEwPAjFruUzwsLpESwalxA?e=IuFanz)
  to `DIG/xgraph/SubgraphX/results`
 
+Moreover, if you want to train a new model for these datasets, 
+run the training scripts for corresponding dataset.
+```shell script
+$ cd DIG/xgraph/SubgraphX
+$ source models/train_gnns.sh 
+```
 
 ## Citations
 If you use this code, please cite our papers.
