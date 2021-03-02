@@ -11,12 +11,16 @@ This is the official implementation for [Spherical Message Passing for 3D Graph 
 1. [Installation](#installation)
 1. [Usage](#usage)
 1. [Citation](#citation)
+2. 
 
 ## Requirements
 
-* Ubuntu
-* Anaconda
-* Cuda 10.2 & Cudnn (>=7.0)
+* PyTorch
+* PyTorch Geometric >= 1.3.1
+* NetworkX
+* tdqm
+Note that the versions of PyTorch and PyTorch Geometric should be compatible and PyTorch Geometric is related to other packages, which need to be installed in advance. It would be easy by following the installation instruction.
+
 
 ## Installation
 
