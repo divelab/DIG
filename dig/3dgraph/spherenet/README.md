@@ -7,15 +7,6 @@ This is the official implementation for [Spherical Message Passing for 3D Graph 
 
 ## Table of Contents
 
-1. [Setup](#setup)
-1. [Usage](#usage)
-1. [Citation](#citation)
-1. [Acknowledgement](#acknowledgement)
-
-
-
-## Table of Contents
-
 1. [Requirements](#requirements)
 1. [Installation](#installation)
 1. [Usage](#usage)
