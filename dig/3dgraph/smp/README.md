@@ -1,6 +1,6 @@
 # SphereNet and its special cases, including DimeNet++, DimeNet, etc.
 
-This is the official implementation for [Spherical Message Passing for 3D Graph Networks](https://arxiv.org/abs/2102.05013v2).
+This includes the official implementation for [Spherical Message Passing for 3D Graph Networks](https://arxiv.org/abs/2102.05013v2), and re-implementation for [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules](https://arxiv.org/abs/2011.14115) under the 3DGN framewrok.
 
 ![](https://github.com/divelab/DIG/blob/main/dig/3dgraph/smp/figs/sphere.png)
 
