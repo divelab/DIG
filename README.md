@@ -36,7 +36,10 @@ In [`xgraph`](https://github.com/divelab/DIG/tree/main/dig/xgraph), the followin
 * [`SubgraphX`](https://github.com/divelab/DIG/tree/main/dig/xgraph/SubgraphX) from [On Explainability of Graph Neural Networks via Subgraph Explorations](https://arxiv.org/abs/2102.05152)
 
 ## 3D
+In [`3dgraph`](https://github.com/divelab/DIG/tree/main/dig/3dgraph), the following methods are included:
 
+* [`DimeNet++`](https://github.com/divelab/DIG/tree/main/dig/3dgraph/dimenetpp) from [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules](https://arxiv.org/abs/2011.14115)
+* [`SphereNet`](https://github.com/divelab/DIG/tree/main/dig/3dgraph/spherenet) from [spherical message passing for 3d graph networks](https://arxiv.org/abs/2102.05013v2)
 
 
 
