@@ -1,4 +1,4 @@
-# ShpereNet
+# SphereNet
 
 This is the official implementation for [Spherical Message Passing for 3D Graph Networks](https://arxiv.org/abs/2102.05013v2).
 
