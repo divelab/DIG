@@ -14,67 +14,58 @@ This is the official implementation for [Spherical Message Passing for 3D Graph 
 
 
 
-## Setup
+## Table of Contents
 
-To install the conda virtual environment `graphdf`:
+1. [Requirements](#requirements)
+1. [Installation](#installation)
+1. [Usage](#usage)
+1. [Demos](#demos)
+1. [Customization](#customization)
+1. [Citation](#citation)
+
+## Requirements
+
+* Ubuntu
+* Anaconda
+* Cuda 10.2 & Cudnn (>=7.0)
+
+## Installation
+
+* Clone this repo
+* Install the conda environment `xgraph`
+* Download datasets, then download the pretrained models.
+
 ```shell script
-$ cd /ggraph/GraphDF
-$ bash install.sh
+$ git clone git@github.com:divelab/DIG.git
+$ cd DIG/dig/xgraph/GNN-LRP
+$ source ./install.bash
 ```
-Note that we use CUDA 10.1 in this project. If you have other CUDA versions, you should install the PyTorch and cudatoolkit compatible with your CUDA.
-
+Download [Datasets](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/Ebwg9j6YHPJDh5nZKrd4x6UBMvz2kJMw2y3wgp8GNLYOVw?e=3cILKu) to `xgraph/datasets/`, then
+download [pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/ERQCHDEHnq5DiW-XHyiP5C0BE2taSyEmzX_PLwQolMTkkA?e=y6mqtV) to `xgraph/GNN-LRP/`
+```shell script
+$ cd GNN-LRP 
+$ unzip ../datasets/datasets.zip -d ../datasets/
+$ unzip checkpoints.zip
+```
 
 ## Usage
 
-### Random Generation
+For running GNN-LRP or GNN-GI on the given model and the dataset with the first 100 data:
 
-You can use our trained models in `GraphDF/saved_ckpts/ran_gen` or train the model from scratch:
 ```shell script
-$ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --train --out_dir=${your_model_save_dir} --data=qm9 
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --train --out_dir=${your_model_save_dir} --data=zinc250k
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --train --out_dir=${your_model_save_dir} --data=moses
-```
-To generate molecules using our trained model:
-```shell script
-$ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --num_mols=100 --out_dir=${your_generation_result_save_dir} --model_dir=./saved_ckpts/ran_gen/ran_gen_qm9.pth --data=qm9
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --num_mols=100 --out_dir=${your_generation_result_save_dir} --model_dir=./saved_ckpts/ran_gen/ran_gen_zinc250k.pth --data=zinc250k
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --num_mols=100 --out_dir=${your_generation_result_save_dir} --model_dir=./saved_ckpts/ran_gen/ran_gen_moses.pth --data=moses
+python -m benchmark.kernel.pipeline --task explain --model_name [GCN_2l/GCN_3l/GIN_2l/GIN_3l] --dataset_name [ba_shape/ba_lrp/tox21/clintox] --target_idx [0/2] --explainer [GNN_LRP/GNN_GI] --sparsity [0.5/...]
 ```
 
-### Property Optimization
+For running GNN-LRP or GNN-GI with the given data, please add the flag `--debug`, then modify the index at line xx in `benchmark/kernel/pipeline.py` to choose your data in the dataset. Please add the flag `--vis` for important edges visualization while add one more flag `--walk` to visualize the flow view.
 
-For property optimization, we aim to generate molecules with desirable properties (*i.e.*, QED and plogp in this work). You can use our trained models in `GraphDF/prop_optim` or train the model from scratch by reinforcement learning:
-```shell script
-$ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --train --out_dir=${your_model_save_dir} --prop=plogp
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --train --out_dir=${your_model_save_dir} --prop=qed
-```
+Note that the 2-layer models GCN_2l and GIN_3l only work on dataset ba_shape, while 3-layer models work on the left three datasets. Specially, the tox21's target_idx is 2 while others are 0. You can choose any sparsity between 0 to 1 as you like. Higher sparsity means less important edges to be chosen.
 
-To generate molecules using our trained model:
-```shell script
-$ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --num_mols=100 --out_dir=${your_generation_result_save_dir} --model_dir=./saved_ckpts/prop_optim/prop_optim_plogp.pth --prop=plogp
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --num_mols=100 --out_dir=${your_generation_result_save_dir} --model_dir=./saved_ckpts/prop_optim/prop_optim_qed.pth --prop=qed
-```
+If you want to save the visualization result in debug mode, please use `--save_fig` flag. Then the output figure will be saved
+in the `./visual_results/` folder.
 
-### Constrained Optimization
 
-For constrained optimization, we aim to optimize molecules with desirable properties (plogp in this work). You can use our trained models in `GraphDF/con_optim` or train the model from scratch by reinforcement learning:
-```shell script
-$ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_con_optim.py --train --out_dir=${your_model_save_dir} --data=graphaf
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_con_optim.py --train --out_dir=${your_model_save_dir} --data=jt
-```
+## Citation
 
-To optimize molecules using our trained model:
-```shell script
-$ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_con_optim.py --out_dir=${your_optimization_result_save_dir} --model_dir=./saved_ckpts/con_optim/con_optim_graphaf.pth --data=graphaf
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_con_optim.py --out_dir=${your_optimization_result_save_dir} --model_dir=./saved_ckpts/con_optim/con_optim_jt.pth --data=jt
-```
-### Citation
 ```
 @article{liu2021spherical,
   title={Spherical Message Passing for 3D Graph Networks},
@@ -83,6 +74,3 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_con_optim.py --out_dir=${your_o
   year={2021}
 }
 ```
-
-### Acknowledgement
-Our implementation is based on [GraphAF](https://github.com/DeepGraphLearning/GraphAF). Thanks a lot for their awesome works.
