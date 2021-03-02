@@ -96,4 +96,4 @@ def pipeline(subgraph_max_nodes):
 if __name__ == '__main__':
     subgraph_max_nodes = 10
     fidelity_scores, sparsity_scores = pipeline(subgraph_max_nodes)
-    print(f"fidelity score: {sparsity_scores.mean().item()}, sparsity score: {sparsity_scores.mean().item()}")
+    print(f"fidelity score: {fidelity_scores.mean().item()}, sparsity score: {sparsity_scores.mean().item()}")

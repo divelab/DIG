@@ -56,9 +56,9 @@ class MCTSParser(DataParser, ModelParser):
 
 class RewardParser(Tap):
     reward_method: str = 'mc_l_shapley'                         # Liberal, gnn_score, mc_shapley, l_shapley， mc_l_shapley
-    local_raduis: int = 4                                       # for l&c_sharply
-    subgraph_building_method: str = 'zero_filling'                  # should use Liberal
-    sample_num: int = 100
+    local_raduis: int = 4                                       # (n-1) hops neighbors for l_shapley
+    subgraph_building_method: str = 'zero_filling'                  
+    sample_num: int = 100                                       # sample time for monte carlo approximation
 
 
 class TrainParser(Tap):
@@ -66,8 +66,8 @@ class TrainParser(Tap):
     batch_size: int = 64
     weight_decay: float = 0.0
     max_epochs: int = 800
-    save_epoch: int = 10
-    early_stopping: int = 100                        # early stopping for node classification
+    save_epoch: int = 10                                        
+    early_stopping: int = 100                                  
 
 
 data_args = DataParser().parse_args(known_only=True)
