@@ -11,7 +11,6 @@ from torch_geometric.datasets import MoleculeNet
 from torch_geometric.data import Data, InMemoryDataset, DataLoader
 from torch_geometric.utils import dense_to_sparse
 from torch.utils.data import random_split, Subset
-from torch_geometric.data.download import download_url
 
 
 def undirected_graph(data):
@@ -98,7 +97,7 @@ def read_ba2motif_data(folder: str, prefix):
     data_list = []
     for graph_idx in range(dense_edges.shape[0]):
         data_list.append(Data(x=torch.from_numpy(node_features[graph_idx]).float(),
-                              edge_index=tensor_to_sparse(torch.from_numpy(dense_edges[graph_idx]))._indices(),
+                              edge_index=dense_to_sparse(torch.from_numpy(dense_edges[graph_idx]))[0],
                               y=torch.from_numpy(np.where(graph_labels[graph_idx])[0])))
     return data_list
 
@@ -186,7 +185,7 @@ class MUTAGDataset(InMemoryDataset):
             targets = np.array(feature).reshape(-1)
             one_hot_feature = np.eye(nb_clss)[targets]
             data_example = Data(x=torch.from_numpy(one_hot_feature).float(),
-                                edge_index=tensor_to_sparse(torch.from_numpy(adj))._indices(), y=label)
+                                edge_index=tensor_to_sparse(torch.from_numpy(adj))[0], y=label)
             data_list.append(data_example)
 
         torch.save(self.collate(data_list), self.processed_paths[0])
