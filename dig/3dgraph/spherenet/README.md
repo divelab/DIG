@@ -76,11 +76,12 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_con_optim.py --out_dir=${your_o
 ```
 ### Citation
 ```
-@article{luo2021graphdf,
-  title={{GraphDF}: A Discrete Flow Model for Molecular Graph Generation},
-  author={Luo, Youzhi and Yan, Keqiang and Ji, Shuiwang},
-  journal={arXiv preprint arXiv:2102.01189},
+@article{liu2021spherical,
+  title={Spherical Message Passing for 3D Graph Networks},
+  author={Liu, Yi and Wang, Limei and Liu, Meng and Zhang, Xuan and Oztekin, Bora and Ji, Shuiwang},
+  journal={arXiv preprint arXiv:2102.05013},
   year={2021}
+}
 }
 ```
 
