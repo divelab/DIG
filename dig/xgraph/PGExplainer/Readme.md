@@ -13,7 +13,7 @@ The [official implementation](https://github.com/flyingdoog/PGExplainer) is base
 ```shell script
 $ git clone https://github.com/divelab/DIG.git
 $ cd DIG/xgraph/PGexplainer
-$ source  ./install.bash
+$ source  ./install.sh
 ```
 
 ## Usage
@@ -21,8 +21,16 @@ $ source  ./install.bash
 * Download the checkpoints to  `DIG/xgraph/PGExplainer/checkpoint`
 * run the pipeline scripts with corresponding dataset
 ```shell script
-$ sh scripts.sh
+$ source ./scripts.sh
 ```
+
+Moreover, if you want to train a new model for these datasets, 
+run the training scripts for corresponding dataset.
+```shell script
+$ cd DIG/xgraph/PGExplainer
+$ source ./models/train_gnns.sh 
+```
+
 
 ## Citations
 ``` 

@@ -22,7 +22,7 @@ $ source ./install.sh
 $ cd DIG/xgraph/SubgraphX
 $ source ./scripts.sh
 ``` 
-For different dataset, please refer the corresponding hyper-parameters in the script.
+The hyper-parameters for different models and datasets are shown in this script.
 
 In addition, we also provide the saved searching results.
 If you want to reproduce, you can directly download the 
@@ -33,7 +33,7 @@ Moreover, if you want to train a new model for these datasets,
 run the training scripts for corresponding dataset.
 ```shell script
 $ cd DIG/xgraph/SubgraphX
-$ source models/train_gnns.sh 
+$ source ./models/train_gnns.sh 
 ```
 
 ## Citations
