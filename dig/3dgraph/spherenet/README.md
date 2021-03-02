@@ -32,11 +32,11 @@ Note that the versions of PyTorch and PyTorch Geometric should be compatible and
 
 ```shell script
 $ git clone git@github.com:divelab/DIG.git
-$ cd DIG/dig/3dgraph/GNN-LRP
+$ cd DIG/dig/3dgraph/spherenet
 $ source ./install.bash
 ```
-Download [Datasets](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/Ebwg9j6YHPJDh5nZKrd4x6UBMvz2kJMw2y3wgp8GNLYOVw?e=3cILKu) to `xgraph/datasets/`, then
-download [pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/ERQCHDEHnq5DiW-XHyiP5C0BE2taSyEmzX_PLwQolMTkkA?e=y6mqtV) to `xgraph/GNN-LRP/`
+Download [Datasets](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/Ebwg9j6YHPJDh5nZKrd4x6UBMvz2kJMw2y3wgp8GNLYOVw?e=3cILKu) to `3dgraph/datasets/`, then
+download [pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/ERQCHDEHnq5DiW-XHyiP5C0BE2taSyEmzX_PLwQolMTkkA?e=y6mqtV) to `3dgraph/spherenet/`
 ```shell script
 $ cd spherenet 
 $ unzip ../datasets/datasets.zip -d ../datasets/
