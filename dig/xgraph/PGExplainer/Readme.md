@@ -34,11 +34,10 @@ $ source ./models/train_gnns.sh
 
 ## Citations
 ``` 
-@article{luo2020parameterized,
-  title={Parameterized Explainer for Graph Neural Network},
-  author={Luo, Dongsheng and Cheng, Wei and Xu, Dongkuan and Yu, Wenchao and Zong, Bo and Chen, Haifeng and Zhang, Xiang},
-  journal={Advances in Neural Information Processing Systems},
-  volume={33},
+@article{yuan2020explainability,
+  title={Explainability in Graph Neural Networks: A Taxonomic Survey},
+  author={Yuan, Hao and Yu, Haiyang and Gui, Shurui and Ji, Shuiwang},
+  journal={arXiv preprint arXiv:2012.15445},
   year={2020}
 }
 ```
