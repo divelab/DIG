@@ -10,8 +10,6 @@ This is the official implementation for [Spherical Message Passing for 3D Graph 
 1. [Requirements](#requirements)
 1. [Installation](#installation)
 1. [Usage](#usage)
-1. [Demos](#demos)
-1. [Customization](#customization)
 1. [Citation](#citation)
 
 ## Requirements
