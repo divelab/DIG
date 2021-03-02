@@ -1,4 +1,4 @@
-# SphereNet
+# SphereNet and its special cases, including DimeNet++, DimeNet, etc.
 
 This is the official implementation for [Spherical Message Passing for 3D Graph Networks](https://arxiv.org/abs/2102.05013v2).
 
