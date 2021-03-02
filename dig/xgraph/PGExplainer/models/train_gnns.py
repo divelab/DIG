@@ -3,8 +3,8 @@ import torch
 import shutil
 import numpy as np
 import torch.nn as nn
-from models import GnnNets, GnnNets_NC
 from torch.optim import Adam
+from models import GnnNets, GnnNets_NC
 from load_dataset import get_dataset, get_dataloader
 from Configures import data_args, train_args, model_args
 
@@ -105,9 +105,9 @@ def train_GC():
         avg_edge_index += dataset[i].edge_index.shape[1]
     avg_nodes /= len(dataset)
     avg_edge_index /= len(dataset)
-    print(f"graphs {len(dataset)}, avg_nodes{avg_nodes}, avg_edge_index_{avg_edge_index/2}")
+    print(f"graphs {len(dataset)}, avg_nodes{avg_nodes :.4f}, avg_edge_index_{avg_edge_index/2 :.4f}")
+
     best_acc = 0.0
-    best_loss = 1000.0
     data_size = len(dataset)
     print(f'The total num of dataset is {data_size}')
 
@@ -140,7 +140,7 @@ def train_GC():
 
         # report train msg
         print(f"Train Epoch:{epoch}  |Loss: {np.average(loss_list):.3f} | "
-                    f"Acc: {np.concatenate(acc, axis=0).mean():.3f}")
+              f"Acc: {np.concatenate(acc, axis=0).mean():.3f}")
 
         # report eval msg
         eval_state = evaluate_GC(dataloader['eval'], gnnNets, criterion)
@@ -242,6 +242,7 @@ def predict_GC(test_dataloader, gnnNets):
 # train for node classification task
 def train_NC():
     print('start loading data====================')
+    import pdb; pdb.set_trace()
     dataset = get_dataset(data_args)
     input_dim = dataset.num_node_features
     output_dim = int(dataset.num_classes)
@@ -345,4 +346,5 @@ def save_best(ckpt_dir, epoch, gnnNets, model_name, eval_acc, is_best):
 
 
 if __name__ == '__main__':
-    train_GC()
+    import sys
+    globals()[sys.argv[1]]()

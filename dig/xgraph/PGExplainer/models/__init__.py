@@ -77,24 +77,3 @@ class GnnNets_NC(GnnBase):
         logits, prob, emb = self.model(data)
         return logits, prob, emb
 
-
-def GnnNets_GC2value_func(gnnNets, target_class):
-    def value_func(batch):
-        with torch.no_grad():
-            logits, prob, _ = gnnNets(batch)
-            score = prob[:, target_class]
-        return score
-    return value_func
-
-
-def GnnNets_NC2value_func(gnnNets_NC, node_idx: Union[int, torch.tensor], target_class: torch.tensor):
-    def value_func(data):
-        with torch.no_grad():
-            logits, prob, _ = gnnNets_NC(data)
-            # select the corresponding node prob through the node idx on all the sampling graphs
-            batch_size = data.batch.max() + 1
-            prob = prob.reshape(batch_size, -1, logits.shape[-1])
-            score = prob[:, node_idx, target_class]
-            return score
-    return value_func
-
