@@ -82,7 +82,6 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_con_optim.py --out_dir=${your_o
   journal={arXiv preprint arXiv:2102.05013},
   year={2021}
 }
-}
 ```
 
 ### Acknowledgement
