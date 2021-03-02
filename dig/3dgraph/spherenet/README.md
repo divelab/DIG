@@ -21,7 +21,7 @@ This is the official implementation for [Spherical Message Passing for 3D Graph 
 * tdqm
 
 
-Note that the versions of PyTorch and PyTorch Geometric should be compatible and PyTorch Geometric is related to other packages, which need to be installed in advance. It would be easy by following the installation instruction.
+Note that the versions of PyTorch and PyTorch Geometric should be compatible and PyTorch Geometric is related to other packages, which need to be installed in advance. It would be easy by following the [installation instruction](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html#).
 
 
 ## Installation
