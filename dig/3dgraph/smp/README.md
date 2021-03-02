@@ -44,7 +44,9 @@ $ unzip checkpoints.zip
 ```
 
 ## Usage
+### SphereNet
 
+### DimeNet++
 
 ## Citation
 
