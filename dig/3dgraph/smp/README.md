@@ -2,7 +2,7 @@
 
 This is the official implementation for [Spherical Message Passing for 3D Graph Networks](https://arxiv.org/abs/2102.05013v2).
 
-![](https://github.com/divelab/DIG/blob/main/dig/3dgraph/spherenet/figs/sphere.png)
+![](https://github.com/divelab/DIG/blob/main/dig/3dgraph/smp/figs/sphere.png)
 
 
 ## Table of Contents
