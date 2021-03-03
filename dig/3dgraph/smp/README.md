@@ -10,7 +10,7 @@ This includes the official implementation for [Spherical Message Passing for 3D 
 1. [Requirements](#requirements)
 1. [Installation](#installation)
 1. [Usage](#usage)
-1. [Citation](#citation)
+1. [Citations](#citations)
 
 
 ## Requirements
@@ -48,7 +48,7 @@ $ unzip checkpoints.zip
 
 ### DimeNet++
 
-## Citation
+## Citations
 
 ```
 @article{liu2021spherical,
