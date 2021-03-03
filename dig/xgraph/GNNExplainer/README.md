@@ -8,7 +8,6 @@ Code for GNNExplainer following the [GNNExplainer: Generating Explanations for G
 1. [Installation](#installation)
 1. [Usage](#usage)
 1. [Demos](#demos)
-1. [Customization](#customization)
 1. [Citation](#citation)
 
 ## Requirements
@@ -65,10 +64,6 @@ The edge views of example on clintox is:
 <img src="./figures/clintox.png" alt="ba_shape_edge" style="zoom:30%"/>
 
 where F means Fidelity while S means Sparsity.
-
-## Customization
-
-We closely follow the GNNExplainer's forward reproduction, which is very model dependent; thus, please clearly understand the code for your own model design's modification. And of course, you can add your datasets in `benchmark/data/dataset` then retrain our given models.
 
 ## Citation
 
