@@ -1,6 +1,6 @@
 # DeepLIFT
 
-Code for DeepLIFT following the [Explainability methods for graph convolutional neural networks](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiAzsLPj5PvAhV8zIsBHQMADfUQFjABegQIAxAD&url=http%3A%2F%2Fopenaccess.thecvf.com%2Fcontent_CVPR_2019%2Fpapers%2FPope_Explainability_Methods_for_Graph_Convolutional_Neural_Networks_CVPR_2019_paper.pdf&usg=AOvVaw2A_X2cCcRcXycNdivQ0Fml).
+This is a [DeepLIFT (Learning Important Features Through Propagating Activation Differences)](https://arxiv.org/abs/1704.02685) implementation on graph neural network.
 
 ## Table of Contents
 
