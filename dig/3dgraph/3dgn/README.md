@@ -2,4 +2,4 @@
 
 ![](https://github.com/divelab/DIG/blob/main/dig/3dgraph/3dgn/figs/frame.png)
 
-Functions need implemented: three $\phi$ functions and six $\rho$ functions.
+Functions need implemented: three ɸ functions and six ρ functions.
