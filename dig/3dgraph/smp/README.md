@@ -58,3 +58,22 @@ $ unzip checkpoints.zip
   year={2021}
 }
 ```
+
+```
+@inproceedings{klicpera_dimenet_2020,
+  title = {Directional Message Passing for Molecular Graphs},
+  author = {Klicpera, Johannes and Gro{\ss}, Janek and G{\"u}nnemann, Stephan},
+  booktitle={International Conference on Learning Representations (ICLR)},
+  year = {2020}
+}
+```
+
+
+```
+@inproceedings{klicpera_dimenetpp_2020,
+title = {Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules},
+author = {Klicpera, Johannes and Giri, Shankari and Margraf, Johannes T. and G{\"u}nnemann, Stephan},
+booktitle={NeurIPS-W},
+year = {2020}
+}
+```
