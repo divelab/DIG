@@ -6,16 +6,25 @@ import pickle
 import numpy as np
 import os.path as osp
 from Configures import data_args
-from utils import tensor_to_sparse
 from torch_geometric.datasets import MoleculeNet
 from torch_geometric.data import Data, InMemoryDataset, DataLoader
 from torch_geometric.utils import dense_to_sparse
 from torch.utils.data import random_split, Subset
 
 
+def tensor_to_sparse(dense_tensor):
+    """ transfer a dense form torch tensor into a sparse form """
+    row, col = torch.where(dense_tensor)
+    values = dense_tensor[row, col]
+    indices = torch.stack([row, col], dim=0).type(torch.long)
+    sparse_tensor = \
+        torch.sparse_coo_tensor(indices=indices, values=values, size=dense_tensor.shape)
+    return sparse_tensor.to(dense_tensor.device)
+
+
 def undirected_graph(data):
     data.edge_index = torch.cat([torch.stack([data.edge_index[1], data.edge_index[0]], dim=0),
-                                      data.edge_index], dim=1)
+                                 data.edge_index], dim=1)
     return data
 
 
@@ -97,7 +106,7 @@ def read_ba2motif_data(folder: str, prefix):
     data_list = []
     for graph_idx in range(dense_edges.shape[0]):
         data_list.append(Data(x=torch.from_numpy(node_features[graph_idx]).float(),
-                              edge_index=dense_to_sparse(torch.from_numpy(dense_edges[graph_idx]))[0],
+                              edge_index=tensor_to_sparse(torch.from_numpy(dense_edges[graph_idx]))._indices(),
                               y=torch.from_numpy(np.where(graph_labels[graph_idx])[0])))
     return data_list
 
@@ -107,7 +116,7 @@ def get_dataset(data_args):
         'BA_2Motifs'.lower(): 'BA_2Motifs',
         'BA_Shapes'.lower(): 'BA_shapes'
     }
-    sentigraph_names = ['grt_sst2_BERT_Identity']
+    sentigraph_names = ['Graph_SST2']
     sentigraph_names = [name.lower() for name in sentigraph_names]
     molecule_net_dataset_names = [name.lower() for name in MoleculeNet.names.keys()]
 
@@ -185,7 +194,7 @@ class MUTAGDataset(InMemoryDataset):
             targets = np.array(feature).reshape(-1)
             one_hot_feature = np.eye(nb_clss)[targets]
             data_example = Data(x=torch.from_numpy(one_hot_feature).float(),
-                                edge_index=tensor_to_sparse(torch.from_numpy(adj))[0], y=label)
+                                edge_index=tensor_to_sparse(torch.from_numpy(adj))._indices(), y=label)
             data_list.append(data_example)
 
         torch.save(self.collate(data_list), self.processed_paths[0])

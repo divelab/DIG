@@ -6,7 +6,7 @@ from typing import List
 
 class DataParser(Tap):
     dataset_name: str = 'bbbp'
-    dataset_dir: str = '../datasets'
+    dataset_dir: str = './datasets'
     random_split: bool = True
     data_split_ratio: List = [0.8, 0.1, 0.1]   # the ratio of training, validation and testing set for random split
     seed: int = 1
@@ -17,7 +17,7 @@ class GATParser(Tap):           # hyper-parameter for gat model
     gat_heads: int = 10         # multi-head
     gat_hidden: int = 10        # the hidden units for each head
     gat_concate: bool = True    # the concatenation of the multi-head feature
-    num_gat_layer: int = 3
+    num_gat_layer: int = 3      # the gat layers
 
 
 class ModelParser(GATParser):
@@ -32,6 +32,7 @@ class ModelParser(GATParser):
     dropout: float = 0.5                      # the dropout after mlp layers
     adj_normlize: bool = True                 # the edge_weight normalization for gcn conv
     emb_normlize: bool = False                # the l2 normalization after gnn layer
+    model_path: str = ""                      # default path to save the model
 
     def process_args(self) -> None:
         # self.device = torch.device('cpu')
@@ -40,25 +41,10 @@ class ModelParser(GATParser):
         else:
             pass
 
-
-class MCTSParser(DataParser, ModelParser):
-    rollout: int = 20                         # the rollout number
-    high2low: bool = False                    # expand children with different node degree ranking method
-    c_puct: float = 5                         # the exploration hyper-parameter
-    min_atoms: int = 3                        # for the synthetic dataset, change the minimal atoms to 5.
-    expand_atoms: int = 12                    # # of atoms to expand children
-
-    def process_args(self) -> None:
-        self.explain_model_path = os.path.join(self.checkpoint,
-                                               self.dataset_name,
-                                               f"{self.model_name}_best.pth")
-
-
-class RewardParser(Tap):
-    reward_method: str = 'mc_l_shapley'                         # Liberal, gnn_score, mc_shapley, l_shapley， mc_l_shapley
-    local_raduis: int = 4                                       # (n-1) hops neighbors for l_shapley
-    subgraph_building_method: str = 'zero_filling'                  
-    sample_num: int = 100                                       # sample time for monte carlo approximation
+        if not self.model_path:
+            self.model_path = os.path.join(self.checkpoint,
+                                           DataParser().parse_args(known_only=True).dataset_name,
+                                           f"{self.model_name}_best.pth")
 
 
 class TrainParser(Tap):
@@ -66,17 +52,23 @@ class TrainParser(Tap):
     batch_size: int = 64
     weight_decay: float = 0.0
     max_epochs: int = 800
-    save_epoch: int = 10                                        
-    early_stopping: int = 100                                  
+    save_epoch: int = 10
+    early_stopping: int = 100
+
+
+class ExplainerParser(Tap):
+    t0: float = 5.0                   # temperature denominator
+    t1: float = 1.0                   # temperature numerator
+    coff_size: float = 0.01           # constrains on mask size
+    coff_ent: float = 5e-4            # constrains on smooth and continuous mask
 
 
 data_args = DataParser().parse_args(known_only=True)
 model_args = ModelParser().parse_args(known_only=True)
-mcts_args = MCTSParser().parse_args(known_only=True)
-reward_args = RewardParser().parse_args(known_only=True)
 train_args = TrainParser().parse_args(known_only=True)
+explainer_args = ExplainerParser().parse_args(known_only=True)
 
-import torch
+
 import random
 import numpy as np
 random_seed = 1234
