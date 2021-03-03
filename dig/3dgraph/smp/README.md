@@ -58,7 +58,6 @@ $ unzip checkpoints.zip
   year={2021}
 }
 ```
-
 ```
 @inproceedings{klicpera_dimenet_2020,
   title = {Directional Message Passing for Molecular Graphs},
@@ -67,8 +66,6 @@ $ unzip checkpoints.zip
   year = {2020}
 }
 ```
-
-
 ```
 @inproceedings{klicpera_dimenetpp_2020,
 title = {Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules},
