@@ -57,7 +57,7 @@ $ unzip checkpoints.zip
   journal={arXiv preprint arXiv:2102.05013},
   year={2021}
 }
-```
+
 ```
 @inproceedings{klicpera_dimenet_2020,
   title = {Directional Message Passing for Molecular Graphs},
@@ -65,7 +65,7 @@ $ unzip checkpoints.zip
   booktitle={International Conference on Learning Representations (ICLR)},
   year = {2020}
 }
-```
+
 ```
 @inproceedings{klicpera_dimenetpp_2020,
 title = {Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules},
