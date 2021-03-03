@@ -1,6 +1,6 @@
-# GNNExplainer
+# GradCAM
 
-Code for GNNExplainer following the [GNNExplainer: Generating Explanations for Graph Neural Networks](https://arxiv.org/abs/1903.03894).
+Code for GradCAM following the [Explainability methods for graph convolutional neural networks](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiAzsLPj5PvAhV8zIsBHQMADfUQFjABegQIAxAD&url=http%3A%2F%2Fopenaccess.thecvf.com%2Fcontent_CVPR_2019%2Fpapers%2FPope_Explainability_Methods_for_Graph_Convolutional_Neural_Networks_CVPR_2019_paper.pdf&usg=AOvVaw2A_X2cCcRcXycNdivQ0Fml).
 
 ## Table of Contents
 
@@ -24,26 +24,26 @@ Code for GNNExplainer following the [GNNExplainer: Generating Explanations for G
 
 ```shell script
 $ git clone git@github.com:divelab/DIG.git (or directly clone the xgraph directory by svn)
-$ cd DIG/dig/xgraph/GNNExplainer
+$ cd DIG/dig/xgraph/GradCAM
 $ source ./install.bash
 ```
 Download [Datasets](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EdH7QVBBghBBgmMgf0_UZSAByxkMa3AvRdH7_QwD9MUfrw?e=EN3JiS) to `xgraph/datasets/`, then
-download [pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EZklsgM56i5EtCKeeEpTTLIBNpDvDNB-zol6ROXBngPsZg?e=20IBOg) to `xgraph/GNNExplainer/`
+download [pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EZklsgM56i5EtCKeeEpTTLIBNpDvDNB-zol6ROXBngPsZg?e=20IBOg) to `xgraph/GradCAM/`
 ```shell script
-$ cd GNNExplainer 
+$ cd GradCAM 
 $ unzip ../datasets/datasets.zip -d ../datasets/
 $ unzip checkpoints.zip
 ```
 
 ## Usage
 
-For running GNNExplainer on the given model and the dataset with the first 100 data:
+For running GradCAM on the given model and the dataset with the first 100 data:
 
 ```shell script
-python -m benchmark.kernel.pipeline --task explain --model_name [GCN_2l/GCN_3l/GIN_2l/GIN_3l] --dataset_name [ba_shape/ba_lrp/tox21/clintox] --target_idx [0/2] --explainer GNNExplainer --sparsity [0.5/...]
+python -m benchmark.kernel.pipeline --task explain --model_name [GCN_2l/GCN_3l/GIN_2l/GIN_3l] --dataset_name [ba_shape/ba_lrp/tox21/clintox] --target_idx [0/2] --explainer GradCAM --sparsity [0.5/...]
 ```
 
-For running GNNExplainer with the given data, please add the flag `--debug`, then modify the index at line xx in `benchmark/kernel/pipeline.py` to choose your data in the dataset. Please add the flag `--vis` for important edges visualization while add one more flag `--walk` to visualize the flow view.
+For running GradCAM with the given data, please add the flag `--debug`, then modify the index at line xx in `benchmark/kernel/pipeline.py` to choose your data in the dataset. Please add the flag `--vis` for important edges visualization while add one more flag `--walk` to visualize the flow view.
 
 Note that the 2-layer models GCN_2l and GIN_3l only work on dataset ba_shape, while 3-layer models work on the left three datasets. Specially, the tox21's target_idx is 2 while others are 0. You can choose any sparsity between 0 to 1 as you like. Higher sparsity means less important edges to be chosen.
 
@@ -55,13 +55,13 @@ in the `./visual_results/` folder.
 We provide a visualization example:
 
 ```bash
-python -m benchmark.kernel.pipeline --task explain --model_name GCN_3l --dataset_name clintox --target_idx 0 --explainer GNNExplainer --sparsity 0.5 --debug --vis --nolabel
+python -m benchmark.kernel.pipeline --task explain --model_name GCN_3l --dataset_name tox21 --target_idx 2 --explainer GradCAM --sparsity 0.5 --debug --vis --nolabel
 ```
 where the `--nolabel` means to remove debug labels on the graph.
 
-The edge view of the example on clintox is:
+The edge view of the example on tox21 is:
 
-<img src="./figures/clintox.png" alt="ba_shape_edge" style="zoom:30%"/>
+<img src="./figures/tox21.png" alt="ba_shape_edge" style="zoom:30%"/>
 
 where F means Fidelity while S means Sparsity.
 
