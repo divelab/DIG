@@ -26,7 +26,11 @@ In [`ggraph`](https://github.com/divelab/DIG/tree/main/dig/ggraph), the followin
 
 
 ## Self-supervised Learning
-
+In [`ssl`](https://github.com/divelab/DIG/tree/main/dig/), the following methods are included:
+* [`InfoGraph`](https://github.com/divelab/DIG/tree/main/dig/) from [InfoGraph: Unsupervised and Semi-supervised Graph-Level Representation Learning via Mutual Information Maximization](https://arxiv.org/abs/1908.01000)
+* [`GRACE`](https://github.com/divelab/DIG/tree/main/dig/) from [Deep Graph Contrastive Representation Learning](https://arxiv.org/abs/2006.04131)
+* [`MVGRL`](https://github.com/divelab/DIG/tree/main/dig/) from [Contrastive Multi-View Representation Learning on Graphs](https://arxiv.org/abs/2006.05582)
+* [`GraphCL`](https://github.com/divelab/DIG/tree/main/dig/) from [Graph Contrastive Learning with Augmentations](https://arxiv.org/abs/2010.13902)
 
 
 ## Interpretability
