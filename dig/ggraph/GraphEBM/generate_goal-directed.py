@@ -162,7 +162,7 @@ if __name__ == '__main__':
 
     ### Load trained model
     model = GraphEBM(n_atom_type, args.hidden, n_edge_type, args.swish, args.depth, add_self = args.add_self)
-    print("Loading hyperparamaters from {}".format(args.model_dir))
+    print("Loading paramaters from {}".format(args.model_dir))
     model.load_state_dict(torch.load(args.model_dir))
     model = model.to(device)
     
