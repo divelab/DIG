@@ -170,7 +170,7 @@ if __name__ == '__main__':
     print("Loading hyperparamaters from {}".format(args.model_qed_dir))
     model_qed.load_state_dict(torch.load(args.model_qed_dir))
     model_qed = model_qed.to(device)
-    print("Loading hyperparamaters from {}".format(args.model_plogp_dir))
+    print("Loading paramaters from {}".format(args.model_plogp_dir))
     model_plogp.load_state_dict(torch.load(args.model_plogp_dir))
     model_plogp = model_plogp.to(device)
     
