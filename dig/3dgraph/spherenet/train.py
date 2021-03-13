@@ -11,7 +11,6 @@ def run(train_dataset, val_dataset, model, epochs, batch_size, lr, lr_decay_fact
         energy_and_force, num_atom, p):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('device',device)
     model = model.to(device)
     optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     loss_func = torch.nn.L1Loss(reduction='none')
@@ -23,7 +22,6 @@ def run(train_dataset, val_dataset, model, epochs, batch_size, lr, lr_decay_fact
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     save_dir = os.path.join(save_dir, 'model.ckpt')    
-
     
     for epoch in range(1, epochs + 1):
         if torch.cuda.is_available():
@@ -32,42 +30,8 @@ def run(train_dataset, val_dataset, model, epochs, batch_size, lr, lr_decay_fact
         train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
         t_start = time.perf_counter()
 
-        # model.train()
-        # losses = []
-        # for batch_data in train_loader:
-        #     optimizer.zero_grad()
-        #     batch_data = batch_data.to(device)
-        #     out = model(batch_data)
-        #     if energy_and_force:
-        #         force = -grad(outputs=out, inputs=batch_data.pos, grad_outputs=torch.ones_like(out),create_graph=True,retain_graph=True)[0]
-        #         e_loss = loss_func(out, batch_data.y.unsqueeze(1))
-        #         f_loss = loss_func(force, batch_data.force)
-        #         loss = e_loss.sum() + p/(3*num_atom) * f_loss.sum()
-        #     else:
-        #         loss = loss_func(out, batch_data.y.unsqueeze(1)).sum()
-        #     loss.backward()
-        #     optimizer.step()
-        #     losses.append(loss)
-
         train_loss = train(model, optimizer, train_loader, energy_and_force, num_atom, p, loss_func, device)/len(train_dataset) 
-
-        # model.eval()
-        # losses = []
-        # for batch_data in val_loader:
-        #     optimizer.zero_grad()
-        #     batch_data = batch_data.to(device)
-        #     out = model(batch_data)
-        #     if energy_and_force:
-        #         force = -grad(outputs=out, inputs=batch_data.pos, grad_outputs=torch.ones_like(out),create_graph=True,retain_graph=True)[0]
-        #         e_loss = loss_func(out, batch_data.y.unsqueeze(1))
-        #         f_loss = loss_func(force, batch_data.force)
-        #         loss = e_loss.sum() + p/(3*num_atom) * f_loss.sum()
-        #     else:
-        #         loss = loss_func(out, batch_data.y.unsqueeze(1)).sum()
-        #     losses.append(loss)
-        # val_loss = val(model, optimizer, val_loader, energy_and_force, num_atom, p, loss_func, device)/len(val_dataset)
-        val_loss = float('inf')
-
+        val_loss = val(model, optimizer, val_loader, energy_and_force, num_atom, p, loss_func, device)/len(val_dataset)
         
         if val_loss < best_val:
             epoch_best_val = epoch
@@ -107,7 +71,7 @@ def train(model, optimizer, train_loader, energy_and_force, num_atom, p, loss_fu
 
 def val(model, optimizer, val_loader, energy_and_force, num_atom, p, loss_func, device):
     model.eval()
-    losses = []
+    losses = torch.Tensor([0.0]).to(device)
     for batch_data in val_loader:
         optimizer.zero_grad()
         batch_data = batch_data.to(device)
@@ -119,5 +83,5 @@ def val(model, optimizer, val_loader, energy_and_force, num_atom, p, loss_func, 
             loss = e_loss.sum() + p/(3*num_atom) * f_loss.sum()
         else:
             loss = loss_func(out, batch_data.y.unsqueeze(1)).sum()
-        losses.append(loss)
-    return sum(losses).item()
+        losses += loss.sum().item()
+    return losses[0]
