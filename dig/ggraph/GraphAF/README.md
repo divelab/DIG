@@ -36,7 +36,7 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python main_density.py
 To generate molecules using our trained model, you can open the jupyter notebook and use the example in `GraphAF/density_test.ipynb`:
 ```shell script
 $ cd GraphAF
-$ jupyternotebook
+$ jupyter notebook
 ```
 
 ### Property Optimization
@@ -50,7 +50,7 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python main_prop_optim.py
 To generate molecules using our trained model, you can open the jupyter notebook and use the example in `GraphAF/prop_test.ipynb`:
 ```shell script
 $ cd GraphAF
-$ jupyternotebook
+$ jupyter notebook
 ```
 
 ### Constrained Optimization
@@ -64,7 +64,7 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python main_constrained_optim.py
 To optimize molecules using our trained model, you can open the jupyter notebook and use the example in `GraphAF/cons_optim_test.ipynb`:
 ```shell script
 $ cd GraphAF
-$ jupyternotebook
+$ jupyter notebook
 ```
 ### Citation
 ```
