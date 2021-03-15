@@ -1,11 +1,11 @@
 from .environment import check_chemical_validity, qed, calculate_min_plogp, reward_target_molecule_similarity
-from .data_io import get_smiles, get_smiles_props
+from .data_io import get_smiles_props_800
 from rdkit import Chem
 import numpy as np
 
 
 
-def metric_random_generation(mols, train_smiles):
+def metric_random_generation(mols, train_smiles=None):
     """
     Evaluation in random generation task.
     Compute the valid ratio, unique ratio and novel ratio of generated molecules
@@ -23,9 +23,10 @@ def metric_random_generation(mols, train_smiles):
         print("Unique Ratio: {}/{} = {:.2f}%".format(len(unique_smiles), len(valid_smiles), len(unique_smiles)/len(valid_smiles)*100))
         results['unique_ratio'] = len(unique_smiles) / len(valid_smiles) * 100
 
-        novels = [1 for smile in valid_smiles if smile not in train_smiles]
-        print("Novel Ratio: {}/{} = {:.2f}%".format(len(novels), len(valid_smiles), len(novels)/len(valid_smiles)*100))
-        results['novel_ratio'] = len(novels) / len(valid_smiles) * 100
+        if train_smiles is not None:
+            novels = [1 for smile in valid_smiles if smile not in train_smiles]
+            print("Novel Ratio: {}/{} = {:.2f}%".format(len(novels), len(valid_smiles), len(novels)/len(valid_smiles)*100))
+            results['novel_ratio'] = len(novels) / len(valid_smiles) * 100
     
     return results
 
@@ -60,7 +61,7 @@ def metric_constrained_optimization(mols_0, mols_2, mols_4, mols_6, data_file=No
     param mols_0, mols_2, mols_4, mols_6: the list of optimized molecules under the similarity threshold 0.0, 0.2, 0.4, 0.6, all represented by Chem.RWMol objects
     """
     assert data_file is not None
-    inp_smiles, inp_props = get_smiles_props(data_file)
+    inp_smiles, inp_props = get_smiles_props_800(data_file)
     inp_mols = [Chem.MolFromSmiles(s) for s in inp_smiles]
 
     results = {}
