@@ -5,6 +5,8 @@ from chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atom
 from vocab import *
 from tqdm import tqdm
 
+import argparse
+
 class MolTreeNode(object):
 
     def __init__(self, smiles, clique=[]):
@@ -113,17 +115,21 @@ def dfs(node, fa_idx):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_file', required=True)
+    args = parser.parse_args()
+    print(args)
+
     lg = rdkit.RDLogger.logger() 
     lg.setLevel(rdkit.RDLogger.CRITICAL)
 
     cset = set()
-    with open(os.path.join(os.pardir, "datasets", "moses.csv"), "r") as f:
-        list_smiles = f.read().splitlines()[1:]
+    with open(os.path.join(os.pardir, "datasets", args.data_file), "r") as f:
+        list_smiles = f.read().splitlines()[1:1000]
     for smiles in tqdm(list_smiles):
         mol = MolTree(smiles)
         for c in mol.nodes:
             cset.add(c.smiles)
     with open("vocab.txt", "w") as f:
         cset_newline = list(map(lambda x: x + "\n", cset))
-        print(cset_newline)
         f.writelines(cset_newline)
