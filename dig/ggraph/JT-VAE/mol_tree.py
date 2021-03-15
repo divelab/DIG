@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
     cset = set()
     with open(os.path.join(os.pardir, "datasets", args.data_file), "r") as f:
-        list_smiles = f.read().splitlines()[1:1000]
+        list_smiles = f.read().splitlines()[1:]
     for smiles in tqdm(list_smiles):
         mol = MolTree(smiles)
         for c in mol.nodes:
