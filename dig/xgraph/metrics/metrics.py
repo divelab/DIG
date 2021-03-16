@@ -14,3 +14,10 @@ def fidelity(ori_probs: torch.Tensor, unimportant_probs: torch.Tensor) -> float:
     drop_probability = ori_probs - unimportant_probs
 
     return drop_probability.mean().item()
+
+
+def infidelity(ori_probs: torch.Tensor, important_probs: torch.Tensor) -> float:
+
+    drop_probability = ori_probs - important_probs
+
+    return drop_probability.mean().item()
