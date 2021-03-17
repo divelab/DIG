@@ -33,7 +33,7 @@ In [`ssl`](https://github.com/divelab/DIG/tree/main/dig/), the following methods
 * [`GraphCL`](https://github.com/divelab/DIG/tree/main/dig/) from [Graph Contrastive Learning with Augmentations](https://arxiv.org/abs/2010.13902)
 
 
-## Interpretability of Graph Neural Networks
+## Explainability of Graph Neural Networks
 In [`xgraph`](https://github.com/divelab/DIG/tree/main/dig/xgraph), the following methods are included:
 * [`XGNN`](https://github.com/divelab/DIG/tree/main/dig/xgraph/XGNN) from [XGNN: Towards Model-Level Explanations of Graph Neural Networks](https://arxiv.org/abs/2006.02587)
 * [`GNN-LRP`](https://github.com/divelab/DIG/tree/main/dig/xgraph/GNN-LRP) from [Higher-Order Explanations of Graph Neural Networks via Relevant Walks](https://arxiv.org/abs/2006.03589)
