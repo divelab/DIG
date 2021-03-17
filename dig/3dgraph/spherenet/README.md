@@ -39,5 +39,5 @@ CUDA_VISIBLE_DEVICES=${your_gpu_id} python main.py --save_dir $save_dir --datase
 }
 
 ```
-## Acknowledgement
+## Acknowledgements
 Our implementation is based on [DimeNet](https://github.com/klicperajo/dimenet) and [Models in PyTorch Geometric](https://github.com/rusty1s/pytorch_geometric/blob/master/torch_geometric/nn/models/dimenet.py). Thanks a lot for their awesome works.
