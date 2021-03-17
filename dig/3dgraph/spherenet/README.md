@@ -1,6 +1,6 @@
 # SphereNet
 
-This is an official implementation for [Spherical Message Passing for 3D Graph Networks](https://arxiv.org/abs/2102.05013v2) under the 3DGN framewrok.
+This is an official implementation for [Spherical Message Passing for 3D Graph Networks](https://arxiv.org/abs/2102.05013v2) under the 3DGN framework.
 
 ![](https://github.com/divelab/DIG/blob/main/dig/3dgraph/spherenet/figs/sphere.png)
 
