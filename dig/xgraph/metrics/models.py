@@ -58,7 +58,7 @@ class GCN_3l(GNNBasic):
         super().__init__()
         num_layer = 3
 
-        self.conv1 = GCNConv(data_args.dim_node, data_args.dim_hidden)
+        self.conv1 = GCNConv(1, data_args.dim_hidden) # data_args.dim_node -> 1 for demos
         self.convs = nn.ModuleList(
             [
                 GCNConv(data_args.dim_hidden, data_args.dim_hidden)
@@ -79,7 +79,7 @@ class GCN_3l(GNNBasic):
 
         self.ffn = nn.Sequential(*(
                 [nn.Linear(data_args.dim_hidden, data_args.dim_hidden)] +
-                [nn.ReLU(), nn.Dropout(), nn.Linear(data_args.dim_hidden, data_args.num_classes)]
+                [nn.ReLU(), nn.Dropout(), nn.Linear(data_args.dim_hidden, 2)] # data_args.num_classes -> 2 for demos
         ))
 
         self.dropout = nn.Dropout()
