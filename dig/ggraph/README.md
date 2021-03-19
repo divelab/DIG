@@ -8,7 +8,7 @@ The ggraph package is a collection of benchmark datasets, data interfaces, evalu
 1. **Property optimization task** (or goal-directed generation task), learning a biased generative model to generate molecular graphs with desired properties;
 1. **Constrained optimization task**, learning a graph translation model to optimize the desired property of the input molecular graphs.
 
-## Implemented Methods
+## Implemented Algorithms
 
 The `ggraph` package implements four state-of-the-art graph generation algorithms and offers detailed code running instructions. The information about the four algorithms is summarized in the following table.
 
