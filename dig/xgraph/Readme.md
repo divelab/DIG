@@ -4,7 +4,7 @@
 
 The xgraph package is a collection of benchmark datasets, data interfaces, evaluation metrics, and existing algorithms for explaining GNNs. We aims to provide standardized datasets and unified performance evaluation for academic researchers interested in GNN explanation tasks. 
 
-## Implemented Methods
+## Implemented Algorithms
 
 The `xgraph` package implements seven existing algorithms for GNN explanation tasks and offers detailed code running instructions. The information about the seven algorithms is summarized in the following table. 
 
