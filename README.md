@@ -37,7 +37,7 @@ We provide documentations on how to use our implemented data interfaces and eval
 
 ## Contributing
 
-We welcome any forms of contributions, such as reporting bugs, add new features and algorithms. Please refer to our [contributing guidelines](https://github.com/divelab/DIG/blob/main/CONTRIBUTING.md) for details.
+We welcome any forms of contributions, such as reporting bugs and adding new algorithms. Please refer to our [contributing guidelines](https://github.com/divelab/DIG/blob/main/CONTRIBUTING.md) for details.
 
 
 ## Citing DIG
