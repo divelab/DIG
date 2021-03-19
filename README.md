@@ -28,7 +28,10 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 * [Explainability of Graph Neural Networks](https://github.com/divelab/DIG/tree/main/dig/xgraph)
 * [Deep Learning on 3D Graphs](https://github.com/divelab/DIG/tree/main/dig/3dgraph)
 
-(To do: Add the overview figure of the library.)
+<p align="center">
+<img src="https://github.com/divelab/DIG/blob/main/imgs/DIG-overview.jpg" class="center" alt="logo"/>
+    <br/>
+</p>
 
 ## Usage
 
