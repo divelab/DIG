@@ -29,7 +29,7 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 * [Deep Learning on 3D Graphs](https://github.com/divelab/DIG/tree/main/dig/3dgraph)
 
 <p align="center">
-<img src="https://github.com/divelab/DIG/blob/main/imgs/DIG-overview.jpg" class="center" alt="logo"/>
+<img src="https://github.com/divelab/DIG/blob/main/imgs/DIG-overview.jpg" width="700" class="center" alt="logo"/>
     <br/>
 </p>
 
