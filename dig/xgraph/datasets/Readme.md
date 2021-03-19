@@ -7,8 +7,7 @@ More details of these datasets are described in [our paper](https://arxiv.org/ab
 We provide a unified data reader so different types of data can be easily loaded. The data reader supports all following datasets and the details can be found in `load_datasets.py` file.
   
 ## Synthetic datasets
-The synthetic datasets are can be downloaded from  
-[here](https://mailustceducn-my.sharepoint.com/:u:/g/personal/yhy12138_mail_ustc_edu_cn/ETK3CTHgFQVFhzIFB5piofQBv2Av-TsX_rnweymigve_hg?e=SyQjEX)
+The synthetic datasets are can be downloaded from [here](https://mailustceducn-my.sharepoint.com/:u:/g/personal/yhy12138_mail_ustc_edu_cn/ETK3CTHgFQVFhzIFB5piofQBv2Av-TsX_rnweymigve_hg?e=SyQjEX)
 
 #### Node classification 
 * BA-shapes 
