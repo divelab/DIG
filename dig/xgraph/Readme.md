@@ -8,7 +8,7 @@ The xgraph package is a collection of benchmark datasets, data interfaces, evalu
 
 The `xgraph` package implements seven existing algorithms for GNN explanation tasks and offers detailed code running instructions. The information about the seven algorithms is summarized in the following table. 
 
-| Method | Paper Links | Brief description |
+| Method | Links | Brief description |
 | ------ | ----- | ------------------ |
 | GNNExplainer | [Paper](https://arxiv.org/abs/1903.03894) <br> [Code](https://github.com/divelab/DIG/tree/main/dig/xgraph/GNNExplainer) | GNNExplainer learns soft masks for edges and hard masks for node features to identify important input information. The masks are randomly initialized and updated to maximize the mutual information between original predictions and new predictions. |
 | PGExplainer | [Paper](https://arxiv.org/abs/2011.04573) <br> [Code](https://github.com/divelab/DIG/tree/main/dig/xgraph/PGExplainer) | PGExplainer learns approximated discrete masks for edges to explain the predictions. It trains a parameterized mask predictor to predict whether an edge is important. All egdes share the same predictor and the preditor is trained to maximize the mutual information. Note that reparameterization trick is used to approximate discrete masks. |
