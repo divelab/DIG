@@ -24,11 +24,11 @@ Here we briefly introduce our unified data interfaces and evaluation metrics.
 
 (1) Data interfaces
 
-We provide unified data interfaces for reading several benchmark datasets and a standard Pytorch data loader. The details can be found in the `datasets` folder ([link])(https://github.com/divelab/DIG/tree/main/dig/xgraph/datasets).
+We provide unified data interfaces for reading several benchmark datasets and a standard Pytorch data loader. The details can be found in the `datasets` folder ([link](https://github.com/divelab/DIG/tree/main/dig/xgraph/datasets)).
 
 
 (2) Evaluation metrics
 
-We also provide unified evaluation metrics, including Fidelity+, Fidelity-, and Sparsity, for the evaluation of explanation results. We provide demo code to help the usage of these metrics. The details can be found in `metrics` folder ([link])(https://github.com/divelab/DIG/tree/main/dig/xgraph/metrics).
+We also provide unified evaluation metrics, including Fidelity+, Fidelity-, and Sparsity, for the evaluation of explanation results. We provide demo code to help the usage of these metrics. The details can be found in `metrics` folder ([link](https://github.com/divelab/DIG/tree/main/dig/xgraph/metrics)).
 
 
