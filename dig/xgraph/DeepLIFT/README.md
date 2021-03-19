@@ -1,6 +1,6 @@
 # DeepLIFT
 
-This is a [DeepLIFT (Learning Important Features Through Propagating Activation Differences)](https://arxiv.org/abs/1704.02685) implementation on graph neural network.
+This is the implementation of [DeepLIFT (Learning Important Features Through Propagating Activation Differences)](https://arxiv.org/abs/1704.02685) for graph neural network. We extend the algorithm from image domain to deep graph models to study node importance. 
 
 ## Table of Contents
 
