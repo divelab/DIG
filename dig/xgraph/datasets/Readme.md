@@ -1,15 +1,12 @@
 # Datasets
 
-Here we provide the datasets for graph explanation. 
+Here we provide the graph datasets for GNN explanation.
 More details of these datasets are described in our paper.
 
   
 ## Synthetic datasets
 The synthetic datasets are can be downloaded from the 
-[PGExplainer repository](https://github.com/flyingdoog/PGExplainer)
-except the BA-LRP. 
-The BA-LRP dataset can be download 
-[here](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EdH7QVBBghBBgmMgf0_UZSAByxkMa3AvRdH7_QwD9MUfrw?e=EN3JiS).
+[here](https://mailustceducn-my.sharepoint.com/:u:/g/personal/yhy12138_mail_ustc_edu_cn/ETK3CTHgFQVFhzIFB5piofQBv2Av-TsX_rnweymigve_hg?e=SyQjEX)
 
 #### Node classification 
 * BA-shapes 
@@ -39,10 +36,9 @@ The corresponding Graph-SST2, Graph-SST5 and Graph-Twitter can be downloaded
 
 Molecule datasets are shown as below. 
 We directly use the molecule datasets from the [Moleculenet](http://moleculenet.ai/datasets-1)
- in Pytorch-Geometric. 
- These datasets will be downloaded automatically if you don't download the datasets. 
+in Pytorch-Geometric. 
+These datasets will be downloaded automatically. 
  
-
 * BBBP
 * Tox21
 * BACE

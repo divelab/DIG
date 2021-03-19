@@ -1,1 +1,3 @@
-/datasets/datasets.zip
+/datasets/*
+!/datasets/Readme.md
+!/datasets/load_datasets.py
