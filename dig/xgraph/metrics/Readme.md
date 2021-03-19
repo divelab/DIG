@@ -2,8 +2,8 @@
 
 In this part, we provide three metrics here as shown in the paper:
 
-* Fidelity
-* Infidelity
+* Fidelity+
+* Fidelity-
 * Sparsity
 
 ## Quick Usage
@@ -34,7 +34,7 @@ related probabilities for further metric calculations.
 #### Class XCollector
 
 This class is to collect the corresponding model output (the probabilities of
-various label), then compute the Fidelity and Infidelity.
+various label), then compute the Fidelity+(fidelity) and Fidelity-(fidelity_inv).
 
 The example is given in `metrics.py`. Please refer to the `demo` function.
 You can also run the `metrics.py` for the demo function.

@@ -62,7 +62,7 @@ def fidelity(ori_probs: torch.Tensor, unimportant_probs: torch.Tensor) -> float:
     return drop_probability.mean().item()
 
 
-def infidelity(ori_probs: torch.Tensor, important_probs: torch.Tensor) -> float:
+def fidelity_inv(ori_probs: torch.Tensor, important_probs: torch.Tensor) -> float:
 
     drop_probability = ori_probs - important_probs
 
@@ -130,7 +130,7 @@ class XCollector(object):
                 torch.tensor(self.__related_preds['zero']), torch.tensor(self.__related_preds['maskout']), \
                 torch.tensor(self.__related_preds['masked']), torch.tensor(self.__related_preds['origin'])
 
-            self.__fidelity_inv = infidelity(one_mask_preds, masked_preds)
+            self.__fidelity_inv = fidelity_inv(one_mask_preds, masked_preds)
             return self.__fidelity_inv
 
     @property
