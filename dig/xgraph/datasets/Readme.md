@@ -43,3 +43,26 @@ These datasets will be downloaded automatically.
 * Tox21
 * BACE
 * ClinTox
+
+## Citations
+If you use our code and data, please cite our papers.
+
+```
+@misc{yuan2021explainability,
+      title={On Explainability of Graph Neural Networks via Subgraph Explorations}, 
+      author={Hao Yuan and Haiyang Yu and Jie Wang and Kang Li and Shuiwang Ji},
+      year={2021},
+      eprint={2102.05152},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
+
+```
+@article{yuan2020explainability,
+  title={Explainability in Graph Neural Networks: A Taxonomic Survey},
+  author={Yuan, Hao and Yu, Haiyang and Gui, Shurui and Ji, Shuiwang},
+  journal={arXiv preprint arXiv:2012.15445},
+  year={2020}
+}
+```
