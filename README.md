@@ -3,9 +3,20 @@
     <br/>
 </p>
 
-------
 
 
+
+
+
+[license-image]:https://img.shields.io/badge/license-GPL3.0-green.svg
+[license-url]:https://github.com/divelab/DIG/blob/main/LICENSE
+[contributing-image]:https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
+[contributing-url]:https://github.com/divelab/DIG/blob/main/CONTRIBUTING.md
+
+![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG&)
+![Contributors](https://img.shields.io/github/contributors/divelab/DIG)
+[![Contributing][contributing-image]][contributing-url]
+[![License][license-image]][license-url]
 
 ## Overview
 *DIG: Dive into Graphs* is a turnkey library for graph deep learning research. [[Paper (Coming soon)]](https://github.com/divelab/DIG)
