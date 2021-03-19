@@ -1,8 +1,8 @@
 # Datasets
 
 Here we provide the graph datasets for GNN explanation.
-More details of these datasets are described in our paper.
-
+More details of these datasets are described in [our paper](https://arxiv.org/abs/2012.15445).
+We provide a unified data reader so different types of data can be easily loaded. The data reader supports all following datasets and the details can be found in `load_datasets.py` file.
   
 ## Synthetic datasets
 The synthetic datasets are can be downloaded from the 
