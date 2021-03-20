@@ -2,7 +2,7 @@
 
 ## Overview
 
-The sslgraph package is a collection of benchmark datasets, data interfaces, evaluation tasks, and state-of-the-art algorithms for graph self-supervised learning. We aims to provide a *unified and highly customizable framework* for implementing graph self-supervised learning methods, *standardized datasets*, and *unified performance evaluation* for academic researchers interested in graph generation. We cover the following three tasks:
+The sslgraph package is a collection of benchmark datasets, data interfaces, evaluation tasks, and state-of-the-art algorithms for graph self-supervised learning. We aims to provide a *unified and highly customizable framework* for implementing graph self-supervised learning methods, *standardized datasets*, and *unified performance evaluation* for academic researchers interested in graph self-supervised learning. We cover the following three tasks:
 
 1. **Unsupervised graph-level representation learning**, to learn graph-level representations on unlabeled graph dataset, evaluated by 10-fold linear classification with SVC or logistic regression;
 1. **Semi-supervised graph classification (and any other two-stage training tasks including pre-training and finetuning on different datasets)**, that pretrain graph encoders with a large amount of unlabeled graphs, fintune and evaluate the encoder on a smaller amount of labeled graphs;
@@ -22,6 +22,8 @@ Based on the framework and components, four state-of-the-art graph generation al
 * `GRACE` (node-level): [Deep Graph Contrastive Representation Learning](https://arxiv.org/abs/2006.04131)
 * `MVGRL` (graph & node): [Contrastive Multi-View Representation Learning on Graphs](https://arxiv.org/abs/2006.05582)
 * `GraphCL` (graph-level): [Graph Contrastive Learning with Augmentations](https://arxiv.org/abs/2010.13902)
+
+Alghouth only contrastive learning framework and methods are implemented, the evaluation tools are also compatible with predictive methods for self-supervised learning, such as graph auto-encoders.
 
 ## Package Usage
 
