@@ -24,7 +24,7 @@
 It includes unified implementations of **data interfaces**, **common algorithms**, and **evaluation metrics** for several advanced tasks. Our goal is to enable researchers to easily implement and benchmark algorithms. Currently, we consider the following research directions.
 
 * [Graph Generation](https://github.com/divelab/DIG/tree/main/dig/ggraph)
-* [Self-supervised Learning on Graphs]()
+* [Self-supervised Learning on Graphs](https://github.com/divelab/DIG/tree/main/dig/sslgraph)
 * [Explainability of Graph Neural Networks](https://github.com/divelab/DIG/tree/main/dig/xgraph)
 * [Deep Learning on 3D Graphs](https://github.com/divelab/DIG/tree/main/dig/3dgraph)
 
@@ -44,7 +44,7 @@ svn export https://github.com/divelab/DIG/trunk/ggraph
 We provide documentations on how to use our implemented data interfaces and evaluation metrics. For every algorithm, an instruction documentation is also available. You can get started with your interested directions.
 
 * Graph Generation: [`ggraph`](https://github.com/divelab/DIG/tree/main/dig/ggraph)
-* Self-supervised Learning on Graphs: [`sslgraph`]()
+* Self-supervised Learning on Graphs: [`sslgraph`](https://github.com/divelab/DIG/tree/main/dig/sslgraph)
 * Explainability of Graph Neural Networks: [`xgraph`](https://github.com/divelab/DIG/tree/main/dig/xgraph)
 * Deep Learning on 3D Graphs: [`3dgraph`](https://github.com/divelab/DIG/tree/main/dig/3dgraph)
 
