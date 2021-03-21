@@ -45,6 +45,19 @@ These datasets will be downloaded automatically.
 * BACE
 * ClinTox
 
+
+##Usage
+Here we provide an example to use the data_loader interface.
+```python
+from load_datasets import get_dataset, get_dataloader
+dataset = get_dataset(dataset_dir='./datasets', dataset_name=bbbp)
+data_loader = get_dataloader(dataset, 
+                             batch_size=32, 
+                             random_split_flag=True, 
+                             data_split_ratio=[0.8, 0.1, 0.1], 
+                             seed=2)
+```
+  
 ## Citations
 If you use our code and data, please cite our papers.
 
