@@ -412,7 +412,7 @@ class GraphFlowModel_con_rl(nn.Module):
                                     current_imp = calculate_min_plogp(tmp_mol1) - org_mol_plogp
                                     current_sim = reward_target_molecule_similarity(tmp_mol1, org_mol_true_raw)
                                     if current_imp > 0:
-                                        cur_mol_smiles.append(current_smile)
+                                        cur_mols.append(tmp_mol1)
                                         cur_mol_imps.append(current_imp)
                                         cur_mol_sims.append(current_sim)
 
@@ -424,7 +424,7 @@ class GraphFlowModel_con_rl(nn.Module):
                                             current_imp2 = calculate_min_plogp(tmp_mol2) - org_mol_plogp
                                             current_sim2 = reward_target_molecule_similarity(tmp_mol2, org_mol_true_raw)
                                             if current_imp2 > 0:
-                                                cur_mol_smiles.append(current_smile2)
+                                                cur_mols.append(tmp_mol2)
                                                 cur_mol_imps.append(current_imp2)
                                                 cur_mol_sims.append(current_sim2)                                      
                                 node_features_each_iter_backup = cur_node_features.clone() # update node backup since new node is valid
