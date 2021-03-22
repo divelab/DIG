@@ -107,6 +107,7 @@ def get_dataset(dataset_dir, dataset_name, task=None):
         'BA_Community'.lower(): 'BA_Community',
         'Tree_Cycle'.lower(): 'Tree_Cycle',
         'Tree_Grids'.lower(): 'Tree_Grids',
+        'BA_LRP'.lower(): 'ba_lrp'
     }
     sentigraph_names = ['Graph_SST2', 'Graph_Twitter', 'Graph_SST5']
     sentigraph_names = [name.lower() for name in sentigraph_names]
@@ -307,10 +308,73 @@ def load_MUTAG(dataset_dir, dataset_name):
     return dataset
 
 
+class BA_LRP(InMemoryDataset):
+
+    def __init__(self, root, num_per_class, transform=None, pre_transform=None):
+        self.num_per_class = num_per_class
+        super().__init__(root, transform, pre_transform)
+        self.data, self.slices = torch.load(self.processed_paths[0])
+
+    @property
+    def processed_file_names(self):
+        return [f'data{self.num_per_class}.pt']
+
+    def gen_class1(self):
+        x = torch.tensor([[1], [1]], dtype=torch.float)
+        edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
+        data = Data(x=x, edge_index=edge_index, y=torch.tensor([[0]], dtype=torch.float))
+
+        for i in range(2, 20):
+            data.x = torch.cat([data.x, torch.tensor([[1]], dtype=torch.float)], dim=0)
+            deg = torch.stack([(data.edge_index[0] == node_idx).float().sum() for node_idx in range(i)], dim=0)
+            sum_deg = deg.sum(dim=0, keepdim=True)
+            probs = (deg / sum_deg).unsqueeze(0)
+            prob_dist = torch.distributions.Categorical(probs)
+            node_pick = prob_dist.sample().squeeze()
+            data.edge_index = torch.cat([data.edge_index,
+                                         torch.tensor([[node_pick, i], [i, node_pick]], dtype=torch.long)], dim=1)
+
+        return data
+
+    def gen_class2(self):
+        x = torch.tensor([[1], [1]], dtype=torch.float)
+        edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
+        data = Data(x=x, edge_index=edge_index, y=torch.tensor([[1]], dtype=torch.float))
+        epsilon = 1e-30
+
+        for i in range(2, 20):
+            data.x = torch.cat([data.x, torch.tensor([[1]], dtype=torch.float)], dim=0)
+            deg_reciprocal = torch.stack([1 / ((data.edge_index[0] == node_idx).float().sum() + epsilon) for node_idx in range(i)], dim=0)
+            sum_deg_reciprocal = deg_reciprocal.sum(dim=0, keepdim=True)
+            probs = (deg_reciprocal / sum_deg_reciprocal).unsqueeze(0)
+            prob_dist = torch.distributions.Categorical(probs)
+            node_pick = -1
+            for _ in range(1 if i % 5 != 4 else 2):
+                new_node_pick = prob_dist.sample().squeeze()
+                while new_node_pick == node_pick:
+                    new_node_pick = prob_dist.sample().squeeze()
+                node_pick = new_node_pick
+                data.edge_index = torch.cat([data.edge_index,
+                                             torch.tensor([[node_pick, i], [i, node_pick]], dtype=torch.long)], dim=1)
+
+        return data
+
+    def process(self):
+        data_list = []
+        for i in range(self.num_per_class):
+            data_list.append(self.gen_class1())
+            data_list.append(self.gen_class2())
+
+        data, slices = self.collate(data_list)
+        torch.save((data, slices), self.processed_paths[0])
+
+
 def load_syn_data(dataset_dir, dataset_name):
     """ The synthetic dataset """
     if dataset_name.lower() == 'BA_2Motifs'.lower():
         dataset = BA2MotifDataset(root=dataset_dir, name=dataset_name)
+    elif dataset_name.lower() == 'BA_LRP'.lower():
+        dataset = BA_LRP(root=os.path.join(dataset_dir, 'ba_lrp'), num_per_class=10000)
     else:
         dataset = SynGraphDataset(root=dataset_dir, name=dataset_name)
     dataset.node_type_dict = {k: v for k, v in enumerate(range(dataset.num_classes))}
@@ -372,3 +436,7 @@ def get_dataloader(dataset, batch_size, random_split_flag=True, data_split_ratio
     dataloader['eval'] = DataLoader(eval, batch_size=batch_size, shuffle=False)
     dataloader['test'] = DataLoader(test, batch_size=batch_size, shuffle=False)
     return dataloader
+
+
+if __name__ == '__main__':
+    get_dataset(dataset_dir='./datasets', dataset_name='ba_lrp')

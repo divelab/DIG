@@ -1,6 +1,6 @@
 # DeepLIFT
 
-This is a [DeepLIFT (Learning Important Features Through Propagating Activation Differences)](https://arxiv.org/abs/1704.02685) implementation on graph neural network.
+This is the implementation of [DeepLIFT (Learning Important Features Through Propagating Activation Differences)](https://arxiv.org/abs/1704.02685) for explaining graph neural network. We extend the algorithm from image domain to deep graph models to study node/edge importance. 
 
 ## Table of Contents
 
@@ -21,15 +21,14 @@ This is a [DeepLIFT (Learning Important Features Through Propagating Activation 
 
 * Clone this repo
 * Install the conda environment `xgraph`
-* Download datasets, then download the pretrained models.
 
 ```shell script
 $ git clone git@github.com:divelab/DIG.git (or directly clone the xgraph directory by svn)
 $ cd DIG/dig/xgraph/DeepLIFT
 $ source ./install.bash
 ```
-Download [Datasets](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EdH7QVBBghBBgmMgf0_UZSAByxkMa3AvRdH7_QwD9MUfrw?e=EN3JiS) to `xgraph/datasets/`, then
-download [pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EZklsgM56i5EtCKeeEpTTLIBNpDvDNB-zol6ROXBngPsZg?e=20IBOg) to `xgraph/DeepLIFT/`
+Download [the datasets](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EdH7QVBBghBBgmMgf0_UZSAByxkMa3AvRdH7_QwD9MUfrw?e=EN3JiS) to `xgraph/datasets/`, then
+download [the pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EZklsgM56i5EtCKeeEpTTLIBNpDvDNB-zol6ROXBngPsZg?e=20IBOg) to `xgraph/DeepLIFT/`
 ```shell script
 $ cd DeepLIFT 
 $ unzip ../datasets/datasets.zip -d ../datasets/

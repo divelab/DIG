@@ -12,16 +12,6 @@ from torch_geometric.utils import dense_to_sparse
 from torch.utils.data import random_split, Subset
 
 
-def tensor_to_sparse(dense_tensor):
-    """ transfer a dense form torch tensor into a sparse form """
-    row, col = torch.where(dense_tensor)
-    values = dense_tensor[row, col]
-    indices = torch.stack([row, col], dim=0).type(torch.long)
-    sparse_tensor = \
-        torch.sparse_coo_tensor(indices=indices, values=values, size=dense_tensor.shape)
-    return sparse_tensor.to(dense_tensor.device)
-
-
 def undirected_graph(data):
     data.edge_index = torch.cat([torch.stack([data.edge_index[1], data.edge_index[0]], dim=0),
                                  data.edge_index], dim=1)
@@ -106,7 +96,7 @@ def read_ba2motif_data(folder: str, prefix):
     data_list = []
     for graph_idx in range(dense_edges.shape[0]):
         data_list.append(Data(x=torch.from_numpy(node_features[graph_idx]).float(),
-                              edge_index=tensor_to_sparse(torch.from_numpy(dense_edges[graph_idx]))._indices(),
+                              edge_index=dense_to_sparse(torch.from_numpy(dense_edges[graph_idx]))[0],
                               y=torch.from_numpy(np.where(graph_labels[graph_idx])[0])))
     return data_list
 
@@ -194,7 +184,7 @@ class MUTAGDataset(InMemoryDataset):
             targets = np.array(feature).reshape(-1)
             one_hot_feature = np.eye(nb_clss)[targets]
             data_example = Data(x=torch.from_numpy(one_hot_feature).float(),
-                                edge_index=tensor_to_sparse(torch.from_numpy(adj))._indices(), y=label)
+                                edge_index=dense_to_sparse(torch.from_numpy(adj))[1], y=label)
             data_list.append(data_example)
 
         torch.save(self.collate(data_list), self.processed_paths[0])
