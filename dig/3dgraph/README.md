@@ -16,7 +16,11 @@ The `3dgraph` package implements three state-of-the-art algorithms under the [3D
 
 ## Package Usage
 
-Here we provide some examples of using the data interfaces. The detail of running the code can be found in README.md for each methods.
+Here we provide some examples of using the data interfaces and evaluation metrics. The detail of running the code can be found in README.md for each methods.
+
+(1) Data interfaces
+
+We provide unified data interfaces for reading benchmark datasets. For 3D data like molecules, the loaded data contains atom type and positions.
 
 ```python
 from utils import load_qm9
@@ -24,5 +28,13 @@ from torch_geometric.data import DataLoader
 
 train_dataset, val_dataset, test_dataset = load_qm9(dataset='qm9', target='U0', train_size=110000, val_size=10000)
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+```
+
+(2) Evaluation metrics
+
+```python
+from utils import compute_mae, compute_rmse
+
+regression_metric = compute_mae(targets, preds, num_tasks)
 ```
 

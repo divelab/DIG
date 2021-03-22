@@ -18,7 +18,7 @@ def load_md17(dataset, train_size, valid_size):
         z_i = torch.tensor(z,dtype=torch.int64)
         E_i = torch.tensor(E[i],dtype=torch.float32)
         F_i = torch.tensor(F[i],dtype=torch.float32)
-        data = Data(pos=R_i, z=z_i, y=E_i, force=F_i)
+        data = Data(pos=R_i, z=z_i, y=E_i, force=F_i) #edge_index
         dataset.append(data)
     ids = shuffle(range(num_molecule), random_state=42)
     train_idx, val_idx, test_idx = np.array(ids[:train_size]), np.array(ids[train_size:train_size + valid_size]), np.array(ids[train_size + valid_size:])
@@ -44,7 +44,7 @@ def load_qm9(dataset, target, train_size, valid_size):
         R_i = torch.tensor(R_qm9[i],dtype=torch.float32)
         z_i = torch.tensor(Z_qm9[i],dtype=torch.int64)
         y_i = torch.tensor(y[i],dtype=torch.float32)
-        data = Data(pos=R_i, z=z_i, y=y_i)
+        data = Data(pos=R_i, z=z_i, y=y_i) #edge_index
         dataset.append(data)
     ids = shuffle(range(num_molecule), random_state=42)
     train_idx, val_idx, test_idx = np.array(ids[:train_size]), np.array(ids[train_size:train_size + valid_size]), np.array(ids[train_size + valid_size:])
