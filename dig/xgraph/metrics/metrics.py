@@ -230,6 +230,8 @@ class ExplanationProcessor(nn.Module):
                                  related_preds,
                                  data.y[y_idx].squeeze().long().item())
 
+
+# --- Explanation evaluation demo ---
 def demo():
     import os
     from defi import ROOT_DIR
@@ -244,20 +246,33 @@ def demo():
 
     from torch_geometric.utils.random import barabasi_albert_graph
     from torch_geometric.data import Data
+
+    # --- Create a 3-layer GCN model ---
     model = GCN_3l().to(device=device)
 
+    # --- Set the Sparsity to 0.5 ---
     sparsity = 0.5
+
+    # --- Create data collector and explanation processor ---
     x_collector = XCollector(sparsity)
     x_processor = ExplanationProcessor(model=model, device=device)
 
+    # --- Given a 2-class classification with 10 explanation ---
     num_classes = 2
     for _ in range(10):
+
+        # --- Create random ten-node BA graph ---
         x = torch.ones((10, 1), dtype=torch.float)
         edge_index = barabasi_albert_graph(10, 3)
-        data = Data(x=x, edge_index=edge_index, y=torch.tensor([1.])) # y is the ground-truth
+        data = Data(x=x, edge_index=edge_index, y=torch.tensor([1.])) # Assume that y is the ground-truth valuing 1
+
+        # --- Create random explanation ---
         masks = [control_sparsity(torch.randn(edge_index.shape[1], device=device), sparsity) for _ in range(num_classes)]
+
+        # --- Process the explanation including data collection ---
         x_processor(data, masks, x_collector)
 
+    # --- Get the evaluation metric results from the data collector ---
     print(f'#I#Fidelity: {x_collector.fidelity:.4f}\n'
           f'Fidelity_inv: {x_collector.fidelity_inv:.4f}\n'
           f'Sparsity: {x_collector.sparsity:.4f}')

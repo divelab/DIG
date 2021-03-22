@@ -36,5 +36,6 @@ related probabilities for further metric calculations.
 This class is to collect the corresponding model output (the probabilities of
 various label), then compute the Fidelity+(fidelity) and Fidelity-(fidelity_inv).
 
-The example is given in `metrics.py`. Please refer to the `demo` function.
+The example is given in `metrics.py`. Please refer to the `demo` function
+where provides elaborated comments.
 You can also run the `metrics.py` for the demo function.
