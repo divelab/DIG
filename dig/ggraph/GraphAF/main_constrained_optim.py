@@ -7,7 +7,7 @@ from con_optim import ConOptim
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
 
 out_path = 'cons_optim/'
 if not os.path.isdir(out_path):
