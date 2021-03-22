@@ -85,6 +85,7 @@ class GraphFlowModel_con_rl(nn.Module):
 
         with torch.no_grad():
             flag_reconstruct_from_node_adj = True
+            flag_start_from_original_graph = False
 
             rand_num = np.random.rand()
             if rand_num <= 0.5:
@@ -92,6 +93,8 @@ class GraphFlowModel_con_rl(nn.Module):
             else:
                 cur_modify_size = 0
 
+            if cur_modify_size == 0:
+                flag_start_from_original_graph = True
             keep_size = mol_size - cur_modify_size
             
             org_bfs_perm_origin = bfs_perm_origin
@@ -104,6 +107,8 @@ class GraphFlowModel_con_rl(nn.Module):
             cur_node_features[:, keep_size:, :] = 0.
             cur_adj_features[:, :, keep_size:, :] = 0.
             cur_adj_features[:, :, :, keep_size:] = 0.
+
+            min_action_node = 1
 
             rw_mol = Chem.RWMol()  # editable mol
             mol = None
@@ -148,6 +153,7 @@ class GraphFlowModel_con_rl(nn.Module):
                 cur_node_features[:, keep_size:, :] = 0.
                 cur_adj_features[:, :, keep_size:, :] = 0.
                 cur_adj_features[:, :, :, keep_size:] = 0.
+                flag_start_from_original_graph = True
             
             s_inp = Chem.MolToSmiles(mol)
 
@@ -162,12 +168,10 @@ class GraphFlowModel_con_rl(nn.Module):
                 cur_adj_features = cur_adj_features.cuda()
 
             is_continue = True
-            if keep_size <= self.edge_unroll:
-                edge_idx = int(keep_size * (keep_size - 1) / 2)
-            else:
-                edge_idx = int(self.edge_unroll * (self.edge_unroll - 1) / 2 + (keep_size - self.edge_unroll) * self.edge_unroll)
+            total_resample = 0
+            each_node_resample = np.zeros([max_size_rl])
 
-            min_action_node = max(1, max_size_rl - keep_size)
+            
             added_num = 0
             node_features_each_iter_backup = cur_node_features.clone() # backup of features, updated when newly added node is connected to previous subgraph
             adj_features_each_iter_backup = cur_adj_features.clone()
@@ -184,11 +188,7 @@ class GraphFlowModel_con_rl(nn.Module):
                 
                 # first generate node
                 ## reverse flow
-                if self.use_df:
-                    prior_node_dist = torch.distributions.OneHotCategorical(logits=self.node_base_log_probs[i]*temperature[0])
-                    latent_node = prior_node_dist.sample().view(1, -1)
-                else:
-                    latent_node = prior_node_dist.sample().view(1, -1) #(1, 9)
+                latent_node = prior_node_dist.sample().view(1, -1) #(1, 9)
 
                 if self.dp:
                     latent_node = self.flow_core.module.reverse(cur_node_features, cur_adj_features, latent_node, mode=0).view(-1)  # (9, )
@@ -210,18 +210,12 @@ class GraphFlowModel_con_rl(nn.Module):
                 for j in range(edge_total):
                     valid = False
                     resample_edge = 0
-                    if self.use_df:
-                        edge_dis = self.edge_base_log_probs[edge_idx].clone()
                     invalid_bond_type_set = set()
                     while not valid:
                         if len(invalid_bond_type_set) < 3 and resample_edge <= 50:  # haven't sampled all possible bond type or is not stuck in the loop
                             
-                            if self.use_df:
-                                prior_edge_dist = torch.distributions.OneHotCategorical(logits=self.edge_base_log_probs[edge_idx]/temperature[1])
-                                latent_edge = prior_edge_dist.sample().view(1, -1)
-                            else:
-                                latent_edge = prior_edge_dist.sample().view(1, -1)  # (1, 4)
-                            latent_id = torch.argmax(latent_edge, dim=1)
+                            latent_edge = prior_edge_dist.sample().view(1, -1)  # (1, 4)
+                            
                             if self.dp:
                                 latent_edge = self.flow_core.module.reverse(cur_node_features, cur_adj_features, latent_edge,
                                                                             mode=1, edge_index=torch.Tensor([[j + start, i]]).long().cuda()).view(-1)  # (4, )
@@ -248,19 +242,17 @@ class GraphFlowModel_con_rl(nn.Module):
                             if valid:
                                 is_connect = True
                             else:  # backtrack
-                                if self.use_df:
-                                    edge_dis[latent_id] = float('-inf')
                                 if flag_reconstruct_from_node_adj:
                                     rw_mol.RemoveBond(i, j + start)
                                 else:
                                     rw_mol.RemoveBond(i, int(org_bfs_perm_origin[j+start].item()))
                                 cur_adj_features[0, edge_discrete_id, i, j + start] = 0.0
                                 cur_adj_features[0, edge_discrete_id, j + start, i] = 0.0
+                                total_resample += 1.0
+                                each_node_resample[i] += 1.0
                                 resample_edge += 1
 
-                                invalid_bond_type_set.add(edge_discrete_id)
-
-                    edge_idx += 1    
+                                invalid_bond_type_set.add(edge_discrete_id)  
                             
                 if is_connect:  # new generated node has at least one bond with previous node, do not stop generation, backup mol from rw_mol to mol
                     is_continue = True
@@ -300,120 +292,152 @@ class GraphFlowModel_con_rl(nn.Module):
                         is_continue = False
                     else:
                         is_continue = False # first set as False
-
+                        # print('taking min actions, %d remained' % (min_action_node-added_num))
                         rw_mol = Chem.RWMol(mol) # important, recover the mol
                         cur_node_features = node_features_each_iter_backup.clone() # recover the backuped features
                         cur_adj_features = adj_features_each_iter_backup.clone()
-                        cur_node_features_tmp = cur_node_features.clone()
-                        cur_adj_features_tmp = cur_adj_features.clone()
+                        # cur_node_features_tmp = cur_node_features.clone()
+                        # cur_adj_features_tmp = cur_adj_features.clone()
+                        candidate = []
+                        local_num2bond =  {0: Chem.rdchem.BondType.SINGLE, 1: Chem.rdchem.BondType.DOUBLE, 2: Chem.rdchem.BondType.TRIPLE}
+                        local_bond2num =  {Chem.rdchem.BondType.SINGLE:1 , Chem.rdchem.BondType.DOUBLE:2, Chem.rdchem.BondType.TRIPLE:3} 
                         cur_mol_size = rw_mol.GetNumAtoms()
 
-                        mol_demon_edit = Chem.RWMol(rw_mol)
-                        last_id2 = mol_demon_edit.AddAtom(Chem.Atom(6))
-                        cur_node_features_tmp[0, last_id2, 0] = 1.0
-                        cur_adj_features_tmp[0, :, last_id2, last_id2] = 1.0
-                        
-                        flag_success = False
-                        if cur_mol_size > keep_size:
-                            mol_demon_edit.AddBond(cur_mol_size-1, last_id2, Chem.rdchem.BondType.SINGLE)
-                            cur_adj_features_tmp[0, 0, cur_mol_size-1, last_id2] = 1.0
-                            cur_adj_features_tmp[0, 0, last_id2, cur_mol_size-1] = 1.0
-                            valid = check_valency(mol_demon_edit)
-                            if valid:
-                                flag_success = True
-                            else:
-                                mol_demon_edit.RemoveBond(cur_mol_size-1, last_id2)
-                                cur_adj_features_tmp[0, 0, cur_mol_size-1, last_id2] = 0.0
-                                cur_adj_features_tmp[0, 0, last_id2, cur_mol_size-1] = 0.0
-
-                                count = 0
-                                while True:
-                                    if count > 100:
-                                        break
-                                    if last_id2 > 12:
-                                        j = np.random.randint(1, 13)
-                                    else:
-                                        j = np.random.randint(1, last_id2 + 1)
-                                    if flag_reconstruct_from_node_adj:
-                                        mol_demon_edit.AddBond(int(last_id2 - j), int(last_id2), Chem.rdchem.BondType.SINGLE)
-                                    else:
-                                        mol_demon_edit.AddBond(int(org_bfs_perm_origin[last_id2 - j]), int(last_id2), Chem.rdchem.BondType.SINGLE)
-                                    cur_adj_features_tmp[0, 0, last_id2 - j, last_id2] = 1.0
-                                    cur_adj_features_tmp[0, 0, last_id2, last_id2 - j] = 1.0
-
-                                    valid = check_valency(mol_demon_edit)
-                                    if valid:
-                                        flag_success = True
-                                        break
-                                    else:
-                                        if flag_reconstruct_from_node_adj:
-                                            mol_demon_edit.RemoveBond(int(last_id2 - j), int(last_id2))
-                                        else:
-                                            mol_demon_edit.RemoveBond(int(org_bfs_perm_origin[last_id2 - j]), int(last_id2))
-                                        cur_adj_features_tmp[0, 0, last_id2 - j, last_id2] = 0.0
-                                        cur_adj_features_tmp[0, 0, last_id2, last_id2 - j] = 0.0
-                                        count += 1
+                        if cur_mol_size < self.edge_unroll: # 12
+                            candidate_start = 0
+                            candidate_end = cur_mol_size
                         else:
-                            count = 0
-                            while True:
-                                if count > 100:
-                                    break
-                                if keep_size > 12:
-                                    j = np.random.randint(1, 13)
-                                else:
-                                    j = np.random.randint(1, keep_size+1)
-                                if flag_reconstruct_from_node_adj:
-                                    mol_demon_edit.AddBond(int(keep_size-j), int(keep_size), Chem.rdchem.BondType.SINGLE)
-                                else:
-                                    mol_demon_edit.AddBond(int(org_bfs_perm_origin[keep_size-j]), int(keep_size), Chem.rdchem.BondType.SINGLE)
-                                cur_adj_features_tmp[0, 0, keep_size - j, keep_size] = 1.0
-                                cur_adj_features_tmp[0, 0, keep_size, keep_size - j] = 1.0
-
-                                valid = check_valency(mol_demon_edit)
-                                if valid:
-                                    flag_success = True
-                                    break
-                                else:
-                                    if flag_reconstruct_from_node_adj:
-                                        mol_demon_edit.RemoveBond(int(keep_size-j), int(keep_size))
-                                    else:
-                                        mol_demon_edit.RemoveBond(int(org_bfs_perm_origin[keep_size-j]), int(keep_size))
-                                    cur_adj_features_tmp[0, 0, keep_size - j, keep_size] = 0.0
-                                    cur_adj_features_tmp[0, 0, keep_size, keep_size - j] = 0.0
-                                    count += 1
-
-
-                        if flag_success and check_chemical_validity(mol_demon_edit): # successfully take one min action.
-                            rw_mol = Chem.RWMol(mol_demon_edit)
-                            cur_node_features = cur_node_features_tmp.clone()
-                            cur_adj_features = cur_adj_features_tmp.clone()
-                            is_continue = True
-                            mol = rw_mol.GetMol()
-                            if check_chemical_validity(mol) is True:
-                                current_smile = Chem.MolToSmiles(mol, isomericSmiles=True)
-                                tmp_mol1 = Chem.MolFromSmiles(current_smile)
-                                current_imp = calculate_min_plogp(tmp_mol1) - org_mol_plogp
-                                current_sim = reward_target_molecule_similarity(tmp_mol1, org_mol_true_raw)
-                                if current_imp > 0:
-                                    cur_mols.append(tmp_mol1)
-                                    cur_mol_imps.append(current_imp)
-                                    cur_mol_sims.append(current_sim)
-
-                                if flag_reconstruct_from_node_adj is False: #not reconstructed from adj, can convert.
-                                    mol_converted = convert_radical_electrons_to_hydrogens(mol)                                        
-                                    if check_chemical_validity(mol_converted) is True:
-                                        current_smile2 = Chem.MolToSmiles(mol_converted, isomericSmiles=True)
-                                        tmp_mol2 = Chem.MolFromSmiles(current_smile2)
-                                        current_imp2 = calculate_min_plogp(tmp_mol2) - org_mol_plogp
-                                        current_sim2 = reward_target_molecule_similarity(tmp_mol2, org_mol_true_raw)
-                                        if current_imp2 > 0:
-                                            cur_mols.append(tmp_mol2)
-                                            cur_mol_imps.append(current_imp2)
-                                            cur_mol_sims.append(current_sim2)                                     
+                            candidate_start = cur_mol_size - self.edge_unroll
+                            candidate_end = cur_mol_size
+                        candidate_node_features = cur_node_features.clone() # (1, 38, 9)
+                        candidate_adj_features = cur_adj_features.clone() # (1, 4, 38, 38)
+                        candidate_node_features = candidate_node_features[0, candidate_start:candidate_end] #(12, 9)
+                        candidate_adj_features = candidate_adj_features[0, :, candidate_start:candidate_end, candidate_start:candidate_end] #(4, 12, 12)
+                        assert candidate_node_features.size(0) == candidate_adj_features.size(1)
+                        for cur_cand_index in range(candidate_node_features.size(0)):
+                            cur_node_feat = candidate_node_features[cur_cand_index] #(9,)
+                            cur_adj_list = candidate_adj_features[:, cur_cand_index] #(4, 12,)
+                            assert cur_node_feat.sum() == 1.0
+                            if cur_node_feat[0] != 1.0:
+                                continue
+                            cur_valency = 0
+                            for neighbor_id in range(cur_adj_list.size(1)):
+                                if neighbor_id == cur_cand_index: # ignore self loop
+                                    continue
+                                neighbor_edge_type = torch.argmax(cur_adj_list[:, neighbor_id]).item()
+                                assert neighbor_edge_type <= 3
+                                if neighbor_edge_type < 3:
+                                    cur_valency += (neighbor_edge_type + 1)
+                            if cur_valency > 0 and cur_valency <= 3:
+                                candidate.append(cur_cand_index + candidate_start)
+                        # print('selecting candidate done')
+                        if len(candidate) > 0:
+                            try_take_min_action_time = 5
+                            flag_success = False
+                            stop_sig = False
+                            cur_try = 0
+                            cur_try2 = 0
+                            last_id1 = -1
+                            cache_demon = [-1]
+                            while cur_try < try_take_min_action_time and not stop_sig and cur_try2 < 2 * try_take_min_action_time:
+                                cur_try2 += 1
+                                last_id1 = -1
+                                #if 1:
+                                try:
+                        
+                                    mol_demon_edit = Chem.RWMol(rw_mol)
+                                    #keep_size = org_mol_true_raw.GetNumAtoms()
+                                    cur_node_features_tmp = cur_node_features.clone()
+                                    cur_adj_features_tmp = cur_adj_features.clone()
+                                    #cur_node_features[:, keep_size:, :] = 0.
+                                    #cur_adj_features[:, :, keep_size:, :] = 0.
+                                    #cur_adj_features[:, :, :, keep_size:] = 0.
+                                    #cur_node_features = cur_node_features.cuda()  
+                                    #cur_adj_features = cur_adj_features.cuda()
                             
-                            node_features_each_iter_backup = cur_node_features.clone() # update node backup since new node is valid
-                            adj_features_each_iter_backup = cur_adj_features.clone() #
-                            added_num += 1                                        
+                                    try_time=5
+                                    try_count=0
+                                    while last_id1 in cache_demon and try_count < try_time: # get a starting point
+                                        try_count += 1
+                                        last_id1 = np.random.randint(len(candidate))
+                                        last_id1 = int(candidate[last_id1])
+                                    cache_demon.append(last_id1)
+                                    #print(org_bfs_perm_origin)
+                                    if flag_reconstruct_from_node_adj:
+                                        last_id1_origin = last_id1
+                                    else:
+                                        last_id1_origin = int(org_bfs_perm_origin[last_id1].item())
+                                    #TODO:check the logic of bfs is right
+                                    atom = mol_demon_edit.GetAtomWithIdx(last_id1_origin)
+                                    #print('start testing atom')
+                                    assert atom.GetAtomicNum() == 6
+                                    #print('pass carbon test')
+                                    assert sum([local_bond2num[x.GetBondType()] for x in atom.GetBonds()]) <= 3
+                                    #print('pass testing atom')
+                                    for act_id in range(1): # only add one node and one edge
+                                
+                                        last_id2 = mol_demon_edit.AddAtom(Chem.Atom(6))
+                                        print('act_id:%d, org_mol_size: %d, cur mol size: %d, last_id1: %d, last_id2:%d' % (act_id, mol.GetNumAtoms(), mol_demon_edit.GetNumAtoms(), last_id1, last_id2))
+
+                                        assert  mol_demon_edit.GetNumAtoms() == (last_id2 + 1)
+
+                                        cur_node_features_tmp[0, last_id2, 0] = 1.0
+                                        cur_adj_features_tmp[0, :, last_id2, last_id2] = 1.0
+                                        mol_demon_edit.AddBond(last_id1_origin, last_id2, local_num2bond[0])
+                                                            
+                                        cur_adj_features_tmp[0, 0, last_id1, last_id2] = 1.0
+                                        cur_adj_features_tmp[0, 0, last_id2, last_id1] = 1.0
+                                    assert check_chemical_validity(mol_demon_edit) is True
+                                    # print('pass chemical validity check...')
+                                    stop_sig = True
+                                    flag_success = True
+                                    rw_mol = Chem.RWMol(mol_demon_edit)
+                                    cur_node_features = cur_node_features_tmp.clone()
+                                    cur_adj_features = cur_adj_features_tmp.clone()
+                                    
+                                    cur_try += 1
+                                    
+                                #if 1:
+                                except:
+                                    print('demonstration invalid occur, continue, raw is: %s' % s_raw)
+                                    continue
+                            if flag_success: # successfully take one min action.
+                                #flag_use_demon = True
+                                is_continue = True
+                                mol = rw_mol.GetMol()
+
+                                if check_chemical_validity(mol) is True:
+                                    current_smile = Chem.MolToSmiles(mol, isomericSmiles=True)
+                                    tmp_mol1 = Chem.MolFromSmiles(current_smile)
+                                    current_imp = calculate_min_plogp(tmp_mol1) - org_mol_plogp
+                                    current_sim = reward_target_molecule_similarity(tmp_mol1, org_mol_true_raw)
+                                    if current_imp > 0:
+                                        cur_mol_smiles.append(current_smile)
+                                        cur_mol_imps.append(current_imp)
+                                        cur_mol_sims.append(current_sim)
+
+                                    if flag_reconstruct_from_node_adj is False: #not reconstructed from adj, can convert.
+                                        mol_converted = convert_radical_electrons_to_hydrogens(mol)                                        
+                                        if check_chemical_validity(mol_converted) is True:
+                                            current_smile2 = Chem.MolToSmiles(mol_converted, isomericSmiles=True)
+                                            tmp_mol2 = Chem.MolFromSmiles(current_smile2)
+                                            current_imp2 = calculate_min_plogp(tmp_mol2) - org_mol_plogp
+                                            current_sim2 = reward_target_molecule_similarity(tmp_mol2, org_mol_true_raw)
+                                            if current_imp2 > 0:
+                                                cur_mol_smiles.append(current_smile2)
+                                                cur_mol_imps.append(current_imp2)
+                                                cur_mol_sims.append(current_sim2)                                      
+                                node_features_each_iter_backup = cur_node_features.clone() # update node backup since new node is valid
+                                adj_features_each_iter_backup = cur_adj_features.clone() #
+                                added_num += 1                                        
+
+                                # print('successfully take one action')
+                            else:
+                                # print('failed in take one min action')
+                                continue
+                        
+                        else:
+                            continue                                     
                                                         
         return cur_mols, cur_mol_imps, cur_mol_sims
 
@@ -429,20 +453,19 @@ class GraphFlowModel_con_rl(nn.Module):
             max_size_rl: maximal num of atoms allowed for generation
         Returns:
         """
+        optim_dict = {}
         batch_size = min(batch_size, mol_sizes.size(0)) # last batch of one iter may be less batch_size
 
         assert cur_iter is not None
         if cur_iter % self.conf_rl['update_iters'] == 0: # uodate the demenstration net every 4 iter.
             print('copying to old model at iter {}'.format(cur_iter))
             self.flow_core_old.load_state_dict(self.flow_core.state_dict())
-            if self.use_df:    
-                self.node_base_log_probs_old = nn.Parameter(self.node_base_log_probs.detach().clone(), requires_grad=False)
-                self.edge_base_log_probs_old = nn.Parameter(self.edge_base_log_probs.detach().clone(), requires_grad=False)
-
+            
         #assert cur_baseline is not None
         num2bond = {0: Chem.rdchem.BondType.SINGLE, 1: Chem.rdchem.BondType.DOUBLE, 2: Chem.rdchem.BondType.TRIPLE}
         num2atom = {i:atom_list[i] for i in range(len(atom_list))}
-
+        num2bond_symbol = {0: '=', 1: '==', 2: '==='}
+        num2symbol = {0: 'C', 1: 'N', 2: 'O', 3: 'F', 4: 'P', 5: 'S', 6: 'Cl', 7: 'Br', 8: 'I'}
         if self.dp:
             if not self.use_df:
                 prior_node_dist = torch.distributions.normal.Normal(torch.zeros([self.node_dim]).cuda(),
@@ -462,7 +485,7 @@ class GraphFlowModel_con_rl(nn.Module):
         node_inputs['node_features_cont'] = []
         node_inputs['rewards'] = []
         node_inputs['baseline_index'] = []
-        node_inputs['node_cnt'] = []
+        
 
         adj_inputs = {}
         adj_inputs['node_features'] = []
@@ -471,7 +494,7 @@ class GraphFlowModel_con_rl(nn.Module):
         adj_inputs['index'] = []
         adj_inputs['rewards'] = []
         adj_inputs['baseline_index'] = []
-        adj_inputs['edge_cnt'] = []
+        
 
         reward_baseline = torch.zeros([max_size_rl + 5, 2]).cuda()
 
@@ -495,7 +518,7 @@ class GraphFlowModel_con_rl(nn.Module):
                 traj_node_inputs['node_features_cont'] = []
                 traj_node_inputs['rewards'] = []
                 traj_node_inputs['baseline_index'] = []
-                traj_node_inputs['node_cnt'] = []
+                
                 traj_adj_inputs = {}
                 traj_adj_inputs['node_features'] = []
                 traj_adj_inputs['adj_features'] = []
@@ -503,18 +526,22 @@ class GraphFlowModel_con_rl(nn.Module):
                 traj_adj_inputs['index'] = []
                 traj_adj_inputs['rewards'] = []
                 traj_adj_inputs['baseline_index'] = []
-                traj_adj_inputs['edge_cnt'] = []
+                
 
                 step_cnt = 1.0
 
+                flag_start_from_original_graph = False
                 flag_reconstruct_from_node_adj = True
+                flag_use_demon = False
 
                 rand_num = np.random.rand()
                 if rand_num <= 0.5:
                     cur_modify_size = np.random.randint(low=0, high=self.conf_rl['modify_size'])
                 else:
                     cur_modify_size = 0
-                
+                if cur_modify_size == 0:
+                    flag_start_from_original_graph = True
+
                 keep_size = int(mol_sizes[batch_length]) - cur_modify_size
                 
                 org_bfs_perm_origin = bfs_perm_origin[batch_length]
@@ -569,7 +596,8 @@ class GraphFlowModel_con_rl(nn.Module):
                     cur_adj_features = org_adj_features.clone()
                     cur_node_features[:, keep_size:, :] = 0.
                     cur_adj_features[:, :, keep_size:, :] = 0.
-                    cur_adj_features[:, :, :, keep_size:] = 0.                                        
+                    cur_adj_features[:, :, :, keep_size:] = 0.               
+                    flag_start_from_original_graph = True                         
 
                 assert check_chemical_validity(org_mol_true_raw) is True, 's_raw is %s' % (s_raw)
                 assert check_chemical_validity(mol) is True
@@ -582,10 +610,8 @@ class GraphFlowModel_con_rl(nn.Module):
                     cur_adj_features = cur_adj_features.cuda()
 
                 is_continue = True
-                if keep_size <= self.edge_unroll:
-                    edge_idx = int(keep_size * (keep_size - 1) / 2)
-                else:
-                    edge_idx = int(self.edge_unroll * (self.edge_unroll - 1) / 2 + (keep_size - self.edge_unroll) * self.edge_unroll)
+                total_resample = 0
+                each_node_resample = np.zeros([max_size_rl])
 
                 step_num_data_edge = 0
                 added_num = 0
@@ -606,11 +632,7 @@ class GraphFlowModel_con_rl(nn.Module):
                     
                     # first generate node
                     ## reverse flow
-                    if self.use_df:
-                        prior_node_dist = torch.distributions.OneHotCategorical(logits=self.node_base_log_probs[i]*temperature[0])
-                        latent_node = prior_node_dist.sample().view(1, -1)
-                    else:
-                        latent_node = prior_node_dist.sample().view(1, -1) #(1, 9)
+                    latent_node = prior_node_dist.sample().view(1, -1) #(1, 9)
                     if self.dp:
                         latent_node = self.flow_core_old.module.reverse(cur_node_features, cur_adj_features, latent_node, mode=0).view(-1)  # (9, )
                     else:
@@ -627,7 +649,7 @@ class GraphFlowModel_con_rl(nn.Module):
                     traj_node_inputs['node_features_cont'].append(node_feature_cont)  # (1, self.node_dim)
                     traj_node_inputs['rewards'].append(torch.full(size=(1,1), fill_value=step_cnt).cuda())  # (1, 1)
                     traj_node_inputs['baseline_index'].append(torch.full(size=(1,), fill_value=step_cnt).long().cuda())  # (1, 1)
-                    traj_node_inputs['node_cnt'].append(torch.full(size=(1,), fill_value=float(i)).long().cuda())
+                    
 
                     cur_node_features[0, i, feature_id] = 1.0
                     cur_adj_features[0, :, i, i] = 1.0
@@ -642,18 +664,12 @@ class GraphFlowModel_con_rl(nn.Module):
                     for j in range(edge_total):
                         valid = False
                         resample_edge = 0
-                        if self.use_df:
-                            edge_dis = self.edge_base_log_probs_old[edge_idx].clone()
                         invalid_bond_type_set = set()
                         while not valid:
                             if len(invalid_bond_type_set) < 3 and resample_edge <= 50:  # haven't sampled all possible bond type or is not stuck in the loop
                                 
-                                if self.use_df:
-                                    prior_edge_dist = torch.distributions.OneHotCategorical(logits=self.edge_base_log_probs[edge_idx]/temperature[1])
-                                    latent_edge = prior_edge_dist.sample().view(1, -1)
-                                else:
-                                    latent_edge = prior_edge_dist.sample().view(1, -1)  # (1, 4)
-                                latent_id = torch.argmax(latent_edge, dim=1)
+                                latent_edge = prior_edge_dist.sample().view(1, -1)  # (1, 4)
+                                
                                 if self.dp:
                                     latent_edge = self.flow_core_old.module.reverse(cur_node_features, cur_adj_features, latent_edge,
                                                                                 mode=1, edge_index=torch.Tensor([[j + start, i]]).long().cuda()).view(-1)  # (4, )
@@ -674,7 +690,7 @@ class GraphFlowModel_con_rl(nn.Module):
                             traj_adj_inputs['adj_features'].append(cur_adj_features.clone())  # 1, self.bond_dim, max_size_rl, max_size_rl
                             traj_adj_inputs['edge_features_cont'].append(edge_feature_cont)  # 1, self.bond_dim
                             traj_adj_inputs['index'].append(torch.Tensor([[j + start, i]]).long().cuda().view(1,-1)) # (1, 2)
-                            traj_adj_inputs['edge_cnt'].append(torch.full(size=(1,), fill_value=float(edge_idx)).long().cuda())
+                            
                             step_num_data_edge += 1 # add one edge data, not sure if this should be added to the final train data
 
                             cur_adj_features[0, edge_discrete_id, i, j + start] = 1.0
@@ -692,14 +708,14 @@ class GraphFlowModel_con_rl(nn.Module):
                                 if valid:
                                     is_connect = True
                                 else:  # backtrack
-                                    if self.use_df:
-                                        edge_dis[latent_id] = float('-inf')
                                     if flag_reconstruct_from_node_adj:
                                         rw_mol.RemoveBond(i, j + start)
                                     else:
                                         rw_mol.RemoveBond(i, int(org_bfs_perm_origin[j+start].item()))
                                     cur_adj_features[0, edge_discrete_id, i, j + start] = 0.0
                                     cur_adj_features[0, edge_discrete_id, j + start, i] = 0.0
+                                    total_resample += 1.0
+                                    each_node_resample[i] += 1.0
                                     resample_edge += 1
 
                                     invalid_bond_type_set.add(edge_discrete_id)
@@ -716,10 +732,10 @@ class GraphFlowModel_con_rl(nn.Module):
                                     traj_adj_inputs['adj_features'].pop(-1)
                                     traj_adj_inputs['edge_features_cont'].pop(-1)
                                     traj_adj_inputs['index'].pop(-1)
-                                    traj_adj_inputs['edge_cnt'].pop(-1)
+                                    
                                     step_num_data_edge -= 1 # if we do not penalize invalid edge, pop train data, decrease counter by 1                              
 
-                        edge_idx += 1        
+                            
 
                     if is_connect:  # new generated node has at least one bond with previous node, do not stop generation, backup mol from rw_mol to mol
                         is_continue = True
@@ -742,16 +758,13 @@ class GraphFlowModel_con_rl(nn.Module):
                             rw_mol = Chem.RWMol(mol) # important, recover the mol
                             cur_node_features = node_features_each_iter_backup.clone() # recover the backuped features
                             cur_adj_features = adj_features_each_iter_backup.clone()
-                            cur_node_features_tmp = cur_node_features.clone()
-                            cur_adj_features_tmp = cur_adj_features.clone()
-                            cur_mol_size = rw_mol.GetNumAtoms()
 
                             traj_node_inputs['node_features'].pop(-1)
                             traj_node_inputs['adj_features'].pop(-1)
                             traj_node_inputs['node_features_cont'].pop(-1)
                             traj_node_inputs['rewards'].pop(-1)
                             traj_node_inputs['baseline_index'].pop(-1)
-                            traj_node_inputs['node_cnt'].pop(-1)
+                            
                 
                             ## pop adj
                             for pop_cnt in range(step_num_data_edge):
@@ -761,177 +774,183 @@ class GraphFlowModel_con_rl(nn.Module):
                                 traj_adj_inputs['index'].pop(-1)
                                 traj_adj_inputs['rewards'].pop(-1)
                                 traj_adj_inputs['baseline_index'].pop(-1)
-                                traj_adj_inputs['edge_cnt'].pop(-1)
-                            
-                            mol_demon_edit = Chem.RWMol(rw_mol)
-                            last_id2 = mol_demon_edit.AddAtom(Chem.Atom(6))
-                            traj_node_inputs['node_features'].append(cur_node_features_tmp.clone())
-                            traj_node_inputs['adj_features'].append(cur_adj_features_tmp.clone())
-                            node_feature_cont = torch.zeros([1, self.node_dim]).cuda()
-                            node_feature_cont[0, feature_id] = 1.0
-                            traj_node_inputs['node_features_cont'].append(node_feature_cont)
-                            traj_node_inputs['rewards'].append(torch.full(size=(1,1), fill_value=step_cnt).cuda())  # (1, 1)
-                            traj_node_inputs['baseline_index'].append(torch.full(size=(1,), fill_value=step_cnt).long().cuda())  # (1, 1)
-                            traj_node_inputs['node_cnt'].append(torch.full(size=(1,), fill_value=float(i)).long().cuda())
-                            
-                            cur_node_features_tmp[0, last_id2, 0] = 1.0
-                            cur_adj_features_tmp[0, :, last_id2, last_id2] = 1.0
-
-                            flag_success = False
-                            if cur_mol_size <= self.edge_unroll:
-                                edge_total = cur_mol_size
-                                start = 0
-                                edge_idx = int(cur_mol_size * (cur_mol_size - 1) / 2)
+                                
+                            candidate = []
+                            local_num2bond =  {0: Chem.rdchem.BondType.SINGLE, 1: Chem.rdchem.BondType.DOUBLE, 2: Chem.rdchem.BondType.TRIPLE}
+                            local_bond2num =  {Chem.rdchem.BondType.SINGLE:1 , Chem.rdchem.BondType.DOUBLE:2, Chem.rdchem.BondType.TRIPLE:3}                                
+                            cur_mol_size = rw_mol.GetNumAtoms()
+                            if cur_mol_size < self.edge_unroll: # 12
+                                candidate_start = 0
+                                candidate_end = cur_mol_size
                             else:
-                                edge_total = self.edge_unroll
-                                start = cur_mol_size - self.edge_unroll
-                                edge_idx = int(self.edge_unroll * (self.edge_unroll - 1) / 2 + (cur_mol_size - self.edge_unroll) * self.edge_unroll)
+                                candidate_start = cur_mol_size - self.edge_unroll
+                                candidate_end = cur_mol_size
+                            candidate_node_features = cur_node_features.clone() # (1, 38, 9)
+                            candidate_adj_features = cur_adj_features.clone() # (1, 4, 38, 38)
+                            candidate_node_features = candidate_node_features[0, candidate_start:candidate_end] #(12, 9)
+                            candidate_adj_features = candidate_adj_features[0, :, candidate_start:candidate_end, candidate_start:candidate_end] #(4, 12, 12)
+                            assert candidate_node_features.size(0) == candidate_adj_features.size(1)
+                            for cur_cand_index in range(candidate_node_features.size(0)):
+                                cur_node_feat = candidate_node_features[cur_cand_index] #(9,)
+                                cur_adj_list = candidate_adj_features[:, cur_cand_index] #(4, 12,)
+                                assert cur_node_feat.sum() == 1.0
+                                if cur_node_feat[0] != 1.0:
+                                    continue
+                                cur_valency = 0
+                                for neighbor_id in range(cur_adj_list.size(1)):
+                                    if neighbor_id == cur_cand_index: # ignore self loop
+                                        continue
+                                    neighbor_edge_type = torch.argmax(cur_adj_list[:, neighbor_id]).item()
+                                    assert neighbor_edge_type <= 3
+                                    if neighbor_edge_type < 3:
+                                        cur_valency += (neighbor_edge_type + 1)
+                                if cur_valency > 0 and cur_valency <= 3:
+                                    candidate.append(cur_cand_index + candidate_start)
 
-                            if cur_mol_size > keep_size:
-                                mol_demon_edit.AddBond(cur_mol_size-1, last_id2, Chem.rdchem.BondType.SINGLE)
-                                valid = check_valency(mol_demon_edit)
-                                if valid:
-                                    flag_success = True
-                                    for j in range(edge_total):
-                                        edge_feature_cont = torch.zeros([1, self.bond_dim]).cuda()
-                                        if j == edge_total - 1:
-                                            edge_feature_cont[0, 0] = 1.0
-                                        else:
-                                            edge_feature_cont[0, 3] = 1.0
-                                        
-                                        traj_adj_inputs['node_features'].append(cur_node_features_tmp.clone())
-                                        traj_adj_inputs['adj_features'].append(cur_adj_features_tmp.clone())
-                                        traj_adj_inputs['edge_features_cont'].append(edge_feature_cont)
-                                        traj_adj_inputs['index'].append(torch.Tensor([[j + start, last_id2]]).long().cuda().view(1,-1))
-                                        traj_adj_inputs['edge_cnt'].append(torch.full(size=(1,), fill_value=float(edge_idx)).long().cuda())
-                                        traj_adj_inputs['rewards'].append(torch.full(size=(1, 1), fill_value=step_cnt).cuda())  # (1, 1)
-                                        traj_adj_inputs['baseline_index'].append(torch.full(size=(1,), fill_value=step_cnt).long().cuda())  # (1)
+                            if len(candidate) > 0:
+                                try_take_min_action_time = 5
+                                flag_success = False
+                                stop_sig = False
+                                cur_try = 0
+                                cur_try2 = 0
+                                last_id1 = -1
+                                cache_demon = [-1]
+                                while cur_try < try_take_min_action_time and not stop_sig and cur_try2 < 2 * try_take_min_action_time:
+                                    cur_try2 += 1
+                                    last_id1 = -1
+                                    #if 1:
+                                    try:
+                                        traj_node_inputs_tmp = {}
+                                        traj_node_inputs_tmp['node_features'] = []
+                                        traj_node_inputs_tmp['adj_features'] = []
+                                        traj_node_inputs_tmp['node_features_cont'] = []
+                                        traj_node_inputs_tmp['rewards'] = []
+                                        traj_node_inputs_tmp['baseline_index'] = []
+                                        traj_adj_inputs_tmp = {}
+                                        traj_adj_inputs_tmp['node_features'] = []
+                                        traj_adj_inputs_tmp['adj_features'] = []
+                                        traj_adj_inputs_tmp['edge_features_cont'] = []
+                                        traj_adj_inputs_tmp['index'] = []
+                                        traj_adj_inputs_tmp['rewards'] = []
+                                        traj_adj_inputs_tmp['baseline_index'] = []
+                                        step_cnt_tmp = step_cnt # still use the current step cnt
 
-                                        if j == edge_total - 1:
-                                            cur_adj_features_tmp[0, 0, last_id2, j + start] = 1.0
-                                            cur_adj_features_tmp[0, 0, j + start, last_id2] = 1.0
-                                        else:
-                                            cur_adj_features_tmp[0, 3, last_id2, j + start] = 1.0
-                                            cur_adj_features_tmp[0, 3, j + start, last_id2] = 1.0
-
-                                        edge_idx += 1
-                                else:
-                                    mol_demon_edit.RemoveBond(cur_mol_size-1, last_id2)
-
-                                    count = 0
-                                    while True:
-                                        if count > 100:
-                                            break
-                                        if last_id2 > 12:
-                                            k = np.random.randint(1, 13)
-                                        else:
-                                            k = np.random.randint(1, last_id2 + 1)
+                                        mol_demon_edit = Chem.RWMol(rw_mol)
+                                        #keep_size = org_mol_true_raw.GetNumAtoms()
+                                        cur_node_features_tmp = cur_node_features.clone()
+                                        cur_adj_features_tmp = cur_adj_features.clone()
+                                        #cur_node_features[:, keep_size:, :] = 0.
+                                        #cur_adj_features[:, :, keep_size:, :] = 0.
+                                        #cur_adj_features[:, :, :, keep_size:] = 0.
+                                        #cur_node_features = cur_node_features.cuda()  
+                                        #cur_adj_features = cur_adj_features.cuda()
+                                
+                                        try_time=5
+                                        try_count=0
+                                        while last_id1 in cache_demon and try_count < try_time: # get a starting point
+                                            try_count += 1
+                                            last_id1 = np.random.randint(len(candidate))
+                                            last_id1 = int(candidate[last_id1])
+                                        cache_demon.append(last_id1)
+                                        #print(org_bfs_perm_origin)
                                         if flag_reconstruct_from_node_adj:
-                                            mol_demon_edit.AddBond(int(last_id2 - k), int(last_id2), Chem.rdchem.BondType.SINGLE)
+                                            last_id1_origin = last_id1
                                         else:
-                                            mol_demon_edit.AddBond(int(org_bfs_perm_origin[last_id2 - k]), int(last_id2), Chem.rdchem.BondType.SINGLE)
+                                            last_id1_origin = int(org_bfs_perm_origin[last_id1].item())
+                                        #TODO:check the logic of bfs is right
+                                        atom = mol_demon_edit.GetAtomWithIdx(last_id1_origin)
+                                        # print('start testing atom')
+                                        assert atom.GetAtomicNum() == 6
+                                        # print('pass carbon test')
+                                        assert sum([local_bond2num[x.GetBondType()] for x in atom.GetBonds()]) <= 3
+                                        # print('pass testing atom')
+                                        for act_id in range(1): # only add one node and one edge
+                                    
+                                            last_id2 = mol_demon_edit.AddAtom(Chem.Atom(6))
+                                            # print('act_id:%d, org_mol_size: %d, cur mol size: %d, last_id1: %d, last_id2:%d' % (act_id, mol.GetNumAtoms(), mol_demon_edit.GetNumAtoms(), last_id1, last_id2))
+                                            node_feature_cont = torch.zeros([1, self.node_dim]).cuda()
+                                            node_feature_cont[0, 0] = 1.0   # carbon                                     
+                                            traj_node_inputs_tmp['node_features'].append(cur_node_features_tmp.clone())  # (1, max_size_rl, self.node_dim)
+                                            traj_node_inputs_tmp['adj_features'].append(cur_adj_features_tmp.clone())  # (1, self.bond_dim, max_size_rl, max_size_rl)
+                                            traj_node_inputs_tmp['node_features_cont'].append(node_feature_cont)  # (1, self.node_dim)
+                                            traj_node_inputs_tmp['rewards'].append(torch.full(size=(1,1), fill_value=step_cnt_tmp).cuda())  # (1, 1)
+                                            traj_node_inputs_tmp['baseline_index'].append(torch.full(size=(1,), fill_value=step_cnt_tmp).long().cuda())  # (1, 1)                                        
 
-                                        valid = check_valency(mol_demon_edit)
-                                        if valid:
-                                            flag_success = True
-                                            for j in range(edge_total):
-                                                edge_feature_cont = torch.zeros([1, self.bond_dim]).cuda()
-                                                if j + start == last_id2 - k:
-                                                    edge_feature_cont[0, 0] = 1.0
-                                                else:
-                                                    edge_feature_cont[0, 3] = 1.0
-                                                
-                                                traj_adj_inputs['node_features'].append(cur_node_features_tmp.clone())
-                                                traj_adj_inputs['adj_features'].append(cur_adj_features_tmp.clone())
-                                                traj_adj_inputs['edge_features_cont'].append(edge_feature_cont)
-                                                traj_adj_inputs['index'].append(torch.Tensor([[j + start, last_id2 - k]]).long().cuda().view(1,-1))
-                                                traj_adj_inputs['edge_cnt'].append(torch.full(size=(1,), fill_value=float(edge_idx)).long().cuda())
-                                                traj_adj_inputs['rewards'].append(torch.full(size=(1, 1), fill_value=step_cnt).cuda())  # (1, 1)
-                                                traj_adj_inputs['baseline_index'].append(torch.full(size=(1,), fill_value=step_cnt).long().cuda())  # (1)
+                                            assert  mol_demon_edit.GetNumAtoms() == (last_id2 + 1)
 
-                                                if j + start == last_id2 - k:
-                                                    cur_adj_features_tmp[0, 0, last_id2, last_id2 - k] = 1.0
-                                                    cur_adj_features_tmp[0, 0, last_id2 - k, last_id2] = 1.0
-                                                else:
-                                                    cur_adj_features_tmp[0, 3, last_id2, last_id2 - k] = 1.0
-                                                    cur_adj_features_tmp[0, 3, last_id2 - k, last_id2] = 1.0
-
-                                                edge_idx += 1
-                                            break
-                                        else:
-                                            if flag_reconstruct_from_node_adj:
-                                                mol_demon_edit.RemoveBond(int(last_id2 - k), int(last_id2))
-                                            else:
-                                                mol_demon_edit.RemoveBond(int(org_bfs_perm_origin[last_id2 - k]), int(last_id2))
-                                            count += 1
-                            else:
-                                count = 0
-                                while True:
-                                    if count > 100:
-                                        break
-                                    if keep_size > 12:
-                                        k = np.random.randint(1, 13)
-                                    else:
-                                        k = np.random.randint(1, keep_size+1)
-                                    if flag_reconstruct_from_node_adj:
-                                        mol_demon_edit.AddBond(int(keep_size-k), int(keep_size), Chem.rdchem.BondType.SINGLE)
-                                    else:
-                                        mol_demon_edit.AddBond(int(org_bfs_perm_origin[keep_size-k]), int(keep_size), Chem.rdchem.BondType.SINGLE)
-                                    cur_adj_features_tmp[0, 0, keep_size - k, keep_size] = 1.0
-                                    cur_adj_features_tmp[0, 0, keep_size, keep_size - k] = 1.0
-
-                                    valid = check_valency(mol_demon_edit)
-                                    if valid:
-                                        flag_success = True
-                                        for j in range(edge_total):
+                                            cur_node_features_tmp[0, last_id2, 0] = 1.0
+                                            cur_adj_features_tmp[0, :, last_id2, last_id2] = 1.0
+                                            #if act_id == 0:
+                                            mol_demon_edit.AddBond(last_id1_origin, last_id2, local_num2bond[0])
+                                            #else:
+                                            #mol_demon_edit.AddBond(last_id1, last_id2, local_num2bond[0])
                                             edge_feature_cont = torch.zeros([1, self.bond_dim]).cuda()
-                                            if j + start == last_id2 - k:
-                                                edge_feature_cont[0, 0] = 1.0
-                                            else:
-                                                edge_feature_cont[0, 3] = 1.0
-                                            
-                                            traj_adj_inputs['node_features'].append(cur_node_features_tmp.clone())
-                                            traj_adj_inputs['adj_features'].append(cur_adj_features_tmp.clone())
-                                            traj_adj_inputs['edge_features_cont'].append(edge_feature_cont)
-                                            traj_adj_inputs['index'].append(torch.Tensor([[j + start, last_id2 - k]]).long().cuda().view(1,-1))
-                                            traj_adj_inputs['edge_cnt'].append(torch.full(size=(1,), fill_value=float(edge_idx)).long().cuda())
-                                            traj_adj_inputs['rewards'].append(torch.full(size=(1, 1), fill_value=step_cnt).cuda())  # (1, 1)
-                                            traj_adj_inputs['baseline_index'].append(torch.full(size=(1,), fill_value=step_cnt).long().cuda())  # (1)
+                                            edge_feature_cont[0, 0] = 1.0  # single bond                                      
+                                            traj_adj_inputs_tmp['node_features'].append(cur_node_features_tmp.clone())  # 1, max_size_rl, self.node_dim
+                                            traj_adj_inputs_tmp['adj_features'].append(cur_adj_features_tmp.clone())  # 1, self.bond_dim, max_size_rl, max_size_rl
+                                            traj_adj_inputs_tmp['edge_features_cont'].append(edge_feature_cont)  # 1, self.bond_dim
+                                            traj_adj_inputs_tmp['index'].append(torch.Tensor([[last_id1, last_id2]]).long().cuda().view(1,-1)) # (1, 2)                                        
+                                            traj_adj_inputs_tmp['rewards'].append(torch.full(size=(1, 1), fill_value=step_cnt_tmp).cuda())  # (1, 1)
+                                            traj_adj_inputs_tmp['baseline_index'].append(torch.full(size=(1,), fill_value=step_cnt_tmp).long().cuda())  # (1)                                        
+                                            cur_adj_features_tmp[0, 0, last_id1, last_id2] = 1.0
+                                            cur_adj_features_tmp[0, 0, last_id2, last_id1] = 1.0
+                                        assert check_chemical_validity(mol_demon_edit) is True
+                                        # print('pass chemical validity check...')
+                                        stop_sig = True
+                                        flag_success = True
+                                        rw_mol = Chem.RWMol(mol_demon_edit)
+                                        cur_node_features = cur_node_features_tmp.clone()
+                                        cur_adj_features = cur_adj_features_tmp.clone()
+                                        traj_node_inputs['node_features'].extend(traj_node_inputs_tmp['node_features'])
+                                        traj_node_inputs['adj_features'].extend(traj_node_inputs_tmp['adj_features'])
+                                        traj_node_inputs['node_features_cont'].extend(traj_node_inputs_tmp['node_features_cont'])
+                                        traj_node_inputs['rewards'].extend(traj_node_inputs_tmp['rewards'])
+                                        traj_node_inputs['baseline_index'].extend(traj_node_inputs_tmp['baseline_index'])
 
-                                            if j + start == last_id2 - k:
-                                                cur_adj_features_tmp[0, 0, last_id2, last_id2 - k] = 1.0
-                                                cur_adj_features_tmp[0, 0, last_id2 - k, last_id2] = 1.0
-                                            else:
-                                                cur_adj_features_tmp[0, 3, last_id2, last_id2 - k] = 1.0
-                                                cur_adj_features_tmp[0, 3, last_id2 - k, last_id2] = 1.0
+                                        traj_adj_inputs['node_features'].extend(traj_adj_inputs_tmp['node_features'])
+                                        traj_adj_inputs['adj_features'].extend(traj_adj_inputs_tmp['adj_features'])
+                                        traj_adj_inputs['edge_features_cont'].extend(traj_adj_inputs_tmp['edge_features_cont'])
+                                        traj_adj_inputs['index'].extend(traj_adj_inputs_tmp['index'])
+                                        traj_adj_inputs['rewards'].extend(traj_adj_inputs_tmp['rewards'])
+                                        traj_adj_inputs['baseline_index'].extend(traj_adj_inputs_tmp['baseline_index'])
+                                        cur_try += 1
+                                        #print('act finish')
+                                        #mol_demonstrated = mol_demon_edit.GetMol()
+                                        #s_mol_demonstrated = Chem.MolToSmiles(mol_demonstrated, isomericSmiles=True)
+                                        #mol = Chem.MolFromSmiles(s_mol_demonstrated)
+                                        #print('mol get finish')
+                                        #imp_demonstrated = env.calculate_min_plogp(mol) - env.calculate_min_plogp(org_mol_true_raw)
+                                        #print('cal imp finish')
+                                        #sim_demonstrated = reward_target_molecule_similarity(mol, org_mol_true_raw)
+                                        #print('cal sim finish')
+                                        #if imp_demonstrated > 0 and sim_demonstrated >= 0.6:
+                                        #    stop_sig = True
+                                        #    flag_success = True
+                                        #else:
+                                        #    stop_sig = False
+                                        #cur_try += 1
+                                    #if 1:
+                                    except:
+                                        # print('demonstration invalid occur, continue, raw is: %s' % s_raw)
+                                        continue
+                                if flag_success: # successfully take one min action.
+                                    #flag_use_demon = True
+                                    is_continue = True
+                                    mol = rw_mol.GetMol()
+                                    node_features_each_iter_backup = cur_node_features.clone() # update node backup since new node is valid
+                                    adj_features_each_iter_backup = cur_adj_features.clone() #
+                                    added_num += 1                                        
 
-                                            edge_idx += 1
-                                        break
-                                    else:
-                                        if flag_reconstruct_from_node_adj:
-                                            mol_demon_edit.RemoveBond(int(keep_size-k), int(keep_size))
-                                        else:
-                                            mol_demon_edit.RemoveBond(int(org_bfs_perm_origin[keep_size-k]), int(keep_size))
-                                        count += 1
-
-                            if flag_success and check_chemical_validity(mol_demon_edit): # successfully take one min action.
-                                rw_mol = Chem.RWMol(mol_demon_edit)
-                                cur_node_features = cur_node_features_tmp.clone()
-                                cur_adj_features = cur_adj_features_tmp.clone()
-                                is_continue = True
-                                mol = rw_mol.GetMol()
-                                node_features_each_iter_backup = cur_node_features.clone() # update node backup since new node is valid
-                                adj_features_each_iter_backup = cur_adj_features.clone() #
-                                added_num += 1                                        
+                                    # print('successfully take one action')
+                                else:
+                                    # print('failed in take one min action')
+                                    step_cnt += 1 # we should add one here since the loop is continued.
+                                    continue
+                            
                             else:
-                                traj_node_inputs['node_features'].pop(-1)
-                                traj_node_inputs['adj_features'].pop(-1)
-                                traj_node_inputs['node_features_cont'].pop(-1)
-                                traj_node_inputs['rewards'].pop(-1)
-                                traj_node_inputs['baseline_index'].pop(-1)
-                                traj_node_inputs['node_cnt'].pop(-1)
                                 step_cnt += 1
                                 continue
+                            
                     step_cnt += 1
 
                 batch_length += 1
@@ -963,7 +982,7 @@ class GraphFlowModel_con_rl(nn.Module):
                         traj_node_inputs['node_features_cont'].pop(-1)
                         traj_node_inputs['rewards'].pop(-1)
                         traj_node_inputs['baseline_index'].pop(-1)
-                        traj_node_inputs['node_cnt'].pop(-1)
+                        
                    
                         ## pop adj
                         for pop_cnt in range(step_num_data_edge):
@@ -973,14 +992,179 @@ class GraphFlowModel_con_rl(nn.Module):
                             traj_adj_inputs['index'].pop(-1)
                             traj_adj_inputs['rewards'].pop(-1)
                             traj_adj_inputs['baseline_index'].pop(-1)
-                            traj_adj_inputs['edge_cnt'].pop(-1)
+                            
                     except:
                         print('pop from empty list, take min action fail.')
 
+                if added_num == 0:
+                    if flag_start_from_original_graph is False:
+                        continue
+                    else: # start from original graph, but policy stop add atom immediately, give guide
+                        print('try to satisfy min action!')
+                        local_num2bond =  {0: Chem.rdchem.BondType.SINGLE, 1: Chem.rdchem.BondType.DOUBLE, 2: Chem.rdchem.BondType.TRIPLE}
+                        local_bond2num =  {Chem.rdchem.BondType.SINGLE:1 , Chem.rdchem.BondType.DOUBLE:2, Chem.rdchem.BondType.TRIPLE:3}
+                        candidate = []
+
+                        # get all candidate
+                       
+
+                        # method2: previous 12 nodes
+                        #***********************#
+                        org_mol_size = org_mol_true_raw.GetNumAtoms()
+                        if org_mol_size < self.edge_unroll: # 12
+                            candidate_start = 0
+                            candidate_end = org_mol_size
+                        else:
+                            candidate_start = org_mol_size - self.edge_unroll
+                            candidate_end = org_mol_size
+
+                        candidate_node_features = org_node_features.clone() # (1, 38, 9)
+                        candidate_adj_features = org_adj_features.clone() # (1, 4, 38, 38)
+                        candidate_node_features = candidate_node_features[0, candidate_start:candidate_end] #(12, 9)
+                        candidate_adj_features = candidate_adj_features[0, :, candidate_start:candidate_end, candidate_start:candidate_end] #(4, 12, 12)
+                        assert candidate_node_features.size(0) == candidate_adj_features.size(1)
+                        for cur_cand_index in range(candidate_node_features.size(0)):
+                            cur_node_feat = candidate_node_features[cur_cand_index] #(9,)
+                            cur_adj_list = candidate_adj_features[:, cur_cand_index] #(4, 12,)
+                            assert cur_node_feat.sum() == 1.0
+                            if cur_node_feat[0] != 1.0:
+                                continue
+                            cur_valency = 0
+                            for neighbor_id in range(cur_adj_list.size(1)):
+                                if neighbor_id == cur_cand_index: # ignore self loop
+                                    continue
+                                neighbor_edge_type = torch.argmax(cur_adj_list[:, neighbor_id]).item()
+                                assert neighbor_edge_type <= 3
+                                if neighbor_edge_type < 3:
+                                    cur_valency += (neighbor_edge_type + 1)
+                            if cur_valency > 0 and cur_valency <= 3:
+                                candidate.append(cur_cand_index + candidate_start)
+                        # print('selecting candidate done')
+
+
+
+                        #***********************#
+
+
+                        if len(candidate) > 0:
+                            demonstration_time = 10
+                            flag_success = False
+                            stop_sig = False
+                            cur_try = 0
+                            cur_try2 = 0
+                            last_id1 = -1
+                            cache_demon = [-1]
+                            while cur_try < demonstration_time and not stop_sig and cur_try2 < 2 * demonstration_time:
+                                cur_try2 += 1
+                                last_id1 = -1
+                                #if 1:
+                                try:
+                                    traj_node_inputs = {}
+                                    traj_node_inputs['node_features'] = []
+                                    traj_node_inputs['adj_features'] = []
+                                    traj_node_inputs['node_features_cont'] = []
+                                    traj_node_inputs['rewards'] = []
+                                    traj_node_inputs['baseline_index'] = []
+                                    traj_adj_inputs = {}
+                                    traj_adj_inputs['node_features'] = []
+                                    traj_adj_inputs['adj_features'] = []
+                                    traj_adj_inputs['edge_features_cont'] = []
+                                    traj_adj_inputs['index'] = []
+                                    traj_adj_inputs['rewards'] = []
+                                    traj_adj_inputs['baseline_index'] = []
+                                    step_cnt = 1.0
+
+                                    mol_demon_edit = Chem.RWMol(org_mol_true_raw)
+                                    keep_size = org_mol_true_raw.GetNumAtoms()
+                                    cur_node_features = org_node_features.clone()
+                                    cur_adj_features = org_adj_features.clone()
+                                    cur_node_features[:, keep_size:, :] = 0.
+                                    cur_adj_features[:, :, keep_size:, :] = 0.
+                                    cur_adj_features[:, :, :, keep_size:] = 0.
+                                    cur_node_features = cur_node_features.cuda()  
+                                    cur_adj_features = cur_adj_features.cuda()
+                                    
+                                    try_time=5
+                                    try_count=0
+                                    while last_id1 in cache_demon and try_count < try_time: # get a starting point
+                                        try_count += 1
+                                        last_id1 = np.random.randint(len(candidate))
+                                        last_id1 = int(candidate[last_id1])
+                                    cache_demon.append(last_id1)
+                                    #print(org_bfs_perm_origin)
+                                    last_id1_origin = int(org_bfs_perm_origin[last_id1].item())
+                                    #TODO:check the logic of bfs is right
+                                    atom = mol_demon_edit.GetAtomWithIdx(last_id1_origin)
+                                    # print('start testing atom')
+                                    assert atom.GetAtomicNum() == 6
+                                    assert sum([local_bond2num[x.GetBondType()] for x in atom.GetBonds()]) <= 3
+                                    # print('pass testing atom')
+                                    for act_id in range(2):
+                                        
+                                        last_id2 = mol_demon_edit.AddAtom(Chem.Atom(6))
+                                        # print('act_id:%d, org_mol_size: %d, cur mol size: %d, last_id1: %d, last_id2:%d' % (act_id, org_mol_true_raw.GetNumAtoms(), mol_demon_edit.GetNumAtoms(), last_id1, last_id2))
+                                        node_feature_cont = torch.zeros([1, self.node_dim]).cuda()
+                                        node_feature_cont[0, 0] = 1.0   # carbon                                     
+                                        traj_node_inputs['node_features'].append(cur_node_features.clone())  # (1, max_size_rl, self.node_dim)
+                                        traj_node_inputs['adj_features'].append(cur_adj_features.clone())  # (1, self.bond_dim, max_size_rl, max_size_rl)
+                                        traj_node_inputs['node_features_cont'].append(node_feature_cont)  # (1, self.node_dim)
+                                        traj_node_inputs['rewards'].append(torch.full(size=(1,1), fill_value=step_cnt).cuda())  # (1, 1)
+                                        traj_node_inputs['baseline_index'].append(torch.full(size=(1,), fill_value=step_cnt).long().cuda())  # (1, 1)                                        
+
+                                        assert keep_size + act_id == last_id2
+
+                                        cur_node_features[0, keep_size + act_id, 0] = 1.0
+                                        cur_adj_features[0, :, keep_size + act_id, keep_size + act_id] = 1.0
+                                        if act_id == 0:
+                                            mol_demon_edit.AddBond(last_id1_origin, last_id2, local_num2bond[0])
+                                        else:
+                                            mol_demon_edit.AddBond(last_id1, last_id2, local_num2bond[0])
+                                        edge_feature_cont = torch.zeros([1, self.bond_dim]).cuda()
+                                        edge_feature_cont[0, 0] = 1.0  # single bond                                      
+                                        traj_adj_inputs['node_features'].append(cur_node_features.clone())  # 1, max_size_rl, self.node_dim
+                                        traj_adj_inputs['adj_features'].append(cur_adj_features.clone())  # 1, self.bond_dim, max_size_rl, max_size_rl
+                                        traj_adj_inputs['edge_features_cont'].append(edge_feature_cont)  # 1, self.bond_dim
+                                        traj_adj_inputs['index'].append(torch.Tensor([[last_id1, last_id2]]).long().cuda().view(1,-1)) # (1, 2)                                        
+                                        traj_adj_inputs['rewards'].append(torch.full(size=(1, 1), fill_value=step_cnt).cuda())  # (1, 1)
+                                        traj_adj_inputs['baseline_index'].append(torch.full(size=(1,), fill_value=step_cnt).long().cuda())  # (1)                                        
+                                        cur_adj_features[0, 0, last_id1, last_id2] = 1.0
+                                        cur_adj_features[0, 0, last_id2, last_id1] = 1.0                                        
+                                        last_id1 = last_id2
+                                        step_cnt += 1.
+                                    #print('act finish')
+                                    mol_demonstrated = mol_demon_edit.GetMol()
+                                    s_mol_demonstrated = Chem.MolToSmiles(mol_demonstrated, isomericSmiles=True)
+                                    mol = Chem.MolFromSmiles(s_mol_demonstrated)
+                                    #print('mol get finish')
+                                    imp_demonstrated = calculate_min_plogp(mol) - calculate_min_plogp(org_mol_true_raw)
+                                    #print('cal imp finish')
+                                    sim_demonstrated = reward_target_molecule_similarity(mol, org_mol_true_raw)
+                                    #print('cal sim finish')
+                                    if imp_demonstrated > 0 and sim_demonstrated >= 0.6:
+                                        stop_sig = True
+                                        flag_success = True
+                                    else:
+                                        stop_sig = False
+                                    cur_try += 1
+                                #if 1:
+                                except:
+                                    # print('demonstration invalid occur, continue, raw is: %s' % s_raw)
+                                    continue
+                            if flag_success:
+                                flag_use_demon = True
+                                # print('successfully demonstrate behavior with %d attempts' % cur_try)
+                            else:
+                                # print('failed in demonstrate behavior')
+                                continue
+                                
+                        else:
+                            continue
                 reward_valid = 2
                 reward_property = 0
                 reward_length = 0 
-
+                reward_sim = 0
+                flag_steric_strain_filter = True
+                flag_zinc_molecule_filter = True
                 assert mol is not None, 'mol is None...'
                 final_valid = check_chemical_validity(mol)
                 s_tmp = Chem.MolToSmiles(mol, isomericSmiles=True)
@@ -997,8 +1181,10 @@ class GraphFlowModel_con_rl(nn.Module):
                     # mol filters with negative rewards
                     if not steric_strain_filter(final_mol):  # passes 3D conversion, no excessive strain
                         reward_valid -= 1 #TODO: check the magnitude of this reward.
+                        flag_steric_strain_filter = False
                     if not zinc_molecule_filter(final_mol):  # does not contain any problematic functional groups
                         reward_valid -= 1
+                        flag_zinc_molecule_filter = False
 
                     similairty = reward_target_molecule_similarity(final_mol, org_mol_true_raw)
                     
@@ -1031,7 +1217,7 @@ class GraphFlowModel_con_rl(nn.Module):
                         reward_final_total * torch.pow(reward_decay, step_cnt - 1. - traj_node_inputs_rewards[traj_node_inputs_rewards > 0])
                     node_inputs['rewards'].append(traj_node_inputs_rewards)  # append tensor of shape (max_size_rl, 1)                
                     node_inputs['baseline_index'].append(traj_node_inputs_baseline_index)
-                    node_inputs['node_cnt'].append(torch.cat(traj_node_inputs['node_cnt'], dim=0))
+                    
 
                     for ss in range(traj_node_inputs_rewards.size(0)):
                         reward_baseline[traj_node_inputs_baseline_index[ss]][0] += 1.0
@@ -1041,7 +1227,7 @@ class GraphFlowModel_con_rl(nn.Module):
                     adj_inputs['adj_features'].append(torch.cat(traj_adj_inputs['adj_features'], dim=0)) # (step, bond_dim, max_size_rl, max_size_rl)
                     adj_inputs['edge_features_cont'].append(torch.cat(traj_adj_inputs['edge_features_cont'], dim=0)) # (step, 4)
                     adj_inputs['index'].append(torch.cat(traj_adj_inputs['index'], dim=0)) # (step, 2)
-                    adj_inputs['edge_cnt'].append(torch.cat(traj_adj_inputs['edge_cnt'], dim=0))
+                    
 
                     traj_adj_inputs_baseline_index = torch.cat(traj_adj_inputs['baseline_index'], dim=0) #(step)                
                     traj_adj_inputs_rewards = torch.cat(traj_adj_inputs['rewards'], dim=0)
@@ -1075,7 +1261,7 @@ class GraphFlowModel_con_rl(nn.Module):
         node_inputs_rewards = torch.cat(node_inputs['rewards'], dim=0).view(-1) # (total_size,)
         node_inputs_baseline_index = torch.cat(node_inputs['baseline_index'], dim=0).long() # (total_size,)
         node_inputs_baseline = torch.index_select(reward_baseline_per_step, dim=0, index=node_inputs_baseline_index) #(total_size, )
-        node_inputs_node_cnts = torch.cat(node_inputs['node_cnt'], dim=0)
+        
 
         adj_inputs_node_features = torch.cat(adj_inputs['node_features'], dim=0) # (total_size, max_size_rl, 9)
         adj_inputs_adj_features = torch.cat(adj_inputs['adj_features'], dim=0) # (total_size, 4, max_size_rl, max_size_rl)
@@ -1084,7 +1270,7 @@ class GraphFlowModel_con_rl(nn.Module):
         adj_inputs_rewards = torch.cat(adj_inputs['rewards'], dim=0).view(-1) # (total_size,)
         adj_inputs_baseline_index = torch.cat(adj_inputs['baseline_index'], dim=0).long() #(total_size,)
         adj_inputs_baseline = torch.index_select(reward_baseline_per_step, dim=0, index=adj_inputs_baseline_index) #(total_size, )
-        adj_inputs_edge_cnts = torch.cat(adj_inputs['edge_cnt'], dim=0)
+        
         if not self.use_df:
             node_inputs_node_features_cont += self.deq_coeff * torch.rand(node_inputs_node_features_cont.size(), device='cuda:%d' % (node_inputs_node_features_cont.get_device()))  # (total_size, 9)
             adj_inputs_edge_features_cont += self.deq_coeff * torch.rand(adj_inputs_edge_features_cont.size(), device='cuda:%d' % (adj_inputs_edge_features_cont.get_device()))  # (total_size, 4)
