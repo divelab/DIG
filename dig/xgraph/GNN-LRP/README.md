@@ -24,12 +24,12 @@ Code for GNN-LRP following the [Higher-Order Explanations of Graph Neural Networ
 * Download datasets, then download the pretrained models.
 
 ```shell script
-$ git clone git@github.com:divelab/DIG.git
+$ git clone git@github.com:divelab/DIG.git (or directly clone the xgraph directory by svn)
 $ cd DIG/dig/xgraph/GNN-LRP
 $ source ./install.bash
 ```
-Download [Datasets](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/Ebwg9j6YHPJDh5nZKrd4x6UBMvz2kJMw2y3wgp8GNLYOVw?e=3cILKu) to `xgraph/datasets/`, then
-download [pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/ERQCHDEHnq5DiW-XHyiP5C0BE2taSyEmzX_PLwQolMTkkA?e=y6mqtV) to `xgraph/GNN-LRP/`
+Download [Datasets](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EdH7QVBBghBBgmMgf0_UZSAByxkMa3AvRdH7_QwD9MUfrw?e=EN3JiS) to `xgraph/datasets/`, then
+download [pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EZklsgM56i5EtCKeeEpTTLIBNpDvDNB-zol6ROXBngPsZg?e=20IBOg) to `xgraph/GNN-LRP/`
 ```shell script
 $ cd GNN-LRP 
 $ unzip ../datasets/datasets.zip -d ../datasets/
@@ -73,14 +73,14 @@ We closely follow the GNN-LRP's forward reproduction, which is very model depend
 
 ## Citation
 
+If using our implementation, please cite our work.
+
 ```
-@misc{schnake2020higherorder,
-      title={Higher-Order Explanations of Graph Neural Networks via Relevant Walks}, 
-      author={Thomas Schnake and Oliver Eberle and Jonas Lederer and Shinichi Nakajima and Kristof T. Schütt and Klaus-Robert Müller and Grégoire Montavon},
-      year={2020},
-      eprint={2006.03589},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@article{yuan2020explainability,
+  title={Explainability in Graph Neural Networks: A Taxonomic Survey},
+  author={Yuan, Hao and Yu, Haiyang and Gui, Shurui and Ji, Shuiwang},
+  journal={arXiv preprint arXiv:2012.15445},
+  year={2020}
 }
 ```
 
