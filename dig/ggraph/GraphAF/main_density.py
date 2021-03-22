@@ -7,7 +7,7 @@ from dense_gen import DensityGen
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
 
 out_path = 'density/'
 if not os.path.isdir(out_path):
