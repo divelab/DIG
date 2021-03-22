@@ -2,9 +2,7 @@ import torch
 import time
 import numpy as np
 from model import dimenetpp
-from torch_geometric.nn.acts import swish
 import argparse
-import torch.nn.functional as F
 from train import run
 import sys
 sys.path.append('..')
@@ -12,12 +10,13 @@ from utils import load_qm9, load_md17
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--dataset', type=str, default="benzene", help='dataset name') # qm9, aspirin, benzene, ethanol, malonaldehyde, naphthalene, salicylic, toluene, uracil
-parser.add_argument('--target', type=str, default='U0')
+parser.add_argument('--dataset', type=str, default="qm9", help='dataset name') # qm9, aspirin, benzene, ethanol, malonaldehyde, naphthalene, salicylic, toluene, uracil
+parser.add_argument('--target', type=str, default='U0') # For QM9, the target can be mu, aplha, homo, lumo, gap, r2, zpve, U0, U, H, G, Cv.
 parser.add_argument('--num_task', type=int, default=1)
 parser.add_argument('--output_init', type=str, default='GlorotOrthogonal') # in DimeNet++, for QM9, 'zeros' for mu, homo, lumo, and zpve; 'GlorotOrthogonal' for alpha, R2, U0, U, H, G, and Cv
 
-parser.add_argument('--save_dir', type=str, default='../trained_models/', help='directory to save the model with best validation performance')
+parser.add_argument('--save_dir', type=str, default='../trained_models/')
+parser.add_argument('--log_dir', type=str, default='../logs/')
 
 parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--epochs', type=int, default=300)
@@ -67,4 +66,4 @@ print(args)
 print('Loading model')
 model = dimenetpp(args.energy_and_force, args.cutoff, args.num_layer, args.hidden_channels, args.num_task, args.int_emb_size, args.basis_emb_size, args.out_emb_size, args.num_spherical, args.num_radial, output_init=args.output_init)
 print('Loaded model')
-run(train_dataset, val_dataset, model, args.epochs, args.batch_size, args.lr, args.lr_decay_factor, args.lr_decay_step_size, args.weight_decay, args.save_dir, args.energy_and_force, args.num_atom, args.p)
+run(train_dataset, val_dataset, test_dataset, args.save_dir, args.log_dir, model, args.epochs, args.batch_size, args.lr, args.lr_decay_factor, args.lr_decay_step_size, args.weight_decay, args.energy_and_force, args.num_atom, args.p)

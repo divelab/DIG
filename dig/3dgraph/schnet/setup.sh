@@ -1,4 +1,5 @@
 #!/bin/bash
+# same with dimenetpp and spherenet
 
 conda create -n schnet python=3.7
 conda activate schnet

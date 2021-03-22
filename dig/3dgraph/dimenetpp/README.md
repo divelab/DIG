@@ -1,6 +1,6 @@
 # DimeNet++
 
-This is an re-implementation for [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules](https://arxiv.org/abs/2011.14115) under the 3DGN framewrok.
+This is an re-implementation for [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules](https://arxiv.org/abs/2011.14115) under the 3DGN framework.
 
 ## Table of Contents
 

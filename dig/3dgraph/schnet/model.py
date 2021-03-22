@@ -3,18 +3,13 @@
 
 
 import os
-import warnings
-import os.path as osp
 from math import pi as PI
-
-import ase
 import torch
 import torch.nn.functional as F
 from torch.nn import Embedding, Sequential, Linear, ModuleList
 import numpy as np
-
 from torch_scatter import scatter
-from torch_geometric.nn import radius_graph, MessagePassing
+from torch_geometric.nn import radius_graph
 
 
 class update_e(torch.nn.Module):
@@ -26,7 +21,7 @@ class update_e(torch.nn.Module):
             Linear(num_gaussians, num_filters),
             ShiftedSoftplus(),
             Linear(num_filters, num_filters),
-        )       
+        )
 
         self.reset_parameters()
 
@@ -44,6 +39,7 @@ class update_e(torch.nn.Module):
         v = self.lin(v)
         e = v[j] * W
         return e
+
 
 class update_v(torch.nn.Module):
     def __init__(self, hidden_channels, num_filters):
@@ -67,6 +63,7 @@ class update_v(torch.nn.Module):
         out = self.act(out)
         out = self.lin2(out)
         return v + out
+
 
 class update_u(torch.nn.Module):
     def __init__(self, hidden_channels):
@@ -111,17 +108,17 @@ class ShiftedSoftplus(torch.nn.Module):
     def forward(self, x):
         return F.softplus(x) - self.shift
 
+
 class schnet(torch.nn.Module):
     def __init__(self, energy_and_force, cutoff=10.0, num_layers=6, hidden_channels=128, num_filters=128, num_gaussians=50):
         super(schnet, self).__init__()
 
+        self.energy_and_force = energy_and_force
+        self.cutoff = cutoff
+        self.num_layers = num_layers
         self.hidden_channels = hidden_channels
         self.num_filters = num_filters
-        self.num_layers = num_layers
         self.num_gaussians = num_gaussians
-        self.cutoff = cutoff
-        self.energy_and_force = energy_and_force
-
 
         self.init_v = Embedding(100, hidden_channels)
         self.dist_emb = emb(0.0, cutoff, num_gaussians)
@@ -142,9 +139,6 @@ class schnet(torch.nn.Module):
         for update_v in self.update_vs:
             update_v.reset_parameters()
         self.update_u.reset_parameters()
-        for interaction in self.interactions:
-            interaction.reset_parameters()
-
 
     def forward(self, batch_data):
         z, pos, batch = batch_data.z, batch_data.pos, batch_data.batch

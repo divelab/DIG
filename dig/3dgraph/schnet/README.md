@@ -1,6 +1,6 @@
 # SchNet
 
-This is an re-implementation for [SchNet: A continuous-filter convolutional neural net work for modeling quantum interactions](https://arxiv.org/abs/1706.08566) under the 3DGN framewrok.
+This is an re-implementation for [SchNet: A continuous-filter convolutional neural net work for modeling quantum interactions](https://arxiv.org/abs/1706.08566) under the 3DGN framework.
 
 ## Table of Contents
 

@@ -1,21 +1,20 @@
 import torch
 import time
 import numpy as np
-from schnet import schnet
 import argparse
-import torch.nn.functional as F
+from model import schnet
 from train import run
 import sys
-sys.path.append('..')'
+sys.path.append('..')
 from utils import load_qm9, load_md17
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--dataset', type=str, default="qm9", help='dataset name') # qm9, aspirin, benzene, ethanol, malonaldehyde, naphthalene, salicylic, toluene, uracil
-parser.add_argument('--target', type=str, default='U0')
+parser.add_argument('--target', type=str, default='U0') # For QM9, the target can be mu, aplha, homo, lumo, gap, r2, zpve, U0, U, H, G, Cv.
 parser.add_argument('--num_task', type=int, default=1)
 
-parser.add_argument('--save_dir', type=str, default='../trained_models/', help='directory to save the model with best validation performance')
+parser.add_argument('--save_dir', type=str, default='../trained_models/')
 parser.add_argument('--log_dir', type=str, default='../logs/')
 
 parser.add_argument('--batch_size', type=int, default=32)
@@ -27,7 +26,7 @@ parser.add_argument('--weight_decay', type=float, default=0)
 
 parser.add_argument('--energy_and_force', type=bool, default=False)
 parser.add_argument('--num_atom', type=int, default=1)
-parser.add_argument('--p', type=int, default=100)
+parser.add_argument('--p', type=int, default=100) #the weight between energy and force for MD17
 
 parser.add_argument('--cutoff', type=float, default=10.0)
 parser.add_argument('--num_layers', type=int, default=6)
