@@ -13,7 +13,7 @@
 [contributing-image]:https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
 [contributing-url]:https://github.com/divelab/DIG/blob/main/CONTRIBUTING.md
 
-![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG&)
+![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG)
 ![Contributors](https://img.shields.io/github/contributors/divelab/DIG)
 [![Contributing][contributing-image]][contributing-url]
 [![License][license-image]][license-url]
