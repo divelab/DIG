@@ -47,4 +47,6 @@ rg_metrics = metric_random_generation(rg_mols, dataset_smiles)
 po_metrics = metric_property_optimization(plogp_mols, topk=3, prop='plogp')
 co_metrics = metric_constrained_optimization(co_mols_0, co_mols_2, co_mols_4, co_mols_6, '../datasets/zinc_800_jt.csv')
 ```
-*If you have any questions, please submit a new issue or contact us: yzluo@tamu.edu or sji@tamu.edu.*
+
+## Contact
+*If you have any questions, please submit a new issue or contact us at Youzhi Luo [yzluo@tamu.edu] and Shuiwang Ji [sji@tamu.edu] .*
