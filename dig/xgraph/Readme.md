@@ -48,4 +48,5 @@ If you use our code and data, please cite our papers.
   year={2020}
 }
 ```
-
+## Contact
+*If you have any questions, please submit an issue or contact us at hao.yuan@tamu.edu and sji@tamu.edu.*
