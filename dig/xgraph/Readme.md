@@ -31,4 +31,15 @@ We provide unified data interfaces for reading several benchmark datasets and a 
 
 We also provide unified evaluation metrics, including Fidelity+, Fidelity-, and Sparsity, for the evaluation of explanation results. We provide demo code to help the usage of these metrics. The details can be found in `metrics` folder ([link](https://github.com/divelab/DIG/tree/main/dig/xgraph/metrics)).
 
+## Citations
+If you use our code and data, please cite our papers.
+
+```
+@article{yuan2020explainability,
+  title={Explainability in Graph Neural Networks: A Taxonomic Survey},
+  author={Yuan, Hao and Yu, Haiyang and Gui, Shurui and Ji, Shuiwang},
+  journal={arXiv preprint arXiv:2012.15445},
+  year={2020}
+}
+```
 
