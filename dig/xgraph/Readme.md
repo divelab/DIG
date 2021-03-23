@@ -49,4 +49,4 @@ If you use our code and data, please cite our papers.
 }
 ```
 ## Contact
-*If you have any questions, please submit an issue or contact us at hao.yuan@tamu.edu and sji@tamu.edu.*
+*If you have any questions, please submit an issue or contact us at Hao Yuan [hao.yuan@tamu.edu] and Shuiwang Ji [sji@tamu.edu] .*
