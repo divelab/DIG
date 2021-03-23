@@ -38,3 +38,6 @@ from utils import compute_mae, compute_rmse
 regression_metric = compute_mae(targets, preds, num_tasks)
 ```
 
+## Contact
+*If you have any questions, please submit a new issue or contact us at Limei Wang [limei@tamu.edu] and Shuiwang Ji [sji@tamu.edu] .*
+
