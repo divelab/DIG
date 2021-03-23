@@ -63,3 +63,9 @@ Please cite our paper if you find *DIG* useful in your work:
 ```
 To be added
 ```
+
+## Contact
+
+If you have any questions, please submit a new issue or contact us: Meng Liu [mengliu@tamu.edu] or Shuiwang Ji [sji@tamu.edu].
+
+
