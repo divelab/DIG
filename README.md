@@ -28,7 +28,7 @@
 
 ## Why DIG?
 
-Most existing graph deep learning library, such as PyG and DGL, focus on providing basic components of graph neural networks and mainly consider elementary tasks, such as node classification and graph classification. With these libraries, it still costs a lot of efforts to implement and benchmark algorithms for advanced tasks, such as graph generation and explainability of graph neural networks. *DIG* is present to bridge this gap.
+The key difference with current graph deep learning libraries, such as PyTorch Geometric (PyG) and Deep Graph Library (DGL), is that, while PyG and DGL support basic graph deep learning operations, DIG provides a unified testbed for higher level, research-oriented graph deep learning tasks, such as graph generation, self-supervised learning, explainability, and 3D graphs.
 
 ## Overview
 
