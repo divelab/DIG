@@ -21,10 +21,16 @@
 [![Contributing][contributing-image]][contributing-url]
 [![License][license-image]][license-url]
 
-## Overview
+
 *DIG: Dive into Graphs* is a turnkey library for graph deep learning research.
 
 [DIG: A Turnkey Library for Diving into Graph Deep Learning Research](https://arxiv.org/abs/2103.12608) by Meng Liu*, Youzhi Luo*, Limei Wang*, Yaochen Xie*, Hao Yuan*, Shurui Gui, Zhao Xu, Haiyang Yu, Jingtun Zhang, Yi Liu, Keqiang Yan, Bora Oztekin, Haoran Liu, Xuan Zhang, Cong Fu, and Shuiwang Ji.
+
+## Why DIG?
+
+Most existing graph deep learning library, such as PyG and DGL, focus on providing basic components of graph neural networks and mainly consider elementary tasks, such as node classification and graph classification. With these libraries, it still costs a lot of efforts to implement and benchmark algorithms for advanced tasks, such as graph generation and explainability of graph neural networks. *DIG* is present to bridge this gap.
+
+## Overview
 
 It includes unified implementations of **data interfaces**, **common algorithms**, and **evaluation metrics** for several advanced tasks. Our goal is to enable researchers to easily implement and benchmark algorithms. Currently, we consider the following research directions.
 
