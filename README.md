@@ -22,7 +22,7 @@
 [![License][license-image]][license-url]
 
 ## Overview
-*DIG: Dive into Graphs* is a turnkey library for graph deep learning research. [[Paper (Coming soon)]](https://github.com/divelab/DIG)
+*DIG: Dive into Graphs* is a turnkey library for graph deep learning research. [[Paper]](https://arxiv.org/abs/2103.12608)
 
 It includes unified implementations of **data interfaces**, **common algorithms**, and **evaluation metrics** for several advanced tasks. Our goal is to enable researchers to easily implement and benchmark algorithms. Currently, we consider the following research directions.
 
@@ -61,7 +61,12 @@ We welcome any forms of contributions, such as reporting bugs and adding new alg
 
 Please cite our paper if you find *DIG* useful in your work:
 ```
-To be added
+@article{liu2021dig,
+      title={{DIG}: A Turnkey Library for Diving into Graph Deep Learning Research}, 
+      author={Meng Liu and Youzhi Luo and Limei Wang and Yaochen Xie and Hao Yuan and Shurui Gui and Zhao Xu and Haiyang Yu and Jingtun Zhang and Yi Liu and Keqiang Yan and Bora Oztekin and Haoran Liu and Xuan Zhang and Cong Fu and Shuiwang Ji},
+      journal={arXiv preprint arXiv:2103.12608},
+      year={2021},
+}
 ```
 
 ## Contact
