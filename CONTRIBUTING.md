@@ -69,9 +69,9 @@ We use the GitHub [issues](https://github.com/divelab/DIG/issues) tracker to man
 
 We welcome contributions of new algorithms that are implemented in PyTorch. To contribute, follow these steps:
 
-1. Create a new directory under the relevant topic. For example, `DIG/dig/ggraph/[YOUR_ALGORITHM]`.
+1. Create a new directory under the relevant topic. For example, `DIG/dig/ggraph/[YOUR_ALGORITHM]`. [For `sslgraph`, add your method to a new python file under the directory `DIG/dig/ssl/contrastive/model/` and add functions to `DIG/dig/ssl/contrastive/views_fn/` if necessary.]
 
-2. Add your algorithm to this directory. Take care to craft a README that is compatible with the DIG standards. An example of a strong README is [available here](https://github.com/divelab/DIG/blob/main/dig/ggraph/GraphEBM/README.md).
+2. Add your algorithm to this directory. Take care to craft a README that is compatible with the DIG standards. An example of a strong README is [available here](https://github.com/divelab/DIG/blob/main/dig/ggraph/GraphEBM/README.md). [For `sslgraph`, creating a jupyter notebook with your example is greatly recommended.]
 
 3. Follow the steps provided in the Environment & Setup section to push your contributions to your fork. Then, navigate to your fork on GitHub, and create a pull request. The pull request will be reviewed by a member familiar with the parent topic of the contributed algorithm.
 
