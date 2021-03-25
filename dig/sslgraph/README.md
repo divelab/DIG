@@ -84,7 +84,7 @@ If you find our library useful, please consider cite our work below.
 ```
 @article{xie2021self,
   title={Self-Supervised Learning of Graph Neural Networks: A Unified Review},
-  author={Xie, Yaochen and Xu, Zhao and Wang, Zhengyang and Ji, Shuiwang},
+  author={Xie, Yaochen and Xu, Zhao and and Zhang, Jingtun and Wang, Zhengyang and Ji, Shuiwang},
   journal={arXiv preprint arXiv:2102.10757},
   year={2021}
 }
