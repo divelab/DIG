@@ -68,7 +68,7 @@ Contrastive(objective, views_fn, graph_level=True, node_level=False, z_dim=None,
 ```python
 train(encoder, data_loader, optimizer, epochs, per_epoch_out=False)
 ```
-* `encoder`: Pytorch `nn.Module` object. Callable with input graphs, and returns graph-level, node-level, or both representations.
+* `encoder`: Pytorch `nn.Module` object or List of `nn.Module` object. Callable with input graphs, and returns graph-level, node-level, or both representations. If single object, the encoder will be shared by all views. If `List`, will use dedicated encoders for each view and the number of encoders should match the number of views.
 * `data_loader`: Pytorch `Dataloader` object.
 * `optimizer`: Pytorch optimizer. Should be initialized with the parameters in `encoder`. *Example*: `optimizer=Adam(encoder.parameters(), lr=0.001)`
 * `epochs`: Integer. Number of pretraining epochs.
