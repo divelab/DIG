@@ -17,8 +17,8 @@ $ source  ./install.sh
 ```
 
 ## Usage
-* Download the required dataset to `DIG/xgraph/dataset`
-* Download the checkpoints to  `DIG/xgraph/PGExplainer/checkpoint`
+* Download the required [dataset](https://mailustceducn-my.sharepoint.com/:u:/g/personal/yhy12138_mail_ustc_edu_cn/ET69UPOa9jxAlob03sWzJ50BeXM-lMjoKh52h6aFc8E8Jw?e=lglJcP) to `DIG/xgraph/dataset`
+* Download the [checkpoints](https://mailustceducn-my.sharepoint.com/:u:/g/personal/yhy12138_mail_ustc_edu_cn/EYydmjDKl7xPsqdRaJc-se4BZSea6EI53dMlZHoM9fTvdg?e=I42r6H) to  `DIG/xgraph/PGExplainer/checkpoint`
 * run the pipeline scripts with corresponding dataset
 ```shell script
 $ source ./scripts.sh
