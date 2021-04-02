@@ -27,6 +27,11 @@ Based on the framework and components, four state-of-the-art graph generation al
 
 Alghouth only contrastive learning framework and methods are implemented, the evaluation tools are also compatible with predictive methods for self-supervised learning, such as graph auto-encoders.
 
+## Environment requirements
+
+- PyTorch >= 1.6.0
+- PyTorch Geometric >= 1.6.1
+
 ## Package Usage
 
 ***We have provided examples for running the four pre-implemented algorithms with data interfaces and evaluation tasks. Please refer to the jupyter notebooks for instructions.***
