@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import copy
 
+
 import torch
 from texttable import Texttable
 from torch.utils.data import DataLoader, random_split, Subset, Dataset
@@ -15,21 +16,25 @@ from distutils.util import strtobool
 from rdkit.Chem import Draw
 import cairosvg
 from rdkit.Chem.Descriptors import qed
-from plogp import *
 
 
-from data import transform_qm9, transform_zinc250k
+
+from preprocess_data import transform_qm9, transform_zinc250k
 from model import *
-from data.data_loader import NumpyTupleDataset
-from utils import *
+from preprocess_data.data_loader import NumpyTupleDataset
+from util import *
+
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
+import sys
+sys.path.append('..')
+from utils import metric_random_generation, check_chemical_validity, qed, calculate_min_plogp
 
 ### Args
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', type=str, default='zinc250k', choices=['qm9', 'zinc250k'], help='dataset name')
 parser.add_argument('--model_name', type=str, default='basic', choices=['basic', 'sketch'], help='Dataset name')
-parser.add_argument('--data_dir', type=str, default='./data', help='Location for the dataset')
+parser.add_argument('--data_dir', type=str, default='./preprocess_data', help='Location for the dataset')
 parser.add_argument('--property_name', type=str, default='plogp', choices=['qed', 'plogp'], help='Property name')
 parser.add_argument('--normal_adj', type=strtobool, default='true', help='Normalize the adjacency tensor')
 parser.add_argument('--depth', type=int, default=2, help='Number of graph conv layers')
@@ -38,10 +43,10 @@ parser.add_argument('--hidden', type=int, default=64, help='hidden dimension')
 parser.add_argument('--swish', type=strtobool, default='true', help='Use swish as activation function')
 parser.add_argument('--c', type=float, default=0, help='Dequantization using uniform distribution of [0,c)')
 parser.add_argument('--batch_size', type=int, default=800, help='Batch size during training')
-parser.add_argument('--model_dir', type=str, default='./trained_models/liu/model_zinc250k_goal_plogp.pt', help='Location for loading checkpoints')
+parser.add_argument('--model_dir', type=str, default='./release_models/model_zinc250k_goal_plogp.pt', help='Location for loading checkpoints')
 parser.add_argument('--runs', type=int, default=1, help='# of runs')
 parser.add_argument('--step_size', type=float, default=0.2, help='Step size in Langevin dynamics')
-parser.add_argument('--sample_step', type=int, default=1000, help='Number of sample step in Langevin dynamics')
+parser.add_argument('--sample_step', type=int, default=500, help='Number of sample step in Langevin dynamics')
 parser.add_argument('--correct_validity', type=strtobool, default='true', help='If apply validity correction after the generation')
 parser.add_argument('--save_result_file', type=str, default='./result/cons_testset.txt', help='Save evaluation result')
 parser.add_argument('--save_smiles', type=strtobool, default='true', help='If save generated melucules')
@@ -127,9 +132,9 @@ def load_property_csv(data_name, property_name='qed', normalize=True):
     and no plogp in zinc250k.csv dataset!
     """
     if data_name == 'qm9':
-        filename = './data/qm9_property.csv'
+        filename = '../datasets/qm9_property.csv'
     elif data_name == 'zinc250k':
-        filename = './data/zinc250k_property.csv'
+        filename = '../datasets/zinc250k_property.csv'
 
     df = pd.read_csv(filename)  # qed, plogp, smile
     if property_name=='plogp' and normalize:
@@ -175,49 +180,8 @@ def clip_grad(parameters, optimizer):
                 _, beta2 = group['betas']
 
                 bound = 3 * torch.sqrt(exp_avg_sq / (1 - beta2 ** step)) + 0.1
-                p.grad.data.copy_(torch.max(torch.min(p.grad.data, bound), -bound))
-
+                p.grad.data.copy_(torch.max(torch.min(p.grad.data, bound), -bound))             
                 
-class SampleBuffer:
-    def __init__(self, max_samples=10000):
-        self.max_samples = max_samples
-        self.buffer = []
-
-    def __len__(self):
-        return len(self.buffer)
-
-    def push(self, xs, adjs):
-        xs = xs.detach().to('cpu')
-        adjs = adjs.detach().to('cpu')
-
-        for x, adj in zip(xs, adjs):
-            self.buffer.append((x.detach(), adj.detach()))
-
-            if len(self.buffer) > self.max_samples:
-                self.buffer.pop(0)
-
-    def get(self, n_samples, device='cuda'):
-        items = random.choices(self.buffer, k=n_samples)
-        xs, adjs = zip(*items)
-        xs = torch.stack(xs, 0)
-        xs = xs.to(device)
-        adjs = torch.stack(adjs, 0)
-        adjs = adjs.to(device)
-
-        return xs, adjs
-                
-                
-def sample_buffer(buffer, batch_size=args.batch_size, p=0.95, device='cuda'):
-    if len(buffer) < 1:
-        return torch.rand(batch_size, n_atom, n_atom_type, device=device) * 2, torch.rand(batch_size, n_edge_type, n_atom, n_atom, device=device) * 2 #(128, 9, 5), (128, 4, 9, 9)
-
-    n_replay = (np.random.rand(batch_size) < p).sum()
-
-    replay_x, replay_adj = buffer.get(n_replay)
-    random_x = torch.rand(batch_size - n_replay, n_atom, n_atom_type, device=device) * 2
-    random_adj = torch.rand(batch_size - n_replay, n_edge_type, n_atom, n_atom, device=device) * 2
-
-    return torch.cat([replay_x, random_x], 0), torch.cat([replay_adj, random_adj], 0)                
 
 
 def generate(model, init_dataloader, n_atom, n_atom_type, n_edge_type, device, atomic_num_list):
@@ -315,7 +279,7 @@ if __name__ == '__main__':
         data_file = "qm9_relgcn_kekulized_ggnp.npz"
         transform_fn = transform_qm9.transform_fn
         atomic_num_list = [6, 7, 8, 9, 0]
-        file_path = os.path.join(args.data_dir, 'valid_idx_qm9.json')
+        file_path = '../datasets/valid_idx_qm9.json'
         valid_idx = transform_qm9.get_val_ids(file_path)
         n_atom_type = 5
         n_atom = 9
@@ -324,7 +288,7 @@ if __name__ == '__main__':
         data_file = "zinc250k_relgcn_kekulized_ggnp.npz"
         transform_fn = transform_zinc250k.transform_fn
         atomic_num_list = transform_zinc250k.zinc250_atomic_num_list
-        file_path = os.path.join(args.data_dir, 'valid_idx_zinc.json')
+        file_path = '../datasets/valid_idx_zinc250k.json'
         valid_idx = transform_zinc250k.get_val_ids(file_path)
         n_atom_type = len(atomic_num_list) #10
         n_atom = 38
@@ -364,10 +328,8 @@ if __name__ == '__main__':
     print('==========================================')
     
     ### Load trained model
-    if args.model_name=='basic':
-        model = GraphEBM(n_atom_type, args.hidden, n_edge_type, args.swish, args.depth, add_self = args.add_self)
-    if args.model_name=='sketch':
-        model = GraphEBM2(n_atom_type, args.hidden, n_atom, device, n_edge_type, args.swish, args.depth)
+    model = GraphEBM(n_atom_type, args.hidden, n_edge_type, args.swish, args.depth, add_self = args.add_self)
+    
     print("Loading hyperparamaters from {}".format(args.model_dir))
     model.load_state_dict(torch.load(args.model_dir))
     model = model.to(device)
