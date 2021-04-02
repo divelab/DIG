@@ -74,6 +74,27 @@ $ cd GraphEBM
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python generate_compositional.py --runs=1 --save_result_file=${your_save_result_txt_file} --model_qed_dir=./release_models/model_zinc250k_goal_qed.pt --model_plogp_dir=./release_models/model_zinc250k_goal_plogp.pt --sample_step=300 --data_name=zinc250k --step_size=30 --c=0
 ```
 
+### Task of Constrained Property Optimization
+
+We can generate molecules with desired objectives(plogp) using models trained for goal-directed generation to conduct the task of constrained property optimization using 800 lowest plogp molecules in the testset:
+```shell script
+$ cd GraphEBM
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python con_gen.py --runs=5 --sample_step=500 --exp_name=constrained_plogp_testset
+```
+when using 800 lowest plogp molecules in the trainset:
+```shell script
+$ cd GraphEBM
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python con_gen_trainset.py --runs=5 --sample_step=500 --exp_name=constrained_plogp_trainset
+```
+
+### Task of Property Optimization
+
+We can generate molecules with desired objectives(qed) using models trained for goal-directed generation to conduct the task of property optimization using the molecules in the trainset as initialization:
+```shell script
+$ cd GraphEBM
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python prop_optim.py --runs=1 --batch_size=10000 --exp_name=prop_optim_qed
+```
+
 ### Citation
 ```
 @article{liu2021graphebm,
