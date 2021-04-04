@@ -54,7 +54,7 @@ class EvalUnsupevised(object):
         self.setup_train_config()
 
     def setup_train_config(self, batch_size = 256,
-                           p_optim = 'Adam', p_lr = 0.01, p_weight_decay = 0, p_epoch = 20):
+                           p_optim = 'Adam', p_lr = 0.001, p_weight_decay = 0, p_epoch = 20):
         
         self.batch_size = batch_size
 
