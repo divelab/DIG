@@ -146,11 +146,11 @@ class Contrastive(nn.Module):
                     loss = self.loss_fn(zs, neg_by_crpt=self.neg_by_crpt, tau=self.tau)
                     loss.backward()
                     optimizer.step()
-                    
-                    if self.per_epoch_out:
-                        yield encoder, self.proj_head_g
-                        
                     epoch_loss += loss
+                    
+                if self.per_epoch_out:
+                    yield encoder, self.proj_head_g
+                        
                 t.set_postfix(loss='{:.6f}'.format(float(loss)))
                 
                 if self.choice_model == 'best' and epoch_loss < min_loss:
@@ -209,11 +209,11 @@ class Contrastive(nn.Module):
                                         neg_by_crpt=self.neg_by_crpt, tau=self.tau)
                     loss.backward()
                     optimizer.step()
-                    
-                    if self.per_epoch_out:
-                        yield encoder, self.proj_head_n
-                    
                     epoch_loss += loss
+                    
+                if self.per_epoch_out:
+                    yield encoder, self.proj_head_n
+                    
                 t.set_postfix(loss='{:.6f}'.format(float(loss)))
                 
                 if self.choice_model == 'best' and epoch_loss < min_loss:
@@ -275,11 +275,12 @@ class Contrastive(nn.Module):
                                         neg_by_crpt=self.neg_by_crpt, tau=self.tau)
                     loss.backward()
                     optimizer.step()
-                    
-                    if self.per_epoch_out:
-                        yield encoder, (self.proj_head_g, self.proj_head_n)
-                        
                     epoch_loss += loss
+                    
+                if self.per_epoch_out:
+                    yield encoder, (self.proj_head_g, self.proj_head_n)
+                        
+
                 t.set_postfix(loss='{:.6f}'.format(float(loss)))
                 
                 if self.choice_model == 'best' and epoch_loss < min_loss:
