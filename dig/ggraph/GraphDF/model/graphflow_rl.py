@@ -1,7 +1,5 @@
-import numpy as np
 import torch
 import torch.nn as nn
-from rdkit import Chem
 from .disgraphaf import DisGraphAF
 import sys
 sys.path.append('..')

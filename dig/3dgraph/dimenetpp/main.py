@@ -1,6 +1,4 @@
-import torch
 import time
-import numpy as np
 from model import dimenetpp
 import argparse
 from train import run

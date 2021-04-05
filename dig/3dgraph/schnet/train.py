@@ -1,7 +1,6 @@
 import time
 import os
 import torch
-import torch.nn.functional as F
 from torch.optim import Adam
 from torch_geometric.data import DataLoader
 import numpy as np

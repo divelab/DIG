@@ -1,15 +1,11 @@
-import numpy as np
-import torch
-import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from model import *
 from data_io_tmp import *
-import time
 from rdkit import Chem
 import sys
 sys.path.append('..')
-from utils.data_io import get_smiles_zinc250k
+from utils import get_smiles_zinc250k
 
 
 class DensityGen(object):

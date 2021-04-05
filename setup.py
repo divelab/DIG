@@ -1,11 +1,12 @@
 import setuptools
+from dig.version import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="dig",
-    version="0.0.1",
+    version=__version__,
     author="***",
     author_email="***",
     # entry_points={

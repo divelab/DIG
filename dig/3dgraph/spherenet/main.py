@@ -1,6 +1,4 @@
-import torch
 import time
-import numpy as np
 from model import spherenet
 import argparse
 from train import run

@@ -1,6 +1,3 @@
-import numpy as np
-import torch
-import torch.nn as nn
 from .disgraphaf import DisGraphAF
 from  rdkit import Chem
 from .df_utils import *

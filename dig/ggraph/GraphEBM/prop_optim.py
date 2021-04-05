@@ -1,28 +1,20 @@
 import argparse
 import time
 import sys
-import os
 from tqdm import tqdm
-import random
 import pandas as pd
-import numpy as np
-import copy
 
-import torch
 from texttable import Texttable
-from torch.utils.data import DataLoader, random_split, Subset, Dataset
+from torch.utils.data import DataLoader, Dataset
 from distutils.util import strtobool
-from rdkit.Chem import Draw
-import cairosvg
 
 from preprocess_data import transform_qm9, transform_zinc250k
 from model import *
-from preprocess_data.data_loader import NumpyTupleDataset
 from util import *
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 sys.path.append('..')
-from utils import metric_random_generation, check_chemical_validity, qed, calculate_min_plogp
+from utils import qed, calculate_min_plogp
 ### Args
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', type=str, default='zinc250k', choices=['qm9', 'zinc250k'], help='dataset name')

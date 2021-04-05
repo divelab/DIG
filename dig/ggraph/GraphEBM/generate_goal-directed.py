@@ -1,23 +1,11 @@
 import argparse
 import time
-import sys
-import os
-from tqdm import tqdm
-import random
 
-import numpy as np
-
-import torch
 from texttable import Texttable
-from torch.utils.data import DataLoader, random_split, Subset
 from distutils.util import strtobool
-from rdkit.Chem import Draw
-import cairosvg
-from rdkit.Chem.Descriptors import qed
 
-from preprocess_data import transform_qm9, transform_zinc250k
+from preprocess_data import transform_zinc250k
 from model import *
-from preprocess_data.data_loader import NumpyTupleDataset
 from util import *
 
 import sys

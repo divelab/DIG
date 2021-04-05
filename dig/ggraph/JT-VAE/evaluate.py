@@ -5,7 +5,7 @@ import argparse
 
 sys.path.append('..')
 
-from utils import metric_random_generation, metric_property_optimization, metric_constrained_optimization
+from utils import metric_random_generation, metric_property_optimization
 from rdkit import Chem
 
 parser = argparse.ArgumentParser()
