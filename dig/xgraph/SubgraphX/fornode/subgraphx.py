@@ -12,7 +12,7 @@ from utils import PlotUtils, find_closest_node_result
 
 
 def pipeline(subgraph_max_nodes):
-    dataset = get_dataset(data_args)
+    dataset = get_dataset(data_args.dataset_dir, data_args.dataset_name)
     input_dim = dataset.num_node_features
     output_dim = dataset.num_classes
     data = dataset[0]
