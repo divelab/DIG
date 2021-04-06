@@ -79,4 +79,5 @@ Please follow the group leader's api design.
 
 ## Comments
 
-After the implementation, it is necessary to add comments for the documentation.
+* After the implementation, it is necessary to add comments for the documentation. We can consider this when we write online documentation.
+* Please follow the [PEP8 style guide](https://www.python.org/dev/peps/pep-0008/) as possible in your implementation.
