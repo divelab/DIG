@@ -28,7 +28,7 @@ class LogReg(nn.Module):
         return ret
 
 
-class EvalUnsupevised(object):
+class NodeUnsupervised(object):
     def __init__(self, full_dataset, train_mask, val_mask, test_mask, 
                  classifier='LogReg', metric='acc', device=None, log_interval=1):
 
