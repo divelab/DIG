@@ -2,7 +2,7 @@ import sys, torch
 from tqdm import trange
 import torch.nn as nn
 from torch_geometric.data import Batch, Data
-from sslgraph.contrastive.objectives import NCE_loss, JSE_loss
+from dig.sslgraph.method.contrastive.objectives import NCE_loss, JSE_loss
 
 class Contrastive(nn.Module):
     def __init__(self, objective, views_fn,

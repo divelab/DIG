@@ -48,20 +48,19 @@ into this field.
 Please follow the [mindset](https://mm.tt/1846452931?t=Q6eSYablxF) for the architecture. 
 It may be useful to refer to `xgraph`.
 
-Generally, there are 4 directories in each part.
+Generally, there are 3 directories in each part.
 * `dataset` includes all datasets we need to use. A dataset is written in a class with 
   auto-downloading, auto-processing.
 * `method` includes methods which share a unified input/output format.
 * `evaluation` includes all the metrics to evaluate the method's outputs.
-* `benchmark` is supposed to import the reorganized code above to implement reproduction.
-It is proper to import the main function of different method to the `benchmark` layer by using
-  `__init__.py`. e.g.
-  `from dig.xgraph.benchmark.DeepLIFT.benchmark.kernel.pipeline import main` will be transformed
-  into `from dig.xgraph.benchmark.deeplift`.
 
 All the datasets/methods/metrics should be imported by the corresponding `__init__.py`.
 
 `__init__.pyi` is encouraged if the APIs are sophisticated.
+
+
+**Note**: Besides the dig folder (the source code of the dig package), we have another folder outside of dig, named `benchmark`. In `benchmark`, we include the reproducible code for all algorithms. It is supposed to import the reorganized code above to implement the benchmark code.
+
 
 ## File Management
 
@@ -79,4 +78,5 @@ Please follow the group leader's api design.
 
 ## Comments
 
-After the implementation, it is necessary to add comments for the documentation.
+* After the implementation, it is necessary to add comments for the documentation. We can consider this when we write online documentations.
+* Please follow the [PEP8 style guide](https://www.python.org/dev/peps/pep-0008/) as possible in your implementation.

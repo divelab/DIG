@@ -1,7 +1,7 @@
 import sys, torch
 import torch.nn as nn
 from .contrastive import Contrastive
-from sslgraph.contrastive.views_fn import node_attr_mask, edge_perturbation, uniform_sample, RW_sample, random_view
+from dig.sslgraph.method.contrastive.views_fn import node_attr_mask, edge_perturbation, uniform_sample, RW_sample, random_view
 
 class GraphCL(Contrastive):
     

@@ -1,7 +1,7 @@
 import sys, torch
 import torch.nn as nn
 from .contrastive import Contrastive
-from sslgraph.contrastive.views_fn import node_attr_mask, edge_perturbation, combine
+from dig.sslgraph.method.contrastive.views_fn import node_attr_mask, edge_perturbation, combine
 
 class GRACE(Contrastive):
     

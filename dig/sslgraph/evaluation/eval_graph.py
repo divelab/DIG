@@ -30,7 +30,7 @@ class LogReg(nn.Module):
         return ret
 
     
-class EvalUnsupevised(object):
+class GraphUnsupervised(object):
     
     def __init__(self, dataset, classifier='SVC', search=True, log_interval=1,
                  epoch_select='test_max', metric='acc', n_folds=10, device=None):
@@ -230,7 +230,7 @@ class PredictionModel(nn.Module):
 
     
 
-class EvalSemisupevised(object):
+class GraphSemisupervised(object):
     
     def __init__(self, dataset, dataset_pretrain, label_rate, loss=nn.functional.nll_loss, 
                  epoch_select='test_max', metric='acc', n_folds=10, device=None):
