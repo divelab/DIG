@@ -482,7 +482,6 @@ class ExplainerBase(nn.Module):
         return related_preds
 
 
-
 class WalkBase(ExplainerBase):
 
     def __init__(self, model: nn.Module, epochs=0, lr=0, explain_graph=False, molecule=False):
