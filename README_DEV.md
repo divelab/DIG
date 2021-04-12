@@ -24,7 +24,7 @@
 You can either install the PyTorch and PyTorch Geometry manually or 
 install a `DIG` conda environments with requirements above by following:
 ```bash
-$ ./install
+$ source ./install
 ```
 
 Then you can install this package by:
