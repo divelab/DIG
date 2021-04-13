@@ -14,12 +14,16 @@ from Configures import data_args, model_args, train_args
 
 
 def pipeline_GC(top_k):
-    dataset = get_dataset(data_args)
+    dataset = get_dataset(data_args.dataset_dir, data_args.dataset_name)
     if data_args.dataset_name == 'mutag':
         data_indices = list(range(len(dataset)))
         pgexplainer_trainset = dataset
     else:
-        loader = get_dataloader(dataset, data_args, train_args)
+        loader = get_dataloader(dataset,
+                                batch_size=train_args.batch_size,
+                                random_split_flag=data_args.random_split,
+                                data_split_ratio=data_args.data_split_ratio,
+                                seed=data_args.seed)
         data_indices = loader['test'].dataset.indices
         pgexplainer_trainset = loader['train'].dataset
 
@@ -106,7 +110,7 @@ def pipeline_GC(top_k):
 
 
 def pipeline_NC(top_k):
-    dataset = get_dataset(data_args)
+    dataset = get_dataset(data_args.dataset_dir, data_args.dataset_name)
     input_dim = dataset.num_node_features
     output_dim = dataset.num_classes
     data = dataset[0]
