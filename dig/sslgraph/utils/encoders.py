@@ -50,40 +50,36 @@ class GIN(torch.nn.Module):
         else:
             self.bns = None
         self.convs = torch.nn.ModuleList()
-        self.acts = torch.nn.ModuleList()
         self.n_layers = n_layers
         self.pool = pool
 
-        if act == 'prelu':
-            a = torch.nn.PReLU()
-        else:
-            a = torch.nn.ReLU()
+        self.act = torch.nn.PReLU() if act == 'prelu' else torch.nn.ReLU()
 
         for i in range(n_layers):
             start_dim = hidden_dim if i else feat_dim
             nn = Sequential(Linear(start_dim, hidden_dim, bias=bias),
-                            a,
+                            self.act,
                             Linear(hidden_dim, hidden_dim, bias=bias))
             if xavier:
                 self.weights_init(nn)
             conv = GINConv(nn)
             self.convs.append(conv)
-            self.acts.append(a)
             if bn:
                 self.bns.append(BatchNorm1d(hidden_dim))
 
-    def weights_init(self, m):
-        if isinstance(m, GINConv):
-            torch.nn.init.xavier_uniform_(m.weight.data)
-            if m.bias is not None:
-                m.bias.data.fill_(0.0)
+    def weights_init(self, module):
+        for m in module.modules():
+            if isinstance(m, Linear):
+                torch.nn.init.xavier_uniform_(m.weight.data)
+                if m.bias is not None:
+                    m.bias.data.fill_(0.0)
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         xs = []
         for i in range(self.n_layers):
             x = self.convs[i](x, edge_index)
-            x = self.acts[i](x)
+            x = self.act(x)
             if self.bns is not None:
                 x = self.bns[i](x)
             xs.append(x)

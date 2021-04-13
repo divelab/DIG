@@ -5,7 +5,6 @@ from sklearn.model_selection import StratifiedKFold
 from torch_geometric.data import DataLoader
 from torch import optim
 from sklearn import preprocessing
-from sslgraph.utils import get_node_dataset
 
 
 class LogReg(nn.Module):
