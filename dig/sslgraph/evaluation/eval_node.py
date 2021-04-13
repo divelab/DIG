@@ -28,8 +28,8 @@ class LogReg(nn.Module):
 
 
 class NodeUnsupervised(object):
-    def __init__(self, full_dataset, train_mask, val_mask, test_mask, 
-                 classifier='LogReg', metric='acc', device=None, log_interval=1):
+    def __init__(self, full_dataset, train_mask, val_mask, test_mask, classifier='LogReg', 
+                 metric='acc', device=None, log_interval=1, **kwargs):
 
         self.full_dataset = full_dataset
         self.train_mask = train_mask
@@ -48,7 +48,7 @@ class NodeUnsupervised(object):
             self.device = device
 
         # Use default config if not further specified
-        self.setup_train_config()
+        self.setup_train_config(**kwargs)
 
     def setup_train_config(self, p_optim = 'Adam', p_lr = 0.01, p_weight_decay = 0, 
                            p_epoch = 2000, logreg_wd = 0, comp_embed_on='cpu'):

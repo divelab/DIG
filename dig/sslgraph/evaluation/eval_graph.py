@@ -32,7 +32,8 @@ class LogReg(nn.Module):
 class GraphUnsupervised(object):
     
     def __init__(self, dataset, classifier='SVC', search=True, log_interval=1,
-                 epoch_select='test_max', metric='acc', n_folds=10, device=None):
+                 epoch_select='test_max', metric='acc', n_folds=10, device=None,
+                 **kwargs):
         
         self.dataset = dataset
         self.epoch_select = epoch_select
@@ -50,10 +51,10 @@ class GraphUnsupervised(object):
             self.device = device
 
         # Use default config if not further specified
-        self.setup_train_config()
+        self.setup_train_config(**kwargs)
 
     def setup_train_config(self, batch_size = 256,
-                           p_optim = 'Adam', p_lr = 0.001, p_weight_decay = 0, p_epoch = 20):
+                           p_optim = 'Adam', p_lr = 0.01, p_weight_decay = 0, p_epoch = 20):
         
         self.batch_size = batch_size
 
@@ -232,7 +233,7 @@ class PredictionModel(nn.Module):
 class GraphSemisupervised(object):
     
     def __init__(self, dataset, dataset_pretrain, label_rate, loss=nn.functional.nll_loss, 
-                 epoch_select='test_max', metric='acc', n_folds=10, device=None):
+                 epoch_select='test_max', metric='acc', n_folds=10, device=None, **kwargs):
         
         self.dataset, self.dataset_pretrain = dataset, dataset_pretrain
         self.label_rate = label_rate
@@ -247,7 +248,7 @@ class GraphSemisupervised(object):
             self.device = device
         
         # Use default config if not further specified
-        self.setup_train_config()
+        self.setup_train_config(**kwargs)
         
         
     def setup_train_config(self, batch_size = 128,
