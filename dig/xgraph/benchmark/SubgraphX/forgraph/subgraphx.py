@@ -11,7 +11,7 @@ from utils import PlotUtils, find_closest_node_result
 
 
 def pipeline(max_nodes):
-    dataset = get_dataset(data_args)
+    dataset = get_dataset(data_args.dataset_dir, data_args.dataset_name)
     plotutils = PlotUtils(dataset_name=data_args.dataset_name)
     input_dim = dataset.num_node_features
     output_dim = dataset.num_classes
@@ -19,7 +19,11 @@ def pipeline(max_nodes):
     if data_args.dataset_name == 'mutag':
         data_indices = list(range(len(dataset)))
     else:
-        loader = get_dataloader(dataset, data_args, train_args)
+        loader = get_dataloader(dataset,
+                                batch_size=train_args.batch_size,
+                                random_split_flag=data_args.random_split,
+                                data_split_ratio=data_args.data_split_ratio,
+                                seed=data_args.seed)
         data_indices = loader['test'].dataset.indices
 
     gnnNets = GnnNets(input_dim, output_dim, model_args)
@@ -42,6 +46,7 @@ def pipeline(max_nodes):
         data = dataset[i]
         _, probs, _ = gnnNets(Batch.from_data_list([data.clone()]))
         prediction = probs.squeeze().argmax(-1).item()
+        original_score = probs.squeeze()[prediction]
 
         # get the reward func
         value_func = GnnNets_GC2value_func(gnnNets, target_class=prediction)
@@ -66,7 +71,10 @@ def pipeline(max_nodes):
 
         # l sharply score
         graph_node_x = find_closest_node_result(results, max_nodes=max_nodes)
-        fidelity_score = gnn_score(graph_node_x.coalition, data, value_func, subgraph_building_method='zero_filling')
+        masked_node_list = [node for node in list(range(graph_node_x.data.x.shape[0]))
+                            if node not in graph_node_x.coalition]
+        fidelity_score = original_score - gnn_score(masked_node_list, data, value_func,
+                                                    subgraph_building_method='zero_filling')
         sparsity_score = 1 - len(graph_node_x.coalition) / graph_node_x.ori_graph.number_of_nodes()
         fidelity_score_list.append(fidelity_score)
         sparsity_score_list.append(sparsity_score)
@@ -87,5 +95,5 @@ def pipeline(max_nodes):
 
 if __name__ == '__main__':
     fidelity_scores, sparsity_scores = pipeline(15)
-    print(f"{fidelity_scores.mean().item()}_{sparsity_scores.mean().item()}")
+    print(f"Fidelity: {fidelity_scores.mean().item()}, Sparsity: {sparsity_scores.mean().item()}")
 
