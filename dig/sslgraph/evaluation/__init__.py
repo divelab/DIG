@@ -1,2 +1,2 @@
 from .eval_node import NodeUnsupervised
-from .eval_graph import GraphUnsupervised, GraphSemisupervised, setup_seed
+from .eval_graph import GraphUnsupervised, GraphSemisupervised
