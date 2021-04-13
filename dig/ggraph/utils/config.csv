@@ -1,0 +1,4 @@
+,zinc250k,zinc_800_graphaf,zinc_800_jt,zinc250k_property,qm9_property,moses,qm9,
+smile,smiles,smiles,smiles,smile,smile,smiles,SMILES2
+prop_list,['qed'],['penalized_logp'],['penalized_logp'],"['qed', 'plogp']","['qed', 'penalized_logp']",[],[]
+url,,,,,,,
