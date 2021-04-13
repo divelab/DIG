@@ -6,7 +6,7 @@ from dig.sslgraph.method.contrastive.views_fn import node_attr_mask, edge_pertur
 class GRACE(Contrastive):
     
     def __init__(self, dim, dropE_rate_1, dropE_rate_2, maskN_rate_1, maskN_rate_2, 
-                 tau=0.5, device=None):
+                 **kwargs):
         '''
         dim: Integer. Embedding dimension.
         dropE_rate_1, dropE_rate_2, maskN_rate_1, maskN_rate_2: Float in [0, 1).
@@ -23,8 +23,7 @@ class GRACE(Contrastive):
                                     node_level=True,
                                     z_n_dim=dim,
                                     proj_n='MLP',
-                                    tau=tau,
-                                    device=device)
+                                    **kwargs)
         
     def train(self, encoders, data_loader, optimizer, epochs, per_epoch_out=False):
         # GRACE removes projection heads after pre-training

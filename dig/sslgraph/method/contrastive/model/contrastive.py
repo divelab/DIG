@@ -301,7 +301,6 @@ class Contrastive(nn.Module):
         if not self.per_epoch_out:
             yield encoder, (self.proj_head_g, self.proj_head_n)
     
-    
     def _get_embed(self, enc, view):
         
         if self.neg_by_crpt:
@@ -345,12 +344,22 @@ class Contrastive(nn.Module):
         out_dim = self.proj_out_dim
         
         if proj_head == 'linear':
-            return nn.Linear(in_dim, out_dim)
+            proj_nn = nn.Linear(in_dim, out_dim)
+            self._weights_init(proj_nn)
         elif proj_head == 'MLP':
-            return nn.Sequential(nn.Linear(in_dim, out_dim),
+            proj_nn = nn.Sequential(nn.Linear(in_dim, out_dim),
                                  nn.ReLU(inplace=True),
                                  nn.Linear(out_dim, out_dim))
+            for m in proj_nn.modules():
+                self._weights_init(m)
+            
+        return proj_nn
         
+    def _weights_init(self, m):        
+        if isinstance(m, nn.Linear):
+            nn.init.xavier_uniform_(m.weight.data)
+            if m.bias is not None:
+                m.bias.data.fill_(0.0)
         
     def _get_loss(self, objective):
         

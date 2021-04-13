@@ -35,7 +35,7 @@ class InfoG_enc(nn.Module):
 
 class InfoGraph(Contrastive):
     
-    def __init__(self, z_g_dim, z_n_dim, device=None):
+    def __init__(self, z_g_dim, z_n_dim, **kwargs):
         '''
         Args:
             diffusion_type: String. Diffusion instantiation mode with two options:
@@ -54,7 +54,7 @@ class InfoGraph(Contrastive):
                                         z_n_dim=z_n_dim,
                                         proj=proj,
                                         proj_n=proj_n,
-                                        device=device)
+                                        **kwargs)
         
     def train(self, encoders, data_loader, optimizer, epochs, per_epoch_out=False):
         for enc, (proj, proj_n) in super(InfoGraph, self).train(encoders, data_loader, 

@@ -65,8 +65,7 @@ class ProjHead(nn.Module):
 class MVGRL(Contrastive):
     
     def __init__(self, z_dim, z_n_dim, diffusion_type='ppr', alpha=0.2, t=5, 
-                 graph_level_output=True, node_level_output=False, device=None, 
-                 choice_model='best', model_path='models'):
+                 graph_level_output=True, node_level_output=False, **kwargs):
         '''
         Args:
             diffusion_type: String. Diffusion instantiation mode with two options:
@@ -88,9 +87,7 @@ class MVGRL(Contrastive):
                                     z_n_dim=z_n_dim,
                                     proj=ProjHead(z_dim, z_n_dim),
                                     proj_n=ProjHead(z_n_dim, z_n_dim),
-                                    choice_model=choice_model,
-                                    model_path=model_path,
-                                    device=device)
+                                    **kwargs)
         
     def train(self, encoders, data_loader, optimizer, epochs, per_epoch_out=False):
         

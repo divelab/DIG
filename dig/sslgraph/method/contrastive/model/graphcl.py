@@ -5,8 +5,7 @@ from dig.sslgraph.method.contrastive.views_fn import node_attr_mask, edge_pertur
 
 class GraphCL(Contrastive):
     
-    def __init__(self, dim, aug_1, aug_2, aug_ratio=0.2, device=None,
-                 choice_model='last', model_path='models'):
+    def __init__(self, dim, aug_1, aug_2, aug_ratio=0.2, **kwargs):
         '''
         dim: Integer. Embedding dimension.
         aug1, aug2: String. Should be in ['dropN', 'permE', 'subgraph', 
@@ -50,9 +49,7 @@ class GraphCL(Contrastive):
                                       z_dim=dim,
                                       proj='MLP',
                                       node_level=False,
-                                      choice_model=choice_model,
-                                      model_path=model_path,
-                                      device=device)
+                                      **kwargs)
         
     def train(self, encoders, data_loader, optimizer, epochs, per_epoch_out=False):
         # GraphCL removes projection heads after pre-training
