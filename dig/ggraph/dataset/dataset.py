@@ -13,7 +13,7 @@ from torch_geometric.data import Data, InMemoryDataset, download_url, extract_zi
 from torch_geometric.io import read_tu_data
 from torch_geometric.utils import to_networkx
 
-def graph_data_obj_to_nx_simple(data):
+def graph_data_obj_to_nx_simple(data, use_aug=False):
     """
     Converts graph Data object required by the pytorch geometric package to
     network x data object. NB: Uses simplified atom and bond features,
@@ -27,8 +27,13 @@ def graph_data_obj_to_nx_simple(data):
     # atoms
     atom_features = data.x.cpu().numpy()
     num_atoms = atom_features.shape[0]
+    if use_aug:
+        local_perm = np.random.permutation(num_atoms)
+    else:
+        local_perm = np.arange(num_atoms)
+
     for i in range(num_atoms):
-        atomic_num_idx, chirality_tag_idx = atom_features[i]
+        atomic_num_idx, chirality_tag_idx = atom_features[local_perm[i]]
         G.add_node(i, atom_num_idx=atomic_num_idx, chirality_tag_idx=chirality_tag_idx)
         pass
 
@@ -37,26 +42,27 @@ def graph_data_obj_to_nx_simple(data):
     edge_attr = data.edge_attr.cpu().numpy()
     num_bonds = edge_index.shape[1]
     for j in range(0, num_bonds, 2):
-        begin_idx = int(edge_index[0, j])
-        end_idx = int(edge_index[1, j])
+        begin_idx = np.where(local_perm == int(edge_index[0, j]))[0][0]
+        end_idx = np.where(local_perm == int(edge_index[1, j]))[0][0]
         bond_type_idx, bond_dir_idx = edge_attr[j]
         if not G.has_edge(begin_idx, end_idx):
             G.add_edge(begin_idx, end_idx, bond_type_idx=bond_type_idx,
                        bond_dir_idx=bond_dir_idx)
 
-    return G
+    return G, local_perm
 
 class PygDataset(InMemoryDataset):
     def __init__(self,
                  root='../datasets',
                  name='qm9',
                  prop_name='penalized_logp',
-                 num_max_node = 38,
+                 num_max_node=38,
                  conf_dict=None,
                  transform=None,
                  pre_transform=None,
                  pre_filter=None,
-                 processed_filename='data.pt'
+                 processed_filename='data.pt',
+                 use_aug=False
                  ):
         """
         Pytorch Geometric data interface for molecule datasets.
@@ -66,7 +72,8 @@ class PygDataset(InMemoryDataset):
         param num_max_node: the maximum number of nodes (atoms) among all molecules
         param conf_dict: dictionary that stores all the configuration for the corresponding dataset. Default is None, 
                     but when something is passed, it uses its information. Useful for debugging for external contributers.
-                    
+        param use_aug: whether data augmentation is used, default is False
+                   
         All the rest of parameters of PygDataset follows the use in 'InMemoryDataset' from torch_geometric.data.
         Documentation can be found at https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html.
         """
@@ -78,6 +85,7 @@ class PygDataset(InMemoryDataset):
 #         self.edge_unroll = edge_unroll    # not used
         self.prop_name = prop_name
         self.num_max_node = num_max_node
+        self.use_aug = use_aug
         
         if conf_dict is None:                        
             config_file = pd.read_csv('config.csv', index_col = 0)
@@ -205,12 +213,14 @@ class PygDataset(InMemoryDataset):
         data['smile'] = self.all_smiles[idx]
             
         # bfs-searching order
-        G = to_networkx(data)
         root = 0
+        G, local_perm = graph_data_obj_to_nx_simple(data, use_aug=self.use_aug)
         edges = nx.bfs_edges(G, root)
         nodes = [root] + [v for u, v in edges]
+        if self.use_aug:
+            nodes = local_perm[nodes]
         
-        data['bfs_perm_origin'] = torch.Tensor(nodes)
+        data['bfs_perm_origin'] = torch.Tensor(nodes).long()
 
         return data
     
@@ -230,7 +240,7 @@ class PygDataset(InMemoryDataset):
             Chem.Kekulize(mol)
             num_atom = mol.GetNumAtoms()
             if num_atom > self.num_max_node:
-                return None, None, None
+                continue
             else:
                 # atoms
                 num_atom_features = 2   # atom type,  chirality tag
