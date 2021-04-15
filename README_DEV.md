@@ -92,13 +92,13 @@ $ pip install sphinx-rtd-theme
 
 2. All the documentation source files are in `DIG/docs/source/`. Find the .rst file you want to contribute and write the documentation. The language we use is [reStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html).
 
-3. Make you html locally
+3. Make your html locally.
 ```bash
 $ cd docs
 $ make html
 ```
 
-4. Then, we can preview your documentation by opening `DIG/docs/biuld/html/index.html`.
+4. Then, you can preview your documentation by opening `DIG/docs/biuld/html/index.html`.
 
 5. Before committing to our DIG repo, please clean the make.
 ```bash
@@ -106,7 +106,7 @@ $ cd docs
 $ make clean
 ```
 
-6. Commit your contribution to DIG repo. Then, you can check the documentations at [https://diveintographs.readthedocs.io/en/latest/](https://diveintographs.readthedocs.io/en/latest/)
+6. Commit your contribution to DIG repo. Then, you can check the documentations at [https://diveintographs.readthedocs.io/en/latest/](https://diveintographs.readthedocs.io/en/latest/).
 
 
 ## Comments
