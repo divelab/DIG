@@ -8,7 +8,9 @@
 1. [Architecture](#architecture)
 1. [File Management](#file-management)
 1. [API](#api)
+1. [Writing Documentation](#writing-documentation)
 1. [Comments](#comments)
+
 
 ## Requirements
 
@@ -26,6 +28,7 @@ install a `DIG` conda environments with requirements above by following:
 ```bash
 $ ./install
 ```
+**Note**: CUDA is 10.1 in default. You need to modify the `install` file based on your CUDA version.
 
 Then you can install this package by:
 ```bash
@@ -76,7 +79,37 @@ Specific locations of auto-download checkpoints/datasets are pending to be discu
 
 Please follow the group leader's api design.
 
+
+## Writing Documentation
+
+Please follow the steps below to write documentations
+
+1. Install `sphinx` and `sphinx_rtd_theme`:
+```bash
+$ pip install sphinx
+$ pip install sphinx-rtd-theme
+```
+
+2. All the documentation source files are in `DIG/docs/source/`. Find the .rst file you want to contribute and write the documentation. The language we use is [reStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html).
+
+3. Make you html locally
+```bash
+$ cd docs
+$ make html
+```
+
+4. Then, we can preview your documentation by opening `DIG/docs/biuld/html/index.html`.
+
+5. Before committing to our DIG repo, please clean the make.
+```bash
+$ cd docs
+$ make clean
+```
+
+6. Commit your contribution to DIG repo. Then, you can check the documentations at [https://diveintographs.readthedocs.io/en/latest/](https://diveintographs.readthedocs.io/en/latest/)
+
+
 ## Comments
 
-* After the implementation, it is necessary to add comments for the documentation. We can consider this when we write online documentations.
+* After the implementation, it is necessary to add comments for the documentation. We can consider this when we write documentations.
 * Please follow the [PEP8 style guide](https://www.python.org/dev/peps/pep-0008/) as possible in your implementation.
