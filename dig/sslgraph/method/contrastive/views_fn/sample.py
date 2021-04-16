@@ -46,7 +46,7 @@ def uniform_sample(ratio=0.1):
     return views_fn
 
 
-def RW_sample(ratio=0.1, add_self_loop=True):
+def RW_sample(ratio=0.1, add_self_loop=False):
     '''
     Args:
         ratio: Percentage of nodes to sample from the graph.

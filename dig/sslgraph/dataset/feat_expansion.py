@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.utils import degree, remove_self_loops, add_self_loops
 
@@ -35,10 +36,6 @@ class FeatureExpander(MessagePassing):
         # data.x = torch.cat([data.x, deg, deg_onehot, akx, cent], dim=-1)
         # data.x = torch.cat([data.x, deg_onehot, akx, cent, deg], dim=-1)
         data.x = torch.cat([deg, data.x, deg_onehot, akx, cent], dim=-1)
-
-        # ignore remove edge
-
-        # ignore degree grouping
 
         return data
     
@@ -99,11 +96,6 @@ class FeatureExpander(MessagePassing):
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
 
         return edge_index, deg_inv_sqrt[row] * edge_weight * deg_inv_sqrt[col]
-
-    
-import torch
-import torch.nn.functional as F
-from torch_geometric.utils import degree
 
 
 class CatDegOnehot(object):
