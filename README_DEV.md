@@ -88,6 +88,7 @@ Please follow the steps below to write documentations
 ```bash
 $ pip install sphinx
 $ pip install sphinx-rtd-theme
+$ pip install git+https://github.com/Chilipp/autodocsumm.git
 ```
 
 2. All the documentation source files are in `DIG/docs/source/`. Find the .rst file you want to contribute and write the documentation. The language we use is [reStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html).
