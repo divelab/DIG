@@ -17,7 +17,7 @@ def uniform_sample(ratio=0.1):
         drop_num = int(node_num * ratio)
         idx_drop = np.random.choice(node_num, drop_num, replace=False)
         idx_nondrop = [n for n in range(node_num) if not n in idx_drop]
-        adj = to_dense_adj(data.edge_index)[0]
+        adj = to_dense_adj(data.edge_index, max_num_nodes=node_num)[0]
         adj = adj[idx_nondrop, :][:, idx_nondrop]
         
         return Data(x=data.x[idx_nondrop], edge_index=dense_to_sparse(adj)[0])
@@ -83,7 +83,7 @@ def RW_sample(ratio=0.1, add_self_loop=False):
 
         idx_drop = [n for n in range(node_num) if not n in idx_sub]
         idx_sampled = idx_sub
-        adj = to_dense_adj(edge_index)[0]
+        adj = to_dense_adj(edge_index, max_num_nodes=node_num)[0]
         adj = adj[idx_sampled, :][:, idx_sampled]
 
         return Data(x=data.x[idx_sampled], edge_index=dense_to_sparse(adj)[0])
