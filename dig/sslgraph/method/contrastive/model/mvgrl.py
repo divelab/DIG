@@ -1,7 +1,7 @@
 import sys, torch
 import torch.nn as nn
 from .contrastive import Contrastive
-from dig.sslgraph.method.contrastive.views_fn import diffusion, DiffusionWithSample
+from dig.sslgraph.method.contrastive.views_fn import Diffusion, DiffusionWithSample
 
 
 class MVGRL_enc(nn.Module):
