@@ -18,6 +18,9 @@ sys.path.insert(0,'..')
 sys.path.insert(0,'../..')
 import dig.sslgraph.dataset
 import dig.sslgraph.method
+import dig.sslgraph.utils
+import dig.sslgraph.evaluation
+
 import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
@@ -60,19 +63,19 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-html_theme = 'sphinx_rtd_theme'
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-# html_theme = "furo"
+# html_theme = 'sphinx_rtd_theme'
+# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = "furo"
 
 intersphinx_mapping = {'python': ('https://docs.python.org/', None)}
-
+add_module_names = False
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 
 autodoc_default_options = {'autosummary-no-titles': True,
-                           'autosummary-force-inline': True,
+#                            'autosummary-force-inline': True,
                            'autosummary-nosignatures': True,
                           }
 
@@ -81,6 +84,7 @@ def setup(app):
         members = [
             '__init__',
             '__repr__',
+            '__call__',
             '__weakref__',
             '__dict__',
             '__module__',
