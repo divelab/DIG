@@ -5,26 +5,34 @@ from sklearn.preprocessing import MinMaxScaler
 from torch_geometric.data import Batch, Data
 
 
-def EdgePerturbation(add=True, drop=False, ratio=0.1):
+class EdgePerturbation():
     '''
     Args:
         add (bool): Set True if randomly add edges in a given graph.
         drop (bool): Set True if randomly drop edges in a given graph.
         ratio: Percentage of edges to add or drop.
     '''
-    def do_trans(data):
+    def __init__(self, add=True, drop=False, ratio=0.1):
+        self.add = add
+        self.drop = drop
+        self.ratio = ratio
+        
+    def __call__(self, data):
+        return self.views_fn(data)
+        
+    def do_trans(self, data):
         node_num, _ = data.x.size()
         _, edge_num = data.edge_index.size()
-        perturb_num = int(edge_num * ratio)
+        perturb_num = int(edge_num * self.ratio)
 
         edge_index = data.edge_index.detach().clone()
         idx_remain = edge_index
         idx_add = torch.tensor([]).reshape(-1, 2)
 
-        if drop:
+        if self.drop:
             idx_remain = edge_index[:, np.random.choice(edge_num, edge_num-perturb_num, replace=False)]
 
-        if add:
+        if self.add:
             idx_add = torch.randint(node_num, (2, perturb_num))
 
         new_edge_index = torch.cat((idx_remain, idx_add), dim=1)
@@ -32,7 +40,7 @@ def EdgePerturbation(add=True, drop=False, ratio=0.1):
 
         return Data(x=data.x, edge_index=new_edge_index)
 
-    def views_fn(data):
+    def views_fn(self, data):
         '''
         Args:
             data: A graph data object containing:
@@ -48,15 +56,14 @@ def EdgePerturbation(add=True, drop=False, ratio=0.1):
             batch tensor with shape [num_nodes].
         '''
         if isinstance(data, Batch):
-            dlist = [do_trans(d) for d in data.to_data_list()]
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
         elif isinstance(data, Data):
-            return do_trans(data)
-
-    return views_fn
+            return self.do_trans(data)
 
 
-def Diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
+
+class Diffusion():
     '''
     Args:
         mode: Diffusion instantiation mode with two options:
@@ -65,9 +72,18 @@ def Diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
         alpha: Teleport probability in a random walk.
         t: Diffusion time.
     '''
-    def do_trans(data):
+    def __init__(self, mode='ppr', alpha=0.2, t=5, add_self_loop=True):
+        self.mode = mode
+        self.alpha = alpha
+        self.t = t
+        self.add_self_loop = add_self_loop
+        
+    def __call__(self, data):
+        return self.views_fn(data)
+    
+    def do_trans(self, data):
         node_num, _ = data.x.size()
-        if add_self_loop:
+        if self.add_self_loop:
             sl = torch.tensor([[n, n] for n in range(node_num)]).t()
             edge_index = torch.cat((data.edge_index, sl), dim=1)
         else:
@@ -77,13 +93,13 @@ def Diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
         orig_adj = torch.where(orig_adj>1, torch.ones_like(orig_adj), orig_adj)
         d = torch.diag(torch.sum(orig_adj, 1))
 
-        if mode == 'ppr':
+        if self.mode == 'ppr':
             dinv = torch.inverse(torch.sqrt(d))
             at = torch.matmul(torch.matmul(dinv, orig_adj), dinv)
-            diff_adj = alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - alpha) * at))
+            diff_adj = alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - self.alpha) * at))
 
-        elif mode == 'heat':
-            diff_adj = torch.exp(t * (torch.matmul(orig_adj, torch.inverse(d)) - 1))
+        elif self.mode == 'heat':
+            diff_adj = torch.exp(self.t * (torch.matmul(orig_adj, torch.inverse(d)) - 1))
 
         else:
             raise Exception("Must choose one diffusion instantiation mode from 'ppr' and 'heat'!")
@@ -93,7 +109,7 @@ def Diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
         return Data(x=data.x, edge_index=edge_ind, edge_attr=edge_attr)
     
 
-    def views_fn(data):
+    def views_fn(self, data):
         '''
         Args:
             data: A graph data object containing:
@@ -109,16 +125,14 @@ def Diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
             batch tensor with shape [num_nodes].
         '''
         if isinstance(data, Batch):
-            dlist = [do_trans(d) for d in data.to_data_list()]
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
         elif isinstance(data, Data):
-            return do_trans(data)
-
-    return views_fn
+            return self.do_trans(data)
 
 
-def DiffusionWithSample(sample_size=2000, batch_size=4, mode='ppr', 
-                          alpha=0.2, t=5, epsilon=False, add_self_loop=True):
+
+class DiffusionWithSample():
     '''
     Args:
         sample_size: Number of nodes in the sampled subgraoh from a large graph.
@@ -130,7 +144,20 @@ def DiffusionWithSample(sample_size=2000, batch_size=4, mode='ppr',
         t: Diffusion time.
         epsilon (bool): Set true if need to adjust the diffusion matrix with epsilon.
     '''
-    def views_fn(data):
+    def __init__(self, sample_size=2000, batch_size=4, mode='ppr', 
+                 alpha=0.2, t=5, epsilon=False, add_self_loop=True):
+        self.sample_size = sample_size
+        self.batch_size = batch_size
+        self.mode = mode
+        self.alpha = alpha
+        self.t = t
+        self.epsilon = epsilon
+        self.add_self_loop = add_self_loop
+        
+    def __call__(self, data):
+        return self.view_fn(data)
+    
+    def views_fn(self, data):
         '''
         Args:
             data: A graph data object containing:
@@ -146,7 +173,7 @@ def DiffusionWithSample(sample_size=2000, batch_size=4, mode='ppr',
             batch tensor with shape [num_nodes].
         '''
         node_num, _ = data.x.size()
-        if add_self_loop:
+        if self.add_self_loop:
             sl = torch.tensor([[n, n] for n in range(node_num)]).t()
             edge_index = torch.cat((data.edge_index, sl), dim=1)
         else:
@@ -156,18 +183,18 @@ def DiffusionWithSample(sample_size=2000, batch_size=4, mode='ppr',
         orig_adj = torch.where(orig_adj>1, torch.ones_like(orig_adj), orig_adj)
         d = torch.diag(torch.sum(orig_adj, 1))
 
-        if mode == 'ppr':
+        if self.mode == 'ppr':
             dinv = torch.inverse(torch.sqrt(d))
             at = torch.matmul(torch.matmul(dinv, orig_adj), dinv)
-            diff_adj = alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - alpha) * at))
+            diff_adj = self.alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - self.alpha) * at))
 
-        elif mode == 'heat':
-            diff_adj = torch.exp(t * (torch.matmul(orig_adj, torch.inverse(d)) - 1))
+        elif self.mode == 'heat':
+            diff_adj = torch.exp(self.t * (torch.matmul(orig_adj, torch.inverse(d)) - 1))
 
         else:
             raise Exception("Must choose one diffusion instantiation mode from 'ppr' and 'heat'!")
 
-        if epsilon:
+        if self.epsilon:
             epsilons = [1e-5, 1e-4, 1e-3, 1e-2]
             avg_degree = torch.sum(orig_adj) / orig_adj.shape[0]
             ep = epsilons[np.argmin([abs(avg_degree - torch.sum(diff_adj >= e) / diff_adj.shape[0]) for e in epsilons])]
@@ -179,8 +206,8 @@ def DiffusionWithSample(sample_size=2000, batch_size=4, mode='ppr',
 
         dlist_orig_x = []
         dlist_diff_x = []
-        drop_num = node_num - sample_size
-        for b in range(batch_size):
+        drop_num = node_num - self.sample_size
+        for b in range(self.batch_size):
             idx_drop = np.random.choice(node_num, drop_num, replace=False)
             idx_nondrop = [n for n in range(node_num) if not n in idx_drop]
 
@@ -202,4 +229,3 @@ def DiffusionWithSample(sample_size=2000, batch_size=4, mode='ppr',
 
         return Batch.from_data_list(dlist_orig_x), Batch.from_data_list(dlist_diff_x)
 
-    return views_fn

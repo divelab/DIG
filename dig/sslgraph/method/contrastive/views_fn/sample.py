@@ -4,17 +4,23 @@ from torch_geometric.utils import to_dense_adj, dense_to_sparse
 from torch_geometric.data import Batch, Data
 
 
-def UniformSample(ratio=0.1):
+class UniformSample():
     '''
     Args:
         ratio: Percentage of nodes to drop.
     '''
-    def do_trans(data):
+    def __init__(self, ratio=0.1):
+        self.ratio = ratio
+    
+    def __call__(self, data):
+        return self.views_fn(data)
+    
+    def do_trans(self, data):
         
         node_num, _ = data.x.size()
         _, edge_num = data.edge_index.size()
 
-        drop_num = int(node_num * ratio)
+        drop_num = int(node_num * self.ratio)
         idx_drop = np.random.choice(node_num, drop_num, replace=False)
         idx_nondrop = [n for n in range(node_num) if not n in idx_drop]
         adj = to_dense_adj(data.edge_index, max_num_nodes=node_num)[0]
@@ -22,7 +28,7 @@ def UniformSample(ratio=0.1):
         
         return Data(x=data.x[idx_nondrop], edge_index=dense_to_sparse(adj)[0])
     
-    def views_fn(data):
+    def views_fn(self, data):
         '''
         Args:
             data: A graph data object containing:
@@ -38,25 +44,31 @@ def UniformSample(ratio=0.1):
             batch tensor with shape [num_nondrop_nodes].
         '''
         if isinstance(data, Batch):
-            dlist = [do_trans(d) for d in data.to_data_list()]
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
         elif isinstance(data, Data):
-            return do_trans(data)
-
-    return views_fn
+            return self.do_trans(data)
 
 
-def RWSample(ratio=0.1, add_self_loop=False):
+
+class RWSample():
     '''
     Args:
         ratio: Percentage of nodes to sample from the graph.
         add_self_loop (bool): Set True if add self-loop in edge_index.
     '''
-    def do_trans(data):
+    def __init__(self, ratio=0.1, add_self_loop=False):
+        self.ratio = ratio
+        self.add_self_loop = add_self_loop
+    
+    def __call__(self, data):
+        return self.views_fn(data)
+    
+    def do_trans(self, data):
         node_num, _ = data.x.size()
-        sub_num = int(node_num * ratio)
+        sub_num = int(node_num * self.ratio)
 
-        if add_self_loop:
+        if self.add_self_loop:
             sl = torch.tensor([[n, n] for n in range(node_num)]).t()
             edge_index = torch.cat((data.edge_index, sl), dim=1)
         else:
@@ -88,7 +100,7 @@ def RWSample(ratio=0.1, add_self_loop=False):
 
         return Data(x=data.x[idx_sampled], edge_index=dense_to_sparse(adj)[0])
 
-    def views_fn(data):
+    def views_fn(self, data):
         '''
         Args:
             data: A graph data object containing:
@@ -104,10 +116,9 @@ def RWSample(ratio=0.1, add_self_loop=False):
             batch tensor with shape [num_sampled_nodes].
         '''
         if isinstance(data, Batch):
-            dlist = [do_trans(d) for d in data.to_data_list()]
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
         elif isinstance(data, Data):
-            return do_trans(data)
+            return self.do_trans(data)
 
-    return views_fn
 

@@ -3,27 +3,35 @@ import numpy as np
 import random
 from torch_geometric.data import Batch
 
-def RandomView(candidates):
+class RandomView():
     
-    def views_fn(batch_data):
+    def __init__(self, candidates):
+        self.candidates = candidates
+        
+    def __call__(self, data):
+        return self.views_fn(data)
+    
+    def views_fn(self, batch_data):
         data_list = batch_data.to_data_list()
         transformed_list = []
         for data in data_list:
-            view_fn = random.choice(candidates)
+            view_fn = random.choice(self.candidates)
             transformed = view_fn(data)
             transformed_list.append(transformed)
         
         return Batch.from_data_list(transformed_list)
-    
-    return views_fn
 
 
-def Sequential(fn_sequence):
+class Sequential():
     
-    def views_fn(data):
-        for fn in fn_sequence:
+    def __init__(self, fn_sequence):
+        self.fn_sequence = fn_sequence
+    
+    def __call__(self, data):
+        return self.views_fn(data)
+    
+    def views_fn(self, data):
+        for fn in self.fn_sequence:
             data = fn(data)
         
         return data
-    
-    return views_fn
