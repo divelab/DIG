@@ -7,7 +7,7 @@ import pandas as pd
 # import scipy.sparse as sp
 from torch.utils.data import Dataset
 import networkx as nx
-from PygDataset import PygDataset
+from dig.ggraph.dataset import PygDataset
 
 from itertools import repeat, product
 from torch_geometric.data import Data, InMemoryDataset, download_url, extract_zip
