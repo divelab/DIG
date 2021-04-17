@@ -1,4 +1,4 @@
-Datasets
+dig.sslgraph.dataset
 =========
 
 .. automodule:: dig.sslgraph.dataset
