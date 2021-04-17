@@ -4,7 +4,7 @@ import random
 from torch_geometric.data import Batch, Data
 
 
-def node_attr_mask(mode='whole', mask_ratio=0.1, mask_mean=0.5, mask_std=0.5):
+def NodeAttrMask(mode='whole', mask_ratio=0.1, mask_mean=0.5, mask_std=0.5):
     '''
     Args:
         mode: Masking mode with three options:

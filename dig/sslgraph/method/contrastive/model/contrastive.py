@@ -6,10 +6,10 @@ from dig.sslgraph.method.contrastive.objectives import NCE_loss, JSE_loss
 
 class Contrastive(nn.Module):
     r"""
-    *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`Contrastive`.
-    
     Base class for creating contrastive learning models for either graph-level or 
     node-level tasks.
+    
+    *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`Contrastive`.
 
     Args:
         objective (string, or callable): The learning objective of contrastive model.
@@ -17,28 +17,29 @@ class Contrastive(nn.Module):
             of representations as inputs and returns loss Tensor 
             (see `dig.sslgraph.method.contrastive.objectives` for examples).
         views_fn (list of callable): List of functions to generate views from given graphs.
-        graph_level (bool, optional, optional): Whether to include graph-level representation 
+        graph_level (bool, optional): Whether to include graph-level representation 
             for contrast. (default: :obj:`True`)
-        node_level (bool, optional, optional): Whether to include node-level representation 
+        node_level (bool, optional): Whether to include node-level representation 
             for contrast. (default: :obj:`False`)
-        z_dim (int, optional, optional): The dimension of graph-level representations. 
-            Required if `graph_level=True`. (default: :obj:`None`)
-        z_dim (int, optional, optional): The dimension of node-level representations. 
-            Required if `node_level=True`. (default: :obj:`None`)
+        z_dim (int, optional): The dimension of graph-level representations. 
+            Required if :obj:`graph_level` = :obj:`True`. (default: :obj:`None`)
+        z_dim (int, optional): The dimension of node-level representations. 
+            Required if :obj:`node_level` = :obj:`True`. (default: :obj:`None`)
         proj (string, or Module, optional): Projection head for graph-level representation. 
-            If string, should be one of 'linear' and 'MLP'. Required if `graph_level=True`. 
-            (default: :obj:`None`)
+            If string, should be :obj:`"linear"` or :obj:`"MLP"`. Required if 
+            :obj:`graph_level` = :obj:`True`. (default: :obj:`None`)
         proj_n (string, or Module, optional): Projection head for node-level representations. 
-            If string, should be one of 'linear' and 'MLP'. Required if `node_level=True`. 
-            (default: :obj:`None`)
+            If string, should be one of 'linear' and 'MLP'. Required if 
+            :obj:`node_level` = :obj:`True`. (default: :obj:`None`)
         neg_by_crpt (bool, optional): The mode to obtain negative samples in JSE. If True, 
             obtain negative samples by performing corruption. Otherwise, consider pairs of
-            different graph samples as negative pairs. Only used when `objective="JSE"`. 
-            (default: :obj:`False`)
-        tau (int): The tempurature parameter in InfoNCE (NT-XENT) loss. (default: :obj:`0.5`)
+            different graph samples as negative pairs. Only used when 
+            :obj:`objective` = :obj:`"JSE"`. (default: :obj:`False`)
+        tau (int): The tempurature parameter in InfoNCE (NT-XENT) loss. Only used when 
+            :obj:`objective` = :obj:`"NCE"`. (default: :obj:`0.5`)
         device (int, or `torch.device`, optional): The device to perform computation.
-        choice_model (string, optional): Whether to yield model with `best` training loss or
-            at the `last` epoch. (default: :obj:`last`)
+        choice_model (string, optional): Whether to yield model with :obj:`best` training loss or
+            at the :obj:`last` epoch. (default: :obj:`last`)
         model_path (string, optinal): The directory to restore the saved model. 
             (default: :obj:`models`)
     """
@@ -81,18 +82,20 @@ class Contrastive(nn.Module):
         
         
     def train(self, encoder, data_loader, optimizer, epochs, per_epoch_out=False):
-        r"""Perform contrastive training and yield trained trained encoders per epoch or after the last epoch.
+        r"""Perform contrastive training and yield trained trained encoders per epoch or after 
+        the last epoch.
         
         Args:
-            encoder (Module, or list of Module): The graph encoder or list of graph encoders
-                dedicated for each view. If `node_level=False`, the encoder should return tensor 
-                of shape [n_graphs, z_dim]. Otherwise, return tuple of shape ([n_graphs, z_dim], 
-                [n_nodes, z'_dim]) representing graph-level and node-level embeddings.
+            encoder (Module, or list of Module): A graph encoder shared by all views or a list 
+                of graph encoders dedicated for each view. If :obj:`node_level` = :obj:`False`, 
+                the encoder should return tensor of shape [:obj:`n_graphs`, :obj:`z_dim`].
+                Otherwise, return tuple of shape ([:obj:`n_graphs`, :obj:`z_dim`], 
+                [:obj:`n_nodes`, :obj:`z_n_dim`]) representing graph-level and node-level embeddings.
             dataloader (Dataloader): Dataloader for unsupervised learning or pretraining.
-            optimizer (Optimizer): Pytorch optimizer with parameters in encoder(s).
+            optimizer (Optimizer): Pytorch optimizer for trainable parameters in encoder(s).
             epochs (int): Number of total training epochs.
             per_epoch_out (bool): If True, yield trained encoders per epoch. Otherwise, only yield
-                the final encoder at the last epoch.
+                the final encoder at the last epoch. (default: :obj:`False`)
                 
         :rtype: :class:`generator`.
         """

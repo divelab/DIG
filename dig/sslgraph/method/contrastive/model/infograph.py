@@ -34,24 +34,31 @@ class InfoG_enc(nn.Module):
 
 
 class InfoGraph(Contrastive):
+    r"""
+    Contrastive learning method proposed in the paper `InfoGraph: Unsupervised and 
+    Semi-supervised Graph-Level Representation Learning via Mutual Information 
+    Maximization <https://arxiv.org/abs/1908.01000>`_.
+
+    *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`InfoGraph`.
     
-    def __init__(self, z_g_dim, z_n_dim, **kwargs):
-        '''
-        Args:
-            diffusion_type: String. Diffusion instantiation mode with two options:
-                            'ppr': Personalized PageRank
-                            'heat': heat kernel
-            alpha: Float in (0,1). Teleport probability in a random walk.
-            t: Integer. Diffusion time.
-        '''
+    Args:
+        g_dim (int): The embedding dimension for graph-level (global) representations.
+        n_dim (int): The embedding dimension for node-level (local) representations. Typically,
+            when jumping knowledge is included in the encoder, we have 
+            :obj:`g_dim` = :obj:`n_layers` * :obj:`n_dim`.
+        **kwargs (optinal): Additional arguments of :class:`dig.sslgraph.method.Contrastive`.
+    """
+    
+    def __init__(self, g_dim, n_dim, **kwargs):
+
         views_fn = [lambda x: x]
-        proj = ProjHead(z_g_dim, z_n_dim)
-        proj_n = ProjHead(z_n_dim, z_n_dim)
+        proj = ProjHead(g_dim, n_dim)
+        proj_n = ProjHead(n_dim, n_dim)
         super(InfoGraph, self).__init__(objective='JSE',
                                         views_fn=views_fn,
                                         node_level=True,
-                                        z_dim=z_g_dim,
-                                        z_n_dim=z_n_dim,
+                                        z_dim=g_dim,
+                                        z_n_dim=n_dim,
                                         proj=proj,
                                         proj_n=proj_n,
                                         **kwargs)

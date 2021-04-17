@@ -3,7 +3,7 @@ import numpy as np
 import random
 from torch_geometric.data import Batch
 
-def random_view(candidates):
+def RandomView(candidates):
     
     def views_fn(batch_data):
         data_list = batch_data.to_data_list()
@@ -18,7 +18,7 @@ def random_view(candidates):
     return views_fn
 
 
-def combine(fn_sequence):
+def Sequential(fn_sequence):
     
     def views_fn(data):
         for fn in fn_sequence:

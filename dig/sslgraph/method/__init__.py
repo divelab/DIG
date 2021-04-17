@@ -2,5 +2,11 @@ from .contrastive.model import *
 
 __all__ = [
     'Contrastive',
-    'GraphCL'
+    'GraphCL',
+    'GRACE',
+    'InfoGraph',
+    'MVGRL',
+    'NodeMVGRL'
 ]
+
+classes = __all__

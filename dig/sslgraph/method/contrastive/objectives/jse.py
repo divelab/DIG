@@ -6,13 +6,19 @@ import torch.nn as nn
 
 
 def JSE_loss(zs, zs_n=None, batch=None, sigma=None, neg_by_crpt=False, **kwargs):
-    '''
+    '''The Jensen-Shannon Estimator of Mutual Information used in contrastive learning.
+    
     Args:
-        zs: List of tensors of shape [n_views, batch_size, z_dim].
-        zs_n: List of tensors of shape [n_views, nodes, z_dim].
-        sigma: 2D-array of shape [n_views, n_views] with boolean values.
-            Only required when n_views > 2. If sigma_ij = True, then compute
-            infoNCE between view_i and view_j.
+        zs (list, optional): List of tensors of shape [batch_size, z_dim].
+        zs_n (list, optional): List of tensors of shape [nodes, z_dim].
+        batch (Tensor, optional): Required when both :obj:`zs` and :obj:`zs_n` are given.
+        sigma (ndarray, optional): A 2D-array of shape [n_views, n_views] with boolean values, 
+            indicating contrast between which two views are computed. Only required 
+            when number of views is greater than 2. If :obj:`sigma[i][j]` = :obj:`True`, 
+            JSE between view_i and view_j will be computed.
+        neg_by_crpt (bool, optional): The mode to obtain negative samples in JSE. If True, 
+            obtain negative samples by performing corruption. Otherwise, consider pairs of
+            different graph samples as negative pairs.
     '''
     if zs_n is not None:
         assert len(zs_n) == len(zs)

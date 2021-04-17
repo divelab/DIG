@@ -4,14 +4,17 @@ import itertools
 import torch.nn.functional as F
 
 def NCE_loss(zs=None, zs_n=None, batch=None, sigma=None, **kwargs):
-    '''
+    '''The InfoNCE (NT-XENT) loss in contrastive learning.
+    
     Args:
-        zs: [Optional] List of tensors of shape [batch_size, z_dim].
-        zs_n: [Optional] List of tensors of shape [nodes, z_dim].
-        batch: [Optional] Required when both zs and zs_n are not None.
-        sigma: [Optional] 2D-array of shape [n_views, n_views] with boolean values.
-            Only required when n_views > 2. If sigma_ij = True, then compute
-            infoNCE between view_i and view_j.
+        zs (list, optipnal): List of tensors of shape [batch_size, z_dim].
+        zs_n (list, optional): List of tensors of shape [nodes, z_dim].
+        batch (Tensor, optional): Required when both :obj:`zs` and :obj:`zs_n` are given.
+        sigma (ndarray, optional): A 2D-array of shape [:obj:`n_views`, :obj:`n_views`] with boolean 
+            values, indicating contrast between which two views are computed. Only required 
+            when number of views is greater than 2. If :obj:`sigma[i][j]` = :obj:`True`, 
+            infoNCE between :math:`view_i` and :math:`view_j` will be computed.
+        tau (int, optional): The temperature used in NT-XENT.
     '''
     assert zs is not None or zs_n is not None
     

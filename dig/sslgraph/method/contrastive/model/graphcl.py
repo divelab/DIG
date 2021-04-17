@@ -5,12 +5,12 @@ from dig.sslgraph.method.contrastive.views_fn import node_attr_mask, edge_pertur
     uniform_sample, RW_sample, random_view
 
 class GraphCL(Contrastive):
-    r"""
-    *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`GraphCL`.
-    
+    r"""    
     Contrastive learning method proposed in the paper `Graph Contrastive Learning with 
     Augmentations <https://arxiv.org/abs/2010.13902>`_.
 
+    *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`GraphCL`.
+    
     Args:
         dim (int): The embedding dimension.
         aug1 (sting, optinal): Types of augmentation for the first view from (:obj:`"dropN"`, 
