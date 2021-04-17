@@ -25,3 +25,10 @@ Contrastive Objectives
 
 Views Generating Functions
 --------------------------
+.. currentmodule:: dig.sslgraph.method.contrastive.views_fn
+
+.. automodule:: dig.sslgraph.method.contrastive.views_fn
+    :members:
+    :special-members:
+    :autosummary:
+    :autosummary-no-nesting:
