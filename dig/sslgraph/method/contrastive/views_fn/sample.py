@@ -4,7 +4,7 @@ from torch_geometric.utils import to_dense_adj, dense_to_sparse
 from torch_geometric.data import Batch, Data
 
 
-def uniform_sample(ratio=0.1):
+def UniformSample(ratio=0.1):
     '''
     Args:
         ratio: Percentage of nodes to drop.
@@ -46,7 +46,7 @@ def uniform_sample(ratio=0.1):
     return views_fn
 
 
-def RW_sample(ratio=0.1, add_self_loop=False):
+def RWSample(ratio=0.1, add_self_loop=False):
     '''
     Args:
         ratio: Percentage of nodes to sample from the graph.

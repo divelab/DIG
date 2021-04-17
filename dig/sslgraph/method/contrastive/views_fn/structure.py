@@ -5,7 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 from torch_geometric.data import Batch, Data
 
 
-def edge_perturbation(add=True, drop=False, ratio=0.1):
+def EdgePerturbation(add=True, drop=False, ratio=0.1):
     '''
     Args:
         add (bool): Set True if randomly add edges in a given graph.
@@ -56,7 +56,7 @@ def edge_perturbation(add=True, drop=False, ratio=0.1):
     return views_fn
 
 
-def diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
+def Diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
     '''
     Args:
         mode: Diffusion instantiation mode with two options:
@@ -117,7 +117,7 @@ def diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
     return views_fn
 
 
-def diffusion_with_sample(sample_size=2000, batch_size=4, mode='ppr', 
+def DiffusionWithSample(sample_size=2000, batch_size=4, mode='ppr', 
                           alpha=0.2, t=5, epsilon=False, add_self_loop=True):
     '''
     Args:

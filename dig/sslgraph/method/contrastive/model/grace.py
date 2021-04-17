@@ -1,7 +1,7 @@
 import sys, torch
 import torch.nn as nn
 from .contrastive import Contrastive
-from dig.sslgraph.method.contrastive.views_fn import node_attr_mask, edge_perturbation, combine
+from dig.sslgraph.method.contrastive.views_fn import NodeAttrMask, EdgePerturbation, Sequential
 
 class GRACE(Contrastive):
     r"""
@@ -22,10 +22,10 @@ class GRACE(Contrastive):
     def __init__(self, dim, dropE_rate_1, dropE_rate_2, maskN_rate_1, maskN_rate_2, 
                  **kwargs):
 
-        view_fn_1 = combine([edge_perturbation(ratio=dropE_rate_1),
-                             node_attr_mask(mask_ratio=maskN_rate_1)])
-        view_fn_2 = combine([edge_perturbation(ratio=dropE_rate_2),
-                             node_attr_mask(mask_ratio=maskN_rate_2)])
+        view_fn_1 = Sequential([EdgePerturbation(ratio=dropE_rate_1),
+                                NodeAttrMask(mask_ratio=maskN_rate_1)])
+        view_fn_2 = Sequential([EdgePerturbation(ratio=dropE_rate_2),
+                                NodeAttrMask(mask_ratio=maskN_rate_2)])
         views_fn = [view_fn_1, view_fn_2]
         
         super(GRACE, self).__init__(objective='NCE',

@@ -1,7 +1,7 @@
 import sys, torch
 import torch.nn as nn
 from .contrastive import Contrastive
-from dig.sslgraph.method.contrastive.views_fn import diffusion, diffusion_with_sample
+from dig.sslgraph.method.contrastive.views_fn import diffusion, DiffusionWithSample
 
 
 class MVGRL_enc(nn.Module):
@@ -84,7 +84,7 @@ class MVGRL(Contrastive):
     def __init__(self, g_dim, n_dim, diffusion_type='ppr', alpha=0.2, t=5, **kwargs):
 
         self.views_fn = [lambda x: x,
-                         diffusion(mode=diffusion_type, alpha=alpha, t=t)]
+                         Diffusion(mode=diffusion_type, alpha=alpha, t=t)]
         self.graph_level = graph_level_output
         self.node_level = node_level_output
         super(MVGRL, self).__init__(objective='JSE',
@@ -136,8 +136,8 @@ class NodeMVGRL(Contrastive):
         self.mode = diffusion_type
         self.alpha = alpha
         self.t = t
-        views_fn = [diffusion_with_sample(num_nodes, batch_size, mode=self.mode,
-                                          alpha=self.alpha, t=self.t), None]
+        views_fn = [DiffusionWithSample(num_nodes, batch_size, mode=self.mode,
+                                        alpha=self.alpha, t=self.t), None]
         
         super(NodeMVGRL, self).__init__(objective='JSE',
                                         views_fn=views_fn,
@@ -154,7 +154,7 @@ class NodeMVGRL(Contrastive):
         for encs, (proj, proj_n) in super(NodeMVGRL, self).train(encoders, data_loader, 
                                                              optimizer, epochs, per_epoch_out):
             views_fn = [lambda x: x,
-                        diffusion(mode=self.mode, alpha=self.alpha, t=self.t)]
+                        Diffusion(mode=self.mode, alpha=self.alpha, t=self.t)]
             # mvgrl for node-level tasks follows DGI, excluding the projection heads after pretraining
             mvgrl_enc = MVGRL_enc(encs[0], encs[1], (lambda x: x), (lambda x: x), 
                                   views_fn, False, True)
