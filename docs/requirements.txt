@@ -1,0 +1,10 @@
+numpy
+sphinx
+sphinx_rtd_theme
+torch==1.6.0+cpu
+torchvision==0.7.0+cpu
+--no-index torch-scatter -f https://pytorch-geometric.com/whl/torch-1.6.0+cpu.html
+--no-index torch-sparse -f https://pytorch-geometric.com/whl/torch-1.6.0+${CUDA}.html
+--no-index torch-cluster -f https://pytorch-geometric.com/whl/torch-1.6.0+${CUDA}.html
+--no-index torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.6.0+${CUDA}.html
+torch-geometric
