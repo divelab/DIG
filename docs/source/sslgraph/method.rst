@@ -1,4 +1,4 @@
-dig.sslgraph.method
+Methods
 ========    
 
 Pre-implemented Contrastive Methods
