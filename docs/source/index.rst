@@ -23,7 +23,6 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
 
 
 
-
 .. toctree::
    :glob:
    :maxdepth: 1
