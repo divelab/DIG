@@ -2,7 +2,7 @@ furo
 numpy
 sphinx
 sphinx_rtd_theme
-https://download.pytorch.org/whl/cpu/torch-1.6.0%2Bcpu-cp38-cp38m-linux_x86_64.whl
+https://download.pytorch.org/whl/cpu/torch-1.6.0%2Bcpu-cp38-cp38-linux_x86_64.whl
 https://pytorch-geometric.com/whl/torch-1.6.0%2Bcpu/torch_scatter-2.0.6-cp38-cp38m-linux_x86_64.whl
 https://pytorch-geometric.com/whl/torch-1.6.0%2Bcpu/torch_sparse-0.6.9-cp38-cp38m-linux_x86_64.whl
 https://pytorch-geometric.com/whl/torch-1.6.0%2Bcpu/torch_cluster-1.5.9-cp38-cp38m-linux_x86_64.whl
