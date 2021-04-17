@@ -1,6 +1,9 @@
 Methods
 ========    
 
+.. contents:: Contents
+    :local:
+
 Pre-implemented Contrastive Methods
 -----------------------------------
 .. currentmodule:: dig.sslgraph.method
