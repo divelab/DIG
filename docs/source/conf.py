@@ -68,6 +68,7 @@ exclude_patterns = []
 html_theme = "furo"
 
 intersphinx_mapping = {'python': ('https://docs.python.org/', None)}
+
 add_module_names = False
 
 # Add any paths that contain custom static files (such as style sheets) here,
