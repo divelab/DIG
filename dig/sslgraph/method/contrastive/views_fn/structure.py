@@ -6,11 +6,15 @@ from torch_geometric.data import Batch, Data
 
 
 class EdgePerturbation():
-    '''
+    '''Edge perturbation on the given graph or batched graphs. Class objects callable via 
+    method :meth:`views_fn`.
+    
     Args:
-        add (bool): Set True if randomly add edges in a given graph.
-        drop (bool): Set True if randomly drop edges in a given graph.
-        ratio: Percentage of edges to add or drop.
+        add (bool, optional): Set :obj:`True` if randomly add edges in a given graph.
+            (default: :obj:`True`)
+        drop (bool, optional): Set :obj:`True` if randomly drop edges in a given graph.
+            (default: :obj:`False`)
+        ratio (float, optional): Percentage of edges to add or drop. (default: :obj:`0.1`)
     '''
     def __init__(self, add=True, drop=False, ratio=0.1):
         self.add = add
@@ -30,7 +34,8 @@ class EdgePerturbation():
         idx_add = torch.tensor([]).reshape(-1, 2)
 
         if self.drop:
-            idx_remain = edge_index[:, np.random.choice(edge_num, edge_num-perturb_num, replace=False)]
+            idx_remain = edge_index[:, np.random.choice(edge_num, edge_num-perturb_num, 
+                                                        replace=False)]
 
         if self.add:
             idx_add = torch.randint(node_num, (2, perturb_num))
@@ -41,20 +46,13 @@ class EdgePerturbation():
         return Data(x=data.x, edge_index=new_edge_index)
 
     def views_fn(self, data):
-        '''
+        r"""Method to be called when :class:`EdgePerturbation` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    batch tensor with shape [num_nodes];
-                    x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    original edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_nodes, num_node_features];
-            edge_index tensor with shape [2, num_perturb_edges];
-            batch tensor with shape [num_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         if isinstance(data, Batch):
             dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
@@ -64,13 +62,18 @@ class EdgePerturbation():
 
 
 class Diffusion():
-    '''
+    '''Diffusion on the given graph or batched graphs, used in 
+    `MVGRL <https://arxiv.org/pdf/2006.05582v1.pdf>`_. Class objects callable via 
+    method :meth:`views_fn`.
+    
     Args:
-        mode: Diffusion instantiation mode with two options:
-                'ppr': Personalized PageRank
-                'heat': heat kernel
-        alpha: Teleport probability in a random walk.
-        t: Diffusion time.
+        mode (string, optional): Diffusion instantiation mode with two options:
+            :obj:`"ppr"`: Personalized PageRank; :obj:`"heat"`: heat kernel.
+            (default: :obj:`"ppr"`)
+        alpha (float, optinal): Teleport probability in a random walk. (default: :obj:`0.2`)
+        t (float, optinal): Diffusion time. (default: :obj:`5`)
+        add_self_loop (bool, optional): Set True to add self-loop to edge_index.
+            (default: :obj:`True`)
     '''
     def __init__(self, mode='ppr', alpha=0.2, t=5, add_self_loop=True):
         self.mode = mode
@@ -110,20 +113,13 @@ class Diffusion():
     
 
     def views_fn(self, data):
-        '''
+        r"""Method to be called when :class:`Diffusion` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    batch tensor with shape [num_nodes];
-                    x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    original edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_nodes, num_node_features];
-            edge_index tensor with shape [2, num_diff_edges];
-            batch tensor with shape [num_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         if isinstance(data, Batch):
             dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
@@ -133,16 +129,21 @@ class Diffusion():
 
 
 class DiffusionWithSample():
-    '''
+    '''Diffusion with node sampling on the given graph for node-level datasets, used in 
+    `MVGRL <https://arxiv.org/pdf/2006.05582v1.pdf>`_.  Class objects callable via method 
+    :meth:`views_fn`.
+    
     Args:
-        sample_size: Number of nodes in the sampled subgraoh from a large graph.
-        batch_size: Number of subgraphs to sample.
-        mode: Diffusion instantiation mode with two options:
-                'ppr': Personalized PageRank
-                'heat': heat kernel
-        alpha: Teleport probability in a random walk.
-        t: Diffusion time.
-        epsilon (bool): Set true if need to adjust the diffusion matrix with epsilon.
+        sample_size (int, optional): Number of nodes in the sampled subgraoh from a large graph.
+            (default: :obj:`2000`)
+        batch_size (int, optional): Number of subgraphs to sample. (default: :obj:`4`)
+        mode (string, optional): Diffusion instantiation mode with two options:
+            :obj:`"ppr"`: Personalized PageRank; :obj:`"heat"`: heat kernel; 
+            (default: :obj:`"ppr"`)
+        alpha (float, optinal): Teleport probability in a random walk. (default: :obj:`0.2`)
+        t (float, optinal): Diffusion time. (default: :obj:`5`)
+        add_self_loop (bool, optional): Set True to add self-loop to edge_index.
+            (default: :obj:`True`)
     '''
     def __init__(self, sample_size=2000, batch_size=4, mode='ppr', 
                  alpha=0.2, t=5, epsilon=False, add_self_loop=True):
@@ -158,20 +159,13 @@ class DiffusionWithSample():
         return self.view_fn(data)
     
     def views_fn(self, data):
-        '''
+        r"""Method to be called when :class:`DiffusionWithSample` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    batch tensor with shape [num_nodes];
-                    x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    original edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_nodes, num_node_features];
-            edge_index tensor with shape [2, num_diff_edges];
-            batch tensor with shape [num_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         node_num, _ = data.x.size()
         if self.add_self_loop:
             sl = torch.tensor([[n, n] for n in range(node_num)]).t()

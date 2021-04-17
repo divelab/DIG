@@ -5,10 +5,12 @@ from torch_geometric.data import Batch, Data
 
 
 class UniformSample():
-    '''
+    r"""Uniformly node dropping on the given graph or batched graphs. 
+    Class objects callable via method :meth:`views_fn`.
+    
     Args:
-        ratio: Percentage of nodes to drop.
-    '''
+        ratio (float, optinal): Ratio of nodes to be dropped. (default: :obj:`0.1`)
+    """
     def __init__(self, ratio=0.1):
         self.ratio = ratio
     
@@ -29,20 +31,13 @@ class UniformSample():
         return Data(x=data.x[idx_nondrop], edge_index=dense_to_sparse(adj)[0])
     
     def views_fn(self, data):
-        '''
+        r"""Method to be called when :class:`UniformSample` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    batch tensor with shape [num_nodes];
-                    x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_nondrop_nodes, num_node_features];
-            edge_index tensor with shape [2, num_nondrop_edges];
-            batch tensor with shape [num_nondrop_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         if isinstance(data, Batch):
             dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
@@ -52,11 +47,15 @@ class UniformSample():
 
 
 class RWSample():
-    '''
+    """Subgraph sampling on the given graph or batched graphs. 
+    Class objects callable via method :meth:`views_fn`.
+    
     Args:
-        ratio: Percentage of nodes to sample from the graph.
-        add_self_loop (bool): Set True if add self-loop in edge_index.
-    '''
+        ratio (float, optional): Percentage of nodes to sample from the graph.
+            (default: :obj:`0.1`)
+        add_self_loop (bool, optional): Set True to add self-loop to edge_index.
+            (default: :obj:`False`)
+    """
     def __init__(self, ratio=0.1, add_self_loop=False):
         self.ratio = ratio
         self.add_self_loop = add_self_loop
@@ -101,20 +100,13 @@ class RWSample():
         return Data(x=data.x[idx_sampled], edge_index=dense_to_sparse(adj)[0])
 
     def views_fn(self, data):
-        '''
+        r"""Method to be called when :class:`RWSample` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    batch tensor with shape [num_nodes];
-                    x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_sampled_nodes, num_node_features];
-            edge_index tensor with shape [2, num_sampled_edges];
-            batch tensor with shape [num_sampled_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         if isinstance(data, Batch):
             dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)

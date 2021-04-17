@@ -5,15 +5,20 @@ from torch_geometric.data import Batch, Data
 
 
 class NodeAttrMask():
-    '''
+    '''Node attribute masking on the given graph or batched graphs. 
+    Class objects callable via method :meth:`views_fn`.
+    
     Args:
-        mode: Masking mode with three options:
-                'whole': mask all feature dimensions of the selected node with a Gaussian distribution;
-                'partial': mask only selected feature dimensions with a Gaussian distribution;
-                'onehot': mask all feature dimensions of the selected node with a one-hot vector.
-        mask_ratio: Percentage of masking feature dimensions.
-        mask_mean: Mean of the Gaussian distribution.
-        mask_std: Standard deviation of the distribution. Must be non-negative.
+        mode (string, optinal): Masking mode with three options:
+            :obj:`"whole"`: mask all feature dimensions of the selected node with a Gaussian distribution;
+            :obj:`"partial"`: mask only selected feature dimensions with a Gaussian distribution;
+            :obj:`"onehot"`: mask all feature dimensions of the selected node with a one-hot vector.
+            (default: :obj:`"whole"`)
+        mask_ratio (float, optinal): The ratio of node attributes to be masked. (default: :obj:`0.1`)
+        mask_mean (float, optional): Mean of the Gaussian distribution to generate masking values.
+            (default: :obj:`0.5`)
+        mask_std (float, optional): Standard deviation of the distribution to generate masking values. 
+            Must be non-negative. (default: :obj:`0.5`)
     '''
     def __init__(self, mode='whole', mask_ratio=0.1, mask_mean=0.5, mask_std=0.5):
         self.mode = mode
@@ -25,6 +30,7 @@ class NodeAttrMask():
         return self.views_fn(data)
     
     def do_trans(self, data):
+        
         node_num, feat_dim = data.x.size()
         x = data.x.detach().clone()
 
@@ -52,19 +58,13 @@ class NodeAttrMask():
         return Data(x=x, edge_index=data.edge_index)
 
     def views_fn(self, data):
-        '''
+        r"""Method to be called when :class:`NodeAttrMask` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    original x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_nodes, num_node_features];
-            edge_index tensor with shape [2, num_edges];
-            batch tensor with shape [num_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         if isinstance(data, Batch):
             dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
