@@ -184,7 +184,11 @@ class PygDataset(InMemoryDataset):
 
     def process(self):
         print('Processing...')
-        self.data, self.slices = self.one_hot_process()
+        if self.one_shot:
+            self.data, self.slices = self.one_hot_process()
+        else:
+            self.data, self.slices = self.pre_process()
+
         if self.pre_filter is not None:
             data_list = [self.get(idx) for idx in range(len(self))]
             data_list = [data for data in data_list if self.pre_filter(data)]
@@ -221,25 +225,29 @@ class PygDataset(InMemoryDataset):
             data[key] = item[s]
             
         data['smile'] = self.all_smiles[idx]
-            
-        # bfs-searching order
-        mol_size = data.num_atom.numpy()[0]
-        pure_adj = np.sum(np.array(data.adj), axis=0)[:mol_size, :mol_size]
-        if self.use_aug:
-            local_perm = np.random.permutation(mol_size)
-            adj_perm = pure_adj[np.ix_(local_perm, local_perm)]
-            G = nx.from_numpy_matrix(np.asmatrix(adj_perm))
-            start_idx = np.random.randint(adj_perm.shape[0])
-        else:
-            local_perm = np.arange(mol_size)
-            G = nx.from_numpy_matrix(np.asmatrix(pure_adj))
-            start_idx = 0
-
-        bfs_perm = np.array(self._bfs_seq(G, start_idx))
-        bfs_perm_origin = local_perm[bfs_perm]
-        bfs_perm_origin = np.concatenate([bfs_perm_origin, np.arange(mol_size, self.num_max_node)])
         
-        data['bfs_perm_origin'] = torch.Tensor(bfs_perm_origin).long()
+        if not self.one_shot:
+            # bfs-searching order
+            mol_size = data.num_atom.numpy()[0]
+            pure_adj = np.sum(data.adj[:3].numpy(), axis=0)[:mol_size, :mol_size]
+            if self.use_aug:
+                local_perm = np.random.permutation(mol_size)
+                adj_perm = pure_adj[np.ix_(local_perm, local_perm)]
+                G = nx.from_numpy_matrix(np.asmatrix(adj_perm))
+                start_idx = np.random.randint(adj_perm.shape[0])
+            else:
+                local_perm = np.arange(mol_size)
+                G = nx.from_numpy_matrix(np.asmatrix(pure_adj))
+                start_idx = 0
+
+            bfs_perm = np.array(self._bfs_seq(G, start_idx))
+            bfs_perm_origin = local_perm[bfs_perm]
+            bfs_perm_origin = np.concatenate([bfs_perm_origin, np.arange(mol_size, self.num_max_node)])
+            data.x = data.x[bfs_perm_origin]
+            for i in range(4):
+                data.adj[i] = data.adj[i][bfs_perm_origin][:,bfs_perm_origin]
+            
+            data['bfs_perm_origin'] = torch.Tensor(bfs_perm_origin).long()
 
         return data
     
@@ -262,30 +270,31 @@ class PygDataset(InMemoryDataset):
                 continue
             else:
                 # atoms
-                num_atom_features = 2   # atom type,  chirality tag
-                atom_features_list = []
+                atom_array = np.zeros((self.num_max_node, len(self.atom_list)), dtype=np.int32)
+
+                atom_idx = 0
                 for atom in mol.GetAtoms():
-                    atom_feature = [atom.GetAtomicNum()] + [atom.GetChiralTag()]
-                    atom_features_list.append(atom_feature)
-                x = torch.tensor(np.array(atom_features_list), dtype=torch.long)
+                    atom_feature = atom.GetAtomicNum()
+                    atom_array[atom_idx, self.atom_list.index(atom_feature)] = 1
+                    atom_idx += 1
+                    
+                x = torch.tensor(atom_array)
 
                 # bonds
-                num_bond_features = 2   # bond type, bond direction
-                edges_list = []
-                edge_features_list = []
+                adj_array = np.zeros([4, self.num_max_node, self.num_max_node], dtype=np.float32)
                 for bond in mol.GetBonds():
+                    bond_type = bond.GetBondType()
+                    ch = bond_type_to_int[bond_type]
                     i = bond.GetBeginAtomIdx()
                     j = bond.GetEndAtomIdx()
-                    edge_feature = [bond.GetBondType()] + [bond.GetBondDir()]
-                    edges_list.append((i, j))
-                    edge_features_list.append(edge_feature)
-                    edges_list.append((j, i))
-                    edge_features_list.append(edge_feature)
+                    adj_array[ch, i, j] = 1.0
+                    adj_array[ch, j, i] = 1.0
+                adj_array[-1, :, :] = 1 - np.sum(adj_array, axis=0)
+                adj_array += np.eye(self.num_max_node)
 
-                edge_index = torch.tensor(np.array(edges_list).T, dtype=torch.long)
-                edge_attr = torch.tensor(np.array(edge_features_list), dtype=torch.long)
-                                
-                data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr)
+                data = Data(x=x)
+                data.adj = torch.tensor(adj_array)
+                data.num_atom = num_atom
                 if self.available_prop:
                     data.y = torch.tensor([float(prop_list[i])])
                 data_list.append(data)
