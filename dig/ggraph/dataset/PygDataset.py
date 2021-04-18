@@ -93,7 +93,7 @@ class PygDataset(InMemoryDataset):
         self.one_shot = one_shot
         
         if conf_dict is None:                        
-            config_file = pd.read_csv('config.csv', index_col = 0)
+            config_file = pd.read_csv(os.path.join(os.path.dirname(__file__), 'config.csv'), index_col = 0)
             if not self.name in config_file:
                 error_mssg = 'Invalid dataset name {}.\n'.format(self.name)
                 error_mssg += 'Available datasets are as follows:\n'
@@ -325,7 +325,7 @@ class PygDataset(InMemoryDataset):
 #                     print(self.atom_list, atom_feature, self.atom_list.index(atom_feature))
                     atom_array[self.atom_list.index(atom_feature), atom_idx] = 1
                     if self.one_shot:
-                        virtual_node[atom_idx] = 0
+                        virtual_node[0, atom_idx] = 0
                     atom_idx += 1
                     
                 if self.one_shot:
