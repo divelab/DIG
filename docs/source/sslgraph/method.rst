@@ -37,3 +37,5 @@ Views generation classes under :obj:`dig.sslgraph.method.contrastive.views_fn`.
 .. automodule:: dig.sslgraph.method.contrastive.views_fn
     :members:
     :special-members:
+    :autosummary:
+    :autosummary-no-nesting:
