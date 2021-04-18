@@ -24,8 +24,18 @@ def get_dataset(name, task, feat_str="deg", root=None):
         root (string, optional): Root directory where the dataset should be saved.
             (default: :obj:`None`)
         
-    :rtype: :class:`Dataset` if task is unsupervised, or (:class:`Dataset`, 
-        :class:`Dataset`) if task is semisupervised.
+    :rtype: :class:`torch_geometric.data.Dataset` (unsupervised), or (:class:`torch_geometric.data.Dataset`, 
+        :class:`torch_geometric.data.Dataset`) (semisupervised).
+        
+    Examples
+    --------
+    >>> dataset, dataset_pretrain = get_dataset("NCI1", "semisupervised")
+    >>> dataset
+    NCI1(4110)
+    
+    >>> dataset = get_dataset("MUTAG", "unsupervised", feat_str="")
+    >>> dataset # degree not augmented as node attributes
+    MUTAG(188)
     """
 
     root = "." if root is None else root
@@ -69,9 +79,8 @@ def get_dataset(name, task, feat_str="deg", root=None):
         ValueError("Wrong task name")
 
 
-def get_node_dataset(name, root='./node_dataset/'):
-    r"""A pre-implemented function to retrieve node datasets from Planetoid. It
-    returns the Dataset object and the masks for training, val, and test.
+def get_node_dataset(name, root=None):
+    r"""A pre-implemented function to retrieve node datasets from Planetoid.
 
     Args:
         name (string): The name of the dataset (:obj:`"Cora"`,
@@ -79,12 +88,16 @@ def get_node_dataset(name, root='./node_dataset/'):
         root (string, optional): Root directory where the dataset should be saved.
             (default: :obj:`None`)
         
-    :rtype: (:class:`Dataset`, :class:`Tensor`, :class:`Tensor`, :class:`Tensor`)
-    """
+    :rtype: :class:`torch_geometric.data.Dataset`
     
-    full_dataset = Planetoid(root, name)
-    train_mask = full_dataset[0].train_mask
-    val_mask = full_dataset[0].val_mask
-    test_mask = full_dataset[0].test_mask
-    return full_dataset, train_mask, val_mask, test_mask
+    Example
+    -------
+    >>> dataset = get_node_dataset("Cora")
+    >>> dataset
+    Cora()
+    """
+    root = "." if root is None else root
+    full_dataset = Planetoid(root+"/node_dataset/", name)
+
+    return full_dataset
 

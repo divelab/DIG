@@ -6,7 +6,14 @@ import torch.nn as nn
 
 
 def JSE_loss(zs, zs_n=None, batch=None, sigma=None, neg_by_crpt=False, **kwargs):
-    '''The Jensen-Shannon Estimator of Mutual Information used in contrastive learning.
+    '''The Jensen-Shannon Estimator of Mutual Information used in contrastive learning. The
+    implementation follows the paper `Learning deep representations by mutual information 
+    estimation and maximization <https://arxiv.org/abs/1808.06670>`_.
+    
+    .. note::
+        The JSE loss implementation can produce negative values because a :obj:`-2log2` shift is 
+        added to the computation of JSE, for the sake of consistency with other f-convergence 
+        losses.
     
     Args:
         zs (list, optional): List of tensors of shape [batch_size, z_dim].

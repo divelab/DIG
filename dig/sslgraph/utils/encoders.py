@@ -46,16 +46,16 @@ class Encoder(torch.nn.Module):
     --------
     >>> feat_dim = dataset[0].x.shape[1]
     >>> encoder = Encoder(feat_dim, 128, n_layer=3, gnn="gin")
-    >>> encoder(some_batched_data).shape
-    torch.Size([32, 384]) # graph-level embedding of shape [batch_size, 128*3]
+    >>> encoder(some_batched_data).shape # graph-level embedding of shape [batch_size, 128*3]
+    torch.Size([32, 384]) 
     
     >>> encoder = Encoder(feat_dim, 128, n_layer=5, node_level=True, graph_level=False)
-    >>> encoder(some_batched_data).shape
-    torch.Size([707, 128]) # node-level embedding of shape [n_nodes, 128].
+    >>> encoder(some_batched_data).shape # node-level embedding of shape [n_nodes, 128]
+    torch.Size([707, 128]) 
     
     >>> encoder = Encoder(feat_dim, 128, n_layer=5, node_level=True, graph_level=False)
-    >>> encoder(some_batched_data)
-    (tensor([...]), tensor([...])) # a tuple of graph-level and node-level embeddings
+    >>> encoder(some_batched_data) # a tuple of graph-level and node-level embeddings
+    (tensor([...]), tensor([...])) 
     """
     def __init__(self, feat_dim, hidden_dim, n_layers=5, pool='sum', 
                  gnn='gin', bn=True, act='relu', bias=True, xavier=True, 
