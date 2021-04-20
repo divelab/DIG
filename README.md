@@ -83,6 +83,8 @@ Please cite our paper if you find *DIG* useful in your work:
 
 ## Contact
 
-If you have any questions, please submit a new issue or contact us: Meng Liu [mengliu@tamu.edu] or Shuiwang Ji [sji@tamu.edu].
+If you have any technical questions, please submit a new issue.
+
+If you have other questions, please contact us: Meng Liu [mengliu@tamu.edu] or Shuiwang Ji [sji@tamu.edu].
 
 
