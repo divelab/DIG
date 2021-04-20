@@ -17,16 +17,16 @@ This is the official implementation for [GraphDF: A Discrete Flow Model for Mole
 You can use our trained models or train the model from scratch:
 ```shell script
 $ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --train --data=qm9 
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --train --data=zinc250k
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --train --data=moses
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --train --data=qm9 
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --train --data=zinc250k
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --train --data=moses
 ```
 To generate molecules using our trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphDF/saved_ckpts/rand_gen), then:
 ```shell script
 $ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=qm9
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=zinc250k
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_ran_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=moses
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=qm9
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=zinc250k
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=moses
 ```
 
 ### Property Optimization
@@ -58,7 +58,7 @@ To optimize molecules using our trained model, first download models from [this 
 ```shell script
 $ cd GraphDF
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_cons_optim.py --model_path=${path_to_the_model} --data=graphaf
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_con_optim.py --model_path=${path_to_the_model} --data=jt
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_cons_optim.py --model_path=${path_to_the_model} --data=jt
 ```
 ### Citation
 ```
