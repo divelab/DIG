@@ -66,8 +66,8 @@ class NodeUnsupervised(object):
 
         self.full_dataset = full_dataset
         self.train_mask = full_dataset[0].train_mask if train_mask is None else train_mask
-        self.val_mask = val_mask[0].val_mask if val_mask is None else val_mask
-        self.test_mask = test_mask[0].train_mask if test_mask is None else test_mask
+        self.val_mask = full_dataset[0].val_mask if val_mask is None else val_mask
+        self.test_mask = full_dataset[0].test_mask if test_mask is None else test_mask
         self.metric = metric
         self.device = device
         self.classifier = classifier

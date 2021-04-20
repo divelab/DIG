@@ -31,7 +31,7 @@ class EdgePerturbation():
 
         edge_index = data.edge_index.detach().clone()
         idx_remain = edge_index
-        idx_add = torch.tensor([]).reshape(-1, 2)
+        idx_add = torch.tensor([]).reshape(2, -1).long()
 
         if self.drop:
             idx_remain = edge_index[:, np.random.choice(edge_num, edge_num-perturb_num, 

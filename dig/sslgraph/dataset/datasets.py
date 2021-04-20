@@ -5,6 +5,7 @@ import numpy as np
 from itertools import repeat, product
 from torch_geometric.datasets import TUDataset, Planetoid
 from torch_geometric.data import Batch, Data
+from torch_geometric.transforms import NormalizeFeatures
 
 from .TUDataset import TUDatasetExt
 from .feat_expansion import FeatureExpander, CatDegOnehot, get_max_deg
@@ -79,12 +80,13 @@ def get_dataset(name, task, feat_str="deg", root=None):
         ValueError("Wrong task name")
 
 
-def get_node_dataset(name, root=None):
+def get_node_dataset(name, norm_feat=False, root=None):
     r"""A pre-implemented function to retrieve node datasets from Planetoid.
 
     Args:
         name (string): The name of the dataset (:obj:`"Cora"`,
             :obj:`"CiteSeer"`, :obj:`"PubMed"`).
+        norm_feat (bool, optional): Whether to normalize node features.
         root (string, optional): Root directory where the dataset should be saved.
             (default: :obj:`None`)
         
@@ -97,7 +99,8 @@ def get_node_dataset(name, root=None):
     Cora()
     """
     root = "." if root is None else root
-    full_dataset = Planetoid(root+"/node_dataset/", name)
+    transform = NormalizeFeatures() if norm_feat else None
+    full_dataset = Planetoid(root+"/node_dataset/", name, transform=transform)
 
     return full_dataset
 
