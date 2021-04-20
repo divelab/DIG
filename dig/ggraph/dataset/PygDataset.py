@@ -270,7 +270,7 @@ class PygDataset(InMemoryDataset):
                 continue
             else:
                 # atoms
-                atom_array = np.zeros((self.num_max_node, len(self.atom_list)), dtype=np.int32)
+                atom_array = np.zeros((self.num_max_node, len(self.atom_list)), dtype=np.float32)
 
                 atom_idx = 0
                 for atom in mol.GetAtoms():
