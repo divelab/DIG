@@ -1,14 +1,13 @@
 import sys, torch
 import torch.nn as nn
 from .contrastive import Contrastive
-from dig.sslgraph.method.contrastive.views_fn import diffusion, diffusion_with_sample
+from dig.sslgraph.method.contrastive.views_fn import Diffusion, DiffusionWithSample
 
 
 class MVGRL_enc(nn.Module):
-    '''
-        MVGRL includes projection heads and combines two views and encoders
-        when inferencing graph-level representation.
-    '''
+    # MVGRL includes projection heads and combines two views and 
+    # encoders when inferencing graph-level representation.
+
     def __init__(self, encoder_0, encoder_1, 
                  proj, proj_n, views_fn, 
                  graph_level=True, node_level=True):
@@ -63,34 +62,39 @@ class ProjHead(nn.Module):
 
     
 class MVGRL(Contrastive):
+    r'''
+    Contrastive learning method for graph-level tasks proposed in the paper `Contrastive 
+    Multi-View Representation Learning on Graphs (MVGRL) <https://arxiv.org/pdf/2006.05582v1.pdf>`_. 
     
-    def __init__(self, z_dim, z_n_dim, diffusion_type='ppr', alpha=0.2, t=5, 
-                 graph_level_output=True, node_level_output=False, device=None, 
-                 choice_model='best', model_path='models'):
-        '''
-        Args:
-            diffusion_type: String. Diffusion instantiation mode with two options:
-                'ppr': Personalized PageRank
-                'heat': heat kernel
-            alpha: Float in (0,1). Teleport probability in a random walk.
-            t: Integer. Diffusion time.
-            subgraph: Boolean. Whether to sample subgraph from a large graph. 
-                Set to True for node-level tasks on large graphs.
-        '''
+    *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`MVGRL`.
+        
+    Args:
+        g_dim (int): The embedding dimension for graph-level (global) representations.
+        n_dim (int): The embedding dimension for node-level (local) representations. Typically,
+            when jumping knowledge is included in the encoder, we have 
+            :obj:`g_dim` = :obj:`n_layers` * :obj:`n_dim`.
+        diffusion_type (string, optional): Diffusion instantiation mode with two options:
+            :obj:`"ppr"`: Personalized PageRank. 
+            :obj:`"heat"`: heat kernel. 
+            (default: :obj:`"ppr"`)
+        alpha (float, optional): Teleport probability in a random walk. (default: :obj:`0.2`)
+        t (int, optinal): Diffusion time. (default: :obj:`5`)
+    '''
+    
+    def __init__(self, g_dim, n_dim, diffusion_type='ppr', alpha=0.2, t=5, **kwargs):
+
         self.views_fn = [lambda x: x,
-                         diffusion(mode=diffusion_type, alpha=alpha, t=t)]
+                         Diffusion(mode=diffusion_type, alpha=alpha, t=t)]
         self.graph_level = graph_level_output
         self.node_level = node_level_output
         super(MVGRL, self).__init__(objective='JSE',
                                     views_fn=self.views_fn,
                                     node_level=True,
-                                    z_dim=z_dim,
-                                    z_n_dim=z_n_dim,
-                                    proj=ProjHead(z_dim, z_n_dim),
-                                    proj_n=ProjHead(z_n_dim, z_n_dim),
-                                    choice_model=choice_model,
-                                    model_path=model_path,
-                                    device=device)
+                                    z_dim=g_dim,
+                                    z_n_dim=n_dim,
+                                    proj=ProjHead(g_dim, n_dim),
+                                    proj_n=ProjHead(n_dim, n_dim),
+                                    **kwargs)
         
     def train(self, encoders, data_loader, optimizer, epochs, per_epoch_out=False):
         
@@ -103,28 +107,37 @@ class MVGRL(Contrastive):
     
     
 class NodeMVGRL(Contrastive):
+    r'''    
+    Contrastive learning method for node-level tasks proposed in the paper `Contrastive 
+    Multi-View Representation Learning on Graphs (MVGRL) <https://arxiv.org/pdf/2006.05582v1.pdf>`_. 
+
+    *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`NodeMVGRL`.
+
+    Args:
+        z_g_dim (int): The embedding dimension for graph-level (global) representations.
+        z_n_dim (int): The embedding dimension for node-level (local) representations. Typically,
+            when jumping knowledge is included in the encoder, we have 
+            :obj:`z_g_dim` = :obj:`n_layers` * :obj:`z_n_dim`.
+        diffusion_type (string, optional): Diffusion instantiation mode with two options:
+            :obj:`"ppr"`: Personalized PageRank. 
+            :obj:`"heat"`: heat kernel. 
+            (default: :obj:`"ppr"`)
+        alpha (float, optional): Teleport probability in a random walk. (default: :obj:`0.2`)
+        t (int, optinal): Diffusion time. (default: :obj:`5`)
+        batch_size (int, optinal): Number of subgraph samples in each minibatch. (default: :obj:`2`)
+        num_nodes (int, optinal): Number of nodes sampled in each subgraph. (default: :obj:`2000`)
+    '''
     
     def __init__(self, z_dim, z_n_dim, diffusion_type='ppr', alpha=0.2, t=5, 
-                 batch_size=2, num_nodes=2000,
-                 graph_level_output=False, node_level_output=True, device=None, 
-                 choice_model='best', model_path='models'):
-        '''
-        Args:
-            diffusion_type: String. Diffusion instantiation mode with two options:
-                'ppr': Personalized PageRank
-                'heat': heat kernel
-            alpha: Float in (0,1). Teleport probability in a random walk.
-            t: Integer. Diffusion time.
-            subgraph: Boolean. Whether to sample subgraph from a large graph. 
-                Set to True for node-level tasks on large graphs.
-        '''
+                 batch_size=2, num_nodes=2000, **kwargs):
+
         self.graph_level = graph_level_output
         self.node_level = node_level_output
         self.mode = diffusion_type
         self.alpha = alpha
         self.t = t
-        views_fn = [diffusion_with_sample(num_nodes, batch_size, mode=self.mode,
-                                          alpha=self.alpha, t=self.t), None]
+        views_fn = [DiffusionWithSample(num_nodes, batch_size, mode=self.mode,
+                                        alpha=self.alpha, t=self.t), None]
         
         super(NodeMVGRL, self).__init__(objective='JSE',
                                         views_fn=views_fn,
@@ -134,16 +147,14 @@ class NodeMVGRL(Contrastive):
                                         proj=nn.Sigmoid(),
                                         proj_n='linear',
                                         neg_by_crpt=True,
-                                        choice_model=choice_model,
-                                        model_path=model_path,
-                                        device=device)
+                                        **kwargs)
         
     def train(self, encoders, data_loader, optimizer, epochs, per_epoch_out=False):
         
         for encs, (proj, proj_n) in super(NodeMVGRL, self).train(encoders, data_loader, 
                                                              optimizer, epochs, per_epoch_out):
             views_fn = [lambda x: x,
-                        diffusion(mode=self.mode, alpha=self.alpha, t=self.t)]
+                        Diffusion(mode=self.mode, alpha=self.alpha, t=self.t)]
             # mvgrl for node-level tasks follows DGI, excluding the projection heads after pretraining
             mvgrl_enc = MVGRL_enc(encs[0], encs[1], (lambda x: x), (lambda x: x), 
                                   views_fn, False, True)

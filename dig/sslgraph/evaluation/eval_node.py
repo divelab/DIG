@@ -5,7 +5,6 @@ from sklearn.model_selection import StratifiedKFold
 from torch_geometric.data import DataLoader
 from torch import optim
 from sklearn import preprocessing
-from sslgraph.utils import get_node_dataset
 
 
 class LogReg(nn.Module):
@@ -29,13 +28,46 @@ class LogReg(nn.Module):
 
 
 class NodeUnsupervised(object):
-    def __init__(self, full_dataset, train_mask, val_mask, test_mask, 
-                 classifier='LogReg', metric='acc', device=None, log_interval=1):
+    r"""
+    The evaluation interface for unsupervised graph representation learning evaluated with 
+    linear classification.
+    
+    Args:
+        full_dataset (torch_geometric.data.Dataset): The graph classification dataset.
+        train_mask (Tensor, optional): Boolean tensor of shape :obj:`[n_nodes,]`, indicating 
+            nodes for training. Set to :obj:`None` if included in dataset.
+            (default: :obj:`None`)
+        val_mask (Tensor, optional): Boolean tensor of shape :obj:`[n_nodes,]`, indicating 
+            nodes for validation. Set to :obj:`None` if included in dataset.
+            (default: :obj:`None`)
+        test_mask (Tensor, optional): Boolean tensor of shape :obj:`[n_nodes,]`, indicating 
+            nodes for test. Set to :obj:`None` if included in dataset. (default: :obj:`None`)
+        classifier (string, optional): Linear classifier for evaluation, :obj:`"SVC"` or 
+            :obj:`"LogReg"`. (default: :obj:`"LogReg"`)
+        log_interval (int, optional): Perform evaluation per k epochs. (default: :obj:`1`)
+        device (int, or torch.device, optional): Device for computation. (default: :obj:`None`)
+        **kwargs (optional): Training and evaluation configs in :meth:`setup_train_config`.
+        
+    Examples
+    --------
+    >>> node_dataset = get_node_dataset("Cora") # using default train/test split
+    >>> evaluator = NodeUnsupervised(node_dataset, log_interval=10, device=0)
+    >>> evaluator.evaluate(model, encoder)
+    
+    >>> node_dataset = SomeDataset()
+    >>> # Using your own dataset or with different train/test split
+    >>> train_mask, val_mask, test_mask = torch.Tensor([...]), torch.Tensor([...]), torch.Tensor([...])
+    >>> evaluator = NodeUnsupervised(node_dataset, train_mask, val_mask, test_mask, log_interval=10, device=0)
+    >>> evaluator.evaluate(model, encoder)
+    """
+    
+    def __init__(self, full_dataset, train_mask=None, val_mask=None, test_mask=None, 
+                 classifier='LogReg', metric='acc', device=None, log_interval=1, **kwargs):
 
         self.full_dataset = full_dataset
-        self.train_mask = train_mask
-        self.val_mask = val_mask
-        self.test_mask = test_mask
+        self.train_mask = full_dataset[0].train_mask if train_mask is None else train_mask
+        self.val_mask = val_mask[0].val_mask if val_mask is None else val_mask
+        self.test_mask = test_mask[0].train_mask if test_mask is None else test_mask
         self.metric = metric
         self.device = device
         self.classifier = classifier
@@ -49,7 +81,7 @@ class NodeUnsupervised(object):
             self.device = device
 
         # Use default config if not further specified
-        self.setup_train_config()
+        self.setup_train_config(**kwargs)
 
     def setup_train_config(self, p_optim = 'Adam', p_lr = 0.01, p_weight_decay = 0, 
                            p_epoch = 2000, logreg_wd = 0, comp_embed_on='cpu'):
@@ -62,13 +94,13 @@ class NodeUnsupervised(object):
         self.comp_embed_on = comp_embed_on
         self.logreg_wd = logreg_wd
 
-    def evaluate(self, learning_model, encoder, pred_head=None, fold_seed=None):
-        '''
+    def evaluate(self, learning_model, encoder):
+        r"""Run evaluation with given learning model and encoder(s).
+        
         Args:
             learning_model: An object of a contrastive model or a predictive model.
-            encoder: List or trainable pytorch model.
-            pred_head: [Optional] Trainable pytoch model. If None, will use linear projection.
-        '''
+            encoder (torch.nn.Module): List or trainable pytorch model.
+        """
         
         full_loader = DataLoader(self.full_dataset, 1)
         if isinstance(encoder, list):
@@ -106,8 +138,17 @@ class NodeUnsupervised(object):
         return acc
 
 
-    def grid_search(self, learning_model, encoder, pred_head=None, fold_seed=12345,
-                    p_lr_lst=[0.1,0.01,0.001], p_epoch_lst=[2000]):
+    def grid_search(self, learning_model, encoder, p_lr_lst=[0.1,0.01,0.001], 
+                    p_epoch_lst=[2000]):
+        r"""Perform grid search on learning rate and epochs in pretraining.
+        
+        Args:
+            learning_model: An object of a contrastive model (sslgraph.method.Contrastive) 
+                or a predictive model.
+            encoder (torch.nn.Module): List or trainable pytorch model.
+            p_lr_lst (list, optional): List of learning rate candidates.
+            p_epoch_lst (list, optional): List of epochs number candidates.
+        """
         
         acc_m_lst = []
         acc_sd_lst = []
@@ -117,7 +158,7 @@ class NodeUnsupervised(object):
                 self.setup_train_config(p_lr=p_lr, p_epoch=p_epoch)
                 model = copy.deepcopy(learning_model)
                 enc = copy.deepcopy(encoder)
-                acc_m, acc_sd = self.evaluate(model, enc, pred_head, fold_seed)
+                acc_m, acc_sd = self.evaluate(model, enc)
                 acc_m_lst.append(acc_m)
                 acc_sd_lst.append(acc_sd)
                 paras.append((p_lr, p_epoch))

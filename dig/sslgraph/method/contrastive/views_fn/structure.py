@@ -5,26 +5,39 @@ from sklearn.preprocessing import MinMaxScaler
 from torch_geometric.data import Batch, Data
 
 
-def edge_perturbation(add=True, drop=False, ratio=0.1):
-    '''
+class EdgePerturbation():
+    '''Edge perturbation on the given graph or batched graphs. Class objects callable via 
+    method :meth:`views_fn`.
+    
     Args:
-        add (bool): Set True if randomly add edges in a given graph.
-        drop (bool): Set True if randomly drop edges in a given graph.
-        ratio: Percentage of edges to add or drop.
+        add (bool, optional): Set :obj:`True` if randomly add edges in a given graph.
+            (default: :obj:`True`)
+        drop (bool, optional): Set :obj:`True` if randomly drop edges in a given graph.
+            (default: :obj:`False`)
+        ratio (float, optional): Percentage of edges to add or drop. (default: :obj:`0.1`)
     '''
-    def do_trans(data):
+    def __init__(self, add=True, drop=False, ratio=0.1):
+        self.add = add
+        self.drop = drop
+        self.ratio = ratio
+        
+    def __call__(self, data):
+        return self.views_fn(data)
+        
+    def do_trans(self, data):
         node_num, _ = data.x.size()
         _, edge_num = data.edge_index.size()
-        perturb_num = int(edge_num * ratio)
+        perturb_num = int(edge_num * self.ratio)
 
         edge_index = data.edge_index.detach().clone()
         idx_remain = edge_index
         idx_add = torch.tensor([]).reshape(-1, 2)
 
-        if drop:
-            idx_remain = edge_index[:, np.random.choice(edge_num, edge_num-perturb_num, replace=False)]
+        if self.drop:
+            idx_remain = edge_index[:, np.random.choice(edge_num, edge_num-perturb_num, 
+                                                        replace=False)]
 
-        if add:
+        if self.add:
             idx_add = torch.randint(node_num, (2, perturb_num))
 
         new_edge_index = torch.cat((idx_remain, idx_add), dim=1)
@@ -32,42 +45,48 @@ def edge_perturbation(add=True, drop=False, ratio=0.1):
 
         return Data(x=data.x, edge_index=new_edge_index)
 
-    def views_fn(data):
-        '''
+    def views_fn(self, data):
+        r"""Method to be called when :class:`EdgePerturbation` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    batch tensor with shape [num_nodes];
-                    x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    original edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_nodes, num_node_features];
-            edge_index tensor with shape [2, num_perturb_edges];
-            batch tensor with shape [num_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         if isinstance(data, Batch):
-            dlist = [do_trans(d) for d in data.to_data_list()]
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
         elif isinstance(data, Data):
-            return do_trans(data)
-
-    return views_fn
+            return self.do_trans(data)
 
 
-def diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
-    '''
+
+class Diffusion():
+    '''Diffusion on the given graph or batched graphs, used in 
+    `MVGRL <https://arxiv.org/pdf/2006.05582v1.pdf>`_. Class objects callable via 
+    method :meth:`views_fn`.
+    
     Args:
-        mode: Diffusion instantiation mode with two options:
-                'ppr': Personalized PageRank
-                'heat': heat kernel
-        alpha: Teleport probability in a random walk.
-        t: Diffusion time.
+        mode (string, optional): Diffusion instantiation mode with two options:
+            :obj:`"ppr"`: Personalized PageRank; :obj:`"heat"`: heat kernel.
+            (default: :obj:`"ppr"`)
+        alpha (float, optinal): Teleport probability in a random walk. (default: :obj:`0.2`)
+        t (float, optinal): Diffusion time. (default: :obj:`5`)
+        add_self_loop (bool, optional): Set True to add self-loop to edge_index.
+            (default: :obj:`True`)
     '''
-    def do_trans(data):
+    def __init__(self, mode='ppr', alpha=0.2, t=5, add_self_loop=True):
+        self.mode = mode
+        self.alpha = alpha
+        self.t = t
+        self.add_self_loop = add_self_loop
+        
+    def __call__(self, data):
+        return self.views_fn(data)
+    
+    def do_trans(self, data):
         node_num, _ = data.x.size()
-        if add_self_loop:
+        if self.add_self_loop:
             sl = torch.tensor([[n, n] for n in range(node_num)]).t()
             edge_index = torch.cat((data.edge_index, sl), dim=1)
         else:
@@ -77,13 +96,13 @@ def diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
         orig_adj = torch.where(orig_adj>1, torch.ones_like(orig_adj), orig_adj)
         d = torch.diag(torch.sum(orig_adj, 1))
 
-        if mode == 'ppr':
+        if self.mode == 'ppr':
             dinv = torch.inverse(torch.sqrt(d))
             at = torch.matmul(torch.matmul(dinv, orig_adj), dinv)
-            diff_adj = alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - alpha) * at))
+            diff_adj = alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - self.alpha) * at))
 
-        elif mode == 'heat':
-            diff_adj = torch.exp(t * (torch.matmul(orig_adj, torch.inverse(d)) - 1))
+        elif self.mode == 'heat':
+            diff_adj = torch.exp(self.t * (torch.matmul(orig_adj, torch.inverse(d)) - 1))
 
         else:
             raise Exception("Must choose one diffusion instantiation mode from 'ppr' and 'heat'!")
@@ -93,60 +112,62 @@ def diffusion(mode='ppr', alpha=0.2, t=5, add_self_loop=True):
         return Data(x=data.x, edge_index=edge_ind, edge_attr=edge_attr)
     
 
-    def views_fn(data):
-        '''
+    def views_fn(self, data):
+        r"""Method to be called when :class:`Diffusion` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    batch tensor with shape [num_nodes];
-                    x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    original edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_nodes, num_node_features];
-            edge_index tensor with shape [2, num_diff_edges];
-            batch tensor with shape [num_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         if isinstance(data, Batch):
-            dlist = [do_trans(d) for d in data.to_data_list()]
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
         elif isinstance(data, Data):
-            return do_trans(data)
-
-    return views_fn
+            return self.do_trans(data)
 
 
-def diffusion_with_sample(sample_size=2000, batch_size=4, mode='ppr', 
-                          alpha=0.2, t=5, epsilon=False, add_self_loop=True):
-    '''
+
+class DiffusionWithSample():
+    '''Diffusion with node sampling on the given graph for node-level datasets, used in 
+    `MVGRL <https://arxiv.org/pdf/2006.05582v1.pdf>`_.  Class objects callable via method 
+    :meth:`views_fn`.
+    
     Args:
-        sample_size: Number of nodes in the sampled subgraoh from a large graph.
-        batch_size: Number of subgraphs to sample.
-        mode: Diffusion instantiation mode with two options:
-                'ppr': Personalized PageRank
-                'heat': heat kernel
-        alpha: Teleport probability in a random walk.
-        t: Diffusion time.
-        epsilon (bool): Set true if need to adjust the diffusion matrix with epsilon.
+        sample_size (int, optional): Number of nodes in the sampled subgraoh from a large graph.
+            (default: :obj:`2000`)
+        batch_size (int, optional): Number of subgraphs to sample. (default: :obj:`4`)
+        mode (string, optional): Diffusion instantiation mode with two options:
+            :obj:`"ppr"`: Personalized PageRank; :obj:`"heat"`: heat kernel; 
+            (default: :obj:`"ppr"`)
+        alpha (float, optinal): Teleport probability in a random walk. (default: :obj:`0.2`)
+        t (float, optinal): Diffusion time. (default: :obj:`5`)
+        add_self_loop (bool, optional): Set True to add self-loop to edge_index.
+            (default: :obj:`True`)
     '''
-    def views_fn(data):
-        '''
+    def __init__(self, sample_size=2000, batch_size=4, mode='ppr', 
+                 alpha=0.2, t=5, epsilon=False, add_self_loop=True):
+        self.sample_size = sample_size
+        self.batch_size = batch_size
+        self.mode = mode
+        self.alpha = alpha
+        self.t = t
+        self.epsilon = epsilon
+        self.add_self_loop = add_self_loop
+        
+    def __call__(self, data):
+        return self.view_fn(data)
+    
+    def views_fn(self, data):
+        r"""Method to be called when :class:`DiffusionWithSample` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    batch tensor with shape [num_nodes];
-                    x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    original edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_nodes, num_node_features];
-            edge_index tensor with shape [2, num_diff_edges];
-            batch tensor with shape [num_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         node_num, _ = data.x.size()
-        if add_self_loop:
+        if self.add_self_loop:
             sl = torch.tensor([[n, n] for n in range(node_num)]).t()
             edge_index = torch.cat((data.edge_index, sl), dim=1)
         else:
@@ -156,18 +177,18 @@ def diffusion_with_sample(sample_size=2000, batch_size=4, mode='ppr',
         orig_adj = torch.where(orig_adj>1, torch.ones_like(orig_adj), orig_adj)
         d = torch.diag(torch.sum(orig_adj, 1))
 
-        if mode == 'ppr':
+        if self.mode == 'ppr':
             dinv = torch.inverse(torch.sqrt(d))
             at = torch.matmul(torch.matmul(dinv, orig_adj), dinv)
-            diff_adj = alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - alpha) * at))
+            diff_adj = self.alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - self.alpha) * at))
 
-        elif mode == 'heat':
-            diff_adj = torch.exp(t * (torch.matmul(orig_adj, torch.inverse(d)) - 1))
+        elif self.mode == 'heat':
+            diff_adj = torch.exp(self.t * (torch.matmul(orig_adj, torch.inverse(d)) - 1))
 
         else:
             raise Exception("Must choose one diffusion instantiation mode from 'ppr' and 'heat'!")
 
-        if epsilon:
+        if self.epsilon:
             epsilons = [1e-5, 1e-4, 1e-3, 1e-2]
             avg_degree = torch.sum(orig_adj) / orig_adj.shape[0]
             ep = epsilons[np.argmin([abs(avg_degree - torch.sum(diff_adj >= e) / diff_adj.shape[0]) for e in epsilons])]
@@ -179,8 +200,8 @@ def diffusion_with_sample(sample_size=2000, batch_size=4, mode='ppr',
 
         dlist_orig_x = []
         dlist_diff_x = []
-        drop_num = node_num - sample_size
-        for b in range(batch_size):
+        drop_num = node_num - self.sample_size
+        for b in range(self.batch_size):
             idx_drop = np.random.choice(node_num, drop_num, replace=False)
             idx_nondrop = [n for n in range(node_num) if not n in idx_drop]
 
@@ -202,4 +223,3 @@ def diffusion_with_sample(sample_size=2000, batch_size=4, mode='ppr',
 
         return Batch.from_data_list(dlist_orig_x), Batch.from_data_list(dlist_diff_x)
 
-    return views_fn

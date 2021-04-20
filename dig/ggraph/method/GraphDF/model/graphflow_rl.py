@@ -1,20 +1,20 @@
 import torch
 import torch.nn as nn
+import numpy as np
 from .disgraphaf import DisGraphAF
 import sys
 sys.path.append('..')
-from utils import *
+from dig.ggraph.utils import *
 
 
 class GraphFlowModel_rl(nn.Module):
-    def __init__(self, conf_rl, conf_net, out_path=None):
+    def __init__(self, model_conf_dict):
         super(GraphFlowModel_rl, self).__init__()
-        self.max_size = conf_net['max_size']
-        self.node_dim = conf_net['node_dim']
-        self.bond_dim = conf_net['bond_dim']
-        self.edge_unroll = conf_net['edge_unroll']
-        self.conf_rl = conf_rl
-        self.out_path = out_path
+        self.max_size = model_conf_dict['max_size']
+        self.node_dim = model_conf_dict['node_dim']
+        self.bond_dim = model_conf_dict['bond_dim']
+        self.edge_unroll = model_conf_dict['edge_unroll']
+        self.conf_rl = model_conf_dict['rl_conf_dict']
 
         node_masks, adj_masks, link_prediction_index, self.flow_core_edge_masks = self.initialize_masks(max_node_unroll=self.max_size, max_edge_unroll=self.edge_unroll)
 
@@ -22,14 +22,14 @@ class GraphFlowModel_rl(nn.Module):
         self.latent_node_length = self.max_size * self.node_dim
         self.latent_edge_length = (self.latent_step - self.max_size) * self.bond_dim
 
-        self.dp = conf_net['use_gpu']
+        self.dp = model_conf_dict['use_gpu']
         
         node_base_log_probs = torch.randn(self.max_size, self.node_dim)
         edge_base_log_probs = torch.randn(self.latent_step - self.max_size, self.bond_dim)
-        self.flow_core = DisGraphAF(node_masks, adj_masks, link_prediction_index, num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
-        self.flow_core_old = DisGraphAF(node_masks, adj_masks, link_prediction_index, num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
+        self.flow_core = DisGraphAF(node_masks, adj_masks, link_prediction_index, num_flow_layer = model_conf_dict['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=model_conf_dict['num_rgcn_layer'], nhid=model_conf_dict['nhid'], nout=model_conf_dict['nout'])
+        self.flow_core_old = DisGraphAF(node_masks, adj_masks, link_prediction_index, num_flow_layer = model_conf_dict['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=model_conf_dict['num_rgcn_layer'], nhid=model_conf_dict['nhid'], nout=model_conf_dict['nout'])
         if self.dp:
             self.flow_core = nn.DataParallel(self.flow_core.cuda())
             self.flow_core_old = nn.DataParallel(self.flow_core_old.cuda())
@@ -164,7 +164,7 @@ class GraphFlowModel_rl(nn.Module):
             return None, None
 
 
-    def reinforce_forward_optim(self, atom_list, temperature=[0.3,0.3], batch_size=32, max_size_rl=48, in_baseline=None, cur_iter=None):
+    def reinforce_forward_optim(self, in_baseline=None, cur_iter=None):
         """
         Fintuning model using reinforce algorithm
         Args:
@@ -177,7 +177,7 @@ class GraphFlowModel_rl(nn.Module):
 
         """
         assert cur_iter is not None
-
+        atom_list, temperature, batch_size, max_size_rl = self.conf_rl['atom_list'], self.conf_rl['temperature'], self.conf_rl['batch_size'], self.conf_rl['max_size_rl']
         if cur_iter % self.conf_rl['update_iters'] == 0: # uodate the demenstration net every 4 iter.
             print('copying to old model at iter {}'.format(cur_iter))
             self.flow_core_old.load_state_dict(self.flow_core.state_dict())

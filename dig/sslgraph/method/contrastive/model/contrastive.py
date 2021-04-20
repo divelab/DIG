@@ -5,6 +5,45 @@ from torch_geometric.data import Batch, Data
 from dig.sslgraph.method.contrastive.objectives import NCE_loss, JSE_loss
 
 class Contrastive(nn.Module):
+    r"""
+    Base class for creating contrastive learning models for either graph-level or 
+    node-level tasks.
+    
+    *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`Contrastive`.
+
+    Args:
+        objective (string, or callable): The learning objective of contrastive model.
+            If string, should be one of 'NCE' and 'JSE'. If callable, should take lists
+            of representations as inputs and returns loss Tensor 
+            (see `dig.sslgraph.method.contrastive.objectives` for examples).
+        views_fn (list of callable): List of functions to generate views from given graphs.
+        graph_level (bool, optional): Whether to include graph-level representation 
+            for contrast. (default: :obj:`True`)
+        node_level (bool, optional): Whether to include node-level representation 
+            for contrast. (default: :obj:`False`)
+        z_dim (int, optional): The dimension of graph-level representations. 
+            Required if :obj:`graph_level` = :obj:`True`. (default: :obj:`None`)
+        z_dim (int, optional): The dimension of node-level representations. 
+            Required if :obj:`node_level` = :obj:`True`. (default: :obj:`None`)
+        proj (string, or Module, optional): Projection head for graph-level representation. 
+            If string, should be :obj:`"linear"` or :obj:`"MLP"`. Required if 
+            :obj:`graph_level` = :obj:`True`. (default: :obj:`None`)
+        proj_n (string, or Module, optional): Projection head for node-level representations. 
+            If string, should be one of 'linear' and 'MLP'. Required if 
+            :obj:`node_level` = :obj:`True`. (default: :obj:`None`)
+        neg_by_crpt (bool, optional): The mode to obtain negative samples in JSE. If True, 
+            obtain negative samples by performing corruption. Otherwise, consider pairs of
+            different graph samples as negative pairs. Only used when 
+            :obj:`objective` = :obj:`"JSE"`. (default: :obj:`False`)
+        tau (int): The tempurature parameter in InfoNCE (NT-XENT) loss. Only used when 
+            :obj:`objective` = :obj:`"NCE"`. (default: :obj:`0.5`)
+        device (int, or `torch.device`, optional): The device to perform computation.
+        choice_model (string, optional): Whether to yield model with :obj:`best` training loss or
+            at the :obj:`last` epoch. (default: :obj:`last`)
+        model_path (string, optinal): The directory to restore the saved model. 
+            (default: :obj:`models`)
+    """
+    
     def __init__(self, objective, views_fn,
                  graph_level=True,
                  node_level=False,
@@ -17,21 +56,7 @@ class Contrastive(nn.Module):
                  device=None,
                  choice_model='last',
                  model_path='models'):
-        """
-        Args:
-            objective: String or function. If string, should be one of 'NCE' and 'JSE'.
-            views_fn: List of functions. Functions to perform view transformation.
-            graph_level: Boolean. Whether to include graph-level embedding for contrast.
-            node_level: Boolean. Whether to include node-level embedding for contrast.
-            proj: String, function or None. Projection head for graph-level representation. 
-                If string, should be one of 'linear' and 'MLP'.
-            proj_n: String, function or None. Projection head for node-level representations. 
-                If string, should be one of 'linear' and 'MLP'. Required when node_level
-                is True.
-            neg_by_crpt: Boolean. If True, obtain negative samples by performing corruption.
-                Otherwise, consider pairs of different graph samples as negative pairs.
-                Should always be False when using InfoNCE objective.
-        """
+
         assert node_level is not None or graph_level is not None
         assert not (objective=='NCE' and neg_by_crpt)
 
@@ -57,19 +82,22 @@ class Contrastive(nn.Module):
         
         
     def train(self, encoder, data_loader, optimizer, epochs, per_epoch_out=False):
-        """
+        r"""Perform contrastive training and yield trained trained encoders per epoch or after 
+        the last epoch.
+        
         Args:
-            encoder: Trainable pytorch model or list of models. Callable with inputs of Data 
-                objects. If node_level is False, return tensor of shape [n_graphs, z_dim]. 
-                Else, return tuple of shape ([n_graphs, z_dim], [n_nodes, z'_dim]) representing 
-                graph-level and node-level embeddings.
-            dataloader: Dataloader for contrastive training.
-            optimizer: Torch optimizer.
-            epochs: Integer.
-            per_epoch_out: Boolean. If True, yield encoder per k epochs. Otherwise, only yield
-                the final encoder at the last epoch.
-        Returns:
-            Generator that yield encoder per k epochs or the final encoder at the last epoch.
+            encoder (Module, or list of Module): A graph encoder shared by all views or a list 
+                of graph encoders dedicated for each view. If :obj:`node_level` = :obj:`False`, 
+                the encoder should return tensor of shape [:obj:`n_graphs`, :obj:`z_dim`].
+                Otherwise, return tuple of shape ([:obj:`n_graphs`, :obj:`z_dim`], 
+                [:obj:`n_nodes`, :obj:`z_n_dim`]) representing graph-level and node-level embeddings.
+            dataloader (Dataloader): Dataloader for unsupervised learning or pretraining.
+            optimizer (Optimizer): Pytorch optimizer for trainable parameters in encoder(s).
+            epochs (int): Number of total training epochs.
+            per_epoch_out (bool): If True, yield trained encoders per epoch. Otherwise, only yield
+                the final encoder at the last epoch. (default: :obj:`False`)
+                
+        :rtype: :class:`generator`.
         """
         self.per_epoch_out = per_epoch_out
         
@@ -301,7 +329,6 @@ class Contrastive(nn.Module):
         if not self.per_epoch_out:
             yield encoder, (self.proj_head_g, self.proj_head_n)
     
-    
     def _get_embed(self, enc, view):
         
         if self.neg_by_crpt:
@@ -345,12 +372,22 @@ class Contrastive(nn.Module):
         out_dim = self.proj_out_dim
         
         if proj_head == 'linear':
-            return nn.Linear(in_dim, out_dim)
+            proj_nn = nn.Linear(in_dim, out_dim)
+            self._weights_init(proj_nn)
         elif proj_head == 'MLP':
-            return nn.Sequential(nn.Linear(in_dim, out_dim),
+            proj_nn = nn.Sequential(nn.Linear(in_dim, out_dim),
                                  nn.ReLU(inplace=True),
                                  nn.Linear(out_dim, out_dim))
+            for m in proj_nn.modules():
+                self._weights_init(m)
+            
+        return proj_nn
         
+    def _weights_init(self, m):        
+        if isinstance(m, nn.Linear):
+            nn.init.xavier_uniform_(m.weight.data)
+            if m.bias is not None:
+                m.bias.data.fill_(0.0)
         
     def _get_loss(self, objective):
         

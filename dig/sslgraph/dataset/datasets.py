@@ -10,7 +10,35 @@ from .TUDataset import TUDatasetExt
 from .feat_expansion import FeatureExpander, CatDegOnehot, get_max_deg
 
 
-def get_dataset(name, task, sparse=True, feat_str="deg+ak3+reall", root=None):
+def get_dataset(name, task, feat_str="deg", root=None):
+    r"""A pre-implemented function to retrieve graph datasets from TUDataset.
+    Depending on evaluation tasks, different node feature augmentation will
+    be applied following `GraphCL <https://arxiv.org/abs/2010.13902>`_.
+
+    Args:
+        name (string): The `name <https://chrsmrrs.github.io/datasets/docs/datasets/>`_ of the dataset.
+        task (string): The evaluation task. Either 'semisupervised' or
+            `unsupervised`.
+        feat_str (bool, optional): The node feature augmentations to be applied,
+            *e.g.*, degrees and centrality. (default: :obj:`deg`)
+        root (string, optional): Root directory where the dataset should be saved.
+            (default: :obj:`None`)
+        
+    :rtype: :class:`torch_geometric.data.Dataset` (unsupervised), or (:class:`torch_geometric.data.Dataset`, 
+        :class:`torch_geometric.data.Dataset`) (semisupervised).
+        
+    Examples
+    --------
+    >>> dataset, dataset_pretrain = get_dataset("NCI1", "semisupervised")
+    >>> dataset
+    NCI1(4110)
+    
+    >>> dataset = get_dataset("MUTAG", "unsupervised", feat_str="")
+    >>> dataset # degree not augmented as node attributes
+    MUTAG(188)
+    """
+
+    root = "." if root is None else root
     if task == "semisupervised":
 
         if name in ['REDDIT-BINARY', 'REDDIT-MULTI-5K', 'REDDIT-MULTI-12K']:
@@ -23,13 +51,15 @@ def get_dataset(name, task, sparse=True, feat_str="deg+ak3+reall", root=None):
         onehot_maxdeg = re.findall("odeg(\d+)", feat_str)
         onehot_maxdeg = int(onehot_maxdeg[0]) if onehot_maxdeg else None
 
-        pre_transform = FeatureExpander(degree=degree, onehot_maxdeg=onehot_maxdeg, AK=0).transform
+        pre_transform = FeatureExpander(degree=degree, 
+                                        onehot_maxdeg=onehot_maxdeg, AK=0).transform
 
-        dataset = TUDatasetExt("./semi_dataset/dataset", name, task, pre_transform=pre_transform, use_node_attr=True,
+        dataset = TUDatasetExt(root+"/semi_dataset/dataset", name, task, 
+                               pre_transform=pre_transform, use_node_attr=True,
                                processed_filename="data_%s.pt" % feat_str)
 
-        dataset_pretrain = TUDatasetExt("./semi_dataset/pretrain_dataset/", name, task, pre_transform=pre_transform,
-                                        use_node_attr=True,
+        dataset_pretrain = TUDatasetExt(root+"/semi_dataset/pretrain_dataset/", name, task, 
+                                        pre_transform=pre_transform, use_node_attr=True,
                                         processed_filename="data_%s.pt" % feat_str)
 
         dataset.data.edge_attr = None
@@ -38,10 +68,10 @@ def get_dataset(name, task, sparse=True, feat_str="deg+ak3+reall", root=None):
         return dataset, dataset_pretrain
 
     elif task == "unsupervised":
-        dataset = TUDatasetExt("./unsuper_dataset/", name=name, task=task)
+        dataset = TUDatasetExt(root+"/unsuper_dataset/", name=name, task=task)
         if feat_str.find("deg") >= 0:
             max_degree = get_max_deg(dataset)
-            dataset = TUDatasetExt("./unsuper_dataset/", name=name, task=task,
+            dataset = TUDatasetExt(root+"./unsuper_dataset/", name=name, task=task,
                                    transform=CatDegOnehot(max_degree), use_node_attr=True)
         return dataset
 
@@ -49,11 +79,25 @@ def get_dataset(name, task, sparse=True, feat_str="deg+ak3+reall", root=None):
         ValueError("Wrong task name")
 
 
-def get_node_dataset(name, root='./node_dataset/', sparse=True):
+def get_node_dataset(name, root=None):
+    r"""A pre-implemented function to retrieve node datasets from Planetoid.
+
+    Args:
+        name (string): The name of the dataset (:obj:`"Cora"`,
+            :obj:`"CiteSeer"`, :obj:`"PubMed"`).
+        root (string, optional): Root directory where the dataset should be saved.
+            (default: :obj:`None`)
+        
+    :rtype: :class:`torch_geometric.data.Dataset`
     
-    full_dataset = Planetoid(root, name)
-    train_mask = full_dataset[0].train_mask
-    val_mask = full_dataset[0].val_mask
-    test_mask = full_dataset[0].test_mask
-    return full_dataset, train_mask, val_mask, test_mask
+    Example
+    -------
+    >>> dataset = get_node_dataset("Cora")
+    >>> dataset
+    Cora()
+    """
+    root = "." if root is None else root
+    full_dataset = Planetoid(root+"/node_dataset/", name)
+
+    return full_dataset
 

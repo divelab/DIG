@@ -4,34 +4,51 @@ import random
 from torch_geometric.data import Batch, Data
 
 
-def node_attr_mask(mode='whole', mask_ratio=0.1, mask_mean=0.5, mask_std=0.5):
-    '''
+class NodeAttrMask():
+    '''Node attribute masking on the given graph or batched graphs. 
+    Class objects callable via method :meth:`views_fn`.
+    
     Args:
-        mode: Masking mode with three options:
-                'whole': mask all feature dimensions of the selected node with a Gaussian distribution;
-                'partial': mask only selected feature dimensions with a Gaussian distribution;
-                'onehot': mask all feature dimensions of the selected node with a one-hot vector.
-        mask_ratio: Percentage of masking feature dimensions.
-        mask_mean: Mean of the Gaussian distribution.
-        mask_std: Standard deviation of the distribution. Must be non-negative.
+        mode (string, optinal): Masking mode with three options:
+            :obj:`"whole"`: mask all feature dimensions of the selected node with a Gaussian distribution;
+            :obj:`"partial"`: mask only selected feature dimensions with a Gaussian distribution;
+            :obj:`"onehot"`: mask all feature dimensions of the selected node with a one-hot vector.
+            (default: :obj:`"whole"`)
+        mask_ratio (float, optinal): The ratio of node attributes to be masked. (default: :obj:`0.1`)
+        mask_mean (float, optional): Mean of the Gaussian distribution to generate masking values.
+            (default: :obj:`0.5`)
+        mask_std (float, optional): Standard deviation of the distribution to generate masking values. 
+            Must be non-negative. (default: :obj:`0.5`)
     '''
-    def do_trans(data):
+    def __init__(self, mode='whole', mask_ratio=0.1, mask_mean=0.5, mask_std=0.5):
+        self.mode = mode
+        self.mask_ratio = mask_ratio
+        self.mask_mean = mask_mean
+        self.mask_std = mask_std
+    
+    def __call__(self, data):
+        return self.views_fn(data)
+    
+    def do_trans(self, data):
+        
         node_num, feat_dim = data.x.size()
         x = data.x.detach().clone()
 
-        if mode == 'whole':
-            mask_num = int(node_num * mask_ratio)
+        if self.mode == 'whole':
+            mask_num = int(node_num * self.mask_ratio)
             idx_mask = np.random.choice(node_num, mask_num, replace=False)
-            x[idx_mask] = torch.tensor(np.random.normal(loc=mask_mean, scale=mask_std, size=(mask_num, feat_dim)), dtype=torch.float32)
+            x[idx_mask] = torch.tensor(np.random.normal(loc=self.mask_mean, scale=self.mask_std, 
+                                                        size=(mask_num, feat_dim)), dtype=torch.float32)
 
-        elif mode == 'partial':
+        elif self.mode == 'partial':
             for i in range(node_num):
                 for j in range(feat_dim):
-                    if random.random() < mask_ratio:
-                        x[i][j] = torch.tensor(np.random.normal(loc=mask_mean, scale=mask_std), dtype=torch.float32)
+                    if random.random() < self.mask_ratio:
+                        x[i][j] = torch.tensor(np.random.normal(loc=self.mask_mean, 
+                                                                scale=self.mask_std), dtype=torch.float32)
 
-        elif mode == 'onehot':
-            mask_num = int(node_num * mask_ratio)
+        elif self.mode == 'onehot':
+            mask_num = int(node_num * self.mask_ratio)
             idx_mask = np.random.choice(node_num, mask_num, replace=False)
             x[idx_mask] = torch.tensor(np.eye(feat_dim)[np.random.randint(0, feat_dim, size=(mask_num))], dtype=torch.float32)
 
@@ -40,24 +57,17 @@ def node_attr_mask(mode='whole', mask_ratio=0.1, mask_mean=0.5, mask_std=0.5):
 
         return Data(x=x, edge_index=data.edge_index)
 
-    def views_fn(data):
-        '''
+    def views_fn(self, data):
+        r"""Method to be called when :class:`NodeAttrMask` object is called.
+        
         Args:
-            data: A graph data object containing:
-                    original x tensor with shape [num_nodes, num_node_features];
-                    y tensor with arbitrary shape;
-                    edge_attr tensor with shape [num_edges, num_edge_features];
-                    edge_index tensor with shape [2, num_edges].
-
-        Returns:
-            x tensor with shape [num_nodes, num_node_features];
-            edge_index tensor with shape [2, num_edges];
-            batch tensor with shape [num_nodes].
-        '''
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
         if isinstance(data, Batch):
-            dlist = [do_trans(d) for d in data.to_data_list()]
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
             return Batch.from_data_list(dlist)
         elif isinstance(data, Data):
-            return do_trans(data)
+            return self.do_trans(data)
 
-    return views_fn
