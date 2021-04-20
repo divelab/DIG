@@ -4,9 +4,8 @@ import torch.nn as nn
 import copy
 from torch_geometric.utils.loop import add_self_loops
 from benchmark.models.utils import subgraph
-from benchmark.data.dataset import data_args
 from benchmark.models.models import GraphSequential
-from base_explainer import WalkBase
+from .base_explainer import WalkBase
 
 EPS = 1e-15
 
@@ -33,7 +32,7 @@ class GNN_LRP(WalkBase):
         walk_indices_list = torch.tensor(
             self.walks_pick(edge_index_with_loop.cpu(), list(range(edge_index_with_loop.shape[1])),
                             num_layers=self.num_layers), device=self.device)
-        if data_args.model_level == 'node':
+        if kwargs.get('model_level') == 'node':
             node_idx = kwargs.get('node_idx')
             assert node_idx is not None
             _, _, _, self.hard_edge_mask = subgraph(
@@ -137,7 +136,7 @@ class GNN_LRP(WalkBase):
                     ht = (s + epsilon) * (std_h / (s + epsilon)).detach()
                     h = ht
 
-                if data_args.model_level == 'node':
+                if kwargs.get('model_level') == 'node':
                     f = h[node_idx, label]
                 else:
                     f = h[0, label]
@@ -147,7 +146,7 @@ class GNN_LRP(WalkBase):
                 walk_scores.append(r)
 
 
-        labels = tuple(i for i in range(data_args.num_classes))
+        labels = tuple(i for i in range(kwargs.get('num_classes')))
         walk_scores_tensor_list = [None for i in labels]
         for label in labels:
 
@@ -171,7 +170,7 @@ class GNN_LRP(WalkBase):
         # --- Apply edge mask evaluation ---
         with torch.no_grad():
             with self.connect_mask(self):
-                ex_labels = tuple(torch.tensor([label]).to(data_args.device) for label in labels)
+                ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
                 masks = []
                 for ex_label in ex_labels:
                     edge_attr = self.explain_edges_with_loop(x, walks, ex_label)

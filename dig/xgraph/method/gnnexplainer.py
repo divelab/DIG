@@ -3,8 +3,7 @@ from torch import Tensor
 from torch_geometric.utils.loop import add_self_loops
 from benchmark.models.utils import subgraph
 from benchmark.kernel.utils import Metric
-from benchmark.data.dataset import data_args
-from base_explainer import ExplainerBase
+from .base_explainer import ExplainerBase
 EPS = 1e-15
 
 class GNNExplainer(ExplainerBase):
@@ -114,7 +113,7 @@ class GNNExplainer(ExplainerBase):
 
         # Only operate on a k-hop subgraph around `node_idx`.
         # Get subgraph and relabel the node, mapping is the relabeled given node_idx.
-        if data_args.model_level == 'node':
+        if kwargs.get('model_level') == 'node':
             node_idx = kwargs.get('node_idx')
             self.node_idx = node_idx
             assert node_idx is not None
@@ -123,8 +122,8 @@ class GNNExplainer(ExplainerBase):
                 num_nodes=None, flow=self.__flow__())
 
         # Assume the mask we will predict
-        labels = tuple(i for i in range(data_args.num_classes))
-        ex_labels = tuple(torch.tensor([label]).to(data_args.device) for label in labels)
+        labels = tuple(i for i in range(kwargs.get('num_classes')))
+        ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
 
         # Calculate mask
         print('#D#Masks calculate...')
