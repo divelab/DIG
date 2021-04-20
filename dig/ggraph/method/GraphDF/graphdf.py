@@ -26,6 +26,13 @@ class GraphDF(Generator):
             raise ValueError('Task {} is not supported in GraphDF!'.format(task))
         if checkpoint_path is not None:
             self.model.load_state_dict(torch.load(checkpoint_path))
+    
+
+    def load_pretrain_model(self, path):
+        load_key = torch.load(path)
+        for key in load_key.keys():
+            if key in self.model.state_dict().keys():
+                self.model.state_dict()[key].copy_(load_key[key].detach().clone())
 
 
     def train_rand_gen(self, loader, lr, wd, max_epochs, model_conf_dict, save_interval, save_dir):
@@ -79,8 +86,9 @@ class GraphDF(Generator):
         return all_mols, pure_valids
 
 
-    def train_prop_optim(self, lr, wd, max_iters, warm_up, model_conf_dict, pretrained_path, save_interval, save_dir):
-        self.get_model('prop_optim', model_conf_dict, pretrained_path)
+    def train_prop_optim(self, lr, wd, max_iters, warm_up, model_conf_dict, pretrain_path, save_interval, save_dir):
+        self.get_model('prop_optim', model_conf_dict)
+        self.load_pretrain_model(pretrain_path)
         self.model.train()
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
         if not os.path.isdir(save_dir):
@@ -128,8 +136,9 @@ class GraphDF(Generator):
         return all_mols
 
 
-    def train_cons_optim(self, loader, lr, wd, max_iters, warm_up, model_conf_dict, pretrained_path, save_interval, save_dir):
-        self.get_model('cons_optim', model_conf_dict, pretrained_path)
+    def train_cons_optim(self, loader, lr, wd, max_iters, warm_up, model_conf_dict, pretrain_path, save_interval, save_dir):
+        self.get_model('cons_optim', model_conf_dict)
+        self.load_pretrain_model(pretrain_path)
         self.model.train()
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
         if not os.path.isdir(save_dir):
@@ -250,7 +259,7 @@ class GraphDF(Generator):
                     continue # not optimize this one
 
                 best_mol0246, best_score0246, final_sim0246 = self.run_cons_optim_one_mol(inp_adj_features, 
-                                                                    inp_node_features, raw_smile, mol_size, bfs_perm_origin, num_max_node, temperature)
+                                                                    inp_node_features, raw_smile, mol_size, bfs_perm_origin, num_max_node, temperature, atomic_num_list)
                 if best_score0246[0] > best_score[0]:
                     best_score[0] = best_score0246[0]
                     best_mol[0] = best_mol0246[0]
@@ -279,5 +288,8 @@ class GraphDF(Generator):
             mols_2.append(best_mol[1])
             mols_4.append(best_mol[2])
             mols_6.append(best_mol[3])
+
+            if batch_cnt % 1 == 0:
+                print('Optimized {} molecules'.format(batch_cnt+1))
 
         return mols_0, mols_2, mols_4, mols_6
