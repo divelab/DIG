@@ -241,7 +241,7 @@ def demo():
 
     cilog.create_logger(sub_print=True)
 
-    from models import GCN_3l
+    from ..models import GCN_3l
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 
     from torch_geometric.utils.random import barabasi_albert_graph

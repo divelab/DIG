@@ -2,7 +2,7 @@ import torch
 from torch import Tensor
 import torch.nn as nn
 from torch_geometric.utils.loop import add_self_loops
-from benchmark.models.utils import subgraph
+from ..models.utils import subgraph
 from .base_explainer import WalkBase
 
 EPS = 1e-15

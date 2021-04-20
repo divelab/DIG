@@ -5,7 +5,7 @@ from torch.nn import Module
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.utils.loop import add_self_loops
-from benchmark.models.utils import subgraph, normalize
+from ..models.utils import subgraph, normalize
 import captum.attr as ca
 from captum.attr._utils.typing import (
     BaselineType,

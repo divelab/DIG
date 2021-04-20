@@ -11,8 +11,7 @@ from torch_geometric.nn import MessagePassing
 from torch_geometric.utils.loop import add_self_loops, remove_self_loops
 from torch_geometric.data import Data, Batch
 from torch_geometric.utils import to_networkx
-from benchmark.models.utils import subgraph, normalize
-from benchmark.kernel.utils import Metric
+from ..models.utils import subgraph
 from rdkit import Chem
 from matplotlib.axes import Axes
 from matplotlib.patches import Path, PathPatch
@@ -425,9 +424,8 @@ class ExplainerBase(nn.Module):
                                   'origin': ori_pred[node_idx]})
 
             # Adding proper activation function to the models' outputs.
-            if 'cs' in Metric.cur_task:
-                related_preds[ex_label] = {key: pred.softmax(0)[ex_label].item()
-                                        for key, pred in related_preds[ex_label].items()}
+            related_preds[ex_label] = {key: pred.softmax(0)[ex_label].item()
+                                    for key, pred in related_preds[ex_label].items()}
 
         return related_preds
 
@@ -558,9 +556,8 @@ class WalkBase(ExplainerBase):
                                   'origin': ori_pred[node_idx]})
 
             # Adding proper activation function to the models' outputs.
-            if 'cs' in Metric.cur_task:
-                related_preds[label] = {key: pred.softmax(0)[label].item()
-                                        for key, pred in related_preds[label].items()}
+            related_preds[label] = {key: pred.softmax(0)[label].item()
+                                    for key, pred in related_preds[label].items()}
 
         return related_preds
 

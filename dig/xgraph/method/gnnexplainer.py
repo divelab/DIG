@@ -1,10 +1,13 @@
 import torch
 from torch import Tensor
 from torch_geometric.utils.loop import add_self_loops
-from benchmark.models.utils import subgraph
-from benchmark.kernel.utils import Metric
+from ..models.utils import subgraph
+from torch.nn.functional import cross_entropy
 from .base_explainer import ExplainerBase
 EPS = 1e-15
+
+def cross_entropy_with_logit(y_pred: torch.Tensor, y_true: torch.Tensor, **kwargs):
+    return cross_entropy(y_pred, y_true.long(), **kwargs)
 
 class GNNExplainer(ExplainerBase):
     r"""The GNN-Explainer model from the `"GNNExplainer: Generating
@@ -43,9 +46,9 @@ class GNNExplainer(ExplainerBase):
 
     def __loss__(self, raw_preds, x_label):
         if self.explain_graph:
-            loss = Metric.loss_func(raw_preds, x_label)
+            loss = cross_entropy_with_logit(raw_preds, x_label)
         else:
-            loss = Metric.loss_func(raw_preds[self.node_idx].unsqueeze(0), x_label)
+            loss = cross_entropy_with_logit(raw_preds[self.node_idx].unsqueeze(0), x_label)
 
         m = self.edge_mask.sigmoid()
         loss = loss + self.coeffs['edge_size'] * m.sum()
