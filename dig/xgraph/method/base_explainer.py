@@ -11,10 +11,7 @@ from torch_geometric.nn import MessagePassing
 from torch_geometric.utils.loop import add_self_loops, remove_self_loops
 from torch_geometric.data import Data, Batch
 from torch_geometric.utils import to_networkx
-from benchmark.models.utils import subgraph, normalize
-from benchmark.kernel.utils import Metric
-from benchmark.data.dataset import data_args
-from benchmark.args import x_args
+from ..models.utils import subgraph
 from rdkit import Chem
 from matplotlib.axes import Axes
 from matplotlib.patches import Path, PathPatch
@@ -112,7 +109,7 @@ class ExplainerBase(nn.Module):
         self.device = x.device
 
 
-    def control_sparsity(self, mask, sparsity=None):
+    def control_sparsity(self, mask, sparsity=None, **kwargs):
         r"""
 
         :param mask: mask that need to transform
@@ -122,7 +119,7 @@ class ExplainerBase(nn.Module):
         if sparsity is None:
             sparsity = 0.7
 
-        if data_args.model_level == 'node':
+        if kwargs.get('model_level') == 'node':
             assert self.hard_edge_mask is not None
             mask_indices = torch.where(self.hard_edge_mask)[0]
             sub_mask = mask[self.hard_edge_mask]
@@ -150,7 +147,7 @@ class ExplainerBase(nn.Module):
 
 
     def visualize_graph(self, node_idx, edge_index, edge_mask, y=None,
-                           threshold=None, **kwargs) -> Tuple[Axes, nx.DiGraph]:
+                           threshold=None, nolabel=True, **kwargs) -> Tuple[Axes, nx.DiGraph]:
         r"""Visualizes the subgraph around :attr:`node_idx` given an edge mask
         :attr:`edge_mask`.
 
@@ -190,7 +187,7 @@ class ExplainerBase(nn.Module):
         if threshold is not None:
             edge_mask = (edge_mask >= threshold).to(torch.float)
 
-        if data_args.dataset_name == 'ba_lrp':
+        if kwargs.get('dataset_name') == 'ba_lrp':
             y = torch.zeros(edge_index.max().item() + 1,
                             device=edge_index.device)
         if y is None:
@@ -242,7 +239,7 @@ class ExplainerBase(nn.Module):
         nx.draw_networkx_nodes(G, pos, node_color=node_colors, **kwargs)
         # define node labels
         if self.molecule:
-            if x_args.nolabel:
+            if nolabel:
                 node_labels = {n: f'{self.table(atomic_num[n].int().item())}'
                                for n in G.nodes()}
                 nx.draw_networkx_labels(G, pos, labels=node_labels, **kwargs)
@@ -251,13 +248,13 @@ class ExplainerBase(nn.Module):
                                for n in G.nodes()}
                 nx.draw_networkx_labels(G, pos, labels=node_labels, **kwargs)
         else:
-            if not x_args.nolabel:
+            if not nolabel:
                 nx.draw_networkx_labels(G, pos, **kwargs)
 
         return ax, G
 
     def visualize_walks(self, node_idx, edge_index, walks, edge_mask, y=None,
-                        threshold=None, **kwargs) -> Tuple[Axes, nx.DiGraph]:
+                        threshold=None, nolabel=True, **kwargs) -> Tuple[Axes, nx.DiGraph]:
         r"""Visualizes the subgraph around :attr:`node_idx` given an edge mask
         :attr:`edge_mask`.
 
@@ -297,7 +294,7 @@ class ExplainerBase(nn.Module):
         if threshold is not None:
             edge_mask = (edge_mask >= threshold).to(torch.float)
 
-        if data_args.dataset_name == 'ba_lrp':
+        if kwargs.get('dataset_name') == 'ba_lrp':
             y = torch.zeros(edge_index.max().item() + 1,
                             device=edge_index.device)
         if y is None:
@@ -385,7 +382,7 @@ class ExplainerBase(nn.Module):
         nx.draw_networkx_nodes(G, pos, node_color=node_colors, **kwargs)
         # define node labels
         if self.molecule:
-            if x_args.nolabel:
+            if nolabel:
                 node_labels = {n: f'{self.table(atomic_num[n].int().item())}'
                                for n in G.nodes()}
                 nx.draw_networkx_labels(G, pos, labels=node_labels, **kwargs)
@@ -394,7 +391,7 @@ class ExplainerBase(nn.Module):
                                for n in G.nodes()}
                 nx.draw_networkx_labels(G, pos, labels=node_labels, **kwargs)
         else:
-            if not x_args.nolabel:
+            if not nolabel:
                 nx.draw_networkx_labels(G, pos, **kwargs)
 
         return ax, G
@@ -407,7 +404,7 @@ class ExplainerBase(nn.Module):
 
         for ex_label, edge_mask in enumerate(edge_masks):
 
-            self.edge_mask.data = float('inf') * torch.ones(edge_mask.size(), device=data_args.device)
+            self.edge_mask.data = float('inf') * torch.ones(edge_mask.size(), device=self.device)
             ori_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             self.edge_mask.data = edge_mask
@@ -418,7 +415,7 @@ class ExplainerBase(nn.Module):
             maskout_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             # zero_mask
-            self.edge_mask.data = - float('inf') * torch.ones(edge_mask.size(), device=data_args.device)
+            self.edge_mask.data = - float('inf') * torch.ones(edge_mask.size(), device=self.device)
             zero_mask_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             related_preds.append({'zero': zero_mask_pred[node_idx],
@@ -427,9 +424,8 @@ class ExplainerBase(nn.Module):
                                   'origin': ori_pred[node_idx]})
 
             # Adding proper activation function to the models' outputs.
-            if 'cs' in Metric.cur_task:
-                related_preds[ex_label] = {key: pred.softmax(0)[ex_label].item()
-                                        for key, pred in related_preds[ex_label].items()}
+            related_preds[ex_label] = {key: pred.softmax(0)[ex_label].item()
+                                    for key, pred in related_preds[ex_label].items()}
 
         return related_preds
 
@@ -536,7 +532,7 @@ class WalkBase(ExplainerBase):
         for label, mask in enumerate(masks):
             # origin pred
             for edge_mask in self.edge_mask:
-                edge_mask.data = float('inf') * torch.ones(mask.size(), device=data_args.device)
+                edge_mask.data = float('inf') * torch.ones(mask.size(), device=self.device)
             ori_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             for edge_mask in self.edge_mask:
@@ -550,7 +546,7 @@ class WalkBase(ExplainerBase):
 
             # zero_mask
             for edge_mask in self.edge_mask:
-                edge_mask.data = - float('inf') * torch.ones(mask.size(), device=data_args.device)
+                edge_mask.data = - float('inf') * torch.ones(mask.size(), device=self.device)
             zero_mask_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             # Store related predictions for further evaluation.
@@ -560,9 +556,8 @@ class WalkBase(ExplainerBase):
                                   'origin': ori_pred[node_idx]})
 
             # Adding proper activation function to the models' outputs.
-            if 'cs' in Metric.cur_task:
-                related_preds[label] = {key: pred.softmax(0)[label].item()
-                                        for key, pred in related_preds[label].items()}
+            related_preds[label] = {key: pred.softmax(0)[label].item()
+                                    for key, pred in related_preds[label].items()}
 
         return related_preds
 

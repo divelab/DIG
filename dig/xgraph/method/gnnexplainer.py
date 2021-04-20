@@ -1,11 +1,13 @@
 import torch
 from torch import Tensor
 from torch_geometric.utils.loop import add_self_loops
-from benchmark.models.utils import subgraph
-from benchmark.kernel.utils import Metric
-from benchmark.data.dataset import data_args
-from base_explainer import ExplainerBase
+from ..models.utils import subgraph
+from torch.nn.functional import cross_entropy
+from .base_explainer import ExplainerBase
 EPS = 1e-15
+
+def cross_entropy_with_logit(y_pred: torch.Tensor, y_true: torch.Tensor, **kwargs):
+    return cross_entropy(y_pred, y_true.long(), **kwargs)
 
 class GNNExplainer(ExplainerBase):
     r"""The GNN-Explainer model from the `"GNNExplainer: Generating
@@ -44,9 +46,9 @@ class GNNExplainer(ExplainerBase):
 
     def __loss__(self, raw_preds, x_label):
         if self.explain_graph:
-            loss = Metric.loss_func(raw_preds, x_label)
+            loss = cross_entropy_with_logit(raw_preds, x_label)
         else:
-            loss = Metric.loss_func(raw_preds[self.node_idx].unsqueeze(0), x_label)
+            loss = cross_entropy_with_logit(raw_preds[self.node_idx].unsqueeze(0), x_label)
 
         m = self.edge_mask.sigmoid()
         loss = loss + self.coeffs['edge_size'] * m.sum()
@@ -114,7 +116,7 @@ class GNNExplainer(ExplainerBase):
 
         # Only operate on a k-hop subgraph around `node_idx`.
         # Get subgraph and relabel the node, mapping is the relabeled given node_idx.
-        if data_args.model_level == 'node':
+        if kwargs.get('model_level') == 'node':
             node_idx = kwargs.get('node_idx')
             self.node_idx = node_idx
             assert node_idx is not None
@@ -123,8 +125,8 @@ class GNNExplainer(ExplainerBase):
                 num_nodes=None, flow=self.__flow__())
 
         # Assume the mask we will predict
-        labels = tuple(i for i in range(data_args.num_classes))
-        ex_labels = tuple(torch.tensor([label]).to(data_args.device) for label in labels)
+        labels = tuple(i for i in range(kwargs.get('num_classes')))
+        ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
 
         # Calculate mask
         print('#D#Masks calculate...')

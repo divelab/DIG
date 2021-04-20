@@ -3,29 +3,30 @@ from  rdkit import Chem
 from .df_utils import *
 import sys
 sys.path.append('..')
-from utils import check_valency, convert_radical_electrons_to_hydrogens
+from dig.ggraph.utils import check_valency, convert_radical_electrons_to_hydrogens
 
 
 class GraphFlowModel(nn.Module):
-    def __init__(self, max_size=38, edge_unroll=12, node_dim=9, bond_dim=4, num_flow_layer=12, num_rgcn_layer=3, nhid=128, nout=128, use_gpu=True):
+    def __init__(self, model_conf_dict):
         super(GraphFlowModel, self).__init__()
-        self.max_size = max_size
-        self.edge_unroll = edge_unroll
-        self.node_dim = node_dim
-        self.bond_dim = bond_dim
+        self.max_size = model_conf_dict['max_size']
+        self.edge_unroll = model_conf_dict['edge_unroll']
+        self.node_dim = model_conf_dict['node_dim']
+        self.bond_dim = model_conf_dict['bond_dim']
 
-        node_masks, adj_masks, link_prediction_index, self.flow_core_edge_masks = self.initialize_masks(max_node_unroll=max_size, max_edge_unroll=edge_unroll)
+        node_masks, adj_masks, link_prediction_index, self.flow_core_edge_masks = self.initialize_masks(max_node_unroll=self.max_size, max_edge_unroll=self.edge_unroll)
 
         self.latent_step = node_masks.size(0)  # (max_size) + (max_edge_unroll - 1) / 2 * max_edge_unroll + (max_size - max_edge_unroll) * max_edge_unroll
         self.latent_node_length = self.max_size * self.node_dim
         self.latent_edge_length = (self.latent_step - self.max_size) * self.bond_dim
 
-        self.dp = use_gpu
+        self.dp = model_conf_dict['use_gpu']
         
-        node_base_log_probs = torch.randn(max_size, node_dim)
-        edge_base_log_probs = torch.randn(self.latent_step - max_size, bond_dim)
-        self.flow_core = DisGraphAF(node_masks, adj_masks, link_prediction_index, num_flow_layer = num_flow_layer, graph_size=self.max_size,
-                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=num_rgcn_layer, nhid=nhid, nout=nout)
+        node_base_log_probs = torch.randn(self.max_size, self.node_dim)
+        edge_base_log_probs = torch.randn(self.latent_step - self.max_size, self.bond_dim)
+        self.flow_core = DisGraphAF(node_masks, adj_masks, link_prediction_index, num_flow_layer = model_conf_dict['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=model_conf_dict['num_rgcn_layer'], 
+                                    nhid=model_conf_dict['nhid'], nout=model_conf_dict['nout'])
         if self.dp:
             self.flow_core = nn.DataParallel(self.flow_core)
             self.node_base_log_probs = nn.Parameter(node_base_log_probs.cuda(), requires_grad=True)

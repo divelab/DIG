@@ -234,7 +234,7 @@ class ExplanationProcessor(nn.Module):
 # --- Explanation evaluation demo ---
 def demo():
     import os
-    from defi import ROOT_DIR
+    from .defi import ROOT_DIR
     import sys
     sys.path.append(os.path.abspath(os.path.join(ROOT_DIR, '../..', 'DeepLIFT')))
     print(f"Add {os.path.abspath(os.path.join(ROOT_DIR, '../..', 'DeepLIFT'))} as a system path.")

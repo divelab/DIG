@@ -16,7 +16,7 @@ from typing import Callable, Union, Optional
 import matplotlib.pyplot as plt
 from torch_geometric.utils.num_nodes import maybe_num_nodes
 from torch_geometric.nn import MessagePassing
-from shapley import GnnNets_GC2value_func, GnnNets_NC2value_func, \
+from .shapley import GnnNets_GC2value_func, GnnNets_NC2value_func, \
     gnn_score, mc_shapley, l_shapley, mc_l_shapley, NC_mc_l_shapley
 
 
