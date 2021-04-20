@@ -14,7 +14,7 @@ class GraphDF(Generator):
     
 
     def get_model(self, task, model_conf_dict, checkpoint_path=None):
-        if model_conf_dict['use_gpu'] and torch.cuda.is_available():
+        if model_conf_dict['use_gpu'] and not torch.cuda.is_available():
             model_conf_dict['use_gpu'] = False
         if task == 'rand_gen':
             self.model = GraphFlowModel(model_conf_dict)
@@ -31,7 +31,7 @@ class GraphDF(Generator):
     def train_rand_gen(self, loader, lr, wd, max_epochs, model_conf_dict, save_interval, save_dir):
         self.get_model('rand_gen', model_conf_dict)
         self.model.train()
-        optimizer = torch.optim.Adam(lr=lr, weight_decay=wd)
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
         if not os.path.isdir(save_dir):
             os.mkdir(save_dir)
 
@@ -82,7 +82,7 @@ class GraphDF(Generator):
     def train_prop_optim(self, lr, wd, max_iters, warm_up, model_conf_dict, pretrained_path, save_interval, save_dir):
         self.get_model('prop_optim', model_conf_dict, pretrained_path)
         self.model.train()
-        optimizer = torch.optim.Adam(lr=lr, weight_decay=wd)
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
         if not os.path.isdir(save_dir):
             os.mkdir(save_dir)
 
@@ -131,7 +131,7 @@ class GraphDF(Generator):
     def train_cons_optim(self, loader, lr, wd, max_iters, warm_up, model_conf_dict, pretrained_path, save_interval, save_dir):
         self.get_model('cons_optim', model_conf_dict, pretrained_path)
         self.model.train()
-        optimizer = torch.optim.Adam(lr=lr, weight_decay=wd)
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
         if not os.path.isdir(save_dir):
             os.mkdir(save_dir)
         loader = DataIterator(loader)
