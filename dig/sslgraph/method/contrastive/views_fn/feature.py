@@ -33,12 +33,14 @@ class NodeAttrMask():
         
         node_num, feat_dim = data.x.size()
         x = data.x.detach().clone()
+        mask = torch.zeros(node_num)
 
         if self.mode == 'whole':
             mask_num = int(node_num * self.mask_ratio)
             idx_mask = np.random.choice(node_num, mask_num, replace=False)
             x[idx_mask] = torch.tensor(np.random.normal(loc=self.mask_mean, scale=self.mask_std, 
                                                         size=(mask_num, feat_dim)), dtype=torch.float32)
+            mask[idx_mask] = 1
 
         elif self.mode == 'partial':
             for i in range(node_num):
@@ -46,16 +48,18 @@ class NodeAttrMask():
                     if random.random() < self.mask_ratio:
                         x[i][j] = torch.tensor(np.random.normal(loc=self.mask_mean, 
                                                                 scale=self.mask_std), dtype=torch.float32)
+                        mask[i][j] = 1
 
         elif self.mode == 'onehot':
             mask_num = int(node_num * self.mask_ratio)
             idx_mask = np.random.choice(node_num, mask_num, replace=False)
             x[idx_mask] = torch.tensor(np.eye(feat_dim)[np.random.randint(0, feat_dim, size=(mask_num))], dtype=torch.float32)
+            mask[idx_mask] = 1
 
         else:
             raise Exception("Masking mode option '{0:s}' is not available!".format(mode))
 
-        return Data(x=x, edge_index=data.edge_index)
+        return Data(x=x, edge_index=data.edge_index, mask=mask)
 
     def views_fn(self, data):
         r"""Method to be called when :class:`NodeAttrMask` object is called.
