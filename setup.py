@@ -14,10 +14,10 @@ setuptools.setup(
     #         'dig=dig.xxx.xxx'
     #     ]
     # },
-    maintainer="xxx",
-    maintainer_email="xxx",
-    license="xxx",
-    keywords="xxx",
+#     maintainer="xxx",
+#     maintainer_email="xxx",
+    license="GPLv3",
+#     keywords="xxx",
     description="DIG: Dive into Graphs is a turnkey library for graph deep learning research.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -25,7 +25,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "License :: OSI Approved :: GNU General Public License v3",
         "Operating System :: OS Independent",
     ],
     install_requires=['scipy',
