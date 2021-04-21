@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - python=3.8
   - rdkit==2021.03.1
   - pytorch==1.6.0
   - pip>=21.0
