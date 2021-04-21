@@ -1,0 +1,906 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Methods &mdash; DIG: Dive into Graphs 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Evaluations" href="evaluation.html" />
+    <link rel="prev" title="Datasets" href="dataset.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> DIG: Dive into Graphs
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/introduction.html">Introduction of DIG: Dive into Graphs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Graph Generation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ggraph/dataset.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ggraph/method.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ggraph/evaluation.html">Evaluations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ggraph/utils.html">Utils</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Self-supervised Learning on Graphs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">Datasets</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pre-implemented-contrastive-methods">Pre-implemented Contrastive Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contrastive-objectives">Contrastive Objectives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#views-generation">Views Generation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="evaluation.html">Evaluations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Explainability of GNNs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../xgraph/dataset.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../xgraph/method.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../xgraph/evaluation.html">Evaluations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../xgraph/utils.html">Utils</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Deep Learning on 3D Graphs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../3dgraph/dataset.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../3dgraph/method.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../3dgraph/evaluation.html">Evaluations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../3dgraph/utils.html">Utils</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contribution/instruction.html">Contributing to DIG</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DIG: Dive into Graphs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Methods</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/sslgraph/method.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="methods">
+<h1>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pre-implemented-contrastive-methods" id="id8">Pre-implemented Contrastive Methods</a></p></li>
+<li><p><a class="reference internal" href="#contrastive-objectives" id="id9">Contrastive Objectives</a></p></li>
+<li><p><a class="reference internal" href="#views-generation" id="id10">Views Generation</a></p></li>
+</ul>
+</div>
+<div class="section" id="pre-implemented-contrastive-methods">
+<h2><a class="toc-backref" href="#id8">Pre-implemented Contrastive Methods</a><a class="headerlink" href="#pre-implemented-contrastive-methods" title="Permalink to this headline">¶</a></h2>
+<p>Contrastive method classes under <a class="reference internal" href="#module-dig.sslgraph.method" title="dig.sslgraph.method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method</span></code></a>, or alias <code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method.contrastive.model</span></code>.</p>
+<span class="target" id="module-dig.sslgraph.method"></span><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dig.sslgraph.method.Contrastive" title="dig.sslgraph.method.Contrastive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Contrastive</span></code></a></p></td>
+<td><p>Base class for creating contrastive learning models for either graph-level or node-level tasks.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dig.sslgraph.method.GRACE" title="dig.sslgraph.method.GRACE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GRACE</span></code></a></p></td>
+<td><p>Contrastive learning method proposed in the paper <a class="reference external" href="https://arxiv.org/abs/2006.04131">Deep Graph Contrastive Representation Learning</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dig.sslgraph.method.GraphCL" title="dig.sslgraph.method.GraphCL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GraphCL</span></code></a></p></td>
+<td><p>Contrastive learning method proposed in the paper <a class="reference external" href="https://arxiv.org/abs/2010.13902">Graph Contrastive Learning with Augmentations</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dig.sslgraph.method.InfoGraph" title="dig.sslgraph.method.InfoGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InfoGraph</span></code></a></p></td>
+<td><p>Contrastive learning method proposed in the paper <a class="reference external" href="https://arxiv.org/abs/1908.01000">InfoGraph: Unsupervised and Semi-supervised Graph-Level Representation Learning via Mutual Information Maximization</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dig.sslgraph.method.MVGRL" title="dig.sslgraph.method.MVGRL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MVGRL</span></code></a></p></td>
+<td><p>Contrastive learning method for graph-level tasks proposed in the paper <a class="reference external" href="https://arxiv.org/pdf/2006.05582v1.pdf">Contrastive Multi-View Representation Learning on Graphs (MVGRL)</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dig.sslgraph.method.NodeMVGRL" title="dig.sslgraph.method.NodeMVGRL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeMVGRL</span></code></a></p></td>
+<td><p><p>Contrastive learning method for node-level tasks proposed in the paper <a class="reference external" href="https://arxiv.org/pdf/2006.05582v1.pdf">Contrastive Multi-View Representation Learning on Graphs (MVGRL)</a>.</p>
+</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt id="dig.sslgraph.method.Contrastive">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Contrastive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objective</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">views_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_n_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neg_by_crpt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'models'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.Contrastive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for creating contrastive learning models for either graph-level or
+node-level tasks.</p>
+<p><em>Alias</em>: <code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method.contrastive.model.</span></code><a class="reference internal" href="#dig.sslgraph.method.Contrastive" title="dig.sslgraph.method.Contrastive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Contrastive</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>objective</strong> (<em>string</em><em>, or </em><em>callable</em>) – The learning objective of contrastive model.
+If string, should be one of ‘NCE’ and ‘JSE’. If callable, should take lists
+of representations as inputs and returns loss Tensor
+(see <cite>dig.sslgraph.method.contrastive.objectives</cite> for examples).</p></li>
+<li><p><strong>views_fn</strong> (<em>list of callable</em>) – List of functions to generate views from given graphs.</p></li>
+<li><p><strong>graph_level</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to include graph-level representation
+for contrast. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>)</p></li>
+<li><p><strong>node_level</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to include node-level representation
+for contrast. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+<li><p><strong>z_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – The dimension of graph-level representations.
+Required if <code class="xref py py-obj docutils literal notranslate"><span class="pre">graph_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>)</p></li>
+<li><p><strong>z_dim</strong> – The dimension of node-level representations.
+Required if <code class="xref py py-obj docutils literal notranslate"><span class="pre">node_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>)</p></li>
+<li><p><strong>proj</strong> (<em>string</em><em>, or </em><em>Module</em><em>, </em><em>optional</em>) – Projection head for graph-level representation.
+If string, should be <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;linear&quot;</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;MLP&quot;</span></code>. Required if
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">graph_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>)</p></li>
+<li><p><strong>proj_n</strong> (<em>string</em><em>, or </em><em>Module</em><em>, </em><em>optional</em>) – Projection head for node-level representations.
+If string, should be one of ‘linear’ and ‘MLP’. Required if
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">node_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>)</p></li>
+<li><p><strong>neg_by_crpt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – The mode to obtain negative samples in JSE. If True,
+obtain negative samples by performing corruption. Otherwise, consider pairs of
+different graph samples as negative pairs. Only used when
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code> = <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;JSE&quot;</span></code>. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+<li><p><strong>tau</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The tempurature parameter in InfoNCE (NT-XENT) loss. Only used when
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">objective</span></code> = <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;NCE&quot;</span></code>. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.5</span></code>)</p></li>
+<li><p><strong>device</strong> (int, or <cite>torch.device</cite>, optional) – The device to perform computation.</p></li>
+<li><p><strong>choice_model</strong> (<em>string</em><em>, </em><em>optional</em>) – Whether to yield model with <code class="xref py py-obj docutils literal notranslate"><span class="pre">best</span></code> training loss or
+at the <code class="xref py py-obj docutils literal notranslate"><span class="pre">last</span></code> epoch. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">last</span></code>)</p></li>
+<li><p><strong>model_path</strong> (<em>string</em><em>, </em><em>optinal</em>) – The directory to restore the saved model.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">models</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.Contrastive.train">
+<code class="sig-name descname"><span class="pre">train</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_epoch_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.Contrastive.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform contrastive training and yield trained trained encoders per epoch or after
+the last epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoder</strong> (<em>Module</em><em>, or </em><em>list of Module</em>) – A graph encoder shared by all views or a list
+of graph encoders dedicated for each view. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">node_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>,
+the encoder should return tensor of shape [<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>].
+Otherwise, return tuple of shape ([<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>],
+[<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_nodes</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_n_dim</span></code>]) representing graph-level and node-level embeddings.</p></li>
+<li><p><strong>dataloader</strong> (<em>Dataloader</em>) – Dataloader for unsupervised learning or pretraining.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – Pytorch optimizer for trainable parameters in encoder(s).</p></li>
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of total training epochs.</p></li>
+<li><p><strong>per_epoch_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If True, yield trained encoders per epoch. Otherwise, only yield
+the final encoder at the last epoch. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">generator</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.GRACE">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">GRACE</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropE_rate_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropE_rate_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maskN_rate_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maskN_rate_2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.GRACE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contrastive learning method proposed in the paper <a class="reference external" href="https://arxiv.org/abs/2006.04131">Deep Graph Contrastive Representation
+Learning</a>.</p>
+<p><em>Alias</em>: <code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method.contrastive.model.</span></code><a class="reference internal" href="#dig.sslgraph.method.GRACE" title="dig.sslgraph.method.GRACE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GRACE</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The embedding dimension.</p></li>
+<li><p><strong>dropE_rate_1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The ratio of the edge dropping augmentation for
+each view. A number between [0,1).</p></li>
+<li><p><strong>dropE_rate_2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The ratio of the edge dropping augmentation for
+each view. A number between [0,1).</p></li>
+<li><p><strong>maskN_rate_1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The ratio of the node masking augmentation for each
+view. A number between [0,1).</p></li>
+<li><p><strong>maskN_rate_2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The ratio of the node masking augmentation for each
+view. A number between [0,1).</p></li>
+<li><p><strong>**kwargs</strong> (<em>optinal</em>) – Additional arguments of <a class="reference internal" href="#dig.sslgraph.method.Contrastive" title="dig.sslgraph.method.Contrastive"><code class="xref py py-class docutils literal notranslate"><span class="pre">dig.sslgraph.method.Contrastive</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.GRACE.train">
+<code class="sig-name descname"><span class="pre">train</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_epoch_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.GRACE.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform contrastive training and yield trained trained encoders per epoch or after
+the last epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoder</strong> (<em>Module</em><em>, or </em><em>list of Module</em>) – A graph encoder shared by all views or a list
+of graph encoders dedicated for each view. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">node_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>,
+the encoder should return tensor of shape [<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>].
+Otherwise, return tuple of shape ([<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>],
+[<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_nodes</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_n_dim</span></code>]) representing graph-level and node-level embeddings.</p></li>
+<li><p><strong>dataloader</strong> (<em>Dataloader</em>) – Dataloader for unsupervised learning or pretraining.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – Pytorch optimizer for trainable parameters in encoder(s).</p></li>
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of total training epochs.</p></li>
+<li><p><strong>per_epoch_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If True, yield trained encoders per epoch. Otherwise, only yield
+the final encoder at the last epoch. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">generator</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.GraphCL">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">GraphCL</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aug_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aug_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aug_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.GraphCL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contrastive learning method proposed in the paper <a class="reference external" href="https://arxiv.org/abs/2010.13902">Graph Contrastive Learning with
+Augmentations</a>.</p>
+<p><em>Alias</em>: <code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method.contrastive.model.</span></code><a class="reference internal" href="#dig.sslgraph.method.GraphCL" title="dig.sslgraph.method.GraphCL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GraphCL</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The embedding dimension.</p></li>
+<li><p><strong>aug1</strong> (<em>sting</em><em>, </em><em>optinal</em>) – Types of augmentation for the first view from (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;dropN&quot;</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;permE&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;subgraph&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;maskN&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;random2&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;random3&quot;</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;random4&quot;</span></code>). (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>)</p></li>
+<li><p><strong>aug2</strong> (<em>sting</em><em>, </em><em>optinal</em>) – Types of augmentation for the second view from (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;dropN&quot;</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;permE&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;subgraph&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;maskN&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;random2&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;random3&quot;</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;random4&quot;</span></code>). (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>)</p></li>
+<li><p><strong>aug_ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – The ratio of augmentations. A number between [0,1).</p></li>
+<li><p><strong>**kwargs</strong> (<em>optinal</em>) – Additional arguments of <a class="reference internal" href="#dig.sslgraph.method.Contrastive" title="dig.sslgraph.method.Contrastive"><code class="xref py py-class docutils literal notranslate"><span class="pre">dig.sslgraph.method.Contrastive</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.GraphCL.train">
+<code class="sig-name descname"><span class="pre">train</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_epoch_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.GraphCL.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform contrastive training and yield trained trained encoders per epoch or after
+the last epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoder</strong> (<em>Module</em><em>, or </em><em>list of Module</em>) – A graph encoder shared by all views or a list
+of graph encoders dedicated for each view. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">node_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>,
+the encoder should return tensor of shape [<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>].
+Otherwise, return tuple of shape ([<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>],
+[<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_nodes</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_n_dim</span></code>]) representing graph-level and node-level embeddings.</p></li>
+<li><p><strong>dataloader</strong> (<em>Dataloader</em>) – Dataloader for unsupervised learning or pretraining.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – Pytorch optimizer for trainable parameters in encoder(s).</p></li>
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of total training epochs.</p></li>
+<li><p><strong>per_epoch_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If True, yield trained encoders per epoch. Otherwise, only yield
+the final encoder at the last epoch. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">generator</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.InfoGraph">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">InfoGraph</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dim</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.InfoGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contrastive learning method proposed in the paper <a class="reference external" href="https://arxiv.org/abs/1908.01000">InfoGraph: Unsupervised and
+Semi-supervised Graph-Level Representation Learning via Mutual Information
+Maximization</a>.</p>
+<p><em>Alias</em>: <code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method.contrastive.model.</span></code><a class="reference internal" href="#dig.sslgraph.method.InfoGraph" title="dig.sslgraph.method.InfoGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InfoGraph</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The embedding dimension for graph-level (global) representations.</p></li>
+<li><p><strong>n_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The embedding dimension for node-level (local) representations. Typically,
+when jumping knowledge is included in the encoder, we have
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">g_dim</span></code> = <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_layers</span></code> * <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_dim</span></code>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>optinal</em>) – Additional arguments of <a class="reference internal" href="#dig.sslgraph.method.Contrastive" title="dig.sslgraph.method.Contrastive"><code class="xref py py-class docutils literal notranslate"><span class="pre">dig.sslgraph.method.Contrastive</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.InfoGraph.train">
+<code class="sig-name descname"><span class="pre">train</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_epoch_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.InfoGraph.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform contrastive training and yield trained trained encoders per epoch or after
+the last epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoder</strong> (<em>Module</em><em>, or </em><em>list of Module</em>) – A graph encoder shared by all views or a list
+of graph encoders dedicated for each view. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">node_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>,
+the encoder should return tensor of shape [<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>].
+Otherwise, return tuple of shape ([<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>],
+[<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_nodes</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_n_dim</span></code>]) representing graph-level and node-level embeddings.</p></li>
+<li><p><strong>dataloader</strong> (<em>Dataloader</em>) – Dataloader for unsupervised learning or pretraining.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – Pytorch optimizer for trainable parameters in encoder(s).</p></li>
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of total training epochs.</p></li>
+<li><p><strong>per_epoch_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If True, yield trained encoders per epoch. Otherwise, only yield
+the final encoder at the last epoch. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">generator</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.MVGRL">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">MVGRL</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diffusion_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ppr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.MVGRL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contrastive learning method for graph-level tasks proposed in the paper <a class="reference external" href="https://arxiv.org/pdf/2006.05582v1.pdf">Contrastive
+Multi-View Representation Learning on Graphs (MVGRL)</a>.</p>
+<p><em>Alias</em>: <code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method.contrastive.model.</span></code><a class="reference internal" href="#dig.sslgraph.method.MVGRL" title="dig.sslgraph.method.MVGRL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MVGRL</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The embedding dimension for graph-level (global) representations.</p></li>
+<li><p><strong>n_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The embedding dimension for node-level (local) representations. Typically,
+when jumping knowledge is included in the encoder, we have
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">g_dim</span></code> = <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_layers</span></code> * <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_dim</span></code>.</p></li>
+<li><p><strong>diffusion_type</strong> (<em>string</em><em>, </em><em>optional</em>) – Diffusion instantiation mode with two options:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;ppr&quot;</span></code>: Personalized PageRank.
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;heat&quot;</span></code>: heat kernel.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;ppr&quot;</span></code>)</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Teleport probability in a random walk. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.2</span></code>)</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optinal</em>) – Diffusion time. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">5</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.MVGRL.train">
+<code class="sig-name descname"><span class="pre">train</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_epoch_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.MVGRL.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform contrastive training and yield trained trained encoders per epoch or after
+the last epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoder</strong> (<em>Module</em><em>, or </em><em>list of Module</em>) – A graph encoder shared by all views or a list
+of graph encoders dedicated for each view. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">node_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>,
+the encoder should return tensor of shape [<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>].
+Otherwise, return tuple of shape ([<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>],
+[<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_nodes</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_n_dim</span></code>]) representing graph-level and node-level embeddings.</p></li>
+<li><p><strong>dataloader</strong> (<em>Dataloader</em>) – Dataloader for unsupervised learning or pretraining.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – Pytorch optimizer for trainable parameters in encoder(s).</p></li>
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of total training epochs.</p></li>
+<li><p><strong>per_epoch_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If True, yield trained encoders per epoch. Otherwise, only yield
+the final encoder at the last epoch. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">generator</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.NodeMVGRL">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">NodeMVGRL</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_n_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diffusion_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ppr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.NodeMVGRL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contrastive learning method for node-level tasks proposed in the paper <a class="reference external" href="https://arxiv.org/pdf/2006.05582v1.pdf">Contrastive
+Multi-View Representation Learning on Graphs (MVGRL)</a>.</p>
+<p><em>Alias</em>: <code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method.contrastive.model.</span></code><a class="reference internal" href="#dig.sslgraph.method.NodeMVGRL" title="dig.sslgraph.method.NodeMVGRL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeMVGRL</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z_g_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The embedding dimension for graph-level (global) representations.</p></li>
+<li><p><strong>z_n_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The embedding dimension for node-level (local) representations. Typically,
+when jumping knowledge is included in the encoder, we have
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">z_g_dim</span></code> = <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_layers</span></code> * <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_n_dim</span></code>.</p></li>
+<li><p><strong>diffusion_type</strong> (<em>string</em><em>, </em><em>optional</em>) – Diffusion instantiation mode with two options:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;ppr&quot;</span></code>: Personalized PageRank.
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;heat&quot;</span></code>: heat kernel.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;ppr&quot;</span></code>)</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Teleport probability in a random walk. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.2</span></code>)</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optinal</em>) – Diffusion time. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">5</span></code>)</p></li>
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optinal</em>) – Number of subgraph samples in each minibatch. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">2</span></code>)</p></li>
+<li><p><strong>num_nodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optinal</em>) – Number of nodes sampled in each subgraph. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">2000</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.NodeMVGRL.train">
+<code class="sig-name descname"><span class="pre">train</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_epoch_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.NodeMVGRL.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform contrastive training and yield trained trained encoders per epoch or after
+the last epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoder</strong> (<em>Module</em><em>, or </em><em>list of Module</em>) – A graph encoder shared by all views or a list
+of graph encoders dedicated for each view. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">node_level</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>,
+the encoder should return tensor of shape [<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>].
+Otherwise, return tuple of shape ([<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_graphs</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_dim</span></code>],
+[<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_nodes</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">z_n_dim</span></code>]) representing graph-level and node-level embeddings.</p></li>
+<li><p><strong>dataloader</strong> (<em>Dataloader</em>) – Dataloader for unsupervised learning or pretraining.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – Pytorch optimizer for trainable parameters in encoder(s).</p></li>
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of total training epochs.</p></li>
+<li><p><strong>per_epoch_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If True, yield trained encoders per epoch. Otherwise, only yield
+the final encoder at the last epoch. (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">generator</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="contrastive-objectives">
+<h2><a class="toc-backref" href="#id9">Contrastive Objectives</a><a class="headerlink" href="#contrastive-objectives" title="Permalink to this headline">¶</a></h2>
+<p>Contrastive objective functions under <a class="reference internal" href="#module-dig.sslgraph.method.contrastive.objectives" title="dig.sslgraph.method.contrastive.objectives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method.contrastive.objectives</span></code></a>.</p>
+<span class="target" id="module-dig.sslgraph.method.contrastive.objectives"></span><dl class="py function">
+<dt id="dig.sslgraph.method.contrastive.objectives.JSE_loss">
+<code class="sig-name descname"><span class="pre">JSE_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zs_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neg_by_crpt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.objectives.JSE_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Jensen-Shannon Estimator of Mutual Information used in contrastive learning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>, </em><em>optional</em>) – List of tensors of shape [batch_size, z_dim].</p></li>
+<li><p><strong>zs_n</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>, </em><em>optional</em>) – List of tensors of shape [nodes, z_dim].</p></li>
+<li><p><strong>batch</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Required when both <code class="xref py py-obj docutils literal notranslate"><span class="pre">zs</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">zs_n</span></code> are given.</p></li>
+<li><p><strong>sigma</strong> (<em>ndarray</em><em>, </em><em>optional</em>) – A 2D-array of shape [n_views, n_views] with boolean values,
+indicating contrast between which two views are computed. Only required
+when number of views is greater than 2. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">sigma[i][j]</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>,
+JSE between view_i and view_j will be computed.</p></li>
+<li><p><strong>neg_by_crpt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – The mode to obtain negative samples in JSE. If True,
+obtain negative samples by performing corruption. Otherwise, consider pairs of
+different graph samples as negative pairs.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dig.sslgraph.method.contrastive.objectives.NCE_loss">
+<code class="sig-name descname"><span class="pre">NCE_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zs_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.objectives.NCE_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>The InfoNCE (NT-XENT) loss in contrastive learning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>, </em><em>optipnal</em>) – List of tensors of shape [batch_size, z_dim].</p></li>
+<li><p><strong>zs_n</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>, </em><em>optional</em>) – List of tensors of shape [nodes, z_dim].</p></li>
+<li><p><strong>batch</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Required when both <code class="xref py py-obj docutils literal notranslate"><span class="pre">zs</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">zs_n</span></code> are given.</p></li>
+<li><p><strong>sigma</strong> (<em>ndarray</em><em>, </em><em>optional</em>) – A 2D-array of shape [<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_views</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_views</span></code>] with boolean
+values, indicating contrast between which two views are computed. Only required
+when number of views is greater than 2. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">sigma[i][j]</span></code> = <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>,
+infoNCE between <span class="math notranslate nohighlight">\(view_i\)</span> and <span class="math notranslate nohighlight">\(view_j\)</span> will be computed.</p></li>
+<li><p><strong>tau</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – The temperature used in NT-XENT.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="views-generation">
+<h2><a class="toc-backref" href="#id10">Views Generation</a><a class="headerlink" href="#views-generation" title="Permalink to this headline">¶</a></h2>
+<p>Views generation classes under <a class="reference internal" href="#module-dig.sslgraph.method.contrastive.views_fn" title="dig.sslgraph.method.contrastive.views_fn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dig.sslgraph.method.contrastive.views_fn</span></code></a>.</p>
+<span class="target" id="module-dig.sslgraph.method.contrastive.views_fn"></span><dl class="py class">
+<dt id="dig.sslgraph.method.contrastive.views_fn.Diffusion">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Diffusion</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ppr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_self_loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.Diffusion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Diffusion on the given graph or batched graphs, used in
+<a class="reference external" href="https://arxiv.org/pdf/2006.05582v1.pdf">MVGRL</a>. Class objects callable via
+method <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.Diffusion.views_fn" title="dig.sslgraph.method.contrastive.views_fn.Diffusion.views_fn"><code class="xref py py-meth docutils literal notranslate"><span class="pre">views_fn()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (<em>string</em><em>, </em><em>optional</em>) – Diffusion instantiation mode with two options:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;ppr&quot;</span></code>: Personalized PageRank; <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;heat&quot;</span></code>: heat kernel.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;ppr&quot;</span></code>)</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optinal</em>) – Teleport probability in a random walk. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.2</span></code>)</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optinal</em>) – Diffusion time. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">5</span></code>)</p></li>
+<li><p><strong>add_self_loop</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Set True to add self-loop to edge_index.
+(default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.contrastive.views_fn.Diffusion.views_fn">
+<code class="sig-name descname"><span class="pre">views_fn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.Diffusion.views_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to be called when <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.Diffusion" title="dig.sslgraph.method.contrastive.views_fn.Diffusion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Diffusion</span></code></a> object is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>) – The input graph or batched graphs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.contrastive.views_fn.DiffusionWithSample">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">DiffusionWithSample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ppr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_self_loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.DiffusionWithSample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Diffusion with node sampling on the given graph for node-level datasets, used in
+<a class="reference external" href="https://arxiv.org/pdf/2006.05582v1.pdf">MVGRL</a>.  Class objects callable via method
+<a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.DiffusionWithSample.views_fn" title="dig.sslgraph.method.contrastive.views_fn.DiffusionWithSample.views_fn"><code class="xref py py-meth docutils literal notranslate"><span class="pre">views_fn()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Number of nodes in the sampled subgraoh from a large graph.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">2000</span></code>)</p></li>
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Number of subgraphs to sample. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">4</span></code>)</p></li>
+<li><p><strong>mode</strong> (<em>string</em><em>, </em><em>optional</em>) – Diffusion instantiation mode with two options:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;ppr&quot;</span></code>: Personalized PageRank; <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;heat&quot;</span></code>: heat kernel;
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;ppr&quot;</span></code>)</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optinal</em>) – Teleport probability in a random walk. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.2</span></code>)</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optinal</em>) – Diffusion time. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">5</span></code>)</p></li>
+<li><p><strong>add_self_loop</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Set True to add self-loop to edge_index.
+(default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.contrastive.views_fn.DiffusionWithSample.views_fn">
+<code class="sig-name descname"><span class="pre">views_fn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.DiffusionWithSample.views_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to be called when <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.DiffusionWithSample" title="dig.sslgraph.method.contrastive.views_fn.DiffusionWithSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiffusionWithSample</span></code></a> object is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>) – The input graph or batched graphs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.contrastive.views_fn.EdgePerturbation">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">EdgePerturbation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.EdgePerturbation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edge perturbation on the given graph or batched graphs. Class objects callable via
+method <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.EdgePerturbation.views_fn" title="dig.sslgraph.method.contrastive.views_fn.EdgePerturbation.views_fn"><code class="xref py py-meth docutils literal notranslate"><span class="pre">views_fn()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>add</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Set <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if randomly add edges in a given graph.
+(default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>)</p></li>
+<li><p><strong>drop</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Set <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if randomly drop edges in a given graph.
+(default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+<li><p><strong>ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Percentage of edges to add or drop. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.1</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.contrastive.views_fn.EdgePerturbation.views_fn">
+<code class="sig-name descname"><span class="pre">views_fn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.EdgePerturbation.views_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to be called when <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.EdgePerturbation" title="dig.sslgraph.method.contrastive.views_fn.EdgePerturbation"><code class="xref py py-class docutils literal notranslate"><span class="pre">EdgePerturbation</span></code></a> object is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>) – The input graph or batched graphs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.contrastive.views_fn.NodeAttrMask">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">NodeAttrMask</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'whole'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.NodeAttrMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Node attribute masking on the given graph or batched graphs.
+Class objects callable via method <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.NodeAttrMask.views_fn" title="dig.sslgraph.method.contrastive.views_fn.NodeAttrMask.views_fn"><code class="xref py py-meth docutils literal notranslate"><span class="pre">views_fn()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (<em>string</em><em>, </em><em>optinal</em>) – Masking mode with three options:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;whole&quot;</span></code>: mask all feature dimensions of the selected node with a Gaussian distribution;
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;partial&quot;</span></code>: mask only selected feature dimensions with a Gaussian distribution;
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;onehot&quot;</span></code>: mask all feature dimensions of the selected node with a one-hot vector.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;whole&quot;</span></code>)</p></li>
+<li><p><strong>mask_ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optinal</em>) – The ratio of node attributes to be masked. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.1</span></code>)</p></li>
+<li><p><strong>mask_mean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Mean of the Gaussian distribution to generate masking values.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.5</span></code>)</p></li>
+<li><p><strong>mask_std</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Standard deviation of the distribution to generate masking values.
+Must be non-negative. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.5</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.contrastive.views_fn.NodeAttrMask.views_fn">
+<code class="sig-name descname"><span class="pre">views_fn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.NodeAttrMask.views_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to be called when <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.NodeAttrMask" title="dig.sslgraph.method.contrastive.views_fn.NodeAttrMask"><code class="xref py py-class docutils literal notranslate"><span class="pre">NodeAttrMask</span></code></a> object is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>) – The input graph or batched graphs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.contrastive.views_fn.RWSample">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">RWSample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_self_loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.RWSample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subgraph sampling on the given graph or batched graphs.
+Class objects callable via method <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.RWSample.views_fn" title="dig.sslgraph.method.contrastive.views_fn.RWSample.views_fn"><code class="xref py py-meth docutils literal notranslate"><span class="pre">views_fn()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Percentage of nodes to sample from the graph.
+(default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.1</span></code>)</p></li>
+<li><p><strong>add_self_loop</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Set True to add self-loop to edge_index.
+(default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.contrastive.views_fn.RWSample.views_fn">
+<code class="sig-name descname"><span class="pre">views_fn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.RWSample.views_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to be called when <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.RWSample" title="dig.sslgraph.method.contrastive.views_fn.RWSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">RWSample</span></code></a> object is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>) – The input graph or batched graphs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.contrastive.views_fn.RandomView">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">RandomView</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.RandomView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate views by random transformation (augmentation) on given batched graphs,
+where each graph in the batch is treated independently. Class objects callable via
+method <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.RandomView.views_fn" title="dig.sslgraph.method.contrastive.views_fn.RandomView.views_fn"><code class="xref py py-meth docutils literal notranslate"><span class="pre">views_fn()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>candidates</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – A list of callable view generation functions (classes).</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.contrastive.views_fn.RandomView.views_fn">
+<code class="sig-name descname"><span class="pre">views_fn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.RandomView.views_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to be called when <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.RandomView" title="dig.sslgraph.method.contrastive.views_fn.RandomView"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomView</span></code></a> object is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Batch</span></code>) – The input batched graphs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Batch</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.contrastive.views_fn.Sequential">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Sequential</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn_sequence</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.Sequential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate views by applying a sequence of transformations (augmentations) on
+given batched graphs. Class objects callable via method <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.Sequential.views_fn" title="dig.sslgraph.method.contrastive.views_fn.Sequential.views_fn"><code class="xref py py-meth docutils literal notranslate"><span class="pre">views_fn()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fn_sequence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – A list of callable view generation functions (classes).</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.contrastive.views_fn.Sequential.views_fn">
+<code class="sig-name descname"><span class="pre">views_fn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.Sequential.views_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to be called when <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.Sequential" title="dig.sslgraph.method.contrastive.views_fn.Sequential"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequential</span></code></a> object is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>) – The input graph or batched graphs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dig.sslgraph.method.contrastive.views_fn.UniformSample">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">UniformSample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.UniformSample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uniformly node dropping on the given graph or batched graphs.
+Class objects callable via method <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.UniformSample.views_fn" title="dig.sslgraph.method.contrastive.views_fn.UniformSample.views_fn"><code class="xref py py-meth docutils literal notranslate"><span class="pre">views_fn()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optinal</em>) – Ratio of nodes to be dropped. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">0.1</span></code>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="dig.sslgraph.method.contrastive.views_fn.UniformSample.views_fn">
+<code class="sig-name descname"><span class="pre">views_fn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dig.sslgraph.method.contrastive.views_fn.UniformSample.views_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to be called when <a class="reference internal" href="#dig.sslgraph.method.contrastive.views_fn.UniformSample" title="dig.sslgraph.method.contrastive.views_fn.UniformSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformSample</span></code></a> object is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>) – The input graph or batched graphs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="evaluation.html" class="btn btn-neutral float-right" title="Evaluations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dataset.html" class="btn btn-neutral float-left" title="Datasets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, DIVE Lab.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

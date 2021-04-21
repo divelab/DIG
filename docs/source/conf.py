@@ -20,6 +20,7 @@ import dig.sslgraph.dataset
 import dig.sslgraph.method
 import dig.sslgraph.utils
 import dig.sslgraph.evaluation
+import dig.ggraph.dataset
 
 import sphinx_rtd_theme
 
