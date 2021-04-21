@@ -13,9 +13,53 @@ from torch_geometric.nn.inits import glorot, zeros
 
 
 class Encoder(torch.nn.Module):
+    r"""A wrapped :class:`torch.nn.Module` class for the convinient instantiation of 
+    pre-implemented graph encoders.
+    
+    Args:
+        feat_dim (int): The dimension of input node features.
+        hidden_dim (int): The dimension of node-level (local) embeddings. 
+        n_layer (int, optional): The number of GNN layers in the encoder. (default: :obj:`5`)
+        pool (string, optional): The global pooling methods, :obj:`sum` or :obj:`mean`.
+            (default: :obj:`sum`)
+        gnn (string, optional): The type of GNN layer, :obj:`gcn`, :obj:`gin` or 
+            :obj:`resgcn`. (default: :obj:`gin`)
+        bn (bool, optional): Whether to include batch normalization. (default: :obj:`True`)
+        act (string, optional): The activation function, :obj:`relu` or :obj:`prelu`.
+            (default: :obj:`relu`)
+        bias (bool, optional): Whether to include bias term in Linear. (default: :obj:`True`)
+        xavier (bool, optional): Whether to apply xavier initialization. (default: :obj:`True`)
+        node_level (bool, optional): If :obj:`True`, the encoder will output node level
+            embedding (local representations). (default: :obj:`False`)
+        graph_level (bool, optional): If :obj:`True`, the encoder will output graph level
+            embeddings (global representations). (default: :obj:`True`)
+        edge_weight (bool, optional): Only applied to GCN. Whether to use edge weight to
+            compute the aggregation. (default: :obj:`False`)
+            
+    Note
+    ----
+    For GCN and GIN encoders, the dimension of the output node-level (local) embedding will be 
+    :obj:`hidden_dim`, whereas the node-level embedding will be :obj:`hidden_dim` * :obj:`n_layers`. 
+    For ResGCN, the output embeddings for boths node and graphs will have dimensions :obj:`hidden_dim`.
+            
+    Examples
+    --------
+    >>> feat_dim = dataset[0].x.shape[1]
+    >>> encoder = Encoder(feat_dim, 128, n_layer=3, gnn="gin")
+    >>> encoder(some_batched_data).shape # graph-level embedding of shape [batch_size, 128*3]
+    torch.Size([32, 384]) 
+    
+    >>> encoder = Encoder(feat_dim, 128, n_layer=5, node_level=True, graph_level=False)
+    >>> encoder(some_batched_data).shape # node-level embedding of shape [n_nodes, 128]
+    torch.Size([707, 128]) 
+    
+    >>> encoder = Encoder(feat_dim, 128, n_layer=5, node_level=True, graph_level=False)
+    >>> encoder(some_batched_data) # a tuple of graph-level and node-level embeddings
+    (tensor([...]), tensor([...])) 
+    """
     def __init__(self, feat_dim, hidden_dim, n_layers=5, pool='sum', 
-                 gnn='gin', bn=False, act='relu', bias=True, xavier=True, 
-                 node_level=False, graph_level=True, xg_dim=None, edge_weight=False):
+                 gnn='gin', bn=True, act='relu', bias=True, xavier=True, 
+                 node_level=False, graph_level=True, edge_weight=False):
         super(Encoder, self).__init__()
 
         if gnn == 'gin':
@@ -25,7 +69,7 @@ class Encoder(torch.nn.Module):
                                act, bias, xavier, edge_weight)
         elif gnn == 'resgcn':
             self.encoder = ResGCN(feat_dim, hidden_dim, num_conv_layers=n_layers, 
-                                  global_pool=pool, xg_dim=xg_dim)
+                                  global_pool=pool)
 
         self.node_level = node_level
         self.graph_level = graph_level
@@ -244,7 +288,7 @@ class ResGCN(torch.nn.Module):
     def __init__(self, feat_dim, hidden_dim, 
                  num_feat_layers=1, 
                  num_conv_layers=3,
-                 num_fc_layers=2, xg_dim=None,
+                 num_fc_layers=2, xg_dim=None, bn=True,
                  gfn=False, collapse=False, residual=False,
                  global_pool="sum", dropout=0, edge_norm=True):
 
@@ -253,6 +297,7 @@ class ResGCN(torch.nn.Module):
         self.conv_residual = residual
         self.fc_residual = False  # no skip-connections for fc layers.
         self.collapse = collapse
+        self.bn = bn
 
         assert "sum" in global_pool or "mean" in global_pool, global_pool
         if "sum" in global_pool:
@@ -321,25 +366,26 @@ class ResGCN(torch.nn.Module):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         if self.use_xg:
             # xg is of shape [n_graphs, feat_dim]
-            xg = self.bn1_xg(data.xg)
+            xg = self.bn1_xg(data.xg) if self.bn else xg
             xg = F.relu(self.lin1_xg(xg))
-            xg = self.bn2_xg(xg)
+            xg = self.bn2_xg(xg) if self.bn else xg
             xg = F.relu(self.lin2_xg(xg))
         else:
             xg = None
         
-        x = self.bn_feat(x)
+        x = self.bn_feat(x) if self.bn else x
         x = F.relu(self.conv_feat(x, edge_index))
         for i, conv in enumerate(self.convs):
-            x_ = self.bns_conv[i](x)
+            x_ = self.bns_conv[i](x) if self.bn else x
             x_ = F.relu(conv(x_, edge_index))
             x = x + x_ if self.conv_residual else x_
+        local_rep = x
         gate = 1 if self.gating is None else self.gating(x)
         x = self.global_pool(x * gate, batch)
         x = x if xg is None else x + xg
         
         for i, lin in enumerate(self.lins):
-            x_ = self.bns_fc[i](x)
+            x_ = self.bns_fc[i](x) if self.bn else x
             x_ = F.relu(lin(x_))
             x = x + x_ if self.fc_residual else x_
         
@@ -347,4 +393,4 @@ class ResGCN(torch.nn.Module):
         if self.dropout > 0:
             x = F.dropout(x, p=self.dropout, training=self.training)
 
-        return x, None
+        return x, local_rep

@@ -5,8 +5,7 @@ from torch.nn import Module
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.utils.loop import add_self_loops
-from benchmark.models.utils import subgraph, normalize
-from benchmark.data.dataset import data_args
+from ..models.utils import subgraph, normalize
 import captum.attr as ca
 from captum.attr._utils.typing import (
     BaselineType,
@@ -33,7 +32,7 @@ from captum.attr._utils.gradient import (
     compute_layer_gradients_and_eval,
     undo_gradient_requirements,
 )
-from base_explainer import WalkBase
+from .base_explainer import WalkBase
 EPS = 1e-15
 
 class GradCAM(WalkBase):
@@ -54,13 +53,13 @@ class GradCAM(WalkBase):
         self.model.eval()
         super().forward(x, edge_index)
 
-        labels = tuple(i for i in range(data_args.num_classes))
-        ex_labels = tuple(torch.tensor([label]).to(data_args.device) for label in labels)
+        labels = tuple(i for i in range(kwargs.get('num_classes')))
+        ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
 
 
         self_loop_edge_index, _ = add_self_loops(edge_index, num_nodes=self.num_nodes)
 
-        if data_args.model_level == 'node':
+        if kwargs.get('model_level') == 'node':
             node_idx = kwargs.get('node_idx')
             assert node_idx is not None
             _, _, _, self.hard_edge_mask = subgraph(

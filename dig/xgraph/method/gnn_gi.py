@@ -2,9 +2,8 @@ import torch
 from torch import Tensor
 import torch.nn as nn
 from torch_geometric.utils.loop import add_self_loops
-from benchmark.models.utils import subgraph
-from benchmark.data.dataset import data_args
-from base_explainer import WalkBase
+from ..models.utils import subgraph
+from .base_explainer import WalkBase
 
 EPS = 1e-15
 
@@ -25,7 +24,7 @@ class GNN_GI(WalkBase):
         walk_steps, fc_step = self.extract_step(x, edge_index, detach=False)
 
 
-        if data_args.model_level == 'node':
+        if kwargs.get('model_level') == 'node':
             node_idx = kwargs.get('node_idx')
             assert node_idx is not None
             _, _, _, self.hard_edge_mask = subgraph(
@@ -45,7 +44,7 @@ class GNN_GI(WalkBase):
                 compute_walk_score(adjs[1:], new_r, allow_edges, [i] + walk_idx)
 
 
-        labels = tuple(i for i in range(data_args.num_classes))
+        labels = tuple(i for i in range(kwargs.get('num_classes')))
         walk_scores_tensor_list = [None for i in labels]
         for label in labels:
 
@@ -70,7 +69,7 @@ class GNN_GI(WalkBase):
         # --- Apply edge mask evaluation ---
         with torch.no_grad():
             with self.connect_mask(self):
-                ex_labels = tuple(torch.tensor([label]).to(data_args.device) for label in labels)
+                ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
                 masks = []
                 for ex_label in ex_labels:
                     edge_attr = self.explain_edges_with_loop(x, walks, ex_label)

@@ -1,0 +1,43 @@
+{
+    "data": {
+        "smile": "smile",
+        "prop_list": "[]",
+        "url": "https://raw.githubusercontent.com/divelab/DIG_storage/main/ggraph/zinc250k_property.csv",
+        "num_max_node": "38",
+        "atom_list": "[6, 7, 8, 9, 15, 16, 17, 35, 53]"
+    },
+    "model": {
+        "max_size": 38,
+        "edge_unroll": 12,
+        "node_dim": 9,
+        "bond_dim": 4,
+        "num_flow_layer": 12,
+        "num_rgcn_layer": 3,
+        "nhid": 128,
+        "nout": 128,
+        "use_gpu": true
+    },
+    "lr": 0.001,
+    "weight_decay": 0,
+    "batch_size": 32,
+    "max_epochs": 10,
+    "save_interval": 1,
+    "save_dir": "rand_gen_zinc250k",
+    "num_min_node": 7,
+    "num_max_node": 25,
+    "temperature": [
+        0.35,
+        0.2
+    ],
+    "atom_list": [
+        6,
+        7,
+        8,
+        9,
+        15,
+        16,
+        17,
+        35,
+        53
+    ]
+}

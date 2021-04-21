@@ -28,8 +28,8 @@ Contrastive objective functions under :obj:`dig.sslgraph.method.contrastive.obje
     :special-members:
 
 
-Views Generation
-----------------
+Transformations for Views Generation
+------------------------------------
 .. currentmodule:: dig.sslgraph.method.contrastive.views_fn
 
 Views generation classes under :obj:`dig.sslgraph.method.contrastive.views_fn`.
@@ -37,3 +37,5 @@ Views generation classes under :obj:`dig.sslgraph.method.contrastive.views_fn`.
 .. automodule:: dig.sslgraph.method.contrastive.views_fn
     :members:
     :special-members:
+    :autosummary:
+    :autosummary-no-nesting:

@@ -19,7 +19,7 @@ from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import to_networkx
 from torch_geometric.utils.num_nodes import maybe_num_nodes
 from typing import Tuple, List, Dict
-from shapley import GnnNets_GC2value_func, GnnNets_NC2value_func, gnn_score
+from .shapley import GnnNets_GC2value_func, GnnNets_NC2value_func, gnn_score
 
 EPS = 1e-6
 

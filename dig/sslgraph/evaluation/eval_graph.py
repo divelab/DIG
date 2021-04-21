@@ -30,17 +30,37 @@ class LogReg(nn.Module):
 
     
 class GraphUnsupervised(object):
+    r"""
+    The evaluation interface for unsupervised graph representation learning evaluated with 
+    linear classification.
     
-    def __init__(self, dataset, classifier='SVC', search=True, log_interval=1,
-                 epoch_select='test_max', metric='acc', n_folds=10, device=None,
-                 **kwargs):
+    Args:
+        dataset (torch_geometric.data.Dataset): The graph classification dataset.
+        classifier (string, optional): Linear classifier for evaluation, :obj:`"SVC"` or 
+            :obj:`"LogReg"`. (default: :obj:`"SVC"`)
+        log_interval (int, optional): Perform evaluation per k epochs. (default: :obj:`1`)
+        epoch_select (string, optional): :obj:`"test_max"` or :obj:`"val_max"`.
+            (default: :obj:`"test_max"`)
+        n_folds (int, optional): Number of folds for evaluation. (default: :obj:`10`)
+        device (int, or torch.device, optional): Device for computation. (default: :obj:`None`)
+        **kwargs (optional): Training and evaluation configs in :meth:`setup_train_config`.
+        
+    Examples
+    --------
+    >>> encoder = Encoder(...)
+    >>> model = Contrastive(...)
+    >>> evaluator = GraphUnsupervised(dataset, log_interval=10, device=0, p_lr = 0.001)
+    >>> evaluator.evaluate(model, encoder)
+    """
+    
+    def __init__(self, dataset, classifier='SVC', log_interval=1, epoch_select='test_max', 
+                 metric='acc', n_folds=10, device=None, **kwargs):
         
         self.dataset = dataset
         self.epoch_select = epoch_select
         self.metric = metric
         self.classifier = classifier
         self.log_interval = log_interval
-        self.search = search
         self.n_folds = n_folds
         self.out_dim = dataset.num_classes
         if device is None:
@@ -53,8 +73,22 @@ class GraphUnsupervised(object):
         # Use default config if not further specified
         self.setup_train_config(**kwargs)
 
-    def setup_train_config(self, batch_size = 256,
-                           p_optim = 'Adam', p_lr = 0.01, p_weight_decay = 0, p_epoch = 20):
+    def setup_train_config(self, batch_size = 256, p_optim = 'Adam', p_lr = 0.01, 
+                           p_weight_decay = 0, p_epoch = 20, svc_search = True):
+        r"""Method to setup training config.
+        
+        Args:
+            batch_size (int, optional): Batch size for pretraining and inference. 
+                (default: :obj:`256`)
+            p_optim (string, or torch.optim.Optimizer class): Optimizer for pretraining.
+                (default: :obj:`"Adam"`)
+            p_lr (float, optional): Pretraining learning rate. (default: :obj:`0.01`)
+            p_weight_decay (float, optional): Pretraining weight decay rate. 
+                (default: :obj:`0`)
+            p_epoch (int, optional): Pretraining epochs number. (default: :obj:`20`)
+            svc_search (string, optional): If :obj:`True`, search for hyper-parameter 
+                :obj:`C` in SVC. (default: :obj:`True`)
+        """
         
         self.batch_size = batch_size
 
@@ -62,14 +96,18 @@ class GraphUnsupervised(object):
         self.p_lr = p_lr
         self.p_weight_decay = p_weight_decay
         self.p_epoch = p_epoch
+        
+        self.search = svc_search
     
-    def evaluate(self, learning_model, encoder, pred_head=None, fold_seed=None):
-        '''
+    def evaluate(self, learning_model, encoder, fold_seed=None):
+        r"""Run evaluation with given learning model and encoder(s).
+        
         Args:
-            learning_model: An object of a contrastive model or a predictive model.
-            encoder: List or trainable pytorch model.
-            pred_head: [Optional] Trainable pytoch model. If None, will use linear projection.
-        '''
+            learning_model: An object of a contrastive model (sslgraph.method.Contrastive) 
+                or a predictive model.
+            encoder (torch.nn.Module): List or trainable pytorch model.
+            fold_seed (int, optional): Seed for fold split. (default: :obj:`None`)
+        """
         
         pretrain_loader = DataLoader(self.dataset, self.batch_size, shuffle=True)
         if isinstance(encoder, list):
@@ -108,8 +146,17 @@ class GraphUnsupervised(object):
         return acc, sd 
 
 
-    def grid_search(self, learning_model, encoder, pred_head=None, fold_seed=12345,
+    def grid_search(self, learning_model, encoder, fold_seed=12345,
                     p_lr_lst=[0.1,0.01,0.001], p_epoch_lst=[20,40,60]):
+        r"""Perform grid search on learning rate and epochs in pretraining.
+        
+        Args:
+            learning_model: An object of a contrastive model (sslgraph.method.Contrastive) 
+                or a predictive model.
+            encoder (torch.nn.Module): List or trainable pytorch model.
+            p_lr_lst (list, optional): List of learning rate candidates.
+            p_epoch_lst (list, optional): List of epochs number candidates.
+        """
         
         acc_m_lst = []
         acc_sd_lst = []
@@ -119,7 +166,7 @@ class GraphUnsupervised(object):
                 self.setup_train_config(p_lr=p_lr, p_epoch=p_epoch)
                 model = copy.deepcopy(learning_model)
                 enc = copy.deepcopy(encoder)
-                acc_m, acc_sd = self.evaluate(model, enc, pred_head, fold_seed)
+                acc_m, acc_sd = self.evaluate(model, enc, fold_seed)
                 acc_m_lst.append(acc_m)
                 acc_sd_lst.append(acc_sd)
                 paras.append((p_lr, p_epoch))
@@ -203,6 +250,9 @@ class GraphUnsupervised(object):
     
     def get_optim(self, optim):
         
+        if callable(optim):
+            return optim
+        
         optims = {'Adam': torch.optim.Adam}
         
         return optims[optim]
@@ -231,8 +281,40 @@ class PredictionModel(nn.Module):
     
 
 class GraphSemisupervised(object):
+    r"""
+    The evaluation interface for semi-supervised learning and transfer learning for 
+    graph-level tasks with pretraining and finetuning datasets.
     
-    def __init__(self, dataset, dataset_pretrain, label_rate, loss=nn.functional.nll_loss, 
+    Args:
+        dataset (torch_geometric.data.Dataset): The graph dataset for finetuning and evaluation.
+        dataset (torch_geometric.data.Dataset): The graph dataset for pretraining.
+        label_rate (float, optional): Ratio of labels to use in finetuning dataset.
+            (default: :obj:`1`)
+        epoch_select (string, optional): :obj:`"test_max"` or :obj:`"val_max"`.
+            (default: :obj:`"test_max"`)
+        n_folds (int, optional): Number of folds for evaluation. (default: :obj:`10`)
+        device (int, or torch.device, optional): Device for computation. (default: :obj:`None`)
+        **kwargs (optional): Training and evaluation configs in :meth:`setup_train_config`.
+        
+    Examples
+    --------
+    >>> dataset, pretrain_dataset = get_dataset("NCI1", "semisupervised")
+    >>> evaluator = GraphSemisupervised(dataset, pretrain_dataset, device=0)
+    >>> evaluator.evaluate(model, encoder) # semi-supervised learning
+    
+    >>> dataset = MoleculeNet("./transfer_data", "HIV")
+    >>> pretrain_dataset = ZINC("./transfer_data")
+    >>> evaluator = GraphSemisupervised(dataset, pretrain_dataset, device=0)
+    >>> evaluator.evaluate(model, encoder) # transfer learning for molecule classification
+    
+    Note
+    ----
+    When using :obj:`torch_geometric.data.Dataset` without our provided :obj:`get_dataset`
+    function, you may need to manually add self-loops before input to evaluator if some view 
+    function requires them, such as diffusion.
+    """
+    
+    def __init__(self, dataset, dataset_pretrain, label_rate=1, loss=nn.functional.nll_loss, 
                  epoch_select='test_max', metric='acc', n_folds=10, device=None, **kwargs):
         
         self.dataset, self.dataset_pretrain = dataset, dataset_pretrain
@@ -254,6 +336,24 @@ class GraphSemisupervised(object):
     def setup_train_config(self, batch_size = 128,
                            p_optim = 'Adam', p_lr = 0.0001, p_weight_decay = 0, p_epoch = 100,
                            f_optim = 'Adam', f_lr = 0.001, f_weight_decay = 0, f_epoch = 100):
+        r"""Method to setup training config.
+        
+        Args:
+            batch_size (int, optional): Batch size for pretraining and inference. 
+                (default: :obj:`128`)
+            p_optim (string, or torch.optim.Optimizer class): Optimizer for pretraining.
+                (default: :obj:`"Adam"`)
+            p_lr (float, optional): Pretraining learning rate. (default: :obj:`0.0001`)
+            p_weight_decay (float, optional): Pretraining weight decay rate. 
+                (default: :obj:`0`)
+            p_epoch (int, optional): Pretraining epochs number. (default: :obj:`100`)
+            f_optim (string, or torch.optim.Optimizer class): Optimizer for finetuning.
+                (default: :obj:`"Adam"`)
+            f_lr (float, optional): Finetuning learning rate. (default: :obj:`0.001`)
+            f_weight_decay (float, optional): Finetuning weight decay rate. 
+                (default: :obj:`0`)
+            f_epoch (int, optional): Finetuning epochs number. (default: :obj:`100`)
+        """
         
         self.batch_size = batch_size
         
@@ -269,12 +369,14 @@ class GraphSemisupervised(object):
         
     
     def evaluate(self, learning_model, encoder, pred_head=None, fold_seed=12345):
-        '''
+        r"""Run evaluation with given learning model and encoder(s).
+        
         Args:
             learning_model: An instance of a contrastive model or a predictive model.
-            encoder: Trainable pytorch model or list of models.
-            pred_head: [Optional] Trainable pytoch model. If None, will use linear projection.
-        '''
+            encoder (torch.nn.Module, or list): Trainable pytorch model or list of models.
+            pred_head (torch.nn.Module, optional): Prediction head. If None, will use linear 
+                projection. (default: :obj:`None`)
+        """
         pretrain_loader = DataLoader(self.dataset_pretrain, self.batch_size, shuffle=True)
         p_optimizer = self.get_optim(self.p_optim)(encoder.parameters(), lr=self.p_lr,
                                                    weight_decay=self.p_weight_decay)
@@ -327,6 +429,18 @@ class GraphSemisupervised(object):
     
     def grid_search(self, learning_model, encoder, pred_head=None, fold_seed=12345,
                     p_lr_lst=[0.1,0.01,0.001,0.0001], p_epoch_lst=[20,40,60,80,100]):
+        
+        r"""Perform grid search on learning rate and epochs in pretraining.
+        
+        Args:
+            learning_model: An object of a contrastive model (sslgraph.method.Contrastive) 
+                or a predictive model.
+            encoder (torch.nn.Module): List or trainable pytorch model.
+            pred_head (torch.nn.Module, optional): Prediction head. If None, will use linear 
+                projection. (default: :obj:`None`)
+            p_lr_lst (list, optional): List of learning rate candidates.
+            p_epoch_lst (list, optional): List of epochs number candidates.
+        """
         
         acc_m_lst = []
         acc_sd_lst = []
@@ -388,6 +502,9 @@ class GraphSemisupervised(object):
     
         
     def get_optim(self, optim):
+        
+        if callable(optim):
+            return optim
         
         optims = {'Adam': torch.optim.Adam}
         

@@ -2,10 +2,9 @@ import torch
 from torch import Tensor
 import torch.nn as nn
 from torch_geometric.utils.loop import add_self_loops
-from benchmark.models.utils import subgraph
-from benchmark.data.dataset import data_args
-from benchmark.models.ext.deeplift.layer_deep_lift import DeepLift
-from base_explainer import WalkBase
+from ..models.utils import subgraph
+from ..models.ext.deeplift.layer_deep_lift import DeepLift
+from .base_explainer import WalkBase
 
 EPS = 1e-15
 
@@ -25,7 +24,7 @@ class DeepLIFT(WalkBase):
         self.model.eval()
         self_loop_edge_index, _ = add_self_loops(edge_index, num_nodes=self.num_nodes)
 
-        if data_args.model_level == 'node':
+        if kwargs.get('model_level') == 'node':
             node_idx = kwargs.get('node_idx')
             assert node_idx is not None
             _, _, _, self.hard_edge_mask = subgraph(
@@ -42,8 +41,8 @@ class DeepLIFT(WalkBase):
         out = self.model(inp_with_ref, edge_index_with_ref, batch)
 
 
-        labels = tuple(i for i in range(data_args.num_classes))
-        ex_labels = tuple(torch.tensor([label]).to(data_args.device) for label in labels)
+        labels = tuple(i for i in range(kwargs.get('num_classes')))
+        ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
 
         print('#D#Mask Calculate...')
         masks = []
