@@ -21,6 +21,9 @@ import dig.sslgraph.method
 import dig.sslgraph.utils
 import dig.sslgraph.evaluation
 import dig.ggraph.dataset
+import dig.ggraph.method
+import dig.ggraph.utils
+import dig.ggraph.evaluation
 
 import sphinx_rtd_theme
 
