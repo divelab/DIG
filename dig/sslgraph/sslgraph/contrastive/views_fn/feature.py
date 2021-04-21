@@ -18,6 +18,7 @@ def node_attr_mask(mode='whole', mask_ratio=0.1, mask_mean=0.5, mask_std=0.5):
     def do_trans(data):
         node_num, feat_dim = data.x.size()
         x = data.x.detach().clone()
+        mask = torch.zeros(node_num)
 
         if mode == 'whole':
             mask_num = int(node_num * mask_ratio)
