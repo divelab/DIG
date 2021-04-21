@@ -114,4 +114,3 @@ $ make clean
 
 * After the implementation, it is necessary to add comments for the documentation. We can consider this when we write documentations.
 * Please follow the [PEP8 style guide](https://www.python.org/dev/peps/pep-0008/) as possible in your implementation.
->>>>>>> c272837934297e24d01f8361a9ebd9067a159c87
