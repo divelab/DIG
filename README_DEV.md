@@ -107,7 +107,7 @@ $ cd docs
 $ make clean
 ```
 
-6. Commit your contribution to DIG repo. Then, you can check the documentations at [https://diveintographs.readthedocs.io/en/latest/](https://diveintographs.readthedocs.io/en/latest/) in about 2 minutes. If the documentation website is not updated as expected, please contact Meng. It might fail to build due to the enviroment of readthedocs.
+6. Commit your contribution to DIG repo. Then, you can check the documentations at [https://diveintographs.readthedocs.io/en/latest/](https://diveintographs.readthedocs.io/en/latest/) in about 10 minutes. If the documentation website is not updated as expected, please contact Meng. It might fail to build due to the enviroment of readthedocs.
 
 
 ## Comments
