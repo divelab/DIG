@@ -19,9 +19,21 @@ zinc_atom_list = [6, 7, 8, 9, 15, 16, 17, 35, 53]
 qm9_atom_list = [6, 7, 8, 9]
 
 class QM9(PygDataset):
+    
+    r"""An `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`QM9` dataset.
+    
+    Args:
+        root (string, optional): Root directory where the dataset should be saved. (default: :obj:`./`)
+        prop_name (string, optional): The molecular property desired and used as the optimization target. (default: :obj:`penalized_logp`)
+        transform (callable, optional): A function/transform that takes in an :obj:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before every access. (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in an :obj:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before being saved to disk. (default: :obj:`None`)
+        pre_filter (callable, optional): A function that takes in an :obj:`torch_geometric.data.Data` object and returns a boolean value, indicating whether the data object should be included in the final dataset. (default: :obj:`None`)
+        use_aug (bool, optional): If :obj:`True`, data augmentation will be used. (default: :obj:`False`)
+        one_shot (bool, optional): If :obj:`True`, the returned data will use one-shot format with an extra dimension of virtual node and edge feature. (default: :obj:`False`)
+    """
+        
     def __init__(self,
                  root='./',
-                 name='qm9_property',
                  prop_name='penalized_logp',
                  conf_dict=None,
                  transform=None,
@@ -31,29 +43,28 @@ class QM9(PygDataset):
                  use_aug=False,
                  one_shot=False
                  ):
-        """
-        Pytorch Geometric data interface for molecule datasets.
-        param root: root directory where the dataset should be saved.
-        param name: the name of the dataset you want to use.
-        param prop_name: the molecular property desired and used as the optimization target.
-        param conf_dict: dictionary that stores all the configuration for the corresponding dataset. Default is None, 
-                    but when something is passed, it uses its information. Useful for debugging for external contributers.
-        param use_aug: whether data augmentation is used, default is False
-        param one_shot: 
-                   
-        All the rest of parameters of PygDataset follows the use in 'InMemoryDataset' from torch_geometric.data.
-        Documentation can be found at https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html.
-        """
-
+        name='qm9_property'
         super(QM9, self).__init__(root, name, prop_name, conf_dict, 
                                   transform, pre_transform, pre_filter, 
                                   processed_filename, use_aug, one_shot)
         
         
 class ZINC250k(PygDataset):
+    
+    r"""An `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`ZINC250k` dataset.
+    
+    Args:
+        root (string, optional): Root directory where the dataset should be saved. (default: :obj:`./`)
+        prop_name (string, optional): The molecular property desired and used as the optimization target. (default: :obj:`penalized_logp`)
+        transform (callable, optional): A function/transform that takes in an :obj:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before every access. (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in an :obj:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before being saved to disk. (default: :obj:`None`)
+        pre_filter (callable, optional): A function that takes in an :obj:`torch_geometric.data.Data` object and returns a boolean value, indicating whether the data object should be included in the final dataset. (default: :obj:`None`)
+        use_aug (bool, optional): If :obj:`True`, data augmentation will be used. (default: :obj:`False`)
+        one_shot (bool, optional): If :obj:`True`, the returned data will use one-shot format with an extra dimension of virtual node and edge feature. (default: :obj:`False`)
+    """
+    
     def __init__(self,
                  root='./',
-                 name='zinc250k_property',
                  prop_name='penalized_logp',
                  conf_dict=None,
                  transform=None,
@@ -63,29 +74,29 @@ class ZINC250k(PygDataset):
                  use_aug=False,
                  one_shot=False
                  ):
-        """
-        Pytorch Geometric data interface for molecule datasets.
-        param root: root directory where the dataset should be saved.
-        param name: the name of the dataset you want to use.
-        param prop_name: the molecular property desired and used as the optimization target.
-        param conf_dict: dictionary that stores all the configuration for the corresponding dataset. Default is None, 
-                    but when something is passed, it uses its information. Useful for debugging for external contributers.
-        param use_aug: whether data augmentation is used, default is False
-        param one_shot: 
-                   
-        All the rest of parameters of PygDataset follows the use in 'InMemoryDataset' from torch_geometric.data.
-        Documentation can be found at https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html.
-        """
-
+        name='zinc250k_property'
         super(ZINC250k, self).__init__(root, name, prop_name, conf_dict, 
                                   transform, pre_transform, pre_filter, 
                                   processed_filename, use_aug, one_shot)
         
 
 class ZINC800(PygDataset):
+    
+    r"""An `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`ZINC800` dataset.
+    
+    Args:
+        root (string, optional): Root directory where the dataset should be saved. (default: :obj:`./`)
+        method (string, optional): Method name for :obj:`ZINC800` dataset, can be either :obj:`jt` or :obj:`graphaf`. (default: :obj:`jt`)
+        prop_name (string, optional): The molecular property desired and used as the optimization target.(default: :obj:`penalized_logp`)
+        transform (callable, optional): A function/transform that takes in an :obj:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before every access. (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in an :obj:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before being saved to disk. (default: :obj:`None`)
+        pre_filter (callable, optional): A function that takes in an :obj:`torch_geometric.data.Data` object and returns a boolean value, indicating whether the data object should be included in the final dataset. (default: :obj:`None`)
+        use_aug (bool, optional): If :obj:`True`, data augmentation will be used. (default: :obj:`False`)
+        one_shot (bool, optional): If :obj:`True`, the returned data will use one-shot format with an extra dimension of virtual node and edge feature. (default: :obj:`False`)
+    """
+    
     def __init__(self,
                  root='./',
-                 name='zinc800',
                  method='jt',
                  prop_name='penalized_logp',
                  conf_dict=None,
@@ -96,23 +107,13 @@ class ZINC800(PygDataset):
                  use_aug=False,
                  one_shot=False
                  ):
-        """
-        Pytorch Geometric data interface for molecule datasets.
-        param root: root directory where the dataset should be saved.
-        param name: the name of the dataset you want to use.
-        param prop_name: the molecular property desired and used as the optimization target.
-        param conf_dict: dictionary that stores all the configuration for the corresponding dataset. Default is None, 
-                    but when something is passed, it uses its information. Useful for debugging for external contributers.
-        param use_aug: whether data augmentation is used, default is False
-        param one_shot: 
-                   
-        All the rest of parameters of PygDataset follows the use in 'InMemoryDataset' from torch_geometric.data.
-        Documentation can be found at https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html.
-        """
+        
+        name='zinc800'
+        
         if method in ['jt', 'graphaf']:
             name = 'zinc_800' + '_' + method
         else:
-            error_mssg = 'Invalid method name {}.\n'.format(method)
+            error_mssg = 'Invalid method type {}.\n'.format(method)
             error_mssg += 'Available datasets are as follows:\n'
             error_mssg += '\n'.join(['jt', 'graphaf'])
             raise ValueError(error_mssg)
@@ -121,9 +122,21 @@ class ZINC800(PygDataset):
                                   processed_filename, use_aug, one_shot)
         
 class MOSES(PygDataset):
+    
+    r"""An `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`MOSES` dataset.
+    
+    Args:
+        root (string, optional): Root directory where the dataset should be saved. (default: :obj:`./`)
+        prop_name (string, optional): The molecular property desired and used as the optimization target. (default: :obj:`None`)
+        transform (callable, optional): A function/transform that takes in an :obj:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before every access. (default: :obj:`None`)
+        pre_transform (callable, optional): A function/transform that takes in an :obj:`torch_geometric.data.Data` object and returns a transformed version. The data object will be transformed before being saved to disk. (default: :obj:`None`)
+        pre_filter (callable, optional): A function that takes in an :obj:`torch_geometric.data.Data` object and returns a boolean value, indicating whether the data object should be included in the final dataset. (default: :obj:`None`)
+        use_aug (bool, optional): If :obj:`True`, data augmentation will be used. (default: :obj:`False`)
+        one_shot (bool, optional): If :obj:`True`, the returned data will use one-shot format with an extra dimension of virtual node and edge feature. (default: :obj:`False`)
+    """
+    
     def __init__(self,
                  root='./',
-                 name='moses',
                  prop_name=None,
                  conf_dict=None,
                  transform=None,
@@ -133,20 +146,8 @@ class MOSES(PygDataset):
                  use_aug=False,
                  one_shot=False
                  ):
-        """
-        Pytorch Geometric data interface for molecule datasets.
-        param root: root directory where the dataset should be saved.
-        param name: the name of the dataset you want to use.
-        param prop_name: the molecular property desired and used as the optimization target.
-        param conf_dict: dictionary that stores all the configuration for the corresponding dataset. Default is None, 
-                    but when something is passed, it uses its information. Useful for debugging for external contributers.
-        param use_aug: whether data augmentation is used, default is False
-        param one_shot: 
-                   
-        All the rest of parameters of PygDataset follows the use in 'InMemoryDataset' from torch_geometric.data.
-        Documentation can be found at https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html.
-        """
-
+        
+        name='moses'
         super(MOSES, self).__init__(root, name, prop_name, conf_dict,transform, pre_transform, pre_filter, 
                                   processed_filename, use_aug, one_shot)
                         
