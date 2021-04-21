@@ -107,7 +107,7 @@ class Cons_Optim_Evaluator:
                     0, 2, 4, 6 --- the metric values under the similarity threshold 0.0, 0.2, 0.4, 0.6.
                     The metric values are given in the form of a tuple (success rate, mean of similarity, standard deviation of similarity,
                     mean of property improvement, standard deviation of property improvement).
-        # """
+        """
         
         inp_smiles = input_dict['inp_smiles']
         inp_mols = [Chem.MolFromSmiles(s) for s in inp_smiles]
