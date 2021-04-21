@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="dig",
+    name="dive_into_graphs",
     version=__version__,
     author="xxx",
     author_email="xxx",
@@ -18,14 +18,14 @@ setuptools.setup(
     maintainer_email="xxx",
     license="xxx",
     keywords="xxx",
-    description="Dive into Graphs is a turnkey library for graph deep learning research.",
+    description="DIG: Dive into Graphs is a turnkey library for graph deep learning research.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/divelab/DIG",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
     ],
     install_requires=['scipy',
