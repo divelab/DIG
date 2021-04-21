@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 from rdkit import Chem
 from .disgraphaf import DisGraphAF
-from dig.ggraph.utils import check_chemical_validity, check_valency, calculate_min_plogp, reward_target_molecule_similarity, 
+from dig.ggraph.utils import check_chemical_validity, check_valency, calculate_min_plogp, reward_target_molecule_similarity
 from dig.ggraph.utils import convert_radical_electrons_to_hydrogens, steric_strain_filter, zinc_molecule_filter
 
 
