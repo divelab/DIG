@@ -93,6 +93,7 @@ def setup(app):
             '__weakref__',
             '__dict__',
             '__module__',
+            'qed',
         ]
         return True if name in members else skip
 
