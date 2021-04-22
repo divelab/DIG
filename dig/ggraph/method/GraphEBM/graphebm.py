@@ -15,6 +15,19 @@ from .util import rescale_adj, requires_grad, clip_grad
 
 
 class GraphEBM(Generator):
+    r"""
+        The method class for GraphEBM algorithm. This class provides interfaces for running random generation, goal-directed generation (including property
+        optimization and constrained optimization), and compositional generation with GraphEBM algorithm. Please refer the paper `GraphEBM: Molecular Graph Generation with Energy-Based Models <https://arxiv.org/abs/2102.00546>`_ 
+        for details and `benchmark codes <https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphEBM>`_ for usage examples.
+        
+        Args:
+            n_atom (int): Maximum number of atoms.
+            n_atom_type (int): Number of possible atom types.
+            n_edge_type (int): Number of possible bond types.
+            hidden (int): Hidden dimensions.
+            device (torch.device, optional): The device where the model is deployed.
+
+    """
     def __init__(self, n_atom, n_atom_type, n_edge_type, hidden, device=None):
         super(GraphEBM, self).__init__()
         if device is None:
@@ -28,6 +41,25 @@ class GraphEBM(Generator):
     
     
     def train_rand_gen(self, loader, lr, wd, max_epochs, c, ld_step, ld_noise, ld_step_size, clamp, alpha, save_interval, save_dir):
+        r"""
+            Running training for random generation task.
+
+            Args:
+                loader: The data loader for loading training samples. It is supposed to use dig.ggraph.dataset.QM9/ZINC250k
+                    as the dataset class, and apply torch_geometric.data.DenseDataLoader to it to form the data loader.
+                lr (float): The learning rate for training.
+                wd (float): The weight decay factor for training.
+                max_epochs (int): The maximum number of training epochs.
+                c (float): The scaling hyperparameter for dequantization.
+                ld_step (int): The number of iteration steps of Langevin dynamics.
+                ld_noise (float): The standard deviation of the added noise in Langevin dynamics.
+                ld_step_size (int): The step size of Langevin dynamics.
+                clamp (bool): Whether to use gradient clamp in Langevin dynamics.
+                alpha (float): The weight coefficient for loss function.
+                save_interval (int): The frequency to save the model parameters to .pt files,
+                    *e.g.*, if save_interval=2, the model parameters will be saved for every 2 training epochs.
+                save_dir (str): the directory to save the model parameters.
+        """
         parameters = self.energy_function.parameters()
         optimizer = Adam(parameters, lr=lr, betas=(0.0, 0.999), weight_decay=wd)
         
@@ -126,6 +158,23 @@ class GraphEBM(Generator):
     
     
     def run_rand_gen(self, checkpoint_path, n_samples, c, ld_step, ld_noise, ld_step_size, clamp, atomic_num_list):
+        r"""
+            Running graph generation for random generation task.
+
+            Args:
+                checkpoint_path (str): The path of the trained model, *i.e.*, the .pt file.
+                n_samples (int): the number of molecules to generate.
+                c (float): The scaling hyperparameter for dequantization.
+                ld_step (int): The number of iteration steps of Langevin dynamics.
+                ld_noise (float): The standard deviation of the added noise in Langevin dynamics.
+                ld_step_size (int): The step size of Langevin dynamics.
+                clamp (bool): Whether to use gradient clamp in Langevin dynamics.
+                atomic_num_list (list): The list used to indicate atom types. 
+            
+            :rtype:
+                gen_mols (list): A list of generated molecules represented by rdkit Chem.Mol objects;
+                
+        """
         print("Loading paramaters from {}".format(checkpoint_path))
         self.energy_function.load_state_dict(torch.load(checkpoint_path))
         parameters =  self.energy_function.parameters()
@@ -180,6 +229,25 @@ class GraphEBM(Generator):
 
 
     def train_goal_directed(self, loader, lr, wd, max_epochs, c, ld_step, ld_noise, ld_step_size, clamp, alpha, save_interval, save_dir):
+        r"""
+            Running training for goal-directed generation task.
+
+            Args:
+                loader: The data loader for loading training samples. It is supposed to use dig.ggraph.dataset.QM9/ZINC250k
+                    as the dataset class, and apply torch_geometric.data.DenseDataLoader to it to form the data loader.
+                lr (float): The learning rate for training.
+                wd (float): The weight decay factor for training.
+                max_epochs (int): The maximum number of training epochs.
+                c (float): The scaling hyperparameter for dequantization.
+                ld_step (int): The number of iteration steps of Langevin dynamics.
+                ld_noise (float): The standard deviation of the added noise in Langevin dynamics.
+                ld_step_size (int): The step size of Langevin dynamics.
+                clamp (bool): Whether to use gradient clamp in Langevin dynamics.
+                alpha (float): The weight coefficient for loss function.
+                save_interval (int): The frequency to save the model parameters to .pt files,
+                    *e.g.*, if save_interval=2, the model parameters will be saved for every 2 training epochs.
+                save_dir (str): the directory to save the model parameters.
+        """
         parameters = self.energy_function.parameters()
         optimizer = Adam(parameters, lr=lr, betas=(0.0, 0.999), weight_decay=wd)
         
@@ -280,6 +348,24 @@ class GraphEBM(Generator):
     
 
     def run_prop_optim(self, checkpoint_path, initialization_loader, c, ld_step, ld_noise, ld_step_size, clamp, atomic_num_list, train_smiles):
+        r"""
+            Running graph generation for goal-directed generation task: property optimization.
+
+            Args:
+                checkpoint_path (str): The path of the trained model, *i.e.*, the .pt file.
+                initialization_loader: The data loader for loading samples to initialize the Langevin dynamics. It is supposed to use dig.ggraph.dataset.QM9/ZINC250k as the dataset class, and apply torch_geometric.data.DenseDataLoader to it to form the data loader.
+                c (float): The scaling hyperparameter for dequantization.
+                ld_step (int): The number of iteration steps of Langevin dynamics.
+                ld_noise (float): The standard deviation of the added noise in Langevin dynamics.
+                ld_step_size (int): The step size of Langevin dynamics.
+                clamp (bool): Whether to use gradient clamp in Langevin dynamics.
+                atomic_num_list (list): The list used to indicate atom types. 
+                train_smiles (list): A list of smiles string corresponding to training samples.
+            
+            :rtype:
+                save_mols_list (list), prop_list (list): save_mols_list is a list of generated molecules with high QED scores represented by rdkit Chem.Mol objects; prop_list is a list of the corresponding QED scores.
+                
+        """
         print("Loading paramaters from {}".format(checkpoint_path))
         self.energy_function.load_state_dict(torch.load(checkpoint_path))
         parameters =  self.energy_function.parameters()
@@ -346,6 +432,23 @@ class GraphEBM(Generator):
     
     
     def run_cons_optim(self, checkpoint_path, initialization_loader, c, ld_step, ld_noise, ld_step_size, clamp, atomic_num_list, train_smiles):
+        r"""
+            Running graph generation for goal-directed generation task: constrained property optimization.
+
+            Args:
+                checkpoint_path (str): The path of the trained model, *i.e.*, the .pt file.
+                initialization_loader: The data loader for loading samples to initialize the Langevin dynamics. It is supposed to use dig.ggraph.dataset.QM9/ZINC250k as the dataset class, and apply torch_geometric.data.DenseDataLoader to it to form the data loader.
+                c (float): The scaling hyperparameter for dequantization.
+                ld_step (int): The number of iteration steps of Langevin dynamics.
+                ld_noise (float): The standard deviation of the added noise in Langevin dynamics.
+                ld_step_size (int): The step size of Langevin dynamics.
+                clamp (bool): Whether to use gradient clamp in Langevin dynamics.
+                atomic_num_list (list): The list used to indicate atom types. 
+                train_smiles (list): A list of smiles string corresponding to training samples.
+            
+            :rtype:
+                mols_0_list (list), mols_2_list (list), mols_4_list (list), mols_6_list (list), imp_0_list (list), imp_2_list (list), imp_4_list (list), imp_4_list (list): They are lists of optimized molecules (represented by rdkit Chem.Mol objects) and the corresponding improvements under the threshold 0.0, 0.2, 0.4, 0.6, respectively.   
+        """
         print("Loading paramaters from {}".format(checkpoint_path))
         self.energy_function.load_state_dict(torch.load(checkpoint_path))
         parameters =  self.energy_function.parameters()
@@ -434,6 +537,23 @@ class GraphEBM(Generator):
     
     
     def run_comp_gen(self, checkpoint_path_qed, checkpoint_path_plogp, n_samples, c, ld_step, ld_noise, ld_step_size, clamp, atomic_num_list):
+        r"""
+            Running graph generation for compositional generation task.
+
+            Args:
+                checkpoint_path_qed (str): The path of the model trained on QED property, *i.e.*, the .pt file.
+                checkpoint_path_plogp (str): The path of the model trained on plogp property, *i.e.*, the .pt file.
+                n_samples (int): the number of molecules to generate.
+                c (float): The scaling hyperparameter for dequantization.
+                ld_step (int): The number of iteration steps of Langevin dynamics.
+                ld_noise (float): The standard deviation of the added noise in Langevin dynamics.
+                ld_step_size (int): The step size of Langevin dynamics.
+                clamp (bool): Whether to use gradient clamp in Langevin dynamics.
+                atomic_num_list (list): The list used to indicate atom types.
+            
+            :rtype:
+                gen_mols (list): A list of generated molecules represented by rdkit Chem.Mol objects;
+        """
         model_qed = self.energy_function
         model_plogp = copy.deepcopy(self.energy_function)
         print("Loading paramaters from {}".format(checkpoint_path_qed))

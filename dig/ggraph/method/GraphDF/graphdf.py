@@ -53,7 +53,7 @@ class GraphDF(Generator):
                 max_epochs (int): the maximum number of training epochs.
                 model_conf_dict (dict): the python dict for configuring the model hyperparameters.
                 save_interval (int): indicate the frequency to save the model parameters to .pth files,
-                    *.e.g.*, if save_interval=2, the model parameters will be saved for every 2 training epochs.
+                    *e.g.*, if save_interval=2, the model parameters will be saved for every 2 training epochs.
                 save_dir (str): the directory to save the model parameters.
         """
 
@@ -137,7 +137,7 @@ class GraphDF(Generator):
                 model_conf_dict (dict): the python dict for configuring the model hyperparameters.
                 pretrain_path (str): the path to the saved pretrained model file.
                 save_interval (int): indicate the frequency to save the model parameters to .pth files,
-                    *.e.g.*, if save_interval=20, the model parameters will be saved for every 20 training iters.
+                    *e.g.*, if save_interval=20, the model parameters will be saved for every 20 training iters.
                 save_dir (str): the directory to save the model parameters.
         """
 
@@ -220,7 +220,7 @@ class GraphDF(Generator):
                 model_conf_dict (dict): the python dict for configuring the model hyperparameters.
                 pretrain_path (str): the path to the saved pretrained model parameters file.
                 save_interval (int): indicate the frequency to save the model parameters to .pth files,
-                    *.e.g.*, if save_interval=20, the model parameters will be saved for every 20 training iters.
+                    *e.g.*, if save_interval=20, the model parameters will be saved for every 20 training iters.
                 save_dir (str): the directory to save the model parameters.
         """
 
