@@ -6,8 +6,6 @@ from .graphaf import MaskedGraphAF
 from .disgraphaf import DisGraphAF
 from  rdkit import Chem
 from .df_utils import *
-import sys
-sys.path.append('..')
 from dig.ggraph.utils import check_valency, convert_radical_electrons_to_hydrogens
 
 class GraphFlowModel(nn.Module):

@@ -2,11 +2,11 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
+from rdkit import Chem
 from .graphaf import MaskedGraphAF
 from .disgraphaf import DisGraphAF
-import sys
-sys.path.append('..')
-from dig.ggraph.utils import *
+from dig.ggraph.utils import check_chemical_validity, check_valency, calculate_min_plogp, qed, 
+from dig.ggraph.utils import convert_radical_electrons_to_hydrogens, steric_strain_filter, zinc_molecule_filter
 
 class GraphFlowModel_rl(nn.Module):
     """
