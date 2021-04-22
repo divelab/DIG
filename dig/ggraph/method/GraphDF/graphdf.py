@@ -103,7 +103,7 @@ class GraphDF(Generator):
             
             :rtype:
                 (all_mols, pure_valids),
-                all_mols is a list of generated molecules represented by Chem.Mol objects;
+                all_mols is a list of generated molecules represented by rdkit Chem.Mol objects;
                 pure_valids is a list of integers, all are 0 or 1, indicating whether bond resampling happens.
         """
 
@@ -184,7 +184,7 @@ class GraphDF(Generator):
                 atomic_num_list (list, optional): a list of integers, the list of atomic numbers indicating the node types in the generated molecular graphs.
             
             :rtype:
-                all_mols, a list of generated molecules represented by Chem.Mol objects.
+                all_mols, a list of generated molecules represented by rdkit Chem.Mol objects.
         """
 
         self.get_model('prop_optim', model_conf_dict, checkpoint_path)
@@ -328,7 +328,7 @@ class GraphDF(Generator):
                 atomic_num_list (list, optional): a list of integers, the list of atomic numbers indicating the node types in the optimized molecular graphs.
             
             :rtype:
-                (mols_0, mols_2, mols_4, mols_6), they are lists of optimized molecules (represented by Chem.Mol objects) under the threshold 0.0, 0.2, 0.4, 0.6, respectively.
+                (mols_0, mols_2, mols_4, mols_6), they are lists of optimized molecules (represented by rdkit Chem.Mol objects) under the threshold 0.0, 0.2, 0.4, 0.6, respectively.
         """
 
         self.get_model('cons_optim', model_conf_dict, checkpoint_path)

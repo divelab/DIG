@@ -17,7 +17,7 @@ class Rand_Gen_Evaluator:
 
         Args:
             input_dict (dict): a python dict with the following items:
-                "mols" --- the list of generated molecules reprsented by Chem.RWMol or Chem.Mol objects;
+                "mols" --- the list of generated molecules reprsented by rdkit Chem.RWMol or Chem.Mol objects;
                 "train_smiles" --- the list of SMILES strings used for training.
             
         :rtype: :class:`dict` (a python dict with the following items:
@@ -65,7 +65,7 @@ class Prop_Optim_Evaluator:
         
         Args:
             input_dict (dict): a python dict with the following items:
-                "mols" --- a list of generated molecules reprsented by Chem.Mol or Chem.RWMol objects.
+                "mols" --- a list of generated molecules reprsented by rdkit Chem.Mol or Chem.RWMol objects.
             
         :rtype: :class:`dict` (a python dict with the following items:
                     1 --- information of molecule with the highest property score;
@@ -104,7 +104,7 @@ class Cons_Optim_Evaluator:
         
         Args:
             input_dict (dict): a python dict with the following items:
-                "mols_0", "mols_2", "mols_4", "mols_6" --- the list of optimized molecules under the similarity threshold 0.0, 0.2, 0.4, 0.6, all represented by Chem.RWMol or Chem.Mol objects;
+                "mols_0", "mols_2", "mols_4", "mols_6" --- the list of optimized molecules under the similarity threshold 0.0, 0.2, 0.4, 0.6, all represented by rdkit Chem.RWMol or Chem.Mol objects;
                 "inp_smiles" --- the list of SMILES strings of input molecules to be optimized.
             
         :rtype: :class:`dict` (a python dict with the following items:
