@@ -21,7 +21,7 @@ qm9_atom_list = [6, 7, 8, 9]
 
 class PygDataset(InMemoryDataset):
     """
-        An `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for datasets used in molecule generation.
+        A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for datasets used in molecule generation.
         
         .. note::
             Some datasets may not come with any node labels, like :obj:`moses`. 

@@ -109,7 +109,7 @@ def gen_mol_from_one_shot_tensor(adj, x, atomic_num_list, correct_validity=True,
         correct_validity (bool, optional): Whether to use the validity correction introduced by the paper `MoFlow: an invertible flow model for generating molecular graphs <https://arxiv.org/pdf/2006.10137.pdf>`_. (default: :obj:`True`)
         largest_connected_comp (bool, optional): Whether to use the largest connected component as the final molecule in the validity correction.(default: :obj:`True`)
         
-    :rtype: A list of rdkit mol object. The length of the list if :obj:`number of samples`.
+    :rtype: A list of rdkit mol object. The length of the list is :obj:`number of samples`.
     
     Examples
     --------
