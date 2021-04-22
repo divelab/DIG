@@ -340,7 +340,7 @@ class PygDataset(InMemoryDataset):
     
     def get_split_idx(self):
         r"""
-        training-validation-test split
+        :rtype: A dictionary for training-validation split with key :obj:`train_idx` and :obj:`valid_idx`.
         """
         if self.name.find('zinc250k') != -1:
             if not osp.exists('./raw/valid_idx_zinc250k.json'):
