@@ -27,7 +27,7 @@ elif args.data == 'zinc250k':
 elif args.data == 'moses':
     with open('config/rand_gen_moses_config_dict.json') as f:
         conf = json.load(f)
-    dataset = QM9(conf_dict=conf['data'], one_shot=False, use_aug=True)  
+    dataset = MOSES(conf_dict=conf['data'], one_shot=False, use_aug=True)  
 else:
     print("Only qm9, zinc250k and moses datasets are supported!")
     exit()

@@ -2,7 +2,7 @@
 
 This is the official implementation for [GraphDF: A Discrete Flow Model for Molecular Graph Generation](https://arxiv.org/abs/2102.01189).
 
-![](https://github.com/divelab/DIG/blob/main/dig/ggraph/GraphDF/figs/graphdf.png)
+![](./figs/graphdf.png)
 
 ## Table of Contents
 
