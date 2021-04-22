@@ -50,6 +50,10 @@ class Rand_Gen_Evaluator:
 class Prop_Optim_Evaluator:
     r"""
     Evaluator for property optimization task. Metric is top-3 property scores among generated molecules.
+
+    Args:
+        prop_name (str): a string indicating the name of the molecular property, use 'plogp' for penalized logP or 'qed' for 
+            Quantitative Estimate of Druglikeness (QED).
     """
 
     def __init__(self, prop_name='plogp'):
