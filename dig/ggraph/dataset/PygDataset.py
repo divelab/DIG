@@ -24,7 +24,7 @@ class PygDataset(InMemoryDataset):
         An `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for datasets used in molecule generation.
         
         .. note::
-            Some datasets may not come with any node labels, like :obj:`qm9` and :obj:`moses`. 
+            Some datasets may not come with any node labels, like :obj:`moses`. 
             Since they don't have any properties in the original data file. The process of the
             dataset can only save the current input property and will load the same  property 
             label when the processed dataset is used. You can change the augment :obj:`processed_filename` 
@@ -98,6 +98,9 @@ class PygDataset(InMemoryDataset):
             self.data, self.slices, self.all_smiles = torch.load(self.processed_paths[0])
         else:
             self.process()
+        
+        if self.one_shot:
+            self.atom_list = ast.literal_eval(config['atom_list'])+[0]
     
     @property
     def num_node_labels(self):
@@ -285,9 +288,7 @@ class PygDataset(InMemoryDataset):
                 
         self.all_smiles = smile_list
         data_list = []
-        
-#         atom_list = ast.literal_eval(self.atom_list)
-        
+                
         for i in range(len(smile_list)):
             smile = smile_list[i]
             mol = Chem.MolFromSmiles(smile)
@@ -338,6 +339,9 @@ class PygDataset(InMemoryDataset):
         return data, slices
     
     def get_split_idx(self):
+        r"""
+        training-validation-test split
+        """
         if self.name.find('zinc250k') != -1:
             if not osp.exists('./raw/valid_idx_zinc250k.json'):
                 path = './raw/valid_idx_zinc250k.json'
