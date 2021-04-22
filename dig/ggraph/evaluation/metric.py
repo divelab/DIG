@@ -65,7 +65,7 @@ class Prop_Optim_Evaluator:
         
         Args:
             input_dict (dict): a python dict with the following items:
-                "mols" --- a list of generated molecules reprsented by Chem.RWMol objects.
+                "mols" --- a list of generated molecules reprsented by Chem.Mol or Chem.RWMol objects.
             
         :rtype: :class:`dict` (a python dict with the following items:
                     1 --- information of molecule with the highest property score;
