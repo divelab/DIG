@@ -74,7 +74,4 @@ class MUTAGDataset(InMemoryDataset):
         torch.save(self.collate(data_list), self.processed_paths[0])
 
 
-class MoleculeDataset(MoleculeNet):
-    def __init__(self, root, name, transform=None, pre_transform=None):
-        super(MoleculeDataset, self).__init__(root, name, transform=transform, pre_transform=pre_transform)
 
