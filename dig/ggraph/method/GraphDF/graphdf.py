@@ -8,6 +8,12 @@ from .train_utils import adjust_learning_rate, DataIterator
 
 
 class GraphDF(Generator):
+    r"""
+        The method class for GraphDF algorithm. This class provides interfaces for running random generation, property
+        optimization, and constrained optimization with GraphDF algorithm. Please refer to `this paper <https://arxiv.org/abs/2102.01189>`_ 
+        for details of GraphDF and `benchmark codes <https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphDF>`_ for usage examples.
+    """
+
     def __init__(self):
         super(GraphDF, self).__init__()
         self.model = None
@@ -26,9 +32,31 @@ class GraphDF(Generator):
             raise ValueError('Task {} is not supported in GraphDF!'.format(task))
         if checkpoint_path is not None:
             self.model.load_state_dict(torch.load(checkpoint_path))
+    
+
+    def load_pretrain_model(self, path):
+        load_key = torch.load(path)
+        for key in load_key.keys():
+            if key in self.model.state_dict().keys():
+                self.model.state_dict()[key].copy_(load_key[key].detach().clone())
 
 
     def train_rand_gen(self, loader, lr, wd, max_epochs, model_conf_dict, save_interval, save_dir):
+        r"""
+            Running training for random generation task.
+
+            Args:
+                loader: the data loader for loading training samples. It is supposed to use dig.ggraph.dataset.QM9/ZINC250k/MOSES
+                    as the dataset class, and apply torch_geometric.data.DenseDataLoader to it to form the data loader.
+                lr (float): the learning rate for training.
+                wd (float): the weight decay factor for training.
+                max_epochs (int): the maximum number of training epochs.
+                model_conf_dict (dict): the python dict for configuring the model hyperparameters.
+                save_interval (int): indicate the frequency to save the model parameters to .pth files,
+                    *e.g.*, if save_interval=2, the model parameters will be saved for every 2 training epochs.
+                save_dir (str): the directory to save the model parameters.
+        """
+
         self.get_model('rand_gen', model_conf_dict)
         self.model.train()
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
@@ -61,6 +89,24 @@ class GraphDF(Generator):
 
 
     def run_rand_gen(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):
+        r"""
+            Running graph generation for random generation task.
+
+            Args:
+                model_conf_dict (dict): the python dict for configuring the model hyperparameters.
+                checkpoint_path (str): the path to the saved model checkpoint file.
+                n_mols (int, optional): the number of molecules to generate.
+                num_min_node (int, optional): the minimum number of nodes in the generated molecular graphs.
+                num_max_node (int, optional): the maximum number of nodes in the generated molecular graphs.
+                temperature (list, optional): a list of two float numbers, the temperature parameter of prior distribution.
+                atomic_num_list (list, optional): a list of integers, the list of atomic numbers indicating the node types in the generated molecular graphs.
+            
+            :rtype:
+                (all_mols, pure_valids),
+                all_mols is a list of generated molecules represented by rdkit Chem.Mol objects;
+                pure_valids is a list of integers, all are 0 or 1, indicating whether bond resampling happens.
+        """
+
         self.get_model('rand_gen', model_conf_dict, checkpoint_path)
         self.model.eval()
         all_mols, pure_valids = [], []
@@ -79,8 +125,24 @@ class GraphDF(Generator):
         return all_mols, pure_valids
 
 
-    def train_prop_optim(self, lr, wd, max_iters, warm_up, model_conf_dict, pretrained_path, save_interval, save_dir):
-        self.get_model('prop_optim', model_conf_dict, pretrained_path)
+    def train_prop_optim(self, lr, wd, max_iters, warm_up, model_conf_dict, pretrain_path, save_interval, save_dir):
+        r"""
+            Running fine-tuning for property optimization task.
+
+            Args:
+                lr (float): the learning rate for fine-tuning.
+                wd (float): the weight decay factor for training.
+                max_iters (int): the maximum number of training iters.
+                warm_up (int): the number of linear warm-up iters.
+                model_conf_dict (dict): the python dict for configuring the model hyperparameters.
+                pretrain_path (str): the path to the saved pretrained model file.
+                save_interval (int): indicate the frequency to save the model parameters to .pth files,
+                    *e.g.*, if save_interval=20, the model parameters will be saved for every 20 training iters.
+                save_dir (str): the directory to save the model parameters.
+        """
+
+        self.get_model('prop_optim', model_conf_dict)
+        self.load_pretrain_model(pretrain_path)
         self.model.train()
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
         if not os.path.isdir(save_dir):
@@ -109,6 +171,22 @@ class GraphDF(Generator):
     
 
     def run_prop_optim(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):
+        r"""
+            Running graph generation for property optimization task.
+
+            Args:
+                model_conf_dict (dict): the python dict for configuring the model hyperparameters.
+                checkpoint_path (str): the path to the saved model checkpoint file.
+                n_mols (int, optional): the number of molecules to generate.
+                num_min_node (int, optional): the minimum number of nodes in the generated molecular graphs.
+                num_max_node (int, optional): the maximum number of nodes in the generated molecular graphs.
+                temperature (list, optional): a list of two float numbers, the temperature parameter of prior distribution.
+                atomic_num_list (list, optional): a list of integers, the list of atomic numbers indicating the node types in the generated molecular graphs.
+            
+            :rtype:
+                all_mols, a list of generated molecules represented by rdkit Chem.Mol objects.
+        """
+
         self.get_model('prop_optim', model_conf_dict, checkpoint_path)
         self.model.eval()
         all_mols, all_smiles = [], []
@@ -128,8 +206,26 @@ class GraphDF(Generator):
         return all_mols
 
 
-    def train_cons_optim(self, loader, lr, wd, max_iters, warm_up, model_conf_dict, pretrained_path, save_interval, save_dir):
-        self.get_model('cons_optim', model_conf_dict, pretrained_path)
+    def train_cons_optim(self, loader, lr, wd, max_iters, warm_up, model_conf_dict, pretrain_path, save_interval, save_dir):
+        r"""
+            Running fine-tuning for constrained optimization task.
+
+            Args:
+                loader: the data loader for loading training samples. It is supposed to use dig.ggraph.dataset.ZINC800
+                    as the dataset class, and apply torch_geometric.data.DenseDataLoader to it to form the data loader.
+                lr (float): the learning rate for training.
+                wd (float): the weight decay factor for training.
+                max_iters (int): the maximum number of training iters.
+                warm_up (int): the number of linear warm-up iters.
+                model_conf_dict (dict): the python dict for configuring the model hyperparameters.
+                pretrain_path (str): the path to the saved pretrained model parameters file.
+                save_interval (int): indicate the frequency to save the model parameters to .pth files,
+                    *e.g.*, if save_interval=20, the model parameters will be saved for every 20 training iters.
+                save_dir (str): the directory to save the model parameters.
+        """
+
+        self.get_model('cons_optim', model_conf_dict)
+        self.load_pretrain_model(pretrain_path)
         self.model.train()
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
         if not os.path.isdir(save_dir):
@@ -168,11 +264,6 @@ class GraphDF(Generator):
     
 
     def run_cons_optim_one_mol(self, adj, x, org_smile, mol_size, bfs_perm_origin, max_size_rl=38, temperature=[0.3,0.3], atom_list=[6, 7, 8, 9]):
-        """
-        direction: score ascent direction
-        adj: adjacent matrix of origin mol (1, 4, N, N)
-        x: node feature of origin mol (1, N, 9)
-        """
         best_mol0 = None
         best_mol2 = None
         best_mol4 = None
@@ -223,6 +314,23 @@ class GraphDF(Generator):
 
 
     def run_cons_optim(self, dataset, model_conf_dict, checkpoint_path, repeat_time=200, min_optim_time=50, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):
+        r"""
+            Running molecule optimization for constrained optimization task.
+
+            Args:
+                dataset: the dataset class for loading molecules to be optimized. It is supposed to use dig.ggraph.dataset.ZINC800 as the dataset class.
+                model_conf_dict (dict): the python dict for configuring the model hyperparameters.
+                checkpoint_path (str): the path to the saved model checkpoint file.
+                repeat_time (int, optional): the maximum number of optimization times for each molecule before successfully optimizing it under the threshold 0.6.
+                min_optim_time (int, optional): the minimum number of optimization times for each molecule.
+                num_max_node (int, optional): the maximum number of nodes in the optimized molecular graphs.
+                temperature (list, optional): a list of two float numbers, the temperature parameter of prior distribution.
+                atomic_num_list (list, optional): a list of integers, the list of atomic numbers indicating the node types in the optimized molecular graphs.
+            
+            :rtype:
+                (mols_0, mols_2, mols_4, mols_6), they are lists of optimized molecules (represented by rdkit Chem.Mol objects) under the threshold 0.0, 0.2, 0.4, 0.6, respectively.
+        """
+
         self.get_model('cons_optim', model_conf_dict, checkpoint_path)
         self.model.eval()
 
@@ -250,7 +358,7 @@ class GraphDF(Generator):
                     continue # not optimize this one
 
                 best_mol0246, best_score0246, final_sim0246 = self.run_cons_optim_one_mol(inp_adj_features, 
-                                                                    inp_node_features, raw_smile, mol_size, bfs_perm_origin, num_max_node, temperature)
+                                                                    inp_node_features, raw_smile, mol_size, bfs_perm_origin, num_max_node, temperature, atomic_num_list)
                 if best_score0246[0] > best_score[0]:
                     best_score[0] = best_score0246[0]
                     best_mol[0] = best_mol0246[0]
@@ -279,5 +387,8 @@ class GraphDF(Generator):
             mols_2.append(best_mol[1])
             mols_4.append(best_mol[2])
             mols_6.append(best_mol[3])
+
+            if batch_cnt % 1 == 0:
+                print('Optimized {} molecules'.format(batch_cnt+1))
 
         return mols_0, mols_2, mols_4, mols_6

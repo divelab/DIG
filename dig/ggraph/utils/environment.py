@@ -14,10 +14,15 @@ from rdkit import DataStructs
 def convert_radical_electrons_to_hydrogens(mol):
     """
     Converts radical electrons in a molecule into bonds to hydrogens. Only
-    use this if molecule is valid. Results a new mol object
-    :param mol: rdkit mol object
-    :return: rdkit mol object
+    use this if molecule is valid. Return a new mol object.
+
+    Args:
+        mol: rdkit mol object
+
+    :rtype:
+        rdkit mol object
     """
+
     m = copy.deepcopy(mol)
     if Chem.Descriptors.NumRadicalElectrons(m) == 0:  # not a radical
         return m
@@ -35,8 +40,14 @@ def check_chemical_validity(mol):
     """
     Checks the chemical validity of the mol object. Existing mol object is
     not modified. Radicals pass this test.
-    :return: True if chemically valid, False otherwise
+
+    Args:
+        mol: rdkit mol object
+    
+    :rtype:
+        :class:`bool`, True if chemically valid, False otherwise
     """
+
     s = Chem.MolToSmiles(mol, isomericSmiles=True)
     m = Chem.MolFromSmiles(s)  # implicitly performs sanitization
     if m:
@@ -48,9 +59,15 @@ def check_chemical_validity(mol):
 def check_valency(mol):
     """
     Checks that no atoms in the mol have exceeded their possible
-    valency
-    :return: True if no valency issues, False otherwise
+    valency.
+
+    Args:
+        mol: rdkit mol object
+
+    :rtype:
+        :class:`bool`, True if no valency issues, False otherwise
     """
+
     try:
         s = Chem.MolToSmiles(mol, isomericSmiles=True)
         m = Chem.MolFromSmiles(s)
@@ -64,10 +81,15 @@ def penalized_logp(mol):
     """
     Reward that consists of log p penalized by SA and # long cycles,
     as described in (Kusner et al. 2017). Scores are normalized based on the
-    statistics of 250k_rndm_zinc_drugs_clean.smi dataset
-    :param mol: rdkit mol object
-    :return: float
+    statistics of 250k_rndm_zinc_drugs_clean.smi dataset.
+
+    Args:
+        mol: rdkit mol object
+    
+    :rtype:
+        :class:`float`
     """
+
     # normalization constants, statistics from 250k_rndm_zinc_drugs_clean.smi
     logP_mean = 2.4570953396190123
     logP_std = 1.434324401111988
@@ -100,6 +122,18 @@ def penalized_logp(mol):
 
 
 def calculate_min_plogp(mol):
+    """
+    Reward that consists of log p penalized by SA and # long cycles,
+    as described in (Kusner et al. 2017). Scores are normalized based on the
+    statistics of 250k_rndm_zinc_drugs_clean.smi dataset.
+
+    Args:
+        mol: rdkit mol object
+    
+    :rtype:
+        :class:`float`
+    """
+
     p1 = penalized_logp(mol)
     s1 = Chem.MolToSmiles(mol, isomericSmiles=True)
     s2 = Chem.MolToSmiles(mol, isomericSmiles=False)
@@ -117,15 +151,20 @@ def steric_strain_filter(mol, cutoff=0.82, max_attempts_embed=20, max_num_iters=
     Flags molecules based on a steric energy cutoff after max_num_iters
     iterations of MMFF94 forcefield minimization. Cutoff is based on average
     angle bend strain energy of molecule
-    :param mol: rdkit mol object
-    :param cutoff: kcal/mol per angle . If minimized energy is above this
-    threshold, then molecule fails the steric strain filter
-    :param max_attempts_embed: number of attempts to generate initial 3d
-    coordinates
-    :param max_num_iters: number of iterations of forcefield minimization
-    :return: True if molecule could be successfully minimized, and resulting
-    energy is below cutoff, otherwise False
+
+    Args:
+        mol: rdkit mol object
+        cutoff (float): kcal/mol per angle . If minimized energy is above this
+            threshold, then molecule fails the steric strain filter.
+        max_attempts_embed (int): number of attempts to generate initial 3d
+            coordinates.
+        max_num_iters (int): number of iterations of forcefield minimization.
+
+    :rtype:
+        :class:`bool`, True if molecule could be successfully minimized, and resulting
+        energy is below cutoff, otherwise False.
     """
+
     # check for the trivial cases of a single atom or only 2 atoms, in which
     # case there is no angle bend strain energy (as there are no angles!)
     if mol.GetNumAtoms() <= 2:
@@ -213,9 +252,13 @@ def zinc_molecule_filter(mol):
     Flags molecules based on problematic functional groups as
     provided set of ZINC rules from
     http://blaster.docking.org/filtering/rules_default.txt.
-    :param mol: rdkit mol object
-    :return: Returns True if molecule is okay (ie does not match any of
-    therules), False if otherwise
+
+    Args:
+        mol: rdkit mol object
+    
+    :rtype:
+        :class:`bool`, returns True if molecule is okay (ie does not match any of
+        therules), False if otherwise.
     """
     params = FilterCatalogParams()
     params.AddCatalog(FilterCatalogParams.FilterCatalogs.ZINC)
@@ -227,10 +270,14 @@ def reward_target_molecule_similarity(mol, target, radius=2, nBits=2048,
                                       useChirality=True):
     """
     Reward for a target molecule similarity, based on tanimoto similarity
-    between the ECFP fingerprints of the x molecule and target molecule
-    :param mol: rdkit mol object
-    :param target: rdkit mol object
-    :return: float, [0.0, 1.0]
+    between the ECFP fingerprints of the x molecule and target molecule.
+
+    Args:
+        mol: rdkit mol object
+        target: rdkit mol object
+    
+    :rtype:
+        :class:`float`, [0.0, 1.0]
     """
     x = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=radius,
                                                         nBits=nBits,

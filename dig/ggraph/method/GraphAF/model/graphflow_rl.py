@@ -5,10 +5,8 @@ import torch.nn as nn
 from rdkit import Chem
 from .graphaf import MaskedGraphAF
 from .disgraphaf import DisGraphAF
-from .environment import *
-from .model_utils import save_one_mol, update_optim_dict, reward_target_molecule_similarity
-import pickle
-
+from dig.ggraph.utils import check_chemical_validity, check_valency, calculate_min_plogp, qed, 
+from dig.ggraph.utils import convert_radical_electrons_to_hydrogens, steric_strain_filter, zinc_molecule_filter
 
 class GraphFlowModel_rl(nn.Module):
     """
@@ -16,61 +14,40 @@ class GraphFlowModel_rl(nn.Module):
         self.args: deq_coeff
                    deq_type
     """
-    def __init__(self, conf_rl, conf_net, out_path=None):
+    def __init__(self, conf_rl, model_conf_dict):
         super(GraphFlowModel_rl, self).__init__()
-        self.max_size = conf_net['max_size']
-        self.node_dim = conf_net['node_dim']
-        self.bond_dim = conf_net['bond_dim']
-        self.edge_unroll = conf_net['edge_unroll']
-        self.deq_coeff = conf_net['deq_coeff']
-        self.conf_rl = conf_rl
-        self.out_path = out_path
+        self.max_size = model_conf_dict['max_size']
+        self.node_dim = model_conf_dict['node_dim']
+        self.bond_dim = model_conf_dict['bond_dim']
+        self.edge_unroll = model_conf_dict['edge_unroll']
+        self.deq_coeff = model_conf_dict['deq_coeff']
+        self.conf_rl = model_conf_dict['rl_conf_dict']
 
         node_masks, adj_masks, link_prediction_index, self.flow_core_edge_masks = self.initialize_masks(max_node_unroll=self.max_size, max_edge_unroll=self.edge_unroll)
 
         self.latent_step = node_masks.size(0)  # (max_size) + (max_edge_unroll - 1) / 2 * max_edge_unroll + (max_size - max_edge_unroll) * max_edge_unroll
         self.latent_node_length = self.max_size * self.node_dim
         self.latent_edge_length = (self.latent_step - self.max_size) * self.bond_dim
-        print('latent node length: %d' % self.latent_node_length)
-        print('latent edge length: %d' % self.latent_edge_length)
+        # print('latent node length: %d' % self.latent_node_length)
+        # print('latent edge length: %d' % self.latent_edge_length)
 
         self.dp = conf_net['use_gpu']
         self.use_df = conf_net['use_df']
         
-        if self.use_df:
-            node_base_log_probs = torch.randn(self.max_size, self.node_dim)
-            edge_base_log_probs = torch.randn(self.latent_step - self.max_size, self.bond_dim)
-            self.flow_core = DisGraphAF(node_masks, adj_masks, link_prediction_index, num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                        num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
-            self.flow_core_old = DisGraphAF(node_masks, adj_masks, link_prediction_index, num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                        num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
-            if self.dp:
-                self.flow_core = nn.DataParallel(self.flow_core.cuda())
-                self.flow_core_old = nn.DataParallel(self.flow_core_old.cuda())
-                self.node_base_log_probs = nn.Parameter(node_base_log_probs.cuda(), requires_grad=True)
-                self.edge_base_log_probs = nn.Parameter(edge_base_log_probs.cuda(), requires_grad=True)
-                self.node_base_log_probs_old = nn.Parameter(node_base_log_probs.cuda(), requires_grad=False)
-                self.edge_base_log_probs_old = nn.Parameter(edge_base_log_probs.cuda(), requires_grad=False)
-            else:
-                self.node_base_log_probs = nn.Parameter(node_base_log_probs, requires_grad=True)
-                self.edge_base_log_probs = nn.Parameter(edge_base_log_probs, requires_grad=True)
-                self.node_base_log_probs_old = nn.Parameter(node_base_log_probs, requires_grad=False)
-                self.edge_base_log_probs_old = nn.Parameter(edge_base_log_probs, requires_grad=False)
+        constant_pi = torch.Tensor([3.1415926535])
+        prior_ln_var = torch.zeros([1])
+        self.flow_core = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=conf_net['st_type'], num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
+        self.flow_core_old = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=conf_net['st_type'], num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
+        if self.dp:
+            self.flow_core = nn.DataParallel(self.flow_core)
+            self.flow_core_old = nn.DataParallel(self.flow_core_old)
+            self.constant_pi = nn.Parameter(constant_pi.cuda(), requires_grad=False)
+            self.prior_ln_var = nn.Parameter(prior_ln_var.cuda(), requires_grad=False)
         else:
-            constant_pi = torch.Tensor([3.1415926535])
-            prior_ln_var = torch.zeros([1])
-            self.flow_core = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=conf_net['st_type'], num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                        num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
-            self.flow_core_old = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=conf_net['st_type'], num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                        num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
-            if self.dp:
-                self.flow_core = nn.DataParallel(self.flow_core)
-                self.flow_core_old = nn.DataParallel(self.flow_core_old)
-                self.constant_pi = nn.Parameter(constant_pi.cuda(), requires_grad=False)
-                self.prior_ln_var = nn.Parameter(prior_ln_var.cuda(), requires_grad=False)
-            else:
-                self.constant_pi = nn.Parameter(constant_pi, requires_grad=False)
-                self.prior_ln_var = nn.Parameter(prior_ln_var, requires_grad=False)
+            self.constant_pi = nn.Parameter(constant_pi, requires_grad=False)
+            self.prior_ln_var = nn.Parameter(prior_ln_var, requires_grad=False)
 
 
     def reinforce_optim_one_mol(self, atom_list, temperature=0.75, max_size_rl=38):
@@ -79,26 +56,24 @@ class GraphFlowModel_rl(nn.Module):
         prop_fn = qed if self.conf_rl['property_type'] == 'qed' else calculate_min_plogp
 
         if self.dp:
-            if not self.use_df:
-                prior_node_dist = torch.distributions.normal.Normal(torch.zeros([self.node_dim]).cuda(),
-                                                                    temperature * torch.ones([self.node_dim]).cuda())
-                prior_edge_dist = torch.distributions.normal.Normal(torch.zeros([self.bond_dim]).cuda(),
-                                                                    temperature * torch.ones([self.bond_dim]).cuda())
+            prior_node_dist = torch.distributions.normal.Normal(torch.zeros([self.node_dim]).cuda(),
+                                                                temperature * torch.ones([self.node_dim]).cuda())
+            prior_edge_dist = torch.distributions.normal.Normal(torch.zeros([self.bond_dim]).cuda(),
+                                                                temperature * torch.ones([self.bond_dim]).cuda())
             cur_node_features = torch.zeros([1, max_size_rl, self.node_dim]).cuda()
             cur_adj_features = torch.zeros([1, self.bond_dim, max_size_rl, max_size_rl]).cuda()
         else:
-            if not self.use_df:
-                prior_node_dist = torch.distributions.normal.Normal(torch.zeros([self.node_dim]),
-                                                                    temperature * torch.ones([self.node_dim]))
-                prior_edge_dist = torch.distributions.normal.Normal(torch.zeros([self.bond_dim]),
-                                                                    temperature * torch.ones([self.bond_dim]))
+            prior_node_dist = torch.distributions.normal.Normal(torch.zeros([self.node_dim]),
+                                                                temperature * torch.ones([self.node_dim]))
+            prior_edge_dist = torch.distributions.normal.Normal(torch.zeros([self.bond_dim]),
+                                                                temperature * torch.ones([self.bond_dim]))
             cur_node_features = torch.zeros([1, max_size_rl, self.node_dim])
             cur_adj_features = torch.zeros([1, self.bond_dim, max_size_rl, max_size_rl])
         self.eval()
 
-        cur_mol_smiles = []
-        cur_mol_props = []
-        cur_mol_num_atoms = []
+        # cur_mol_smiles = []
+        # cur_mol_props = []
+        # cur_mol_num_atoms = []
 
         with torch.no_grad():
             min_action_node = 1
@@ -121,11 +96,7 @@ class GraphFlowModel_rl(nn.Module):
                 
                 # first generate node
                 ## reverse flow
-                if self.use_df:
-                    prior_node_dist = torch.distributions.OneHotCategorical(logits=self.node_base_log_probs[i]*temperature[0])
-                    latent_node = prior_node_dist.sample().view(1, -1)
-                else:
-                    latent_node = prior_node_dist.sample().view(1, -1) #(1, 9)
+                latent_node = prior_node_dist.sample().view(1, -1) #(1, 9)
                 if self.dp:
                     latent_node = self.flow_core_old.module.reverse(cur_node_features, cur_adj_features, latent_node, mode=0).view(-1)  # (9, )
                 else:
@@ -149,11 +120,7 @@ class GraphFlowModel_rl(nn.Module):
                     invalid_bond_type_set = set()
                     while not valid:
                         if len(invalid_bond_type_set) < 3 and resample_edge <= 50:  # haven't sampled all possible bond type or is not stuck in the loop
-                            if self.use_df:
-                                prior_edge_dist = torch.distributions.OneHotCategorical(logits=self.edge_base_log_probs[edge_idx]/temperature[1])
-                                latent_edge = prior_edge_dist.sample().view(1, -1)
-                            else:
-                                latent_edge = prior_edge_dist.sample().view(1, -1)  # (1, 4)
+                            latent_edge = prior_edge_dist.sample().view(1, -1)  # (1, 4)
                             if self.dp:
                                 latent_edge = self.flow_core_old.module.reverse(cur_node_features, cur_adj_features, latent_edge,
                                                                             mode=1, edge_index=torch.Tensor([[j + start, i]]).long().cuda()).view(-1)  # (4, )
@@ -164,6 +131,7 @@ class GraphFlowModel_rl(nn.Module):
                         else:
                             assert resample_edge > 50 or len(invalid_bond_type_set) == 3
                             edge_discrete_id = 3  # we have no choice but to choose not to add edge between (i, j+start)
+                        
                         cur_adj_features[0, edge_discrete_id, i, j + start] = 1.0
                         cur_adj_features[0, edge_discrete_id, j + start, i] = 1.0
                         if edge_discrete_id == 3:  # virtual edge
@@ -185,15 +153,7 @@ class GraphFlowModel_rl(nn.Module):
                             
                 if is_connect:  # new generated node has at least one bond with previous node, do not stop generation, backup mol from rw_mol to mol
                     is_continue = True
-                    mol = rw_mol.GetMol()
-                    
-                    # if check_chemical_validity(mol) is True:
-                    #     current_smile = Chem.MolToSmiles(mol, isomericSmiles=True)
-                    #     tmp_mol1 = Chem.MolFromSmiles(current_smile)
-                    #     current_prop = prop_fn(tmp_mol1)
-                    #     cur_mol_smiles.append(current_smile)
-                    #     cur_mol_props.append(current_prop)
-                                    
+                    mol = rw_mol.GetMol()            
                     added_num += 1
 
                 else:
@@ -207,16 +167,13 @@ class GraphFlowModel_rl(nn.Module):
 
         if check_chemical_validity(mol) is True:
             current_smile = Chem.MolToSmiles(mol, isomericSmiles=True)
-            tmp_mol1 = Chem.MolFromSmiles(current_smile)
-            current_prop = prop_fn(tmp_mol1)
-            cur_mol_smiles.append(current_smile)
-            cur_mol_props.append(current_prop)
-            cur_mol_num_atoms.append(tmp_mol1.GetNumAtoms())
+            final_mol = Chem.MolFromSmiles(current_smile)
+            num_atoms = final_mol.GetNumAtoms()
+            return final_mol, num_atoms
+        else:
+            return None, None
 
-        return cur_mol_smiles, cur_mol_props, cur_mol_num_atoms
-
-
-    def reinforce_forward_optim(self, atom_list, temperature=0.75, batch_size=32, max_size_rl=48, in_baseline=None, cur_iter=None):
+    def reinforce_forward_optim(self, in_baseline=None, cur_iter=None):
         """
         Fintuning model using reinforce algorithm
         Args:
@@ -229,28 +186,24 @@ class GraphFlowModel_rl(nn.Module):
 
         """
         assert cur_iter is not None
+        atom_list, temperature, batch_size, max_size_rl = self.conf_rl['atom_list'], self.conf_rl['temperature'], self.conf_rl['batch_size'], self.conf_rl['max_size_rl']
         if cur_iter % self.conf_rl['update_iters'] == 0: # uodate the demenstration net every 4 iter.
             self.flow_core_old.load_state_dict(self.flow_core.state_dict())
-            if self.use_df:
-                self.node_base_log_probs_old = nn.Parameter(self.node_base_log_probs.detach().clone(), requires_grad=False)
-                self.edge_base_log_probs_old = nn.Parameter(self.edge_base_log_probs.detach().clone(), requires_grad=False)
-
+            
         #assert cur_baseline is not None
         num2bond = {0: Chem.rdchem.BondType.SINGLE, 1: Chem.rdchem.BondType.DOUBLE, 2: Chem.rdchem.BondType.TRIPLE}
         num2atom = {i:atom_list[i] for i in range(len(atom_list))}
 
         if self.dp:
-            if not self.use_df:
-                prior_node_dist = torch.distributions.normal.Normal(torch.zeros([self.node_dim]).cuda(),
-                                                                    temperature * torch.ones([self.node_dim]).cuda())
-                prior_edge_dist = torch.distributions.normal.Normal(torch.zeros([self.bond_dim]).cuda(),
-                                                                    temperature * torch.ones([self.bond_dim]).cuda())
+            prior_node_dist = torch.distributions.normal.Normal(torch.zeros([self.node_dim]).cuda(),
+                                                                temperature * torch.ones([self.node_dim]).cuda())
+            prior_edge_dist = torch.distributions.normal.Normal(torch.zeros([self.bond_dim]).cuda(),
+                                                                temperature * torch.ones([self.bond_dim]).cuda())
         else:
-            if not self.use_df:
-                prior_node_dist = torch.distributions.normal.Normal(torch.zeros([self.node_dim]),
-                                                                    temperature * torch.ones([self.node_dim]))
-                prior_edge_dist = torch.distributions.normal.Normal(torch.zeros([self.bond_dim]),
-                                                                    temperature * torch.ones([self.bond_dim]))
+            prior_node_dist = torch.distributions.normal.Normal(torch.zeros([self.node_dim]),
+                                                                temperature * torch.ones([self.node_dim]))
+            prior_edge_dist = torch.distributions.normal.Normal(torch.zeros([self.bond_dim]),
+                                                                temperature * torch.ones([self.bond_dim]))
 
         node_inputs = {}
         node_inputs['node_features'] = []
@@ -330,11 +283,7 @@ class GraphFlowModel_rl(nn.Module):
                     
                     # first generate node
                     ## reverse flow
-                    if self.use_df:
-                        prior_node_dist = torch.distributions.OneHotCategorical(logits=self.node_base_log_probs[i]*temperature[0])
-                        latent_node = prior_node_dist.sample().view(1, -1)
-                    else:
-                        latent_node = prior_node_dist.sample().view(1, -1) #(1, 9)
+                    latent_node = prior_node_dist.sample().view(1, -1) #(1, 9)
                     if self.dp:
                         latent_node = self.flow_core_old.module.reverse(cur_node_features, cur_adj_features, latent_node, mode=0).view(-1)  # (9, )
                     else:
@@ -368,11 +317,7 @@ class GraphFlowModel_rl(nn.Module):
                         invalid_bond_type_set = set()
                         while not valid:
                             if len(invalid_bond_type_set) < 3 and resample_edge <= 50:  # haven't sampled all possible bond type or is not stuck in the loop
-                                if self.use_df:
-                                    prior_edge_dist = torch.distributions.OneHotCategorical(logits=self.edge_base_log_probs[edge_idx]/temperature[1])
-                                    latent_edge = prior_edge_dist.sample().view(1, -1)
-                                else:
-                                    latent_edge = prior_edge_dist.sample().view(1, -1)  # (1, 4)
+                                latent_edge = prior_edge_dist.sample().view(1, -1)  # (1, 4)
                                 if self.dp:
                                     latent_edge = self.flow_core_old.module.reverse(cur_node_features, cur_adj_features, latent_edge,
                                                                                 mode=1, edge_index=torch.Tensor([[j + start, i]]).long().cuda()).view(-1)  # (4, )
@@ -575,7 +520,7 @@ class GraphFlowModel_rl(nn.Module):
         if in_baseline is not None:
             assert in_baseline.size() == reward_baseline_per_step.size()
             reward_baseline_per_step = reward_baseline_per_step * (1. - self.conf_rl['moving_coeff']) + in_baseline * self.conf_rl['moving_coeff']
-            print('calculating moving baseline per step')
+            # print('calculating moving baseline per step')
 
         node_inputs_node_features = torch.cat(node_inputs['node_features'], dim=0) # (total_size, max_size_rl, 9)
         node_inputs_adj_features = torch.cat(node_inputs['adj_features'], dim=0) # (total_size, 4, max_size_rl, max_size_rl)
@@ -593,9 +538,8 @@ class GraphFlowModel_rl(nn.Module):
         adj_inputs_baseline = torch.index_select(reward_baseline_per_step, dim=0, index=adj_inputs_baseline_index) #(total_size, )
         adj_inputs_edge_cnts = torch.cat(adj_inputs['edge_cnt'], dim=0) # (total_size, )
 
-        if not self.use_df:
-            node_inputs_node_features_cont += self.deq_coeff * torch.rand(node_inputs_node_features_cont.size(), device='cuda:%d' % (node_inputs_node_features_cont.get_device()))  # (total_size, 9)
-            adj_inputs_edge_features_cont += self.deq_coeff * torch.rand(adj_inputs_edge_features_cont.size(), device='cuda:%d' % (adj_inputs_edge_features_cont.get_device()))  # (total_size, 4)
+        node_inputs_node_features_cont += self.deq_coeff * torch.rand(node_inputs_node_features_cont.size(), device='cuda:%d' % (node_inputs_node_features_cont.get_device()))  # (total_size, 9)
+        adj_inputs_edge_features_cont += self.deq_coeff * torch.rand(adj_inputs_edge_features_cont.size(), device='cuda:%d' % (adj_inputs_edge_features_cont.get_device()))  # (total_size, 4)
 
         if self.dp:
             node_function = self.flow_core.module.forward_rl_node
@@ -662,38 +606,22 @@ class GraphFlowModel_rl(nn.Module):
         node_total_length = z_node.size(0) * float(self.node_dim)
         edge_total_length = z_edge.size(0) * float(self.bond_dim)
 
-        if not self.use_df:
-            ll_node = -1 / 2 * (torch.log(2 * self.constant_pi) + self.prior_ln_var + torch.exp(-self.prior_ln_var) * (z_node ** 2))
-            ll_node = ll_node.sum(-1)  # (B)
-            ll_edge = -1 / 2 * (torch.log(2 * self.constant_pi) + self.prior_ln_var + torch.exp(-self.prior_ln_var) * (z_edge ** 2))
-            ll_edge = ll_edge.sum(-1)  # (B)
-            ll_node += logdet_node  # ([B])
-            ll_edge += logdet_edge  # ([B])
+        
+        ll_node = -1 / 2 * (torch.log(2 * self.constant_pi) + self.prior_ln_var + torch.exp(-self.prior_ln_var) * (z_node ** 2))
+        ll_node = ll_node.sum(-1)  # (B)
+        ll_edge = -1 / 2 * (torch.log(2 * self.constant_pi) + self.prior_ln_var + torch.exp(-self.prior_ln_var) * (z_edge ** 2))
+        ll_edge = ll_edge.sum(-1)  # (B)
+        ll_node += logdet_node  # ([B])
+        ll_edge += logdet_edge  # ([B])
 
-            ll_node_old = -1 / 2 * (torch.log(2 * self.constant_pi) + self.prior_ln_var + torch.exp(-self.prior_ln_var) * (z_node_old ** 2))
-            ll_node_old = ll_node_old.sum(-1)  # (B)
-            ll_edge_old = -1 / 2 * (torch.log(2 * self.constant_pi) + self.prior_ln_var + torch.exp(-self.prior_ln_var) * (z_edge_old ** 2))
-            ll_edge_old = ll_edge_old.sum(-1)  # (B)
-            ll_node_old += logdet_node_old  # ([B])
-            ll_edge_old += logdet_edge_old  # ([B])
+        ll_node_old = -1 / 2 * (torch.log(2 * self.constant_pi) + self.prior_ln_var + torch.exp(-self.prior_ln_var) * (z_node_old ** 2))
+        ll_node_old = ll_node_old.sum(-1)  # (B)
+        ll_edge_old = -1 / 2 * (torch.log(2 * self.constant_pi) + self.prior_ln_var + torch.exp(-self.prior_ln_var) * (z_edge_old ** 2))
+        ll_edge_old = ll_edge_old.sum(-1)  # (B)
+        ll_node_old += logdet_node_old  # ([B])
+        ll_edge_old += logdet_edge_old  # ([B])
 
-        else:
-            node_base_log_probs_sm = torch.nn.functional.log_softmax(self.node_base_log_probs, dim=-1)
-            node_base_log_probs_sm_select = torch.index_select(node_base_log_probs_sm, dim=0, index=node_inputs_baseline_index-1) #(total_size, )
-            # print(z_node.shape, node_base_log_probs_sm.shape, node_base_log_probs_sm_new.shape)
-            ll_node = torch.sum(z_node * node_base_log_probs_sm_select, dim=(-1,-2))
-            edge_base_log_probs_sm = torch.nn.functional.log_softmax(self.edge_base_log_probs, dim=-1)
-            edge_base_log_probs_sm_select = torch.index_select(edge_base_log_probs_sm, dim=0, index=adj_inputs_edge_cnts)
-            # print(z_edge.shape, edge_base_log_probs_sm.shape, edge_base_log_probs_sm_select.shape)
-            ll_edge = torch.sum(z_edge * edge_base_log_probs_sm_select, dim=(-1,-2))
-            
-            node_base_log_probs_sm_old = torch.nn.functional.log_softmax(self.node_base_log_probs_old, dim=-1)
-            node_base_log_probs_sm_old_select = torch.index_select(node_base_log_probs_sm_old, dim=0, index=node_inputs_baseline_index-1) #(total_size, )
-            ll_node_old = torch.sum(z_node_old * node_base_log_probs_sm_old_select, dim=(-1,-2))
-            edge_base_log_probs_sm_old = torch.nn.functional.log_softmax(self.edge_base_log_probs_old, dim=-1)
-            edge_base_log_probs_sm_old_select = torch.index_select(edge_base_log_probs_sm_old, dim=0, index=adj_inputs_edge_cnts)
-            ll_edge_old = torch.sum(z_edge_old * edge_base_log_probs_sm_old_select, dim=(-1,-2))
-
+        
         ratio_node = torch.exp((ll_node - ll_node_old.detach()).clamp(max=10., min=-10.))
         ratio_edge = torch.exp((ll_edge - ll_edge_old.detach()).clamp(max=10., min=-10.))        
 
@@ -724,11 +652,8 @@ class GraphFlowModel_rl(nn.Module):
         if torch.isnan(surr2_edge).any():
             raise RuntimeError('surr2 edge has NaN entries')                       
 
-        if self.conf_rl['divide_loss']:
-            return -((torch.min(surr1_node, surr2_node).sum() + torch.min(surr1_edge, surr2_edge).sum()) / (node_total_length + edge_total_length) - 1.0), per_mol_reward, per_mol_property_score, reward_baseline_per_step
-        else:
-            # ! useless
-            return -torch.sum(ll_node + ll_edge) / batch_length  # scalar
+        return -((torch.min(surr1_node, surr2_node).sum() + torch.min(surr1_edge, surr2_edge).sum()) / (node_total_length + edge_total_length) - 1.0), per_mol_reward, per_mol_property_score, reward_baseline_per_step
+        
    
 
     def initialize_masks(self, max_node_unroll=38, max_edge_unroll=12):

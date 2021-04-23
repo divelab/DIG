@@ -31,7 +31,7 @@ class EdgePerturbation():
 
         edge_index = data.edge_index.detach().clone()
         idx_remain = edge_index
-        idx_add = torch.tensor([]).reshape(-1, 2)
+        idx_add = torch.tensor([]).reshape(2, -1).long()
 
         if self.drop:
             idx_remain = edge_index[:, np.random.choice(edge_num, edge_num-perturb_num, 
@@ -99,7 +99,7 @@ class Diffusion():
         if self.mode == 'ppr':
             dinv = torch.inverse(torch.sqrt(d))
             at = torch.matmul(torch.matmul(dinv, orig_adj), dinv)
-            diff_adj = alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - self.alpha) * at))
+            diff_adj = self.alpha * torch.inverse((torch.eye(orig_adj.shape[0]) - (1 - self.alpha) * at))
 
         elif self.mode == 'heat':
             diff_adj = torch.exp(self.t * (torch.matmul(orig_adj, torch.inverse(d)) - 1))

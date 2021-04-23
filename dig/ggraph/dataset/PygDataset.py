@@ -19,48 +19,43 @@ bond_type_to_int = {Chem.BondType.SINGLE: 0, Chem.BondType.DOUBLE: 1, Chem.BondT
 zinc_atom_list = [6, 7, 8, 9, 15, 16, 17, 35, 53]
 qm9_atom_list = [6, 7, 8, 9]
 
-def graph_data_obj_to_nx_simple(data, use_aug=False):
-    """
-    Converts graph Data object required by the pytorch geometric package to
-    network x data object. NB: Uses simplified atom and bond features,
-    and represent as indices. NB: possible issues with recapitulating relative
-    stereochemistry since the edges in the nx object are unordered.
-    :param data: pytorch geometric Data object
-    :return: network x object
-    """
-    G = nx.Graph()
-
-    # atoms
-    atom_features = data.x.cpu().numpy()
-    num_atoms = atom_features.shape[0]
-    if use_aug:
-        local_perm = np.random.permutation(num_atoms)
-    else:
-        local_perm = np.arange(num_atoms)
-
-    for i in range(num_atoms):
-        atomic_num_idx = atom_features[local_perm[i]]
-        G.add_node(i, atom_num_idx=atomic_num_idx)
-        pass
-
-    # bonds
-    edge_index = data.edge_index.cpu().numpy()
-    edge_attr = data.edge_attr.cpu().numpy()
-    num_bonds = edge_index.shape[1]
-    for j in range(0, num_bonds, 2):
-        begin_idx = np.where(local_perm == int(edge_index[0, j]))[0][0]
-        end_idx = np.where(local_perm == int(edge_index[1, j]))[0][0]
-        bond_type_idx, bond_dir_idx = edge_attr[j]
-        if not G.has_edge(begin_idx, end_idx):
-            G.add_edge(begin_idx, end_idx, bond_type_idx=bond_type_idx,
-                       bond_dir_idx=bond_dir_idx)
-
-    return G, local_perm
-
 class PygDataset(InMemoryDataset):
+    """
+        A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for datasets used in molecule generation.
+        
+        .. note::
+            Some datasets may not come with any node labels, like :obj:`moses`. 
+            Since they don't have any properties in the original data file. The process of the
+            dataset can only save the current input property and will load the same  property 
+            label when the processed dataset is used. You can change the augment :obj:`processed_filename` 
+            to re-process the dataset with intended property.
+        
+        Args:
+            root (string, optional): Root directory where the dataset should be saved. (default: :obj:`./`)
+            name (string, optional): The name of the dataset.  Available dataset names are as follows: 
+                                    :obj:`zinc250k`, :obj:`zinc_800_graphaf`, :obj:`zinc_800_jt`, :obj:`zinc250k_property`, 
+                                    :obj:`qm9_property`, :obj:`qm9`, :obj:`moses`. (default: :obj:`qm9`)
+            prop_name (string, optional): The molecular property desired and used as the optimization target. (default: :obj:`penalized_logp`)
+            conf_dict (dictionary, optional): dictionary that stores all the configuration for the corresponding dataset. Default is None, but when something is passed, it uses its information. Useful for debugging and customizing for external contributers. (default: :obj:`False`)
+            transform (callable, optional): A function/transform that takes in an
+                :obj:`torch_geometric.data.Data` object and returns a transformed
+                version. The data object will be transformed before every access.
+                (default: :obj:`None`)
+            pre_transform (callable, optional): A function/transform that takes in
+                an :obj:`torch_geometric.data.Data` object and returns a
+                transformed version. The data object will be transformed before
+                being saved to disk. (default: :obj:`None`)
+            pre_filter (callable, optional): A function that takes in an
+                :obj:`torch_geometric.data.Data` object and returns a boolean
+                value, indicating whether the data object should be included in the
+                final dataset. (default: :obj:`None`)
+            use_aug (bool, optional): If :obj:`True`, data augmentation will be used. (default: :obj:`False`)
+            one_shot (bool, optional): If :obj:`True`, the returned data will use one-shot format with an extra dimension of virtual node and edge feature. (default: :obj:`False`)
+        """
+    
     def __init__(self,
-                 root='./',
-                 name='qm9',
+                 root,
+                 name,
                  prop_name='penalized_logp',
                  conf_dict=None,
                  transform=None,
@@ -70,24 +65,10 @@ class PygDataset(InMemoryDataset):
                  use_aug=False,
                  one_shot=False
                  ):
-        """
-        Pytorch Geometric data interface for molecule datasets.
-        param root: root directory where the dataset should be saved.
-        param name: the name of the dataset you want to use.
-        param prop_name: the molecular property desired and used as the optimization target.
-        param conf_dict: dictionary that stores all the configuration for the corresponding dataset. Default is None, 
-                    but when something is passed, it uses its information. Useful for debugging for external contributers.
-        param use_aug: whether data augmentation is used, default is False
-        param one_shot: 
-                   
-        All the rest of parameters of PygDataset follows the use in 'InMemoryDataset' from torch_geometric.data.
-        Documentation can be found at https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html.
-        """
         
         self.processed_filename = processed_filename
         self.root = root
         self.name = name
-#         self.edge_unroll = edge_unroll    # not used
         self.prop_name = prop_name
         self.use_aug = use_aug
         self.one_shot = one_shot
@@ -117,10 +98,9 @@ class PygDataset(InMemoryDataset):
             self.data, self.slices, self.all_smiles = torch.load(self.processed_paths[0])
         else:
             self.process()
-
-#     @property
-#     def num_max_node(self):
-#         return (self.slices['x'][1:]-self.slices['x'][:-1]).max().item()
+        
+        if self.one_shot:
+            self.atom_list = ast.literal_eval(config['atom_list'])+[0]
     
     @property
     def num_node_labels(self):
@@ -150,7 +130,6 @@ class PygDataset(InMemoryDataset):
     @property
     def raw_dir(self):
         name = 'raw'
-#         return osp.join(self.root, self.name, name)
         return osp.join(self.root, name)
     
     @property
@@ -162,8 +141,6 @@ class PygDataset(InMemoryDataset):
 
     @property
     def raw_file_names(self):
-#         names = ['A', 'graph_indicator', 'node_attributes', 'edge_attributes', 'graph_attributes']
-#         return ['{}_{}.txt'.format(self.name, name) for name in names]
         name = self.name + '.csv'
         return name
 
@@ -311,9 +288,7 @@ class PygDataset(InMemoryDataset):
                 
         self.all_smiles = smile_list
         data_list = []
-        
-#         atom_list = ast.literal_eval(self.atom_list)
-        
+                
         for i in range(len(smile_list)):
             smile = smile_list[i]
             mol = Chem.MolFromSmiles(smile)
@@ -364,6 +339,9 @@ class PygDataset(InMemoryDataset):
         return data, slices
     
     def get_split_idx(self):
+        r"""
+        :rtype: A dictionary for training-validation split with key :obj:`train_idx` and :obj:`valid_idx`.
+        """
         if self.name.find('zinc250k') != -1:
             if not osp.exists('./raw/valid_idx_zinc250k.json'):
                 path = './raw/valid_idx_zinc250k.json'
@@ -416,18 +394,3 @@ if __name__ == '__main__':
         print(test)
         print(test[0])
         print(test[0].y)
-    
-    
-#     atom_list = [a.GetAtomicNum() for a in mol.GetAtoms()]
-#             atom_array = np.zeros(self.num_max_node, dtype=np.int32)
-#             atom_array[:num_atom] = np.array(atom_list, dtype=np.int32)
-
-#             adj_array = np.zeros([self.num_bond_type, self.num_max_node, self.num_max_node], dtype=np.float32)
-#             bond_type_to_int = {Chem.BondType.SINGLE: 0, Chem.BondType.DOUBLE: 1, Chem.BondType.TRIPLE: 2}
-#             for bond in mol.GetBonds():
-#                 bond_type = bond.GetBondType()
-#                 ch = bond_type_to_int[bond_type]
-#                 i = bond.GetBeginAtomIdx()
-#                 j = bond.GetEndAtomIdx()
-#                 adj_array[ch, i, j] = 1.0
-#                 adj_array[ch, j, i] = 1.0

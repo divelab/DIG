@@ -1,4 +1,4 @@
-# README for developers
+# README for developers: instructions
 
 ---
 ## Table of Contents
@@ -107,11 +107,10 @@ $ cd docs
 $ make clean
 ```
 
-6. Commit your contribution to DIG repo. Then, you can check the documentations at [https://diveintographs.readthedocs.io/en/latest/](https://diveintographs.readthedocs.io/en/latest/).
+6. Commit your contribution to DIG repo. Then, you can check the documentations at [https://diveintographs.readthedocs.io/en/latest/](https://diveintographs.readthedocs.io/en/latest/) in about 10 minutes. If the documentation website is not updated as expected, please contact Meng. It might fail to build due to the enviroment of readthedocs.
 
 
 ## Comments
 
 * After the implementation, it is necessary to add comments for the documentation. We can consider this when we write documentations.
 * Please follow the [PEP8 style guide](https://www.python.org/dev/peps/pep-0008/) as possible in your implementation.
->>>>>>> c272837934297e24d01f8361a9ebd9067a159c87

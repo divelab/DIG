@@ -5,25 +5,27 @@ import numpy as np
 
 
 class Rand_Gen_Evaluator:
+    r"""
+    Evaluator for random generation task. Metric is validity ratio, uniqueness ratio, and novelty ratio (all represented in percentage).
+    """
+
     def __init__(self):
-        '''
-            Evaluator for random generation task
-            Metric is validity ratio, uniqueness ratio, and novelty ratio (all represented in percentage)
-        '''
         pass
 
     def eval(self, input_dict):
+        r"""Run evaluation in random generation task. Compute the validity ratio, uniqueness ratio and novelty ratio of generated molecules (all represented in percentage).
+
+        Args:
+            input_dict (dict): a python dict with the following items:
+                "mols" --- the list of generated molecules reprsented by rdkit Chem.RWMol or Chem.Mol objects;
+                "train_smiles" --- the list of SMILES strings used for training.
+            
+        :rtype: :class:`dict` (a python dict with the following items:
+                    "valid_ratio" --- validity percentage;
+                    "unique_ratio" --- uniqueness percentage;
+                    "novel_ratio" --- novelty percentage).
         """
-            Evaluation in random generation task.
-            Compute the validity ratio, uniqueness ratio and novelty ratio of generated molecules (all represented in percentage)
-            The input is a python dict input_dict with the following items:
-                mols --- the list of generated molecules reprsented by Chem.RWMol or Chem.Mol objects
-                train_smiles --- the list of SMILES strings used for training
-            The output is a python dict results with the following items:
-                valid_ratio --- validity ratio
-                unique_ratio --- uniqueness ratio
-                novel_ratio --- novelty ratio
-        """
+
         mols = input_dict['mols']
         results = {}
         valid_mols = [mol for mol in mols if check_chemical_validity(mol)]
@@ -46,26 +48,32 @@ class Rand_Gen_Evaluator:
 
 
 class Prop_Optim_Evaluator:
+    r"""
+    Evaluator for property optimization task. Metric is top-3 property scores among generated molecules.
+
+    Args:
+        prop_name (str): a string indicating the name of the molecular property, use 'plogp' for penalized logP or 'qed' for 
+            Quantitative Estimate of Druglikeness (QED).
+    """
+
     def __init__(self, prop_name='plogp'):
-        '''
-            Evaluator for random generation task
-            Metric is top-3 property scores among generated molecules
-        '''
         assert prop_name in ['plogp', 'qed']
         self.prop_name = prop_name
     
     def eval(self, input_dict):
+        r""" Run evaluation in property optimization task. Find top-3 molucules which have highest property scores.
+        
+        Args:
+            input_dict (dict): a python dict with the following items:
+                "mols" --- a list of generated molecules reprsented by rdkit Chem.Mol or Chem.RWMol objects.
+            
+        :rtype: :class:`dict` (a python dict with the following items:
+                    1 --- information of molecule with the highest property score;
+                    2 --- information of molecule with the second highest property score;
+                    3 --- information of molecule with the third highest property score.
+                    The molecule information is given in the form of a tuple (SMILES string, property score).
         """
-            Evaluation in property optimization task.
-            Find top-3 molucules which have highest property scores.
-            The input is a python dict input_dict with the following items:
-                mols --- a list of generated molecules reprsented by Chem.RWMol objects
-            The output is a python dict results with the following items:
-                1 --- information of molecule with the highest property score
-                2 --- information of molecule with the second highest property score
-                3 --- information of molecule with the third highest property score
-                The molecule information is given in the form of a tuple (SMILES string, property score)
-        """
+
         mols = input_dict['mols']
         prop_fn = qed if self.prop_name == 'qed' else calculate_min_plogp
 
@@ -84,25 +92,27 @@ class Prop_Optim_Evaluator:
 
 
 class Cons_Optim_Evaluator:
+    r"""
+    Evaluator for constrained optimization task. Metric is the average property improvements, similarities and success rates under the similarity threshold 0.0, 0.2, 0.4, 0.6.
+    """
+
     def __init__(self):
-        '''
-            Evaluator for random generation task
-            Metric is the average property improvements, similarities and success rates under the similarity threshold 0.0, 0.2, 0.4, 0.6
-        '''
         pass
 
     def eval(self, input_dict):
+        r""" Run evaluation in constrained optimization task. Compute the average property improvements, similarities and success rates under the similarity threshold 0.0, 0.2, 0.4, 0.6.
+        
+        Args:
+            input_dict (dict): a python dict with the following items:
+                "mols_0", "mols_2", "mols_4", "mols_6" --- the list of optimized molecules under the similarity threshold 0.0, 0.2, 0.4, 0.6, all represented by rdkit Chem.RWMol or Chem.Mol objects;
+                "inp_smiles" --- the list of SMILES strings of input molecules to be optimized.
+            
+        :rtype: :class:`dict` (a python dict with the following items:
+                    0, 2, 4, 6 --- the metric values under the similarity threshold 0.0, 0.2, 0.4, 0.6.
+                    The metric values are given in the form of a tuple (success rate, mean of similarity, standard deviation of similarity,
+                    mean of property improvement, standard deviation of property improvement).
         """
-            Evaluation in constrained optimization task.
-            Compute the average property improvements, similarities and success rates under the similarity threshold 0.0, 0.2, 0.4, 0.6
-            The input is a python dict input_dict with the following items:
-                mols_0, mols_2, mols_4, mols_6 --- the list of optimized molecules under the similarity threshold 0.0, 0.2, 0.4, 0.6, all represented by Chem.RWMol or Chem.Mol objects
-                inp_smiles --- the list of SMILES strings of input molecules to be optimized
-            The output is a python dict results with the following items:
-                0, 2, 4, 6 --- the metric values under the similarity threshold 0.0, 0.2, 0.4, 0.6
-                The metric values are given in the form of a tuple (success rate, mean of similarity, standard deviation of similarity, 
-                mean of property improvement, standard deviation of property improvement)
-        """
+        
         inp_smiles = input_dict['inp_smiles']
         inp_mols = [Chem.MolFromSmiles(s) for s in inp_smiles]
         inp_props = [calculate_min_plogp(mol) for mol in inp_mols]

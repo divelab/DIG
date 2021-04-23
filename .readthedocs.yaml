@@ -10,10 +10,13 @@ sphinx:
 
 
 # Optionally set the version of Python and requirements required to build your docs
-python:
-   version: 3.8
-   system_packages: true
-   install:
-   - requirements: docs/requirements.txt
-   - method: setuptools
-     path: .
+#python:
+#   version: 3.8
+#   system_packages: true
+#   install:
+#   - requirements: docs/environment.txt
+#   - method: setuptools
+#     path: .
+
+conda:
+  environment: docs/environment.yaml

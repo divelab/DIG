@@ -1,0 +1,41 @@
+{
+    "data": {
+        "smile": "smiles",
+        "prop_list": "[]",
+        "url": "https://raw.githubusercontent.com/divelab/DIG_storage/main/ggraph/moses.csv",
+        "num_max_node": "30",
+        "atom_list": "[6, 7, 8, 9, 16, 17, 35]"
+    },
+    "model": {
+        "max_size": 30,
+        "edge_unroll": 12,
+        "node_dim": 7,
+        "bond_dim": 4,
+        "num_flow_layer": 12,
+        "num_rgcn_layer": 3,
+        "nhid": 128,
+        "nout": 128,
+        "use_gpu": true
+    },
+    "lr": 0.001,
+    "weight_decay": 0,
+    "batch_size": 32,
+    "max_epochs": 10,
+    "save_interval": 1,
+    "save_dir": "rand_gen_moses",
+    "num_min_node": 7,
+    "num_max_node": 25,
+    "temperature": [
+        0.3,
+        0.3
+    ],
+    "atom_list": [
+        6,
+        7,
+        8,
+        9,
+        16,
+        17,
+        35
+    ]
+}

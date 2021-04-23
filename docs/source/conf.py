@@ -20,6 +20,10 @@ import dig.sslgraph.dataset
 import dig.sslgraph.method
 import dig.sslgraph.utils
 import dig.sslgraph.evaluation
+import dig.ggraph.dataset
+import dig.ggraph.method
+import dig.ggraph.utils
+import dig.ggraph.evaluation
 
 import sphinx_rtd_theme
 
@@ -76,9 +80,9 @@ add_module_names = False
 # so a file named "default.css" will overwrite the builtin "default.css".
 
 autodoc_default_options = {'autosummary-no-titles': True,
+#                            'autosummary-force-inline': True,
                            'autosummary-nosignatures': True,
                           }
-autodoc_member_order = 'bysource'
 
 def setup(app):
     def skip(app, what, name, obj, skip, options):
@@ -89,6 +93,7 @@ def setup(app):
             '__weakref__',
             '__dict__',
             '__module__',
+            'qed',
         ]
         return True if name in members else skip
 

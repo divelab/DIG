@@ -1,0 +1,20 @@
+name: 
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python==3.8
+  - rdkit==2021.03.1
+  - pytorch==1.6.0
+  - pip>=21.0
+  - pip:
+    - furo
+    - numpy
+    - sphinx==3.5.4
+    - sphinx_rtd_theme==0.5.2
+    - torch-scatter==2.0.6
+    - torch-sparse==0.6.9
+    - torch-cluster==1.5.9
+    - torch-spline-conv==1.2.1
+    - torch-geometric==1.7.0
+    - autodocsumm

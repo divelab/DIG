@@ -11,7 +11,7 @@ from torch_geometric.io import read_tu_data
 class TUDatasetExt(InMemoryDataset):
     r"""An extended TUDataset from `Pytorch Geometric 
     <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_, including
-    a variety of graph kernel benchmark datasets, *.e.g.* "IMDB-BINARY", 
+    a variety of graph kernel benchmark datasets, *e.g.* "IMDB-BINARY", 
     "REDDIT-BINARY" or "PROTEINS".
 
     .. note::
