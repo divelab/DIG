@@ -6,9 +6,10 @@ Project: GNN_benchmark
 Author: Shurui Gui
 """
 from inspect import isclass
-import benchmark.models.models as models
+import dig.xgraph.models.models as models
 import torch
-import sys, os
+import sys
+import os
 
 
 

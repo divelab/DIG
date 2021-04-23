@@ -116,7 +116,7 @@ class GNNExplainer(ExplainerBase):
 
         # Only operate on a k-hop subgraph around `node_idx`.
         # Get subgraph and relabel the node, mapping is the relabeled given node_idx.
-        if kwargs.get('model_level') == 'node':
+        if not self.explain_graph:
             node_idx = kwargs.get('node_idx')
             self.node_idx = node_idx
             assert node_idx is not None

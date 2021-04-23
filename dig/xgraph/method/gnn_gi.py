@@ -24,7 +24,7 @@ class GNN_GI(WalkBase):
         walk_steps, fc_step = self.extract_step(x, edge_index, detach=False)
 
 
-        if kwargs.get('model_level') == 'node':
+        if not self.explain_graph:
             node_idx = kwargs.get('node_idx')
             assert node_idx is not None
             _, _, _, self.hard_edge_mask = subgraph(

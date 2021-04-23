@@ -17,7 +17,7 @@ from matplotlib.axes import Axes
 from matplotlib.patches import Path, PathPatch
 
 import numpy as np
-from benchmark.models.models import GNNPool
+from ..models.models import GNNPool
 
 
 EPS = 1e-15
@@ -119,7 +119,7 @@ class ExplainerBase(nn.Module):
         if sparsity is None:
             sparsity = 0.7
 
-        if kwargs.get('model_level') == 'node':
+        if not self.explain_graph:
             assert self.hard_edge_mask is not None
             mask_indices = torch.where(self.hard_edge_mask)[0]
             sub_mask = mask[self.hard_edge_mask]

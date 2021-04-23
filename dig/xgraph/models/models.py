@@ -14,7 +14,6 @@ import torch_geometric.nn as gnn
 from torch_geometric.utils.loop import add_self_loops, remove_self_loops
 from torch_geometric.utils import add_remaining_self_loops
 from torch_geometric.utils.num_nodes import maybe_num_nodes
-from benchmark.args import data_args
 from torch_geometric.data.batch import Batch
 
 from typing import Callable, Union, Tuple
@@ -54,14 +53,14 @@ class GNNBasic(torch.nn.Module):
 
 class GCN_3l(GNNBasic):
 
-    def __init__(self):
+    def __init__(self, model_level, dim_node, dim_hidden, num_classes):
         super().__init__()
         num_layer = 3
 
-        self.conv1 = GCNConv(data_args.dim_node, data_args.dim_hidden)
+        self.conv1 = GCNConv(dim_node, dim_hidden)
         self.convs = nn.ModuleList(
             [
-                GCNConv(data_args.dim_hidden, data_args.dim_hidden)
+                GCNConv(dim_hidden, dim_hidden)
                 for _ in range(num_layer - 1)
              ]
         )
@@ -72,14 +71,14 @@ class GCN_3l(GNNBasic):
                 for _ in range(num_layer - 1)
             ]
         )
-        if data_args.model_level == 'node':
+        if model_level == 'node':
             self.readout = IdenticalPool()
         else:
             self.readout = GlobalMeanPool()
 
         self.ffn = nn.Sequential(*(
-                [nn.Linear(data_args.dim_hidden, data_args.dim_hidden)] +
-                [nn.ReLU(), nn.Dropout(), nn.Linear(data_args.dim_hidden, data_args.num_classes)]
+                [nn.Linear(dim_hidden, dim_hidden)] +
+                [nn.ReLU(), nn.Dropout(), nn.Linear(dim_hidden, num_classes)]
         ))
 
         self.dropout = nn.Dropout()
@@ -105,14 +104,14 @@ class GCN_3l(GNNBasic):
 
 class GCN_2l(GNNBasic):
 
-    def __init__(self):
+    def __init__(self, model_level, dim_node, dim_hidden, num_classes):
         super().__init__()
         num_layer = 2
 
-        self.conv1 = GCNConv(data_args.dim_node, data_args.dim_hidden)
+        self.conv1 = GCNConv(dim_node, dim_hidden)
         self.convs = nn.ModuleList(
             [
-                GCNConv(data_args.dim_hidden, data_args.dim_hidden)
+                GCNConv(dim_hidden, dim_hidden)
                 for _ in range(num_layer - 1)
             ]
         )
@@ -123,13 +122,13 @@ class GCN_2l(GNNBasic):
                 for _ in range(num_layer - 1)
             ]
         )
-        if data_args.model_level == 'node':
+        if model_level == 'node':
             self.readout = IdenticalPool()
         else:
             self.readout = GlobalMeanPool()
 
         self.ffn = nn.Sequential(*(
-                [nn.Linear(data_args.dim_hidden, data_args.num_classes)]
+                [nn.Linear(dim_hidden, num_classes)]
         ))
 
         self.dropout = nn.Dropout()
@@ -154,18 +153,18 @@ class GCN_2l(GNNBasic):
 
 class GIN_3l(GNNBasic):
 
-    def __init__(self):
+    def __init__(self, model_level, dim_node, dim_hidden, num_classes):
         super().__init__()
         num_layer = 3
 
-        self.conv1 = GINConv(nn.Sequential(nn.Linear(data_args.dim_node, data_args.dim_hidden), nn.ReLU(),
-                                           nn.Linear(data_args.dim_hidden, data_args.dim_hidden), nn.ReLU()))#,
-                                           # nn.BatchNorm1d(data_args.dim_hidden)))
+        self.conv1 = GINConv(nn.Sequential(nn.Linear(dim_node, dim_hidden), nn.ReLU(),
+                                           nn.Linear(dim_hidden, dim_hidden), nn.ReLU()))#,
+                                           # nn.BatchNorm1d(dim_hidden)))
         self.convs = nn.ModuleList(
             [
-                GINConv(nn.Sequential(nn.Linear(data_args.dim_hidden, data_args.dim_hidden), nn.ReLU(),
-                                      nn.Linear(data_args.dim_hidden, data_args.dim_hidden), nn.ReLU()))#,
-                                      # nn.BatchNorm1d(data_args.dim_hidden)))
+                GINConv(nn.Sequential(nn.Linear(dim_hidden, dim_hidden), nn.ReLU(),
+                                      nn.Linear(dim_hidden, dim_hidden), nn.ReLU()))#,
+                                      # nn.BatchNorm1d(dim_hidden)))
                 for _ in range(num_layer - 1)
              ]
         )
@@ -176,14 +175,14 @@ class GIN_3l(GNNBasic):
                 for _ in range(num_layer - 1)
             ]
         )
-        if data_args.model_level == 'node':
+        if model_level == 'node':
             self.readout = IdenticalPool()
         else:
             self.readout = GlobalMeanPool()
 
         self.ffn = nn.Sequential(*(
-                [nn.Linear(data_args.dim_hidden, data_args.dim_hidden)] +
-                [nn.ReLU(), nn.Dropout(), nn.Linear(data_args.dim_hidden, data_args.num_classes)]
+                [nn.Linear(dim_hidden, dim_hidden)] +
+                [nn.ReLU(), nn.Dropout(), nn.Linear(dim_hidden, num_classes)]
         ))
 
         self.dropout = nn.Dropout()
@@ -208,18 +207,18 @@ class GIN_3l(GNNBasic):
 
 class GIN_2l(GNNBasic):
 
-    def __init__(self):
+    def __init__(self, model_level, dim_node, dim_hidden, num_classes):
         super().__init__()
         num_layer = 2
 
-        self.conv1 = GINConv(nn.Sequential(nn.Linear(data_args.dim_node, data_args.dim_hidden), nn.ReLU(),
-                                           nn.Linear(data_args.dim_hidden, data_args.dim_hidden), nn.ReLU()))#,
-                                           # nn.BatchNorm1d(data_args.dim_hidden)))
+        self.conv1 = GINConv(nn.Sequential(nn.Linear(dim_node, dim_hidden), nn.ReLU(),
+                                           nn.Linear(dim_hidden, dim_hidden), nn.ReLU()))#,
+                                           # nn.BatchNorm1d(dim_hidden)))
         self.convs = nn.ModuleList(
             [
-                GINConv(nn.Sequential(nn.Linear(data_args.dim_hidden, data_args.dim_hidden), nn.ReLU(),
-                                      nn.Linear(data_args.dim_hidden, data_args.dim_hidden), nn.ReLU()))#,
-                                      # nn.BatchNorm1d(data_args.dim_hidden)))
+                GINConv(nn.Sequential(nn.Linear(dim_hidden, dim_hidden), nn.ReLU(),
+                                      nn.Linear(dim_hidden, dim_hidden), nn.ReLU()))#,
+                                      # nn.BatchNorm1d(dim_hidden)))
                 for _ in range(num_layer - 1)
              ]
         )
@@ -230,14 +229,14 @@ class GIN_2l(GNNBasic):
                 for _ in range(num_layer - 1)
             ]
         )
-        if data_args.model_level == 'node':
+        if model_level == 'node':
             self.readout = IdenticalPool()
         else:
             self.readout = GlobalMeanPool()
 
         self.ffn = nn.Sequential(*(
-                [nn.Linear(data_args.dim_hidden, data_args.dim_hidden)] +
-                [nn.ReLU(), nn.Dropout(), nn.Linear(data_args.dim_hidden, data_args.num_classes)]
+                [nn.Linear(dim_hidden, dim_hidden)] +
+                [nn.ReLU(), nn.Dropout(), nn.Linear(dim_hidden, num_classes)]
         ))
 
         self.dropout = nn.Dropout()
@@ -327,7 +326,7 @@ class GINConv(gnn.GINConv):
 
 
     def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
-                edge_weight: OptTensor = None, **kwargs) -> Tensor:
+                edge_weight: OptTensor = None, task='explain', **kwargs) -> Tensor:
         """"""
         self.num_nodes = x.shape[0]
         if isinstance(x, Tensor):
@@ -346,7 +345,7 @@ class GINConv(gnn.GINConv):
             self.reweight = True
         out = self.propagate(edge_index, x=x[0], size=None)
 
-        if data_args.task == 'explain':
+        if task == 'explain':
             layer_extractor = []
             hooks = []
 

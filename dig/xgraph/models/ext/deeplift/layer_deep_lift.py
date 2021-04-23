@@ -6,7 +6,7 @@ import torch
 from torch import Tensor
 from torch.nn import Module
 
-from benchmark.models.ext.deeplift.deep_lift import DeepLift, DeepLiftShap
+from .deep_lift import DeepLift, DeepLiftShap
 from captum.attr._utils.attribution import LayerAttribution
 from captum.attr._utils.common import (
     ExpansionTypes,
