@@ -25,6 +25,9 @@ import dig.ggraph.method
 import dig.ggraph.utils
 import dig.ggraph.evaluation
 import dig.xgraph.dataset
+import dig.xgraph.method
+
+import torch_geometric
 
 import sphinx_rtd_theme
 

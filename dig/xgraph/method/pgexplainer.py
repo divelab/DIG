@@ -18,7 +18,7 @@ import networkx as nx
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import to_networkx
 from torch_geometric.utils.num_nodes import maybe_num_nodes
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Optional
 from .shapley import GnnNets_GC2value_func, GnnNets_NC2value_func, gnn_score
 
 
@@ -131,22 +131,25 @@ def calculate_selected_nodes(data, edge_mask, top_k):
 
 class PGExplainer(nn.Module):
     r"""
-    An implementation of `Parameterized Explainer for Graph Neural Network <https://arxiv.org/abs/2011.04573>`_
+    An implementation of PGExplainer in
+    `Parameterized Explainer for Graph Neural Network <https://arxiv.org/abs/2011.04573>`_
 
     Args:
-        model (torch.nn.Module):
-        in_channels (int):
-        explain_graph (bool): Whether to explain graph classification model
-        epochs (int): Number of epochs for training
-        lr (float): learning rate
-        coff_size (float):
-        coff_ent (float):
-        t0 (float):
-        t1(float):
-        num_hops (int, optional):
+        model (:class:`torch.nn.Module`): The target model prepared to explain
+        in_channels (:obj:`int`): Number of input channels for the explanation network
+        explain_graph (:obj:`bool`): Whether to explain graph classification model (default: :obj:`True`)
+        epochs (:obj:`int`): Number of epochs to train the explanation network
+        lr (:obj:`float`): Learning rate to train the explanation network
+        coff_size (:obj:`float`): Size regularization to constrain the explanation size
+        coff_ent (:obj:`float`): Entropy regularization to constrain the connectivity of explanation
+        t0 (:obj:`float`): The temperature at the first epoch
+        t1(:obj:`float`): The temperature at the final epoch
+        num_hops (:obj:`int`, :obj:`None`): The number of hops to extract neighborhood of target node
+        (default: :obj:`None`)
 
-    .. notes: For graph classification model, the explain_graph flag should be True, and it should be false
-                when the model is node classification task.
+    .. note: For node classification model, the :var:`explain_graph` flag is False.
+      If :var:`num_hops` is set to :obj:`None`, it will be automatically calculated by calculating the
+      :class:`torch_geometric.nn.MessagePassing` layers in the :var:`model`.
 
     """
     def __init__(self, model, in_channels: int, explain_graph: bool = True, epochs: int = 20,
@@ -175,8 +178,24 @@ class PGExplainer(nn.Module):
         self.elayers.append(nn.Linear(64, 1))
         self.elayers.to(self.device)
 
-    def __set_masks__(self, x: Tensor, edge_index: Tensor, edge_mask:Tensor =None):
-        """ Set the edge weights before message passing """
+    def __set_masks__(self, x: Tensor, edge_index: Tensor, edge_mask: Tensor = None):
+        r""" Set the edge weights before message passing
+
+        Args:
+            x (:obj:`torch.Tensor`): Node feature matrix with shape
+              :obj:`[num_nodes, dim_node_feature]`
+            edge_index (:obj:`torch.Tensor`): Graph connectivity in COO format
+              with shape :obj:`[2, num_edges]`
+            edge_mask (:obj:`torch.Tensor`): Edge weight matrix before message passing
+              (default: :obj:`None`)
+
+        The :meth:`edge_mask` will be randomly initialized when set to :obj:`None`.
+
+        .. note:: When you use the :meth:`~PGExplainer.__set_mask__`, the explain flag in the
+          :class:`torch_geometric.nn.MessagePassing` will be set to :obj:`True`
+          and the input or randomly initialized :var:`edge_mask` will be set.
+          Please take :meth:`__clear_mask__` to reset.
+        """
         (N, F), E = x.size(), edge_index.size(1)
         std = 0.1
         init_bias = self.init_bias
@@ -195,7 +214,7 @@ class PGExplainer(nn.Module):
                 module.__edge_mask__ = self.edge_mask
 
     def __clear_masks__(self):
-        """ clear the edge weights to None """
+        """ clear the edge weights to None, and set the explain flag to :obj:`False` """
         for module in self.model.modules():
             if isinstance(module, MessagePassing):
                 module.__explain__ = False
@@ -203,8 +222,8 @@ class PGExplainer(nn.Module):
         self.node_feat_masks = None
         self.edge_mask = None
 
-    def update_num_hops(self, num_hops):
-        """ Return the number of layers of GNN model """
+    def update_num_hops(self, num_hops: int):
+        """ Update the number of hops when """
         if num_hops is not None:
             return num_hops
 
@@ -220,7 +239,7 @@ class PGExplainer(nn.Module):
                 return module.flow
         return 'source_to_target'
 
-    def __loss__(self, prob, ori_pred):
+    def __loss__(self, prob: Tensor, ori_pred: int):
         """
         the pred loss encourages the masked graph with higher probability,
         the size loss encourage small size edge mask,
@@ -241,8 +260,11 @@ class PGExplainer(nn.Module):
         loss = pred_loss + size_loss + mask_ent_loss
         return loss
 
-    def get_model_output(self, x, edge_index, edge_mask=None):
-        """ return the model outputs with or without (w/wo) edge mask  """
+    def get_model_output(self,
+                         x: Tensor,
+                         edge_index: Tensor,
+                         edge_mask: Optional[Tensor]=None):
+        r""" return the model outputs with or without (w/wo) edge mask  """
         self.model.eval()
         self.__clear_masks__()
         if edge_mask is not None:
@@ -256,7 +278,27 @@ class PGExplainer(nn.Module):
         self.__clear_masks__()
         return outputs
 
-    def get_subgraph(self, node_idx, x, edge_index, y=None, **kwargs):
+    def get_subgraph(self,
+                     node_idx: int,
+                     x: Tensor,
+                     edge_index: Tensor,
+                     y: Optional[Tensor] = None,
+                     **kwargs)\
+            -> Tuple[Tensor, Tensor, Tensor, List, Dict]:
+        r"""
+        Args:
+            node_idx (:obj:`int`): The node index
+            x (:obj:`torch.Tensor`): Node feature matrix with shape
+              :obj:`[num_nodes, dim_node_feature]`
+            edge_index (:obj:`torch.Tensor`): Graph connectivity in COO format
+            with shape :obj:`[2, num_edges]`
+            y (:obj:`torch.Tensor`, :obj`None`): Node label matrix with shape :obj:`[num_nodes]`
+
+        Returns:
+            :obj:sndk:123
+        :rtype: (:class:`LongTensor`, :class:`LongTensor`, :class:`LongTensor`,
+             :class:`BoolTensor`)
+        """
         num_nodes, num_edges = x.size(0), edge_index.size(1)
         graph = to_networkx(data=Data(x=x, edge_index=edge_index), to_undirected=True)
 
@@ -279,10 +321,8 @@ class PGExplainer(nn.Module):
             y = y[subset]
         return x, edge_index, y, subset, kwargs
 
-    def concrete_sample(self, log_alpha, beta=1.0, training=True):
-        """
-        Sample from the instantiation of concrete distribution when training
-        """
+    def concrete_sample(self, log_alpha: Tensor, beta: float = 1.0, training: bool = True):
+        r""" Sample from the instantiation of concrete distribution when training """
         if training:
             random_noise = torch.rand(log_alpha.shape)
             random_noise = torch.log(random_noise) - torch.log(1.0 - random_noise)
@@ -293,8 +333,13 @@ class PGExplainer(nn.Module):
 
         return gate_inputs
 
-    def explain(self, x: Tensor, edge_index: Tensor, embed: Tensor,
-                tmp: float = 1.0, training: bool = False):
+    def explain(self,
+                x: Tensor,
+                edge_index: Tensor,
+                embed: Tensor,
+                tmp: float = 1.0,
+                training: bool = False)\
+            -> Tuple[float, Tensor]:
 
         nodesize = embed.shape[0]
         feature_dim = embed.shape[1]
@@ -326,6 +371,7 @@ class PGExplainer(nn.Module):
         return outputs[1].squeeze(), edge_mask
 
     def train_explanation_network(self, dataset):
+        r""" training the explanation network """
         optimizer = Adam(self.elayers.parameters(), lr=self.lr)
         if self.explain_graph:
             with torch.no_grad():
@@ -408,8 +454,15 @@ class PGExplainer(nn.Module):
                 print(f'Epoch: {epoch} | Loss: {loss} | Acc : {acc}')
             print(f"training time is {duration:.5}s")
 
-    def forward(self, x: Tensor, edge_index: Tensor, **kwargs)\
+    def forward(self,
+                x: Tensor,
+                edge_index: Tensor,
+                **kwargs)\
             -> Tuple[None, List, List[Dict]]:
+        r"""
+        The forward process of PGExplainer which will return the explanation results and
+        the corresponding metric values.
+        """
         # set default subgraph with 10 edges
         top_k = kwargs.get('top_k') if kwargs.get('top_k') is not None else 10
         y = kwargs.get('y')

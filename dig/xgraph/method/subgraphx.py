@@ -478,6 +478,11 @@ class MCTS(object):
 
 
 class SubgraphX(object):
+    r"""
+    The implementation of Paper
+    `On Explainability of Graph Neural Networks via Subgraph Explorations <https://arxiv.org/abs/2102.05152>`_.
+
+    """
     def __init__(self, model, num_classes: int, num_hops: Optional[int] = None, explain_graph: bool = True,
                  rollout: int = 10, min_atoms: int = 3, c_puct: float = 10.0, expand_atoms=14,
                  high2low=False, local_radius=4, sample_num=100, reward_method='mc_l_shapley',
