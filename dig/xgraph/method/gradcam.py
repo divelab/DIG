@@ -59,7 +59,7 @@ class GradCAM(WalkBase):
 
         self_loop_edge_index, _ = add_self_loops(edge_index, num_nodes=self.num_nodes)
 
-        if kwargs.get('model_level') == 'node':
+        if not self.explain_graph:
             node_idx = kwargs.get('node_idx')
             assert node_idx is not None
             _, _, _, self.hard_edge_mask = subgraph(

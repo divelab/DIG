@@ -4,7 +4,9 @@ import pickle
 import numpy as np
 import os.path as osp
 from torch_geometric.utils import dense_to_sparse
-from torch_geometric.data import Data, InMemoryDataset
+from torch_geometric.data import Data, InMemoryDataset, download_url, extract_zip
+from torch_geometric.data.dataset import files_exist
+import shutil
 
 
 def read_ba2motif_data(folder: str, prefix):
@@ -127,18 +129,37 @@ class BA_LRP(InMemoryDataset):
     .. note:: :class:`~BA_LRP` will automatically generate the dataset
       if the dataset file is not existed in the root directory.
     """
-    def __init__(self, root, num_per_class, transform=None, pre_transform=None):
+    url = ('https://github.com/divelab/DIG_storage/raw/main/xgraph/datasets/ba_lrp/raw.pt')
+
+    def __init__(self, root, num_per_class=10000, transform=None, pre_transform=None):
+        self.name = 'ba_lrp'
         self.num_per_class = num_per_class
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     @property
-    def processed_file_names(self):
+    def raw_dir(self):
+        return osp.join(self.root, self.name, 'raw')
 
-        return [f'data{self.num_per_class}.pt']
+    @property
+    def processed_dir(self):
+        return osp.join(self.root, self.name, 'processed')
+
+    @property
+    def raw_file_names(self):
+        return [f"raw.pt"]
+
+    @property
+    def processed_file_names(self):
+        return [f'data.pt']
+
+    def download(self):
+        url = self.url
+        path = download_url(url, self.raw_dir)
+        # extract_zip(path, self.raw_dir)
+        # os.unlink(path)
 
     def gen_class1(self):
-
         x = torch.tensor([[1], [1]], dtype=torch.float)
         edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
         data = Data(x=x, edge_index=edge_index, y=torch.tensor([[0]], dtype=torch.float))
@@ -156,7 +177,6 @@ class BA_LRP(InMemoryDataset):
         return data
 
     def gen_class2(self):
-
         x = torch.tensor([[1], [1]], dtype=torch.float)
         edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
         data = Data(x=x, edge_index=edge_index, y=torch.tensor([[1]], dtype=torch.float))
@@ -180,6 +200,9 @@ class BA_LRP(InMemoryDataset):
         return data
 
     def process(self):
+        if files_exist(self.raw_paths):
+            shutil.copyfile(self.raw_paths[0], self.processed_paths[0])
+            return
 
         data_list = []
         for i in range(self.num_per_class):

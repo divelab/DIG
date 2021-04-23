@@ -41,7 +41,7 @@ $ unzip checkpoints.zip
 For running GNN-LRP or GNN-GI on the given model and the dataset with the first 100 data:
 
 ```shell script
-python -m benchmark.kernel.pipeline --task explain --model_name [GCN_2l/GCN_3l/GIN_2l/GIN_3l] --dataset_name [ba_shape/ba_lrp/tox21/clintox] --target_idx [0/2] --explainer [GNN_LRP/GNN_GI] --sparsity [0.5/...]
+python -m supp.kernel.pipeline --task explain --model_name [GCN_2l/GCN_3l/GIN_2l/GIN_3l] --dataset_name [ba_shape/ba_lrp/tox21/clintox] --target_idx [0/2] --explainer [GNN_LRP/GNN_GI] --sparsity [0.5/...]
 ```
 
 For running GNN-LRP or GNN-GI with the given data, please add the flag `--debug`, then modify the index at line xx in `benchmark/kernel/pipeline.py` to choose your data in the dataset. Please add the flag `--vis` for important edges visualization while add one more flag `--walk` to visualize the flow view.

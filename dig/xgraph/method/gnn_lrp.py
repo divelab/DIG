@@ -4,7 +4,7 @@ import torch.nn as nn
 import copy
 from torch_geometric.utils.loop import add_self_loops
 from ..models.utils import subgraph
-from .models.models import GraphSequential
+from ..models.models import GraphSequential
 from .base_explainer import WalkBase
 
 EPS = 1e-15
@@ -32,7 +32,7 @@ class GNN_LRP(WalkBase):
         walk_indices_list = torch.tensor(
             self.walks_pick(edge_index_with_loop.cpu(), list(range(edge_index_with_loop.shape[1])),
                             num_layers=self.num_layers), device=self.device)
-        if kwargs.get('model_level') == 'node':
+        if not self.explain_graph:
             node_idx = kwargs.get('node_idx')
             assert node_idx is not None
             _, _, _, self.hard_edge_mask = subgraph(
@@ -136,7 +136,7 @@ class GNN_LRP(WalkBase):
                     ht = (s + epsilon) * (std_h / (s + epsilon)).detach()
                     h = ht
 
-                if kwargs.get('model_level') == 'node':
+                if not self.explain_graph:
                     f = h[node_idx, label]
                 else:
                     f = h[0, label]
