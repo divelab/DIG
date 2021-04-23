@@ -5,3 +5,8 @@ from .gnnexplainer import *
 from .gradcam import *
 from .pgexplainer import *
 from .subgraphx import *
+
+__all__ = [
+    'PGExplainer',
+    'SubgraphX'
+]

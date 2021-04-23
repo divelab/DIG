@@ -37,8 +37,8 @@ def read_syn_data(folder: str, prefix):
 class SynGraphDataset(InMemoryDataset):
     r"""
     The Synthetic datasets used in
-    `Parameterized Explainer for Graph Neural Network <https://arxiv.org/abs/2011.04573>`_
-    which takes Barabási–Albert(BA) graph or balance tree as base graph
+    `Parameterized Explainer for Graph Neural Network <https://arxiv.org/abs/2011.04573>`_.
+    It takes Barabási–Albert(BA) graph or balance tree as base graph
     and randomly attachs specific motifs to the base graph.
 
     Args:
@@ -110,7 +110,7 @@ class BA_LRP(InMemoryDataset):
     The second class in :class:`~BA_LRP` has a slightly higher growth model and nodes are selected
     without replacement with the inverse preferential attachment model.
 
-    .. math:: p(\mathcal{V}) = \frac{Degree(\mathcal{V})^{-1}}{\sum_{\mathcal{V}'^{-1} \in \mathcal{G}} Degree(\mathcal{V}'^{-1})}
+    .. math:: p(\mathcal{V}) = \frac{Degree(\mathcal{V})}{\sum_{\mathcal{V}'^{-1} \in \mathcal{G}} Degree(\mathcal{V}')^{-1}}
 
     Args:
         root (:obj:`str`): Root data directory to save datasets
@@ -124,8 +124,8 @@ class BA_LRP(InMemoryDataset):
             transformed version. The data object will be transformed before
             being saved to disk. (default: :obj:`None`)
 
-    .. notes:: :class:`~BA_LRP` will automatically generate the dataset
-    if the dataset file is not existed in the root directory.
+    .. note:: :class:`~BA_LRP` will automatically generate the dataset
+      if the dataset file is not existed in the root directory.
     """
     def __init__(self, root, num_per_class, transform=None, pre_transform=None):
         self.num_per_class = num_per_class

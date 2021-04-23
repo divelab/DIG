@@ -8,20 +8,22 @@ from torch_geometric.data import Data, InMemoryDataset, DataLoader
 
 class MUTAGDataset(InMemoryDataset):
     r"""
+    The Pytorch_geometric interface of molecule dataset `MUTAG`_.
+
     .. _MUTAG: https://pubs.acs.org/doi/10.1021/jm00106a046
-    The molecule dataset `MUTAG`_.
 
     :param str root: Root directory where the dataset should be saved.
     :param transform: A function/transform that takes in an
-            :obj:`torch_geometric.data.Data` object and returns a transformed
+            :obj: `torch_geometric.data.Data` object and returns a transformed
             version. The data object will be transformed before every access.
             (default: :obj:`None`)
     :param pre_transform: A function/transform that takes in
-            an :obj:`torch_geometric.data.Data` object and returns a
+            an :obj: `torch_geometric.data.Data` object and returns a
             transformed version. The data object will be transformed before
             being saved to disk. (default: :obj:`None`)
     :type transform: Callable, None
     :type pre_transform: Callable, None
+
     """
     def __init__(self, root, transform=None, pre_transform=None):
         self.root = root
@@ -34,7 +36,6 @@ class MUTAGDataset(InMemoryDataset):
 
     @property
     def raw_dir(self):
-
         return os.path.join(self.root, self.name, 'raw')
 
     @property
@@ -43,7 +44,6 @@ class MUTAGDataset(InMemoryDataset):
 
     @property
     def processed_dir(self):
-
         return os.path.join(self.root, self.name, 'processed')
 
     @property
@@ -94,21 +94,23 @@ class MUTAGDataset(InMemoryDataset):
 
 class MoleculeDataset(MoleculeNet):
     r"""
+    An interface of MoleculeNet dataset from `Pytorch_Geometric`_.
+
     .. _Pytorch_Geometric: https://pytorch-geometric.readthedocs.io/en/latest/index.html
-    An extension of MoleculeNet dataset from `Pytorch_Geometric`_.
 
     :param str root: Root directory where the dataset should be saved.
     :param str name: The `name <http://moleculenet.ai/datasets-1>`_ of the dataset.
     :param transform: A function/transform that takes in an
-            :obj:`torch_geometric.data.Data` object and returns a transformed
+            :obj: `torch_geometric.data.Data` object and returns a transformed
             version. The data object will be transformed before every access.
             (default: :obj:`None`)
     :param pre_transform: A function/transform that takes in
-            an :obj:`torch_geometric.data.Data` object and returns a
+            an :obj: `torch_geometric.data.Data` object and returns a
             transformed version. The data object will be transformed before
             being saved to disk. (default: :obj:`None`)
     :type transform: Callable, None
     :type pre_transform: Callable, None
+
     """
     def __init__(self, root, name, transform=None, pre_transform=None):
         super(MoleculeNet, self).__init__(root, name, transform=transform, pre_transform=pre_transform)
