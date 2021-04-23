@@ -9,6 +9,12 @@ from torch_geometric.data import Data, InMemoryDataset
 
 
 def undirected_graph(data):
+    """
+    A pre_transform function that transfers the directed graph into undirected graph.
+    Args:
+        data (torch_geometric.data.Data): Directed graph in the format :class:`torch_geometric.data.Data`.
+        where the :obj:`data.x`, :obj:`data.edge_index` are required.
+    """
     data.edge_index = torch.cat([torch.stack([data.edge_index[1], data.edge_index[0]], dim=0),
                                  data.edge_index], dim=1)
     return data
@@ -71,6 +77,28 @@ def read_sentigraph_data(folder: str, prefix: str):
 
 
 class SentiGraphDataset(InMemoryDataset):
+    r"""
+    The SentiGraph datasets from `Explainability in Graph Neural Networks:A Taxonomic Survey
+    <https://arxiv.org/abs/2012.15445>`_ paper which take pretrained BERT as node feature extractor
+    and dependency tree as edges to transfer the text sentiment datasets into
+    graph classification datasets.
+
+    Args:
+        root (:obj:`str`): Root directory where the datasets are saved
+        name (:obj:`str`): The name of the datasets.
+        transform (:obj:`Callable`, :obj:`None`): A function/transform that takes in an
+            :class:`torch_geometric.data.Data` object and returns a transformed
+            version. The data object will be transformed before every access.
+            (default: :obj:`None`)
+        pre_transform (:obj:`Callable`, :obj:`None`):  A function/transform that takes in
+            an :class:`torch_geometric.data.Data` object and returns a
+            transformed version. The data object will be transformed before
+            being saved to disk. (default: :obj:`None`)
+
+    .. note:: The default parameter of pre_transform is :func:`~undirected_graph`
+        which transfers the directed graph in original data into undirected graph before
+        being saved to disk.
+    """
     def __init__(self, root, name, transform=None, pre_transform=undirected_graph):
         self.name = name
         super(SentiGraphDataset, self).__init__(root, transform, pre_transform)
@@ -78,22 +106,27 @@ class SentiGraphDataset(InMemoryDataset):
 
     @property
     def raw_dir(self):
+
         return osp.join(self.root, self.name, 'raw')
 
     @property
     def processed_dir(self):
+
         return osp.join(self.root, self.name, 'processed')
 
     @property
     def raw_file_names(self):
+
         return ['node_features', 'node_indicator', 'sentence_tokens', 'edge_index',
                 'graph_labels', 'split_indices']
 
     @property
     def processed_file_names(self):
+
         return ['data.pt']
 
     def process(self):
+
         # Read data into huge `Data` list.
         self.data, self.slices, self.supplement \
               = read_sentigraph_data(self.raw_dir, self.name)

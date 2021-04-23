@@ -21,6 +21,7 @@ from torch_geometric.utils.num_nodes import maybe_num_nodes
 from typing import Tuple, List, Dict
 from .shapley import GnnNets_GC2value_func, GnnNets_NC2value_func, gnn_score
 
+
 EPS = 1e-6
 
 
@@ -129,6 +130,25 @@ def calculate_selected_nodes(data, edge_mask, top_k):
 
 
 class PGExplainer(nn.Module):
+    r"""
+    An implementation of `Parameterized Explainer for Graph Neural Network <https://arxiv.org/abs/2011.04573>`_
+
+    Args:
+        model (torch.nn.Module):
+        in_channels (int):
+        explain_graph (bool): Whether to explain graph classification model
+        epochs (int): Number of epochs for training
+        lr (float): learning rate
+        coff_size (float):
+        coff_ent (float):
+        t0 (float):
+        t1(float):
+        num_hops (int, optional):
+
+    .. notes: For graph classification model, the explain_graph flag should be True, and it should be false
+                when the model is node classification task.
+
+    """
     def __init__(self, model, in_channels: int, explain_graph: bool = True, epochs: int = 20,
                  lr: float = 0.003, coff_size: float = 1.0, coff_ent: float = 1.0,
                  t0: float = 1.0, t1: float = 1.0, num_hops: Optional[int] = None):
@@ -156,7 +176,7 @@ class PGExplainer(nn.Module):
         self.elayers.to(self.device)
 
     def __set_masks__(self, x: Tensor, edge_index: Tensor, edge_mask:Tensor =None):
-        """ Set the weights for message passing """
+        """ Set the edge weights before message passing """
         (N, F), E = x.size(), edge_index.size(1)
         std = 0.1
         init_bias = self.init_bias
@@ -184,7 +204,7 @@ class PGExplainer(nn.Module):
         self.edge_mask = None
 
     def update_num_hops(self, num_hops):
-        """ return the number of layers of GNN model """
+        """ Return the number of layers of GNN model """
         if num_hops is not None:
             return num_hops
 

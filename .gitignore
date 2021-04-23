@@ -1,0 +1,6 @@
+.idea/
+dig/xgraph/checkpoint/
+dig/xgraph/dataset/
+dig/xgraph/results/
+**/__pycache__/
+docs/build/

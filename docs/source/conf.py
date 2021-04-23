@@ -24,6 +24,7 @@ import dig.ggraph.dataset
 import dig.ggraph.method
 import dig.ggraph.utils
 import dig.ggraph.evaluation
+import dig.xgraph.dataset
 
 import sphinx_rtd_theme
 
@@ -83,6 +84,7 @@ autodoc_default_options = {'autosummary-no-titles': True,
 #                            'autosummary-force-inline': True,
                            'autosummary-nosignatures': True,
                           }
+
 
 def setup(app):
     def skip(app, what, name, obj, skip, options):
