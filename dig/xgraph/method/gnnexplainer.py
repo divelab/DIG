@@ -1,6 +1,7 @@
 import torch
 from torch import Tensor
 from torch_geometric.utils.loop import add_self_loops
+from dig.version import debug
 from ..models.utils import subgraph
 from torch.nn.functional import cross_entropy
 from .base_explainer import ExplainerBase
@@ -87,8 +88,8 @@ class GNNExplainer(ExplainerBase):
                 h = x
             raw_preds = self.model(x=h, edge_index=edge_index, **kwargs)
             loss = self.__loss__(raw_preds, ex_label)
-            if epoch % 20 == 0:
-                print(f'#D#Loss:{loss.item()}')
+            if epoch % 20 == 0 and debug:
+                print(f'Loss:{loss.item()}')
 
             optimizer.zero_grad()
             loss.backward()
@@ -110,6 +111,7 @@ class GNNExplainer(ExplainerBase):
 
         :rtype: (:class:`Tensor`, :class:`Tensor`)
         """
+        super().forward(x=x, edge_index=edge_index, **kwargs)
         self.model.eval()
 
         self_loop_edge_index, _ = add_self_loops(edge_index, num_nodes=self.num_nodes)
@@ -129,7 +131,6 @@ class GNNExplainer(ExplainerBase):
         ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
 
         # Calculate mask
-        print('#D#Masks calculate...')
         edge_masks = []
         for ex_label in ex_labels:
             self.__clear_masks__()
@@ -137,8 +138,6 @@ class GNNExplainer(ExplainerBase):
             edge_masks.append(self.control_sparsity(self.gnn_explainer_alg(x, edge_index, ex_label), sparsity=kwargs.get('sparsity')))
             # edge_masks.append(self.gnn_explainer_alg(x, edge_index, ex_label))
 
-
-        print('#D#Predict...')
 
         with torch.no_grad():
             related_preds = self.eval_related_pred(x, edge_index, edge_masks, **kwargs)
