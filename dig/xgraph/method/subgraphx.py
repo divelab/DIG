@@ -479,8 +479,31 @@ class MCTS(object):
 
 class SubgraphX(object):
     r"""
-    The implementation of Paper
+    The implementation of paper
     `On Explainability of Graph Neural Networks via Subgraph Explorations <https://arxiv.org/abs/2102.05152>`_.
+    Args:
+        model (:obj:`torch.nn.Module`): The
+        num_classes(:obj:`int`):
+        num_hops(:obj:`int`, :obj:`None`):
+        explain_graph(:obj:`bool`):
+        rollout(:obj:`int`)
+        min_atoms(:obj:`int`)
+        c_puct(:obj:`float`)
+        expand_atoms(:obj:`int`)
+        high2low(:obj:`bool`)
+        local_radius(:obj:`int`)
+        sample_num(:obj:`int`)
+        reward_method(:obj:`str`)
+        subgraph_building_method(:obj:`str`)
+        save_dir(:obj:`str`, :obj:`None`)
+        filename(:obj:`str`)
+        vis(:obj:`bool`)
+
+    Example::
+        >>> # For graph classification task
+        >>> subgraphx = SubgraphX(model=model, num_classes=2)
+        >>> subgraphx.explain_graph()
+        >>> pass
 
     """
     def __init__(self, model, num_classes: int, num_hops: Optional[int] = None, explain_graph: bool = True,

@@ -147,9 +147,9 @@ class PGExplainer(nn.Module):
         num_hops (:obj:`int`, :obj:`None`): The number of hops to extract neighborhood of target node
         (default: :obj:`None`)
 
-    .. note: For node classification model, the :var:`explain_graph` flag is False.
-      If :var:`num_hops` is set to :obj:`None`, it will be automatically calculated by calculating the
-      :class:`torch_geometric.nn.MessagePassing` layers in the :var:`model`.
+    .. note: For node classification model, the :attr:`explain_graph` flag is False.
+      If :attr:`num_hops` is set to :obj:`None`, it will be automatically calculated by calculating the
+      :class:`torch_geometric.nn.MessagePassing` layers in the :attr:`model`.
 
     """
     def __init__(self, model, in_channels: int, explain_graph: bool = True, epochs: int = 20,
@@ -189,12 +189,13 @@ class PGExplainer(nn.Module):
             edge_mask (:obj:`torch.Tensor`): Edge weight matrix before message passing
               (default: :obj:`None`)
 
-        The :meth:`edge_mask` will be randomly initialized when set to :obj:`None`.
+        The :attr:`edge_mask` will be randomly initialized when set to :obj:`None`.
 
-        .. note:: When you use the :meth:`~PGExplainer.__set_mask__`, the explain flag in the
-          :class:`torch_geometric.nn.MessagePassing` will be set to :obj:`True`
-          and the input or randomly initialized :var:`edge_mask` will be set.
-          Please take :meth:`__clear_mask__` to reset.
+        .. note:: When you use the :meth:`~PGExplainer.__set_masks__`, the explain flag
+          :attr:`torch_geometric.nn.MessagePassing.__explain__` will be set to :obj:`True`
+          and :attr:`torch_geometric.nn.MessagePassing.__edge_mask__` will be set
+          for all the :class:`torch_geometric.nn.MessagePassing` modules in :attr:`model`.
+          Please take :meth:`~PGExplainer.__clear_masks__` to reset.
         """
         (N, F), E = x.size(), edge_index.size(1)
         std = 0.1
@@ -223,7 +224,6 @@ class PGExplainer(nn.Module):
         self.edge_mask = None
 
     def update_num_hops(self, num_hops: int):
-        """ Update the number of hops when """
         if num_hops is not None:
             return num_hops
 
@@ -240,11 +240,6 @@ class PGExplainer(nn.Module):
         return 'source_to_target'
 
     def __loss__(self, prob: Tensor, ori_pred: int):
-        """
-        the pred loss encourages the masked graph with higher probability,
-        the size loss encourage small size edge mask,
-        the entropy loss encourage the mask to be continuous.
-        """
         logit = prob[ori_pred]
         logit = logit + EPS
         pred_loss = - torch.log(logit)
@@ -291,11 +286,10 @@ class PGExplainer(nn.Module):
             x (:obj:`torch.Tensor`): Node feature matrix with shape
               :obj:`[num_nodes, dim_node_feature]`
             edge_index (:obj:`torch.Tensor`): Graph connectivity in COO format
-            with shape :obj:`[2, num_edges]`
+              with shape :obj:`[2, num_edges]`
             y (:obj:`torch.Tensor`, :obj`None`): Node label matrix with shape :obj:`[num_nodes]`
+              (default :obj:`None`)
 
-        Returns:
-            :obj:sndk:123
         :rtype: (:class:`LongTensor`, :class:`LongTensor`, :class:`LongTensor`,
              :class:`BoolTensor`)
         """
@@ -371,7 +365,7 @@ class PGExplainer(nn.Module):
         return outputs[1].squeeze(), edge_mask
 
     def train_explanation_network(self, dataset):
-        r""" training the explanation network """
+        r""" training the explanation network by gradient descent(GD) using Adam optimizer """
         optimizer = Adam(self.elayers.parameters(), lr=self.lr)
         if self.explain_graph:
             with torch.no_grad():
