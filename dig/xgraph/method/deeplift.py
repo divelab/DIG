@@ -44,7 +44,6 @@ class DeepLIFT(WalkBase):
         labels = tuple(i for i in range(kwargs.get('num_classes')))
         ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
 
-        print('#D#Mask Calculate...')
         masks = []
         for ex_label in ex_labels:
 
@@ -64,7 +63,6 @@ class DeepLIFT(WalkBase):
 
         # Store related predictions for further evaluation.
         shap._remove_hooks()
-        print('#D#Predict...')
 
         with torch.no_grad():
             with self.connect_mask(self):

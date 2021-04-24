@@ -81,7 +81,6 @@ class GradCAM(WalkBase):
         self.explain_method = GraphLayerGradCam(model, model.convs[-1])
         # --- setting end ---
 
-        print('#D#Mask Calculate...')
         masks = []
         for ex_label in ex_labels:
             attr_wo_relu = self.explain_method.attribute(x, ex_label, additional_forward_args=edge_index)
@@ -92,7 +91,6 @@ class GradCAM(WalkBase):
             masks.append(mask.detach())
 
         # Store related predictions for further evaluation.
-        print('#D#Predict...')
 
         with torch.no_grad():
             with self.connect_mask(self):

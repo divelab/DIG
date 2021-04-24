@@ -1,4 +1,4 @@
-from dig.xgraph.dataset import BA_LRP
+from dig.xgraph.dataset import MoleculeNet
 from dig.xgraph.models import GCN_3l
 import torch
 from torch.utils.data import random_split
@@ -24,9 +24,9 @@ def split_dataset(dataset, dataset_split=[0.8, 0.1, 0.1]):
 
     return {'train': train_set, 'val': val_set, 'test': test_set}
 
-dataset = BA_LRP('datasets')
+dataset = MoleculeNet('./datasets', 'tox21')
 dataset.data.x = dataset.data.x.to(torch.float32)
-dataset.data.y = dataset.data.y[:, 0]
+dataset.data.y = dataset.data.y[:, 2]
 dim_node = dataset.num_node_features
 dim_edge = dataset.num_edge_features
 num_targets = dataset.num_classes

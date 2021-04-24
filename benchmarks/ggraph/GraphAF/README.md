@@ -1,6 +1,6 @@
 # GraphAF
 
-This is a re-implementation for [GraphAF: a Flow-based Autoregressive Model for Molecular Graph Generation(https://arxiv.org/abs/2001.09382).]
+This is a re-implementation for [GraphAF: a Flow-based Autoregressive Model for Molecular Graph Generation](https://arxiv.org/abs/2001.09382).
 
 ![](./figs/graphaf.png)
 
@@ -23,7 +23,7 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --train --data=zinc
 ```
 To generate molecules using trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphAF/saved_ckpts/rand_gen), then:
 ```shell script
-$ cd GraphDF
+$ cd GraphAF
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=qm9
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=zinc250k
 ```
