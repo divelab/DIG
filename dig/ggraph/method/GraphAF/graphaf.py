@@ -167,7 +167,7 @@ class GraphAF(Generator):
     
 
     def run_prop_optim(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):
-         r"""
+        r"""
             Running graph generation for property optimization task.
             Args:
                 model_conf_dict (dict): The python dict for configuring the model hyperparameters.
