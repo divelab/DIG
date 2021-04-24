@@ -56,8 +56,19 @@ class SynGraphDataset(InMemoryDataset):
             being saved to disk. (default: :obj:`None`)
 
     """
+
+    url = 'https://github.com/divelab/DIG_storage/raw/main/xgraph/datasets/{}'
+    # Format: name: [display_name, url_name, filename]
+    names = {
+        'ba_shapes': ['BA_shapes', 'BA_shapes.pkl', 'BA_shapes'],
+        'ba_community': ['BA_Community', 'BA_Community.pkl', 'BA_Community'],
+        'tree_grid': ['Tree_Grid', 'Tree_Grid.pkl', 'Tree_Grid'],
+        'tree_cycle': ['Tree_Cycle', 'Tree_Cycles.pkl', 'Tree_Cycle'],
+        'ba_2motifs': ['BA_2Motifs', 'BA_2Motifs.pkl', 'BA_2Motifs']
+    }
+
     def __init__(self, root, name, transform=None, pre_transform=None):
-        self.name = name
+        self.name = name.lower()
         super(SynGraphDataset, self).__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
@@ -71,16 +82,19 @@ class SynGraphDataset(InMemoryDataset):
 
     @property
     def raw_file_names(self):
-        return [f"{self.name}.pkl"]
+        return f'{self.names[self.name][2]}.pkl'
 
     @property
     def processed_file_names(self):
         return ['data.pt']
 
-    def process(self):
+    def download(self):
+        url = self.url.format(self.names[self.name][1])
+        path = download_url(url, self.raw_dir)
 
+    def process(self):
         if self.name.lower() == 'BA_2Motifs'.lower():
-            data_list = read_ba2motif_data(self.raw_dir, self.name)
+            data_list = read_ba2motif_data(self.raw_dir, self.names[self.name][2])
 
             if self.pre_filter is not None:
                 data_list = [self.get(idx) for idx in range(len(self))]
@@ -98,6 +112,9 @@ class SynGraphDataset(InMemoryDataset):
             data_list = [data]
 
         torch.save(self.collate(data_list), self.processed_paths[0])
+
+    def __repr__(self):
+        return '{}({})'.format(self.names[self.name][0], len(self))
 
 
 class BA_LRP(InMemoryDataset):
@@ -129,7 +146,7 @@ class BA_LRP(InMemoryDataset):
     .. note:: :class:`~BA_LRP` will automatically generate the dataset
       if the dataset file is not existed in the root directory.
     """
-    url = ('https://github.com/divelab/DIG_storage/raw/main/xgraph/datasets/ba_lrp/raw.pt')
+    url = ('https://github.com/divelab/DIG_storage/raw/main/xgraph/datasets/ba_lrp.pt')
 
     def __init__(self, root, num_per_class=10000, transform=None, pre_transform=None):
         self.name = 'ba_lrp'
@@ -156,8 +173,7 @@ class BA_LRP(InMemoryDataset):
     def download(self):
         url = self.url
         path = download_url(url, self.raw_dir)
-        # extract_zip(path, self.raw_dir)
-        # os.unlink(path)
+        shutil.move(path, path.replace('ba_lrp.pt', 'raw.pt'))
 
     def gen_class1(self):
         x = torch.tensor([[1], [1]], dtype=torch.float)
@@ -211,3 +227,9 @@ class BA_LRP(InMemoryDataset):
 
         data, slices = self.collate(data_list)
         torch.save((data, slices), self.processed_paths[0])
+
+
+if __name__ == '__main__':
+    # lrp_dataset = BA_LRP(root='.', num_per_class=10000)
+    syn_dataset = SynGraphDataset(root='.', name='BA_Community')
+

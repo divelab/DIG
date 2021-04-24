@@ -191,10 +191,10 @@ class PGExplainer(nn.Module):
 
         The :attr:`edge_mask` will be randomly initialized when set to :obj:`None`.
 
-        .. note:: When you use the :meth:`~PGExplainer.__set_masks__`, the explain flag
-          :attr:`torch_geometric.nn.MessagePassing.__explain__` will be set to :obj:`True`
-          and :attr:`torch_geometric.nn.MessagePassing.__edge_mask__` will be set
-          for all the :class:`torch_geometric.nn.MessagePassing` modules in :attr:`model`.
+        .. note:: When you use the :meth:`~PGExplainer.__set_masks__`,
+          the explain flag for all the :class:`torch_geometric.nn.MessagePassing`
+          modules in :attr:`model` will be assigned with :obj:`True`. In addition,
+          the :attr:`edge_mask` will be assigned to all the modules.
           Please take :meth:`~PGExplainer.__clear_masks__` to reset.
         """
         (N, F), E = x.size(), edge_index.size(1)
