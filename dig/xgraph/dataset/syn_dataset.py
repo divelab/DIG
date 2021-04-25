@@ -21,20 +21,6 @@ def read_ba2motif_data(folder: str, prefix):
     return data_list
 
 
-def read_syn_data(folder: str, prefix):
-    with open(os.path.join(folder, f"{prefix}.pkl"), 'rb') as f:
-        adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask, edge_label_matrix = pickle.load(f)
-
-    x = torch.from_numpy(features).float()
-    y = train_mask.reshape(-1, 1) * y_train + val_mask.reshape(-1, 1) * y_val + test_mask.reshape(-1, 1) * y_test
-    y = torch.from_numpy(np.where(y)[1])
-    edge_index = dense_to_sparse(torch.from_numpy(adj))[0]
-    data = Data(x=x, y=y, edge_index=edge_index)
-    data.train_mask = torch.from_numpy(train_mask)
-    data.val_mask = torch.from_numpy(val_mask)
-    data.test_mask = torch.from_numpy(test_mask)
-    return data
-
 
 class SynGraphDataset(InMemoryDataset):
     r"""
@@ -107,7 +93,7 @@ class SynGraphDataset(InMemoryDataset):
                 self.data, self.slices = self.collate(data_list)
         else:
             # Read data into huge `Data` list.
-            data = read_syn_data(self.raw_dir, self.name)
+            data = self.read_syn_data()
             data = data if self.pre_transform is None else self.pre_transform(data)
             data_list = [data]
 
@@ -115,6 +101,20 @@ class SynGraphDataset(InMemoryDataset):
 
     def __repr__(self):
         return '{}({})'.format(self.names[self.name][0], len(self))
+
+    def read_syn_data(self):
+        with open(self.raw_paths[0], 'rb') as f:
+            adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask, edge_label_matrix = pickle.load(f)
+
+        x = torch.from_numpy(features).float()
+        y = train_mask.reshape(-1, 1) * y_train + val_mask.reshape(-1, 1) * y_val + test_mask.reshape(-1, 1) * y_test
+        y = torch.from_numpy(np.where(y)[1])
+        edge_index = dense_to_sparse(torch.from_numpy(adj))[0]
+        data = Data(x=x, y=y, edge_index=edge_index)
+        data.train_mask = torch.from_numpy(train_mask)
+        data.val_mask = torch.from_numpy(val_mask)
+        data.test_mask = torch.from_numpy(test_mask)
+        return data
 
 
 class BA_LRP(InMemoryDataset):
