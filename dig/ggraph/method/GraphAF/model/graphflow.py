@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .graphaf import MaskedGraphAF
-from .disgraphaf import DisGraphAF
 from  rdkit import Chem
 from .df_utils import *
 from dig.ggraph.utils import check_valency, convert_radical_electrons_to_hydrogens
@@ -17,7 +16,7 @@ class GraphFlowModel(nn.Module):
         self.bond_dim = model_conf_dict['bond_dim']
         self.deq_coeff = model_conf_dict['deq_coeff']
 
-        node_masks, adj_masks, link_prediction_index, self.flow_core_edge_masks = self.initialize_masks(max_node_unroll=max_size, max_edge_unroll=edge_unroll)
+        node_masks, adj_masks, link_prediction_index, self.flow_core_edge_masks = self.initialize_masks(max_node_unroll=self.max_size, max_edge_unroll=self.edge_unroll)
 
         self.latent_step = node_masks.size(0)  # (max_size) + (max_edge_unroll - 1) / 2 * max_edge_unroll + (max_size - max_edge_unroll) * max_edge_unroll
         self.latent_node_length = self.max_size * self.node_dim
@@ -31,8 +30,8 @@ class GraphFlowModel(nn.Module):
         
         constant_pi = torch.Tensor([3.1415926535])
         prior_ln_var = torch.zeros([1])
-        self.flow_core = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=st_type, num_flow_layer = num_flow_layer, graph_size=self.max_size,
-                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=num_rgcn_layer, nhid=nhid, nout=nout)
+        self.flow_core = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=model_conf_dict['st_type'], num_flow_layer = model_conf_dict['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=model_conf_dict['num_rgcn_layer'], nhid=model_conf_dict['nhid'], nout=model_conf_dict['nout'])
         if self.dp:
             self.flow_core = nn.DataParallel(self.flow_core)
             self.constant_pi = nn.Parameter(constant_pi.cuda(), requires_grad=False)
@@ -185,7 +184,6 @@ class GraphFlowModel(nn.Module):
             # smiles = Chem.MolToSmiles(final_mol, isomericSmiles=True)
             # assert '.' not in smiles, 'warning: use is_connect to check stop action, but the final molecule is disconnected!!!'
 
-            final_mol = Chem.MolFromSmiles(smiles)
             num_atoms = final_mol.GetNumAtoms()
 
             pure_valid = 0

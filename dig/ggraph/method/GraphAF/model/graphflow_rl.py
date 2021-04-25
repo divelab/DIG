@@ -4,8 +4,7 @@ import torch
 import torch.nn as nn
 from rdkit import Chem
 from .graphaf import MaskedGraphAF
-from .disgraphaf import DisGraphAF
-from dig.ggraph.utils import check_chemical_validity, check_valency, calculate_min_plogp, qed, 
+from dig.ggraph.utils import check_chemical_validity, check_valency, calculate_min_plogp, qed
 from dig.ggraph.utils import convert_radical_electrons_to_hydrogens, steric_strain_filter, zinc_molecule_filter
 
 class GraphFlowModel_rl(nn.Module):
@@ -14,7 +13,7 @@ class GraphFlowModel_rl(nn.Module):
         self.args: deq_coeff
                    deq_type
     """
-    def __init__(self, conf_rl, model_conf_dict):
+    def __init__(self, model_conf_dict):
         super(GraphFlowModel_rl, self).__init__()
         self.max_size = model_conf_dict['max_size']
         self.node_dim = model_conf_dict['node_dim']
@@ -31,15 +30,15 @@ class GraphFlowModel_rl(nn.Module):
         # print('latent node length: %d' % self.latent_node_length)
         # print('latent edge length: %d' % self.latent_edge_length)
 
-        self.dp = conf_net['use_gpu']
-        self.use_df = conf_net['use_df']
+        self.dp = model_conf_dict['use_gpu']
+        
         
         constant_pi = torch.Tensor([3.1415926535])
         prior_ln_var = torch.zeros([1])
-        self.flow_core = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=conf_net['st_type'], num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
-        self.flow_core_old = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=conf_net['st_type'], num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
+        self.flow_core = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=model_conf_dict['st_type'], num_flow_layer = model_conf_dict['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=model_conf_dict['num_rgcn_layer'], nhid=model_conf_dict['nhid'], nout=model_conf_dict['nout'])
+        self.flow_core_old = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=model_conf_dict['st_type'], num_flow_layer = model_conf_dict['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=model_conf_dict['num_rgcn_layer'], nhid=model_conf_dict['nhid'], nout=model_conf_dict['nout'])
         if self.dp:
             self.flow_core = nn.DataParallel(self.flow_core)
             self.flow_core_old = nn.DataParallel(self.flow_core_old)

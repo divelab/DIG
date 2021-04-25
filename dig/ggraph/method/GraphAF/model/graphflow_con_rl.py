@@ -3,8 +3,7 @@ import torch.nn as nn
 import numpy as np
 from rdkit import Chem
 from .graphaf import MaskedGraphAF
-from .disgraphaf import DisGraphAF
-from dig.ggraph.utils import check_chemical_validity, check_valency, calculate_min_plogp, reward_target_molecule_similarity, 
+from dig.ggraph.utils import check_chemical_validity, check_valency, calculate_min_plogp, reward_target_molecule_similarity
 from dig.ggraph.utils import convert_radical_electrons_to_hydrogens, steric_strain_filter, zinc_molecule_filter
 
 
@@ -24,15 +23,15 @@ class GraphFlowModel_con_rl(nn.Module):
         self.latent_node_length = self.max_size * self.node_dim
         self.latent_edge_length = (self.latent_step - self.max_size) * self.bond_dim
 
-        self.dp = conf_net['use_gpu']
+        self.dp = model_conf_dict['use_gpu']
         
         
         constant_pi = torch.Tensor([3.1415926535])
         prior_ln_var = torch.zeros([1])
-        self.flow_core = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=conf_net['st_type'], num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
-        self.flow_core_old = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=conf_net['st_type'], num_flow_layer = conf_net['num_flow_layer'], graph_size=self.max_size,
-                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=conf_net['num_rgcn_layer'], nhid=conf_net['nhid'], nout=conf_net['nout'])
+        self.flow_core = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=model_conf_dict['st_type'], num_flow_layer = model_conf_dict['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=model_conf_dict['num_rgcn_layer'], nhid=model_conf_dict['nhid'], nout=model_conf_dict['nout'])
+        self.flow_core_old = MaskedGraphAF(node_masks, adj_masks, link_prediction_index, st_type=model_conf_dict['st_type'], num_flow_layer = model_conf_dict['num_flow_layer'], graph_size=self.max_size,
+                                    num_node_type=self.node_dim, num_edge_type=self.bond_dim, num_rgcn_layer=model_conf_dict['num_rgcn_layer'], nhid=model_conf_dict['nhid'], nout=model_conf_dict['nout'])
         if self.dp:
             self.flow_core = nn.DataParallel(self.flow_core)
             self.flow_core_old = nn.DataParallel(self.flow_core_old)
@@ -433,10 +432,10 @@ class GraphFlowModel_con_rl(nn.Module):
         Returns:
         """
         optim_dict = {}
-        batch_size = min(batch_size, mol_sizes.size(0)) # last batch of one iter may be less batch_size
+        batch_size = min(self.conf_rl['batch_size'], mol_sizes.size(0)) # last batch of one iter may be less batch_size
 
         assert cur_iter is not None
-        atom_list, temperature, batch_size, max_size_rl = self.conf_rl['atom_list'], self.conf_rl['temperature'], self.conf_rl['batch_size'], self.conf_rl['max_size_rl']
+        atom_list, temperature, _, max_size_rl = self.conf_rl['atom_list'], self.conf_rl['temperature'], self.conf_rl['batch_size'], self.conf_rl['max_size_rl']
         if cur_iter % self.conf_rl['update_iters'] == 0: # uodate the demenstration net every 4 iter.
             print('copying to old model at iter {}'.format(cur_iter))
             self.flow_core_old.load_state_dict(self.flow_core.state_dict())

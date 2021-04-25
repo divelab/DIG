@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from .df_utils import *
 
 class ST_Net_Sigmoid(nn.Module):
     def __init__(self, input_dim, output_dim, hid_dim=64, num_layers=2, bias=True, scale_weight_norm=False, sigmoid_shift=2., apply_batch_norm=False):
@@ -193,31 +192,3 @@ class Rescale_channel(nn.Module):
         x = torch.exp(self.weight) * x
         return x
 
-
-class ST_Dis(nn.Module):
-    def __init__(self,  input_dim, output_dim, hid_dim=64, bias=True, temperature=0.1):
-        super(ST_Dis, self).__init__()
-
-        self.input_dim = input_dim
-        self.hid_dim = hid_dim
-        self.output_dim = output_dim
-        self.bias = bias
-        self.temperature = temperature
-
-        self.linear1 = nn.Linear(input_dim, hid_dim, bias=bias)
-        self.linear2 = nn.Linear(hid_dim, output_dim, bias=bias)
-        self.tanh = nn.Tanh()
-
-        # self.reset_parameters()
-
-    def reset_parameters(self):
-        nn.init.xavier_uniform_(self.linear1.weight)
-        nn.init.constant_(self.linear2.weight, 1e-10)
-        if self.bias:
-            nn.init.constant_(self.linear1.bias, 0.)
-            nn.init.constant_(self.linear2.bias, 0.)
-
-    def forward(self, graph_embed):
-        loc = self.linear2(self.tanh(self.linear1(graph_embed)))
-        loc = one_hot_argmax(loc, self.temperature)
-        return loc
