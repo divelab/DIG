@@ -1,6 +1,6 @@
 {
     "model": {
-        "max_size": 48,
+        "max_size": 38,
         "edge_unroll": 12,
         "node_dim": 9,
         "bond_dim": 4,
@@ -46,7 +46,7 @@
     "weight_decay": 0,
     "max_iters": 200,
     "warm_up": 0,
-    "pretrain_model": "saved_ckpts/prop_optim/pretrain_qed.pth",
+    "pretrain_model": "ckpt/dense_gen_net_10.pth",
     "dense_gen_model": "saved_ckpts/prop_optim/dense_gen_net_10.pth",
     "save_interval": 20,
     "save_dir": "prop_optim_qed",

@@ -54,7 +54,7 @@
     "batch_size": 64,
     "max_iters": 300,
     "warm_up": 24,
-    "pretrain_model": "saved_ckpts/cons_optim/pretrain_graphaf.pth",
+    "pretrain_model": "ckpt/dense_gen_net_10.pth",
     "dense_gen_model": "saved_ckpts/cons_optim/checkpoint277.pth",
     "save_interval": 20,
     "save_dir": "cons_optim_graphaf",
