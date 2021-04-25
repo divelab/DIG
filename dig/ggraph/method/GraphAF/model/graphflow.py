@@ -4,7 +4,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .graphaf import MaskedGraphAF
 from  rdkit import Chem
-from .df_utils import *
 from dig.ggraph.utils import check_valency, convert_radical_electrons_to_hydrogens
 
 class GraphFlowModel(nn.Module):
