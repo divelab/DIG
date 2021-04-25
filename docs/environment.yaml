@@ -19,3 +19,5 @@ dependencies:
     - torch-geometric==1.7.0
     - autodocsumm
     - captum==0.2.0
+    - cilog
+    - typed-argument-parser==1.5.4 
