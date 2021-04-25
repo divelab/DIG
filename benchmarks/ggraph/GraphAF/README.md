@@ -1,6 +1,6 @@
 # GraphAF
 
-This is a re-implementation for [GraphAF: a Flow-based Autoregressive Model for Molecular Graph Generation(https://arxiv.org/abs/2001.09382).]
+This is a re-implementation for [GraphAF: a Flow-based Autoregressive Model for Molecular Graph Generation](https://arxiv.org/abs/2001.09382).
 
 ![](./figs/graphaf.png)
 
