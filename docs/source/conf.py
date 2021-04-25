@@ -26,6 +26,7 @@ import dig.ggraph.utils
 import dig.ggraph.evaluation
 import dig.xgraph.dataset
 import dig.xgraph.method
+import dig.xgraph.evaluation
 
 import torch_geometric
 

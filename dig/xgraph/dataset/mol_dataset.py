@@ -68,7 +68,7 @@ class MoleculeDataset(InMemoryDataset):
     .. _MoleculeNet: http://moleculenet.ai/datasets-1
     .. _MUTAG: https://pubs.acs.org/doi/10.1021/jm00106a046
 
-    The extension of MoleculeNet_ with MUATG_.
+    The extension of MoleculeNet_ with MUTAG_.
     The `MoleculeNet `_ benchmark
     collection  from the `"MoleculeNet: A Benchmark for Molecular Machine
     Learning" <https://arxiv.org/abs/1703.00564>`_ paper, containing datasets

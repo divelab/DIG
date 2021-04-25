@@ -17,11 +17,8 @@ class GNNExplainer(ExplainerBase):
     structures and small subsets node features that play a crucial role in a
     GNN’s node-predictions.
 
-    .. note::
-
-        For an example of using GNN-Explainer, see `examples/gnn_explainer.py
-        <https://github.com/rusty1s/pytorch_geometric/blob/master/examples/
-        gnn_explainer.py>`_.
+    .. note:: For an example, see `benchmarks/xgraph
+        <https://github.com/divelab/DIG/tree/dig/benchmarks/xgraph>`_.
 
     Args:
         model (torch.nn.Module): The GNN module to explain.
@@ -29,8 +26,8 @@ class GNNExplainer(ExplainerBase):
             (default: :obj:`100`)
         lr (float, optional): The learning rate to apply.
             (default: :obj:`0.01`)
-        log (bool, optional): If set to :obj:`False`, will not log any learning
-            progress. (default: :obj:`True`)
+        explain_graph (bool, optional): Whether to explain graph classification model
+            (default: :obj:`False`)
     """
 
     coeffs = {
@@ -40,8 +37,8 @@ class GNNExplainer(ExplainerBase):
         'node_feat_ent': 0.1,
     }
 
-    def __init__(self, model, epochs=100, lr=0.01, explain_graph=False, molecule=False):
-        super(GNNExplainer, self).__init__(model, epochs, lr, explain_graph, molecule)
+    def __init__(self, model, epochs=100, lr=0.01, explain_graph=False):
+        super(GNNExplainer, self).__init__(model, epochs, lr, explain_graph)
 
 
 
@@ -97,19 +94,30 @@ class GNNExplainer(ExplainerBase):
 
         return self.edge_mask.data
 
-    def forward(self, x, edge_index, mask_features=False,
-                positive=True, **kwargs):
-        r"""Learns and returns a node feature mask and an edge mask that play a
-        crucial role to explain the prediction made by the GNN for node
-        :attr:`node_idx`.
+    def forward(self, x, edge_index, mask_features=False, **kwargs):
+        r"""
+        Run the explainer for a specific graph instance.
 
         Args:
-            data (Batch): batch from dataloader
-            edge_index (LongTensor): The edge indices.
-            pos_neg (Literal['pos', 'neg']) : get positive or negative mask
-            **kwargs (optional): Additional arguments passed to the GNN module.
+            x (torch.Tensor): The graph instance's input node features.
+            edge_index (torch.Tensor): The graph instance's edge index.
+            mask_features (bool, optional): Whether to use feature mask. Not recommended.
+                (Default: :obj:`False`)
+            **kwargs (dict):
+                :obj:`node_idx` （int): The index of node that is pending to be explained.
+                (for node classification)
+                :obj:`sparsity` (float): The Sparsity we need to control to transform a
+                soft mask to a hard mask. (Default: :obj:`0.7`)
+                :obj:`num_classes` (int): The number of task's classes.
 
-        :rtype: (:class:`Tensor`, :class:`Tensor`)
+        :rtype: (None, list, list)
+
+        .. note::
+            (None, edge_masks, related_predictions):
+            edge_masks is a list of edge-level explanation for each class;
+            related_predictions is a list of dictionary for each class
+            where each dictionary includes 4 type predicted probabilities.
+
         """
         super().forward(x=x, edge_index=edge_index, **kwargs)
         self.model.eval()

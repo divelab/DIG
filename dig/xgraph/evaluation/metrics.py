@@ -70,6 +70,18 @@ def fidelity_inv(ori_probs: torch.Tensor, important_probs: torch.Tensor) -> floa
 
 
 class XCollector(object):
+    r"""
+    XCollector is a data collector which takes processed related prediction probabilities to calculate Fidelity+
+    and Fidelity-.
+
+    Args:
+        sparsity (float): The Sparsity is use to transform the soft mask to a hard one.
+
+    .. note::
+        For more examples, see `benchmarks/xgraph
+        <https://github.com/divelab/DIG/tree/dig/benchmarks/xgraph>`_.
+
+    """
 
     def __init__(self, sparsity):
         self.__related_preds, self.__targets = {'zero': [], 'masked': [], 'maskout': [], 'origin': []}, []
@@ -94,6 +106,17 @@ class XCollector(object):
                      masks: List[Tensor],
                      related_preds: dir,
                      label: int) -> None:
+        r"""
+        The function is used to collect related data. After collection, we can call fidelity, fidelity_inv, sparsity
+        to calculate their values.
+
+        Args:
+            masks (list): It is a list of edge-level explanation for each class.
+            related_preds (list): It is a list of dictionary for each class where each dictionary
+            includes 4 type predicted probabilities.
+            label (int): The ground truth label.
+
+        """
 
         if self.__fidelity or self.__fidelity_inv:
             self.__fidelity, self.__fidelity_inv = None, None
@@ -109,6 +132,9 @@ class XCollector(object):
 
     @property
     def fidelity(self):
+        r"""
+        Return the Fidelity+ value according to collected data.
+        """
         if self.__fidelity:
             return self.__fidelity
         else:
@@ -122,6 +148,9 @@ class XCollector(object):
 
     @property
     def fidelity_inv(self):
+        r"""
+        Return the Fidelity- value according to collected data.
+        """
         if self.__fidelity_inv:
             return self.__fidelity_inv
         else:
@@ -135,6 +164,9 @@ class XCollector(object):
 
     @property
     def sparsity(self):
+        r"""
+        Return the Sparsity value.
+        """
         if self.__sparsity:
             return self.__sparsity
         else:
@@ -143,6 +175,15 @@ class XCollector(object):
 
 
 class ExplanationProcessor(nn.Module):
+    r"""
+    Explanation Processor is edge mask explanation processor which can handle sparsity control and use
+    data collector automatically.
+
+    Args:
+        model (torch.nn.Module): The target model prepared to explain.
+        device (torch.device): Specify running device: CPU or CUDA.
+
+    """
 
     def __init__(self, model, device):
         super().__init__()
@@ -212,6 +253,9 @@ class ExplanationProcessor(nn.Module):
         return related_preds
 
     def forward(self, data, masks, x_collector: XCollector, **kwargs):
+        r"""
+        Please refer to the main function here.
+        """
 
         data.to(self.device)
         node_idx = kwargs.get('node_idx')

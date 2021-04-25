@@ -11,15 +11,52 @@ EPS = 1e-15
 
 
 class GNN_LRP(WalkBase):
+    r"""
+    An implementation of GNN-LRP in
+    `Higher-Order Explanations of Graph Neural Networks via Relevant Walks <https://arxiv.org/abs/2006.03589>`_
 
-    def __init__(self, model: nn.Module, epochs=0, lr=0, explain_graph=False, molecule=False):
-        super().__init__(model=model, epochs=epochs, lr=lr, explain_graph=explain_graph, molecule=molecule)
+    Args:
+        model (torch.nn.Module): The target model prepared to explain.
+        explain_graph (bool, optional): Whether to explain graph classification model.
+            (default: :obj:`False`)
+
+    .. note::
+            For node classification model, the :attr:`explain_graph` flag is False.
+            GNN-LRP is very model dependent. Please be sure you know how to modify it for different models.
+            For an example, see `benchmarks/xgraph
+            <https://github.com/divelab/DIG/tree/dig/benchmarks/xgraph>`_.
+
+    """
+
+    def __init__(self, model: nn.Module, explain_graph=False):
+        super().__init__(model=model, explain_graph=explain_graph)
 
     def forward(self,
                 x: Tensor,
                 edge_index: Tensor,
                 **kwargs
                 ):
+        r"""
+        Run the explainer for a specific graph instance.
+
+        Args:
+            x (torch.Tensor): The graph instance's input node features.
+            edge_index (torch.Tensor): The graph instance's edge index.
+            **kwargs (dict):
+                :obj:`node_idx` （int): The index of node that is pending to be explained.
+                (for node classification)
+                :obj:`sparsity` (float): The Sparsity we need to control to transform a
+                soft mask to a hard mask. (Default: :obj:`0.7`)
+                :obj:`num_classes` (int): The number of task's classes.
+
+        :rtype:
+            (walks, edge_masks, related_predictions),
+            walks is a dictionary including walks' edge indices and corresponding explained scores;
+            edge_masks is a list of edge-level explanation for each class;
+            related_predictions is a list of dictionary for each class
+            where each dictionary includes 4 type predicted probabilities.
+
+        """
         super().forward(x, edge_index, **kwargs)
         self.model.eval()
 
@@ -157,15 +194,6 @@ class GNN_LRP(WalkBase):
 
         walks = {'ids': walk_indices_list, 'score': torch.cat(walk_scores_tensor_list, dim=1)}
 
-        # --- Debug ---
-        # walk_node_indices_list = []
-        # for walk_indices in walk_indices_list:
-        #     walk_node_indices = [edge_index_with_loop[0, walk_indices[0]]]
-        #     for walk_idx in walk_indices:
-        #         walk_node_indices.append(edge_index_with_loop[1, walk_idx])
-        #     walk_node_indices_list.append(torch.stack(walk_node_indices))
-        # walk_node_indices_list = torch.stack(walk_node_indices_list, dim=0)
-        # --- Debug end ---
 
         # --- Apply edge mask evaluation ---
         with torch.no_grad():

@@ -36,19 +36,48 @@ from .base_explainer import WalkBase
 EPS = 1e-15
 
 class GradCAM(WalkBase):
+    r"""
+    An implementation of GradCAM on graph in
+    `Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization <https://arxiv.org/abs/1610.02391>`_
 
-    def __init__(self, model, epochs=100, lr=0.01, explain_graph=False, molecule=False):
-        super().__init__(model, epochs, lr, explain_graph, molecule)
+    Args:
+        model (torch.nn.Module): The target model prepared to explain.
+        explain_graph (bool, optional): Whether to explain graph classification model.
+            (default: :obj:`False`)
+
+    .. note::
+        For node classification model, the :attr:`explain_graph` flag is False.
+        For an example, see `benchmarks/xgraph
+        <https://github.com/divelab/DIG/tree/dig/benchmarks/xgraph>`_.
+
+    """
+
+    def __init__(self, model, explain_graph=False):
+        super().__init__(model, explain_graph)
 
     def forward(self, x: Tensor, edge_index: Tensor, **kwargs)\
             -> Union[Tuple[None, List, List[Dict]], Tuple[Dict, List, List[Dict]]]:
-        """
-        Given a sample, this function will return its predicted masks and corresponding predictions
-        for evaluation
-        :param x: Tensor - Hiden features of all vertexes
-        :param edge_index: Tensor - All connected edge between vertexes/nodes
-        :param kwargs:
-        :return:
+        r"""
+        Run the explainer for a specific graph instance.
+
+        Args:
+            x (torch.Tensor): The graph instance's input node features.
+            edge_index (torch.Tensor): The graph instance's edge index.
+            **kwargs (dict):
+                :obj:`node_idx` （int): The index of node that is pending to be explained.
+                (for node classification)
+                :obj:`sparsity` (float): The Sparsity we need to control to transform a
+                soft mask to a hard mask. (Default: :obj:`0.7`)
+                :obj:`num_classes` (int): The number of task's classes.
+
+        :rtype: (None, list, list)
+
+        .. note::
+            (None, edge_masks, related_predictions):
+            edge_masks is a list of edge-level explanation for each class;
+            related_predictions is a list of dictionary for each class
+            where each dictionary includes 4 type predicted probabilities.
+
         """
         self.model.eval()
         super().forward(x, edge_index)
