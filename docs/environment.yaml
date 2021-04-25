@@ -18,3 +18,4 @@ dependencies:
     - torch-spline-conv==1.2.1
     - torch-geometric==1.7.0
     - autodocsumm
+    - captum==0.2.0
