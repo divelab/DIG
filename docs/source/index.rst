@@ -8,7 +8,7 @@
 DIG: Dive into Graphs Documentation
 ====================================
 
-.. image:: ../imgs/DIG-logo.jpg
+.. image:: ../imgs/DIG-logo.png
    :width: 50%
 
 
