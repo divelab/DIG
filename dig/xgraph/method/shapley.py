@@ -4,28 +4,17 @@ import numpy as np
 from typing import Union
 from scipy.special import comb
 from itertools import combinations
+import torch.nn.functional as F
 from torch_geometric.utils import to_networkx
 from torch_geometric.data import Data, Batch, Dataset, DataLoader
-
-
-def value_func_decorator(value_func):
-    """ input: list of the connected graph (X, A)
-        return sum of the value of all connected graphs
-    """
-    def value_sum_func(batch, target_class):
-        with torch.no_grad():
-            logits, probs, _ = value_func(batch)
-            score = probs[:, target_class]
-        return score
-
-    return value_sum_func
 
 
 def GnnNets_GC2value_func(gnnNets, target_class):
     def value_func(batch):
         with torch.no_grad():
-            logits, prob, _ = gnnNets(batch)
-            score = prob[:, target_class]
+            logits = gnnNets(data=batch)
+            probs = F.softmax(logits, dim=-1)
+            score = probs[:, target_class]
         return score
     return value_func
 
@@ -33,11 +22,12 @@ def GnnNets_GC2value_func(gnnNets, target_class):
 def GnnNets_NC2value_func(gnnNets_NC, node_idx: Union[int, torch.tensor], target_class: torch.tensor):
     def value_func(data):
         with torch.no_grad():
-            logits, prob, _ = gnnNets_NC(data)
+            logits = gnnNets_NC(data=data)
+            probs = F.softmax(logits, dim=-1)
             # select the corresponding node prob through the node idx on all the sampling graphs
             batch_size = data.batch.max() + 1
-            prob = prob.reshape(batch_size, -1, logits.shape[-1])
-            score = prob[:, node_idx, target_class]
+            probs = probs.reshape(batch_size, -1, probs.shape[-1])
+            score = probs[:, node_idx, target_class]
             return score
     return value_func
 
@@ -52,7 +42,6 @@ def get_graph_build_func(build_method):
 
 
 class MarginalSubgraphDataset(Dataset):
-
     def __init__(self, data, exclude_mask, include_mask, subgraph_build_func):
         self.num_nodes = data.num_nodes
         self.X = data.x
@@ -237,12 +226,12 @@ def gnn_score(coalition: list, data: Data, value_func: str,
     """ the value of subgraph with selected nodes """
     num_nodes = data.num_nodes
     subgraph_build_func = get_graph_build_func(subgraph_building_method)
-    mask = torch.zeros(num_nodes).type(torch.float32)
+    mask = torch.zeros(num_nodes).type(torch.float32).to(data.x.device)
     mask[coalition] = 1.0
     ret_x, ret_edge_index = subgraph_build_func(data.x, data.edge_index, mask)
     mask_data = Data(x=ret_x, edge_index=ret_edge_index)
     mask_data = Batch.from_data_list([mask_data])
-    score = value_func(mask_data)
+    score = value_func(data=mask_data)
     # get the score of predicted class for graph or specific node idx
     return score.item()
 

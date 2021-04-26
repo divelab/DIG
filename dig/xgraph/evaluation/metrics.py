@@ -83,8 +83,8 @@ class XCollector(object):
 
     """
 
-    def __init__(self, sparsity):
-        self.__related_preds, self.__targets = {'zero': [], 'masked': [], 'maskout': [], 'origin': []}, []
+    def __init__(self, sparsity=None):
+        self.__related_preds, self.__targets = {'zero': [], 'masked': [], 'maskout': [], 'origin': [], 'sparsity': []}, []
         self.masks: Union[List, List[List[Tensor]]] = []
 
         self.__sparsity = sparsity
@@ -105,7 +105,7 @@ class XCollector(object):
     def collect_data(self,
                      masks: List[Tensor],
                      related_preds: dir,
-                     label: int) -> None:
+                     label: int = 0) -> None:
         r"""
         The function is used to collect related data. After collection, we can call fidelity, fidelity_inv, sparsity
         to calculate their values.
@@ -113,8 +113,8 @@ class XCollector(object):
         Args:
             masks (list): It is a list of edge-level explanation for each class.
             related_preds (list): It is a list of dictionary for each class where each dictionary
-            includes 4 type predicted probabilities.
-            label (int): The ground truth label.
+            includes 4 type predicted probabilities and sparsity.
+            label (int): The ground truth label. (default: 0)
 
         """
 
@@ -125,7 +125,9 @@ class XCollector(object):
         if not np.isnan(label):
             for key, value in related_preds[label].items():
                 self.__related_preds[key].append(value)
-
+            for key in self.__related_preds.keys():
+                if key not in related_preds[0].keys():
+                    self.__related_preds[key].append(None)
             self.__targets.append(label)
             self.masks.append(masks)
 
@@ -137,11 +139,11 @@ class XCollector(object):
         """
         if self.__fidelity:
             return self.__fidelity
+        elif None in self.__related_preds['maskout'] or None in self.__related_preds['origin']:
+            return None
         else:
-
-            zero_mask_preds, mask_out_preds, masked_preds, one_mask_preds = \
-                torch.tensor(self.__related_preds['zero']), torch.tensor(self.__related_preds['maskout']), \
-                torch.tensor(self.__related_preds['masked']), torch.tensor(self.__related_preds['origin'])
+            mask_out_preds, one_mask_preds = \
+                torch.tensor(self.__related_preds['maskout']), torch.tensor(self.__related_preds['origin'])
 
             self.__fidelity = fidelity(one_mask_preds, mask_out_preds)
             return self.__fidelity
@@ -153,10 +155,10 @@ class XCollector(object):
         """
         if self.__fidelity_inv:
             return self.__fidelity_inv
+        elif None in self.__related_preds['masked'] or None in self.__related_preds['origin']:
+            return None
         else:
-
-            zero_mask_preds, mask_out_preds, masked_preds, one_mask_preds = \
-                torch.tensor(self.__related_preds['zero']), torch.tensor(self.__related_preds['maskout']), \
+            masked_preds, one_mask_preds = \
                 torch.tensor(self.__related_preds['masked']), torch.tensor(self.__related_preds['origin'])
 
             self.__fidelity_inv = fidelity_inv(one_mask_preds, masked_preds)
@@ -169,9 +171,10 @@ class XCollector(object):
         """
         if self.__sparsity:
             return self.__sparsity
+        elif None in self.__related_preds['sparsity']:
+            return None
         else:
-            raise ValueError(f'Please control and set your '
-                             f'Sparsity when initializing this class instead of calculating it.')
+            return torch.tensor(self.__related_preds['sparsity']).mean().item()
 
 
 class ExplanationProcessor(nn.Module):

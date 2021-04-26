@@ -12,6 +12,7 @@ import numpy as np
 import torch.nn as nn
 from torch import Tensor
 from torch.optim import Adam
+import torch.nn.functional as F
 from torch_geometric.data import Data, Batch
 import tqdm
 import networkx as nx
@@ -132,7 +133,7 @@ def calculate_selected_nodes(data, edge_mask, top_k):
 class PGExplainer(nn.Module):
     r"""
     An implementation of PGExplainer in
-    `Parameterized Explainer for Graph Neural Network <https://arxiv.org/abs/2011.04573>`_
+    `Parameterized Explainer for Graph Neural Network <https://arxiv.org/abs/2011.04573>`_.
 
     Args:
         model (:class:`torch.nn.Module`): The target model prepared to explain
@@ -152,11 +153,13 @@ class PGExplainer(nn.Module):
       :class:`torch_geometric.nn.MessagePassing` layers in the :attr:`model`.
 
     """
-    def __init__(self, model, in_channels: int, explain_graph: bool = True, epochs: int = 20,
-                 lr: float = 0.003, coff_size: float = 1.0, coff_ent: float = 1.0,
-                 t0: float = 1.0, t1: float = 1.0, num_hops: Optional[int] = None):
+    def __init__(self, model, in_channels: int, device, explain_graph: bool = True, epochs: int = 20,
+                 lr: float = 0.005, coff_size: float = 0.01, coff_ent: float = 5e-4,
+                 t0: float = 5.0, t1: float = 1.0, num_hops: Optional[int] = None):
         super(PGExplainer, self).__init__()
         self.model = model
+        self.device = device
+        self.model.to(self.device)
         self.in_channels = in_channels
         self.explain_graph = explain_graph
 
@@ -169,7 +172,6 @@ class PGExplainer(nn.Module):
         self.t1 = t1
 
         self.num_hops = self.update_num_hops(num_hops)
-        self.device = model.device
         self.init_bias = 0.0
 
         # Explanation model in PGExplainer
@@ -255,24 +257,6 @@ class PGExplainer(nn.Module):
         loss = pred_loss + size_loss + mask_ent_loss
         return loss
 
-    def get_model_output(self,
-                         x: Tensor,
-                         edge_index: Tensor,
-                         edge_mask: Optional[Tensor]=None):
-        r""" return the model outputs with or without (w/wo) edge mask  """
-        self.model.eval()
-        self.__clear_masks__()
-        if edge_mask is not None:
-            self.__set_masks__(x, edge_index, edge_mask.to(self.device))
-
-        with torch.no_grad():
-            data = Batch.from_data_list([Data(x=x, edge_index=edge_index)])
-            data.to(self.device)
-            outputs = self.model(data)
-
-        self.__clear_masks__()
-        return outputs
-
     def get_subgraph(self,
                      node_idx: int,
                      x: Tensor,
@@ -280,18 +264,21 @@ class PGExplainer(nn.Module):
                      y: Optional[Tensor] = None,
                      **kwargs)\
             -> Tuple[Tensor, Tensor, Tensor, List, Dict]:
-        r"""
+        r""" extract the subgraph of target node
+
         Args:
             node_idx (:obj:`int`): The node index
             x (:obj:`torch.Tensor`): Node feature matrix with shape
               :obj:`[num_nodes, dim_node_feature]`
             edge_index (:obj:`torch.Tensor`): Graph connectivity in COO format
               with shape :obj:`[2, num_edges]`
-            y (:obj:`torch.Tensor`, :obj`None`): Node label matrix with shape :obj:`[num_nodes]`
+            y (:obj:`torch.Tensor`, :obj:`None`): Node label matrix with shape :obj:`[num_nodes]`
               (default :obj:`None`)
+            kwargs(:obj:`Dict`, :obj:`None`)
 
-        :rtype: (:class:`LongTensor`, :class:`LongTensor`, :class:`LongTensor`,
-             :class:`BoolTensor`)
+        :rtype: (:class:`torch.Tensor`, :class:`torch.Tensor`, :class:`torch.Tensor`,
+          :obj:`List`, :class:`Dict`)
+
         """
         num_nodes, num_edges = x.size(0), edge_index.size(1)
         graph = to_networkx(data=Data(x=x, edge_index=edge_index), to_undirected=True)
@@ -334,7 +321,21 @@ class PGExplainer(nn.Module):
                 tmp: float = 1.0,
                 training: bool = False)\
             -> Tuple[float, Tensor]:
+        r""" explain the GNN behavior for graph with explanation network
 
+        Args:
+            x (:obj:`torch.Tensor`): Node feature matrix with shape
+              :obj:`[num_nodes, dim_node_feature]`
+            edge_index (:obj:`torch.Tensor`): Graph connectivity in COO format
+              with shape :obj:`[2, num_edges]`
+            embed (:obj:`torch.Tensor`): Node embedding matrix with shape :obj:`[num_nodes, dim_embedding]`
+            tmp (:obj`float`): The temperature parameter fed to the sample procedure
+            training (:obj:`bool`): Whether in training procedure or not
+
+        Returns:
+            probs (:obj:`torch.Tensor`): The classification probability for graph with edge mask
+            edge_mask (:obj:`torch.Tensor`): The probability mask for graph edges
+        """
         nodesize = embed.shape[0]
         feature_dim = embed.shape[1]
         f1 = embed.unsqueeze(1).repeat(1, nodesize, 1).reshape(-1, feature_dim)
@@ -359,10 +360,11 @@ class PGExplainer(nn.Module):
         self.__set_masks__(x, edge_index, edge_mask)
 
         # the model prediction with edge mask
-        data = Batch.from_data_list([Data(x=x, edge_index=edge_index)])
-        data.to(self.device)
-        outputs = self.model(data)
-        return outputs[1].squeeze(), edge_mask
+        logits = self.model(x, edge_index)
+        probs = F.softmax(logits, dim=-1)
+
+        self.__clear_masks__()
+        return probs, edge_mask
 
     def train_explanation_network(self, dataset):
         r""" training the explanation network by gradient descent(GD) using Adam optimizer """
@@ -375,9 +377,10 @@ class PGExplainer(nn.Module):
                 ori_pred_dict = {}
                 for gid in tqdm.tqdm(dataset_indices):
                     data = dataset[gid]
-                    _, prob, emb = self.get_model_output(data.x, data.edge_index)
+                    logits = self.model(data.x, data.edge_index)
+                    emb = self.model.get_emb(data.x, data.edge_index)
                     emb_dict[gid] = emb.data.cpu()
-                    ori_pred_dict[gid] = prob.argmax(-1).data.cpu()
+                    ori_pred_dict[gid] = logits.argmax(-1).data.cpu()
 
             # train the mask generator
             duration = 0.0
@@ -391,6 +394,7 @@ class PGExplainer(nn.Module):
                 tic = time.perf_counter()
                 for gid in tqdm.tqdm(dataset_indices):
                     data = dataset[gid]
+                    data.to(self.device)
                     prob, _ = self.explain(data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
                     loss_tmp = self.__loss__(prob, ori_pred_dict[gid])
                     loss_tmp.backward()
@@ -407,21 +411,25 @@ class PGExplainer(nn.Module):
         else:
             with torch.no_grad():
                 data = dataset[0]
+                data.to(self.device)
                 self.model.eval()
                 x_dict = {}
                 edge_index_dict = {}
                 node_idx_dict = {}
                 pred_dict = {}
                 emb_dict = {}
-                for node_idx in tqdm.tqdm(range(data.x.shape[0])):
+                for node_idx in tqdm.tqdm(torch.where(data.train_mask)[0].tolist()):
                     x, edge_index, y, subset, _ = \
                         self.get_subgraph(node_idx=node_idx, x=data.x, edge_index=data.edge_index, y=data.y)
-                    _, prob, emb = self.get_model_output(data.x, data.edge_index)
-                    x_dict[node_idx] = x
-                    edge_index_dict[node_idx] = edge_index
+                    logits = self.model(data.x, data.edge_index)
+                    emb = self.model.get_emb(data.x, data.edge_index)
+
+                    x_dict[node_idx] = x.to(self.device)
+                    edge_index_dict[node_idx] = edge_index.to(self.device)
+                    emb_dict[node_idx] = emb.to(self.device)
+
                     node_idx_dict[node_idx] = int(torch.where(subset == node_idx)[0])
-                    pred_dict[node_idx] = prob[node_idx_dict[node_idx]].argmax(-1).cpu()
-                    emb_dict[node_idx] = emb.data.cpu()
+                    pred_dict[node_idx] = logits[node_idx_dict[node_idx]].argmax(-1).cpu()
 
             # train the mask generator
             duration = 0.0
@@ -432,19 +440,18 @@ class PGExplainer(nn.Module):
                 tmp = float(self.t0 * np.power(self.t1 / self.t0, epoch / self.epochs))
                 self.elayers.train()
                 tic = time.perf_counter()
-                for node_idx in tqdm.tqdm(range(data.x.shape[0])):
+                for node_idx in tqdm.tqdm(x_dict.keys()):
                     pred, edge_mask = self.explain(x_dict[node_idx], edge_index_dict[node_idx],
                                                    emb_dict[node_idx], tmp, training=True)
                     loss_tmp = self.__loss__(pred[node_idx_dict[node_idx]], pred_dict[node_idx])
                     loss_tmp.backward()
                     loss += loss_tmp.item()
 
-                    acc_list.append(pred[node_idx_dict[node_idx]].argmax().item() == data.y[node_idx])
+                    acc_list.append((pred[node_idx_dict[node_idx]].argmax().item() == data.y[node_idx]).item())
 
                 optimizer.step()
                 duration += time.perf_counter() - tic
-                accs = torch.stack(acc_list, dim=0)
-                acc = np.array(accs).mean()
+                acc = np.array(acc_list).mean()
                 print(f'Epoch: {epoch} | Loss: {loss} | Acc : {acc}')
             print(f"training time is {duration:.5}s")
 
@@ -453,14 +460,31 @@ class PGExplainer(nn.Module):
                 edge_index: Tensor,
                 **kwargs)\
             -> Tuple[None, List, List[Dict]]:
-        r"""
-        The forward process of PGExplainer which will return the explanation results and
-        the corresponding metric values.
+        r""" explain the GNN behavior for graph and calculate the metric values.
+        The interface for the :class:`dig.evaluation.XCollector`.
+
+        Args:
+            x (:obj:`torch.Tensor`): Node feature matrix with shape
+              :obj:`[num_nodes, dim_node_feature]`
+            edge_index (:obj:`torch.Tensor`): Graph connectivity in COO format
+              with shape :obj:`[2, num_edges]`
+            kwargs(:obj:`Dict`)
+                - top_k (:obj:`float`): The number of edges in the final explanation results
+                - y (:obj`torch.Tensor`): The groundtrue labels
+
+        :rtype: (:obj:`None`, List[torch.Tensor], List[Dict])
         """
         # set default subgraph with 10 edges
         top_k = kwargs.get('top_k') if kwargs.get('top_k') is not None else 10
         y = kwargs.get('y')
-        _, probs, embed = self.get_model_output(x, edge_index, edge_mask=None)
+        x = x.to(self.device)
+        edge_index = edge_index.to(self.device)
+        y = y.to(self.device)
+
+        self.__clear_masks__()
+        logits = self.model(x, edge_index)
+        probs = F.softmax(logits, dim=-1)
+        embed = self.model.get_emb(x, edge_index)
 
         if self.explain_graph:
             # original value
@@ -470,9 +494,9 @@ class PGExplainer(nn.Module):
             _, edge_mask = self.explain(x, edge_index, embed=embed, tmp=1.0, training=False)
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
-            masked_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
+            maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
             value_func = GnnNets_GC2value_func(self.model, target_class=label)
-            masked_pred = gnn_score(masked_nodes_list, data, value_func,
+            maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
                                     subgraph_building_method='zero_filling')
             sparsity_score = 1 - len(selected_nodes) / data.x.shape[0]
         else:
@@ -484,22 +508,25 @@ class PGExplainer(nn.Module):
             # masked value
             x, edge_index, _, subset, _ = self.get_subgraph(node_idx, x, edge_index)
             new_node_idx = torch.where(subset == node_idx)[0]
-            _, edge_mask = self.explain(x, edge_index, embed[node_idx], tmp=1.0, training=False)
+            embed = self.model.get_emb(x, edge_index)
+            _, edge_mask = self.explain(x, edge_index, embed, tmp=1.0, training=False)
+
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
-            masked_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
+            maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
             value_func = GnnNets_NC2value_func(self.model,
                                                node_idx=new_node_idx,
                                                target_class=label)
-            masked_pred = gnn_score(masked_nodes_list, data, value_func,
+            maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
                                     subgraph_building_method='zero_filling')
             sparsity_score = 1 - len(selected_nodes) / data.x.shape[0]
 
         # return variables
         pred_mask = [edge_mask]
-        related_preds = [{'masked': masked_pred,
-                         'origin': probs[label],
-                         'sparsity': sparsity_score}]
+        related_preds = [{
+            'maskout': maskout_pred,
+            'origin': probs[label],
+            'sparsity': sparsity_score}]
         return None, pred_mask, related_preds
 
     def __repr__(self):
