@@ -51,6 +51,7 @@ class GNNBasic(torch.nn.Module):
 
         return x, edge_index, batch
 
+
 class GCN_3l(GNNBasic):
 
     def __init__(self, model_level, dim_node, dim_hidden, num_classes):
@@ -101,6 +102,13 @@ class GCN_3l(GNNBasic):
         out = self.ffn(out_readout)
         return out
 
+    def get_emb(self, *args, **kwargs) -> torch.Tensor:
+        x, edge_index, batch = self.arguments_read(*args, **kwargs)
+        post_conv = self.conv1(x, edge_index)
+        for conv in self.convs:
+            post_conv = conv(post_conv, edge_index)
+        return post_conv
+
 
 class GCN_2l(GNNBasic):
 
@@ -149,6 +157,13 @@ class GCN_2l(GNNBasic):
         out = self.ffn(out_readout)
 
         return out
+
+    def get_emb(self, *args, **kwargs) -> torch.Tensor:
+        x, edge_index, batch = self.arguments_read(*args, **kwargs)
+        post_conv = self.conv1(x, edge_index)
+        for conv in self.convs:
+            post_conv = conv(post_conv, edge_index)
+        return post_conv
 
 
 class GIN_3l(GNNBasic):
@@ -205,6 +220,14 @@ class GIN_3l(GNNBasic):
         out = self.ffn(out_readout)
         return out
 
+    def get_emb(self, *args, **kwargs) -> torch.Tensor:
+        x, edge_index, batch = self.arguments_read(*args, **kwargs)
+        post_conv = self.conv1(x, edge_index)
+        for conv in self.convs:
+            post_conv = conv(post_conv, edge_index)
+        return post_conv
+
+
 class GIN_2l(GNNBasic):
 
     def __init__(self, model_level, dim_node, dim_hidden, num_classes):
@@ -258,6 +281,13 @@ class GIN_2l(GNNBasic):
 
         out = self.ffn(out_readout)
         return out
+
+    def get_emb(self, *args, **kwargs) -> torch.Tensor:
+        x, edge_index, batch = self.arguments_read(*args, **kwargs)
+        post_conv = self.conv1(x, edge_index)
+        for conv in self.convs:
+            post_conv = conv(post_conv, edge_index)
+        return post_conv
 
 
 class GCNConv(gnn.GCNConv):
@@ -401,6 +431,7 @@ class GINConv(gnn.GINConv):
 class GNNPool(nn.Module):
     def __init__(self):
         super().__init__()
+
 
 class GlobalMeanPool(GNNPool):
 

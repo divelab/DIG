@@ -9,6 +9,7 @@ from torch import Tensor
 from textwrap import wrap
 from functools import partial
 from collections import Counter
+import torch.nn.functional as F
 from typing import List, Tuple, Dict
 from torch_geometric.data import Batch, Data
 from torch_geometric.utils import to_networkx
@@ -482,31 +483,35 @@ class SubgraphX(object):
     The implementation of paper
     `On Explainability of Graph Neural Networks via Subgraph Explorations <https://arxiv.org/abs/2102.05152>`_.
     Args:
-        model (:obj:`torch.nn.Module`): The
-        num_classes(:obj:`int`):
-        num_hops(:obj:`int`, :obj:`None`):
-        explain_graph(:obj:`bool`):
-        rollout(:obj:`int`)
-        min_atoms(:obj:`int`)
-        c_puct(:obj:`float`)
-        expand_atoms(:obj:`int`)
-        high2low(:obj:`bool`)
-        local_radius(:obj:`int`)
-        sample_num(:obj:`int`)
-        reward_method(:obj:`str`)
-        subgraph_building_method(:obj:`str`)
-        save_dir(:obj:`str`, :obj:`None`)
-        filename(:obj:`str`)
-        vis(:obj:`bool`)
+        model (:obj:`torch.nn.Module`): The target model prepared to explain
+        num_classes(:obj:`int`): Number of classes for the datasets
+        num_hops(:obj:`int`, :obj:`None`): The number of hops to extract neighborhood of target node
+          (default: :obj:`None`)
+        explain_graph(:obj:`bool`): Whether to explain graph classification model (default: :obj:`True`)
+        rollout(:obj:`int`): Number of iteration to get the prediction
+        min_atoms(:obj:`int`): Number of atoms of the leaf node in search tree
+        c_puct(:obj:`float`): The hyperparameter which encourages the exploration
+        expand_atoms(:obj:`int`): The number of atoms to expand
+          when extend the child nodes in the search tree
+        high2low(:obj:`bool`): Whether to expand children nodes from high degree to low degree when
+          extend the child nodes in the search tree (default: :obj:`False`)
+        local_radius(:obj:`int`): Number of local radius to calculate :obj:`l_shapley`, :obj:`mc_l_shapley`
+        sample_num(:obj:`int`): Sampling time of monte carlo sampling approximation for
+          :obj:`mc_shapley`, :obj:`mc_l_shapley` (default: :obj:`mc_l_shapley`)
+        reward_method(:obj:`str`): The command string to select the
+        subgraph_building_method(:obj:`str`): The command string for different subgraph building method,
+          such as :obj:`zero_filling`, :obj:`split` (default: :obj:`zero_filling`)
+        save_dir(:obj:`str`, :obj:`None`): Root directory to save the explanation results (default: :obj:`None`)
+        filename(:obj:`str`): The filename of results
+        vis(:obj:`bool`): Whether to show the visualization (default: :obj:`True`)
 
     Example::
         >>> # For graph classification task
         >>> subgraphx = SubgraphX(model=model, num_classes=2)
-        >>> subgraphx.explain_graph()
-        >>> pass
+        >>> _, explanation_results, related_preds = subgraphx(x, edge_index)
 
     """
-    def __init__(self, model, num_classes: int, num_hops: Optional[int] = None, explain_graph: bool = True,
+    def __init__(self, model, num_classes: int, device, num_hops: Optional[int] = None, explain_graph: bool = True,
                  rollout: int = 10, min_atoms: int = 3, c_puct: float = 10.0, expand_atoms=14,
                  high2low=False, local_radius=4, sample_num=100, reward_method='mc_l_shapley',
                  subgraph_building_method='zero_filling', save_dir: Optional[str] = None,
@@ -514,9 +519,10 @@ class SubgraphX(object):
 
         self.model = model
         self.model.eval()
+        self.device = device
+        self.model.to(self.device)
         self.num_classes = num_classes
         self.num_hops = self.update_num_hops(num_hops)
-        self.device = self.model.device
         self.explain_graph = explain_graph
 
         # mcts hyper-parameters
@@ -539,7 +545,6 @@ class SubgraphX(object):
         self.save = True if self.save_dir is not None else False
 
     def update_num_hops(self, num_hops):
-        """ return the number of layers of GNN model """
         if num_hops is not None:
             return num_hops
 
@@ -576,16 +581,6 @@ class SubgraphX(object):
                     expand_atoms=self.expand_atoms,
                     high2low=self.high2low)
 
-    def get_prediction(self, x: Tensor, edge_index: Tensor, **kwargs):
-        data = Data(x=x, edge_index=edge_index)
-        _, probs, _ = self.model(Batch.from_data_list([data.clone()]))
-        node_idx = kwargs.get('node_idx')
-        if self.explain_graph:
-            return probs.squeeze().argmax(-1)
-        else:
-            assert node_idx is not None, " please input the node idx "
-            return probs.squeeze()[node_idx].argmax(-1)
-
     def visualization(self, explanation_results: list, prediction: Union[int, Tensor],
                       max_nodes: int, plot_utils: object, words: Union[None, list] = None,
                       vis_name: Optional[str] = None):
@@ -607,8 +602,21 @@ class SubgraphX(object):
                             x=tree_node_x.data.x,
                             figname=vis_name)
 
-    def forward(self, x: Tensor, edge_index: Tensor, **kwargs)\
+    def __call__(self, x: Tensor, edge_index: Tensor, **kwargs)\
             -> Tuple[None, List, List[Dict]]:
+        r""" explain the GNN behavior for the graph using SubgraphX method
+        Args:
+            x (:obj:`torch.Tensor`): Node feature matrix with shape
+              :obj:`[num_nodes, dim_node_feature]`
+            edge_index (:obj:`torch.Tensor`): Graph connectivity in COO format
+              with shape :obj:`[2, num_edges]`
+            kwargs(:obj:`Dict`):
+              The additional parameters
+                - node_idx (:obj:`int`, :obj:`None`): The target node index when explain node classification task
+                - max_nodes (:obj:`int`, :obj:`None`): The number of nodes in the final explanation results
+
+        :rtype: (:obj:`None`, List[torch.Tensor], List[Dict])
+        """
         node_idx = kwargs.get('node_idx')
         max_nodes = kwargs.get('max_nodes')
         max_nodes = 14 if max_nodes is None else max_nodes # default max subgraph size
@@ -616,8 +624,8 @@ class SubgraphX(object):
         # collect all the class index
         labels = tuple(label for label in range(self.num_classes))
         ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
-        data = Data(x=x, edge_index=edge_index)
-        _, probs, _ = self.model(Batch.from_data_list([data.clone()]))
+        logits = self.model(x, edge_index)
+        probs = F.softmax(logits, dim=-1)
         probs = probs.squeeze()
         explanation_results = []
         related_preds = []
@@ -633,14 +641,14 @@ class SubgraphX(object):
                 # l sharply score
                 data = Data(x=x, edge_index=edge_index)
                 tree_node_x = find_closest_node_result(results, max_nodes=max_nodes)
-                masked_node_list = [node for node in range(tree_node_x.data.x.shape[0])
-                                    if node not in tree_node_x.coalition]
-                masked_pred = gnn_score(masked_node_list, data, value_func,
-                                        subgraph_building_method='zero_filling')
+                maskout_node_list = [node for node in range(tree_node_x.data.x.shape[0])
+                                     if node not in tree_node_x.coalition]
+                maskout_pred = gnn_score(maskout_node_list, data, value_func,
+                                         subgraph_building_method='zero_filling')
                 sparsity_score = 1 - len(tree_node_x.coalition) / tree_node_x.ori_graph.number_of_nodes()
 
                 explanation_results.append(results)
-                related_preds.append({'masked': masked_pred,
+                related_preds.append({'masked': maskout_pred,
                                       'origin': probs[label],
                                       'sparsity': sparsity_score})
         else:
@@ -657,21 +665,21 @@ class SubgraphX(object):
 
                 tree_node_x = find_closest_node_result(results, max_nodes=max_nodes)
                 original_node_list = [node for node in tree_node_x.ori_graph.nodes]
-                masked_node_list = [node for node in range(tree_node_x.data.x.shape[0])
+                maskout_node_list = [node for node in range(tree_node_x.data.x.shape[0])
                                     if node not in tree_node_x.coalition]
                 original_score = gnn_score(original_node_list,
                                            tree_node_x.data,
                                            value_func=value_func,
                                            subgraph_building_method='zero_filling')
-                masked_score = gnn_score(masked_node_list,
+                maskout_score = gnn_score(maskout_node_list,
                                          tree_node_x.data,
                                          value_func=value_func,
                                          subgraph_building_method='zero_filling')
-                masked_pred = original_score - masked_score
+                maskout_pred = original_score - maskout_score
                 sparsity_score = 1 - len(tree_node_x.coalition) / tree_node_x.ori_graph.number_of_nodes()
 
                 explanation_results.append(results)
-                related_preds.append({'masked': masked_pred,
+                related_preds.append({'maskout': maskout_pred,
                                       'origin': probs[label],
                                       'sparsity': sparsity_score})
 
