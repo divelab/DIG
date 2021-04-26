@@ -86,17 +86,18 @@ class GraphAF(Generator):
                 torch.save(self.model.state_dict(), os.path.join(self.out_path, 'rand_gen_ckpt_{}.pth'.format(epoch)))
 
 
-    def run_rand_gen(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature= 0.75, atomic_num_list=[6, 7, 8, 9]):
+    def run_rand_gen(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature=0.75, atomic_num_list=[6, 7, 8, 9]):
         r"""
             Running graph generation for random generation task.
             
             Args:
                 model_conf_dict (dict): The python dict for configuring the model hyperparameters.
                 checkpoint_path (str): The path to the saved model checkpoint file.
-                n_mols (int, optional): The number of molecules to generate.
-                num_max_node (int, optional): The maximum number of nodes in the generated molecular graphs.
-                temperature (float, optional): A float numbers, the temperature parameter of prior distribution.
-                atomic_num_list (list, optional): A list of integers, the list of atomic numbers indicating the node types in the generated molecular graphs.
+                n_mols (int, optional): The number of molecules to generate. (default: :obj:`100`)
+                num_min_node (int, optional): The minimum number of nodes in the generated molecular graphs. (default: :obj:`7`)
+                num_max_node (int, optional): The maximum number of nodes in the generated molecular graphs. (default: :obj:`25`)
+                temperature (float, optional): A float numbers, the temperature parameter of prior distribution. (default: :obj:`0.75`)
+                atomic_num_list (list, optional): A list of integers, the list of atomic numbers indicating the node types in the generated molecular graphs. (default: :obj:`[6, 7, 8, 9]`)
             
             :rtype:
                 (all_mols, pure_valids),
@@ -168,18 +169,18 @@ class GraphAF(Generator):
         print("Finetuning (Reinforce) Finished!")
     
 
-    def run_prop_optim(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):
+    def run_prop_optim(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature=0.75, atomic_num_list=[6, 7, 8, 9]):
         r"""
             Running graph generation for property optimization task.
             
             Args:
                 model_conf_dict (dict): The python dict for configuring the model hyperparameters.
                 checkpoint_path (str): The path to the saved model checkpoint file.
-                n_mols (int, optional): The number of molecules to generate.
-                num_min_node (int, optional): The minimum number of nodes in the generated molecular graphs.
-                num_max_node (int, optional): The maximum number of nodes in the generated molecular graphs.
-                temperature (float, optional): A float numbers, the temperature parameter of prior distribution.
-                atomic_num_list (list, optional): A list of integers, the list of atomic numbers indicating the node types in the generated molecular graphs.
+                n_mols (int, optional): The number of molecules to generate. (default: :obj:`100`)
+                num_min_node (int, optional): The minimum number of nodes in the generated molecular graphs. (default: :obj:`7`)
+                num_max_node (int, optional): The maximum number of nodes in the generated molecular graphs. (default: :obj:`25`)
+                temperature (float, optional): A float numbers, the temperature parameter of prior distribution. (default: :obj:`0.75`)
+                atomic_num_list (list, optional): A list of integers, the list of atomic numbers indicating the node types in the generated molecular graphs. (default: :obj:`[6, 7, 8, 9]`)
             
             :rtype:
                 all_mols, a list of generated molecules represented by rdkit Chem.Mol objects.
@@ -261,12 +262,8 @@ class GraphAF(Generator):
         print("Finetuning (Reinforce) Finished!")
     
 
-    def run_cons_optim_one_mol(self, adj, x, org_smile, mol_size, bfs_perm_origin, max_size_rl=38, temperature=[0.3,0.3], atom_list=[6, 7, 8, 9]):
-        """
-        direction: score ascent direction
-        adj: adjacent matrix of origin mol (1, 4, N, N)
-        x: node feature of origin mol (1, N, 9)
-        """
+    def run_cons_optim_one_mol(self, adj, x, org_smile, mol_size, bfs_perm_origin, max_size_rl=38, temperature=0.70, atom_list=[6, 7, 8, 9]):
+        
         best_mol0 = None
         best_mol2 = None
         best_mol4 = None
@@ -324,11 +321,11 @@ class GraphAF(Generator):
                 dataset: The dataset class for loading molecules to be optimized. It is supposed to use dig.ggraph.dataset.ZINC800 as the dataset class.
                 model_conf_dict (dict): The python dict for configuring the model hyperparameters.
                 checkpoint_path (str): The path to the saved model checkpoint file.
-                repeat_time (int, optional): The maximum number of optimization times for each molecule before successfully optimizing it under the threshold 0.6.
-                min_optim_time (int, optional): The minimum number of optimization times for each molecule.
-                num_max_node (int, optional): The maximum number of nodes in the optimized molecular graphs.
-                temperature (float, optional): A float numbers, the temperature parameter of prior distribution.
-                atomic_num_list (list, optional): A list of integers, the list of atomic numbers indicating the node types in the optimized molecular graphs.
+                repeat_time (int, optional): The maximum number of optimization times for each molecule before successfully optimizing it under the threshold 0.6.  (default: :obj:`200`)
+                min_optim_time (int, optional): The minimum number of optimization times for each molecule. (default: :obj:`50`)
+                num_max_node (int, optional): The maximum number of nodes in the optimized molecular graphs. (default: :obj:`25`)
+                temperature (float, optional): A float numbers, the temperature parameter of prior distribution. (default: :obj:`0.75`)
+                atomic_num_list (list, optional): A list of integers, the list of atomic numbers indicating the node types in the optimized molecular graphs. (default: :obj:`[6, 7, 8, 9]`)
             
             :rtype:
                 (mols_0, mols_2, mols_4, mols_6), they are lists of optimized molecules (represented by rdkit Chem.Mol objects) under the threshold 0.0, 0.2, 0.4, 0.6, respectively.
