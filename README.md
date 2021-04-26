@@ -37,10 +37,10 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
 
 It includes unified implementations of **data interfaces**, **common algorithms**, and **evaluation metrics** for several advanced tasks. Our goal is to enable researchers to easily implement and benchmark algorithms. Currently, we consider the following research directions.
 
-* **Graph Generation**
-* **Self-supervised Learning on Graphs**
-* **Explainability of Graph Neural Networks**
-* **Deep Learning on 3D Graphs**
+* **Graph Generation**: `ggraph`
+* **Self-supervised Learning on Graphs**: `sslgraph`
+* **Explainability of Graph Neural Networks**: `xgraph`
+* **Deep Learning on 3D Graphs**: `3dgraph`
 
 
 
@@ -94,7 +94,7 @@ python setup.py install
 
 ## Usage
 
-We provide [benchmark implementations](https://github.com/divelab/DIG/tree/dig/benchmarks) as examples to use *DIG*. For details of all included APIs, please refer to the [documentation](https://diveintographs.readthedocs.io/).
+We provide [benchmark implementations](https://github.com/divelab/DIG/tree/dig/benchmarks) as examples to use APIs provided in *DIG*. For details of all included APIs, please refer to the [documentation](https://diveintographs.readthedocs.io/).
 
 ## Contributing
 
