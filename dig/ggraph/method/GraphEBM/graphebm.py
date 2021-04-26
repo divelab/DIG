@@ -16,9 +16,8 @@ from .util import rescale_adj, requires_grad, clip_grad
 
 class GraphEBM(Generator):
     r"""
-        The method class for GraphEBM algorithm. This class provides interfaces for running random generation, goal-directed generation (including property
-        optimization and constrained optimization), and compositional generation with GraphEBM algorithm. Please refer to the paper `GraphEBM: Molecular Graph Generation with Energy-Based Models <https://arxiv.org/abs/2102.00546>`_ 
-        for details and `benchmark codes <https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphEBM>`_ for usage examples.
+        The method class for GraphEBM algorithm proposed in the paper `GraphEBM: Molecular Graph Generation with Energy-Based Models <https://arxiv.org/abs/2102.00546>`_. This class provides interfaces for running random generation, goal-directed generation (including property
+        optimization and constrained optimization), and compositional generation with GraphEBM algorithm. Please refer to the `benchmark codes <https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphEBM>`_ for usage examples.
         
         Args:
             n_atom (int): Maximum number of atoms.
