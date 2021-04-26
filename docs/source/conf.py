@@ -95,7 +95,6 @@ def setup(app):
         members = [
             '__init__',
             '__repr__',
-            '__call__',
             '__weakref__',
             '__dict__',
             '__module__',

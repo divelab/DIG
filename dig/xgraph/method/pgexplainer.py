@@ -274,7 +274,7 @@ class PGExplainer(nn.Module):
               with shape :obj:`[2, num_edges]`
             y (:obj:`torch.Tensor`, :obj:`None`): Node label matrix with shape :obj:`[num_nodes]`
               (default :obj:`None`)
-            kwargs(:obj:`Dict`, :obj:`None`)
+            kwargs(:obj:`Dict`, :obj:`None`): Additional parameters
 
         :rtype: (:class:`torch.Tensor`, :class:`torch.Tensor`, :class:`torch.Tensor`,
           :obj:`List`, :class:`Dict`)
@@ -468,9 +468,10 @@ class PGExplainer(nn.Module):
               :obj:`[num_nodes, dim_node_feature]`
             edge_index (:obj:`torch.Tensor`): Graph connectivity in COO format
               with shape :obj:`[2, num_edges]`
-            kwargs(:obj:`Dict`)
-                - top_k (:obj:`float`): The number of edges in the final explanation results
-                - y (:obj`torch.Tensor`): The groundtrue labels
+            kwargs(:obj:`Dict`):
+              The additional parameters
+                - top_k (:obj:`int`): The number of edges in the final explanation results
+                - y (:obj:`torch.Tensor`): The ground-truth labels
 
         :rtype: (:obj:`None`, List[torch.Tensor], List[Dict])
         """
