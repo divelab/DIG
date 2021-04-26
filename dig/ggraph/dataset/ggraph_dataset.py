@@ -19,7 +19,7 @@ zinc_atom_list = [6, 7, 8, 9, 15, 16, 17, 35, 53]
 qm9_atom_list = [6, 7, 8, 9]
 
 class QM9(PygDataset):
-    r"""A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`QM9` dataset. The :obj:`QM9` dataset from `"MoleculeNet: A Benchmark for Molecular Machine Learning" <https://arxiv.org/abs/1703.00564>`_ paper, consisting of about 130,000 molecules with 2 property optimization targets: :obj:`penalized_logp` and :obj:`qed`.
+    r"""A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`QM9` dataset which is from `"MoleculeNet: A Benchmark for Molecular Machine Learning" <https://arxiv.org/abs/1703.00564>`_ paper and connsists of about 130,000 molecules with 2 property optimization targets: :obj:`penalized_logp` and :obj:`qed`.
     
     Args:
         root (string, optional): Root directory where the dataset should be saved.
@@ -49,7 +49,7 @@ class QM9(PygDataset):
         
         
 class ZINC250k(PygDataset):
-    r"""A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`ZINC250k` dataset. The ZINC dataset from the `ZINC database <https://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559>`_ and the `"Automatic Chemical Design Using a Data-Driven Continuous Representation of Molecules" <https://arxiv.org/abs/1610.02415>`_ paper, containing about 250,000 molecular graphs with up to 38 heavy atoms.
+    r"""A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`ZINC250k` dataset which comes from the `ZINC database <https://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559>`_ and the `"Automatic Chemical Design Using a Data-Driven Continuous Representation of Molecules" <https://arxiv.org/abs/1610.02415>`_ paper and contains about 250,000 molecular graphs with up to 38 heavy atoms.
     
     Args:
         root (string, optional): Root directory where the dataset should be saved.
@@ -104,7 +104,7 @@ class ZINC250k(PygDataset):
         
 
 class ZINC800(PygDataset):
-    r"""A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`ZINC800` dataset. The :obj:`ZINC800` dataset contains 800 selected molecules with lowest penalized logP scores, while method :obj:`jt` selects from the test set and :obj:`graphaf` selects from the train set.
+    r"""A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`ZINC800` dataset which contains 800 selected molecules with lowest penalized logP scores. While method :obj:`jt` selects from the test set and :obj:`graphaf` selects from the train set.
     
     Args:
         root (string, optional): Root directory where the dataset should be saved. 
@@ -144,7 +144,7 @@ class ZINC800(PygDataset):
                                   processed_filename, use_aug, one_shot)
         
 class MOSES(PygDataset):
-    r"""A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`MOSES` dataset. The MOSES dataset from the paper `"Molecular Sets (MOSES): A Benchmarking Platform for Molecular Generation Models" <https://arxiv.org/abs/1811.12823>`_, containing 4,591,276 molecules refined from the ZINC database.
+    r"""A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`MOSES` dataset which is from the paper `"Molecular Sets (MOSES): A Benchmarking Platform for Molecular Generation Models" <https://arxiv.org/abs/1811.12823>`_ and contains 4,591,276 molecules refined from the ZINC database.
     
     Args:
         root (string, optional): Root directory where the dataset should be saved.
