@@ -205,6 +205,23 @@ class update_u(torch.nn.Module):
 
 
 class dimenetpp(torch.nn.Module):
+    r"""
+        The continuous-filter convolutional neural network SchNet from the `"SchNet: A Continuous-filter Convolutional Neural Network for Modeling Quantum Interactions" <https://arxiv.org/abs/1706.08566>`_ paper
+        
+        Args:
+        energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces.
+            (default: :obj:`False`)
+        num_layers (int, optional): The number of layers.
+            (default: :obj:`6`)
+        hidden_channels (int, optional): Hidden embedding size.
+            (default: :obj:`128`)
+        num_filters (int, optional): The number of filters to use.
+            (default: :obj:`128`)
+        num_gaussians (int, optional): The number of gaussians :math:`\mu`.
+            (default: :obj:`50`)
+        cutoff (float, optional): Cutoff distance for interatomic interactions.
+            (default: :obj:`10.0`).
+    """
     def __init__(
         self, energy_and_force, cutoff, num_layers, 
         hidden_channels, out_channels, int_emb_size, basis_emb_size, out_emb_channels, 
