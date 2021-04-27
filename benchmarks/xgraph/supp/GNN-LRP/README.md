@@ -28,8 +28,8 @@ $ git clone git@github.com:divelab/DIG.git (or directly clone the xgraph directo
 $ cd DIG/dig/xgraph/GNN-LRP
 $ source ./install.bash
 ```
-Download [Datasets](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EdH7QVBBghBBgmMgf0_UZSAByxkMa3AvRdH7_QwD9MUfrw?e=EN3JiS) to `xgraph/datasets/`, then
-download [pre-trained models](https://mailustceducn-my.sharepoint.com/:u:/g/personal/agnesgsr_mail_ustc_edu_cn/EZklsgM56i5EtCKeeEpTTLIBNpDvDNB-zol6ROXBngPsZg?e=20IBOg) to `xgraph/GNN-LRP/`
+Download [Datasets](https://drive.google.com/file/d/11a-KP_EUH6sgJ5gTC4LZeR_N9SISMWn2/view?usp=sharing) to `xgraph/datasets/`, then
+download [pre-trained models](https://drive.google.com/file/d/10GnOkvfp-VMWWtPTOE1uVwE7YiLdvOx-/view?usp=sharing) to `xgraph/GNN-LRP/`
 ```shell script
 $ cd GNN-LRP 
 $ unzip ../datasets/datasets.zip -d ../datasets/
