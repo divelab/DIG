@@ -1,6 +1,10 @@
 .idea/
+.vscode/
 dig/xgraph/checkpoint/
 dig/xgraph/dataset/
 dig/xgraph/results/
+benchmarks/xgraph/datasets/
+benchmarks/xgraph/checkpoints/
+benchmarks/xgraph/.ipynb_checkpoints/
 **/__pycache__/
 docs/build/

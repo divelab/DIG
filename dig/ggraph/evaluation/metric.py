@@ -16,7 +16,7 @@ class Rand_Gen_Evaluator:
         r"""Run evaluation in random generation task. Compute the validity ratio, uniqueness ratio and novelty ratio of generated molecules (all represented in percentage).
 
         Args:
-            input_dict (dict): a python dict with the following items:
+            input_dict (dict): A python dict with the following items:
                 "mols" --- the list of generated molecules reprsented by rdkit Chem.RWMol or Chem.Mol objects;
                 "train_smiles" --- the list of SMILES strings used for training.
             
@@ -52,8 +52,8 @@ class Prop_Optim_Evaluator:
     Evaluator for property optimization task. Metric is top-3 property scores among generated molecules.
 
     Args:
-        prop_name (str): a string indicating the name of the molecular property, use 'plogp' for penalized logP or 'qed' for 
-            Quantitative Estimate of Druglikeness (QED).
+        prop_name (str): A string indicating the name of the molecular property, use 'plogp' for penalized logP or 'qed' for 
+            Quantitative Estimate of Druglikeness (QED). (default: :obj:`plogp`)
     """
 
     def __init__(self, prop_name='plogp'):
@@ -64,7 +64,7 @@ class Prop_Optim_Evaluator:
         r""" Run evaluation in property optimization task. Find top-3 molucules which have highest property scores.
         
         Args:
-            input_dict (dict): a python dict with the following items:
+            input_dict (dict): A python dict with the following items:
                 "mols" --- a list of generated molecules reprsented by rdkit Chem.Mol or Chem.RWMol objects.
             
         :rtype: :class:`dict` (a python dict with the following items:
@@ -103,7 +103,7 @@ class Cons_Optim_Evaluator:
         r""" Run evaluation in constrained optimization task. Compute the average property improvements, similarities and success rates under the similarity threshold 0.0, 0.2, 0.4, 0.6.
         
         Args:
-            input_dict (dict): a python dict with the following items:
+            input_dict (dict): A python dict with the following items:
                 "mols_0", "mols_2", "mols_4", "mols_6" --- the list of optimized molecules under the similarity threshold 0.0, 0.2, 0.4, 0.6, all represented by rdkit Chem.RWMol or Chem.Mol objects;
                 "inp_smiles" --- the list of SMILES strings of input molecules to be optimized.
             

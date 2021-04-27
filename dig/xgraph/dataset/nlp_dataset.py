@@ -78,7 +78,7 @@ def read_sentigraph_data(folder: str, prefix: str):
 
 class SentiGraphDataset(InMemoryDataset):
     r"""
-    The SentiGraph datasets from `Explainability in Graph Neural Networks:A Taxonomic Survey
+    The SentiGraph datasets from `Explainability in Graph Neural Networks: A Taxonomic Survey
     <https://arxiv.org/abs/2012.15445>`_.
     The datasets take pretrained BERT as node feature extractor
     and dependency tree as edges to transfer the text sentiment datasets into

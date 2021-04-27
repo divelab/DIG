@@ -17,10 +17,10 @@ def convert_radical_electrons_to_hydrogens(mol):
     use this if molecule is valid. Return a new mol object.
 
     Args:
-        mol: rdkit mol object
+        mol: Rdkit mol object
 
     :rtype:
-        rdkit mol object
+        Rdkit mol object
     """
 
     m = copy.deepcopy(mol)
@@ -42,7 +42,7 @@ def check_chemical_validity(mol):
     not modified. Radicals pass this test.
 
     Args:
-        mol: rdkit mol object
+        mol: Rdkit mol object
     
     :rtype:
         :class:`bool`, True if chemically valid, False otherwise
@@ -62,7 +62,7 @@ def check_valency(mol):
     valency.
 
     Args:
-        mol: rdkit mol object
+        mol: Rdkit mol object
 
     :rtype:
         :class:`bool`, True if no valency issues, False otherwise
@@ -84,7 +84,7 @@ def penalized_logp(mol):
     statistics of 250k_rndm_zinc_drugs_clean.smi dataset.
 
     Args:
-        mol: rdkit mol object
+        mol: Rdkit mol object
     
     :rtype:
         :class:`float`
@@ -128,7 +128,7 @@ def calculate_min_plogp(mol):
     statistics of 250k_rndm_zinc_drugs_clean.smi dataset.
 
     Args:
-        mol: rdkit mol object
+        mol: Rdkit mol object
     
     :rtype:
         :class:`float`
@@ -153,12 +153,12 @@ def steric_strain_filter(mol, cutoff=0.82, max_attempts_embed=20, max_num_iters=
     angle bend strain energy of molecule
 
     Args:
-        mol: rdkit mol object
-        cutoff (float): kcal/mol per angle . If minimized energy is above this
-            threshold, then molecule fails the steric strain filter.
-        max_attempts_embed (int): number of attempts to generate initial 3d
-            coordinates.
-        max_num_iters (int): number of iterations of forcefield minimization.
+        mol: Rdkit mol object
+        cutoff (float, optional): Kcal/mol per angle . If minimized energy is above this
+            threshold, then molecule fails the steric strain filter. (default: :obj:`0.82`)
+        max_attempts_embed (int, optional): Number of attempts to generate initial 3d
+            coordinates. (default: :obj:`20`)
+        max_num_iters (int, optional): Number of iterations of forcefield minimization. (default: :obj:`200`)
 
     :rtype:
         :class:`bool`, True if molecule could be successfully minimized, and resulting
@@ -254,7 +254,7 @@ def zinc_molecule_filter(mol):
     http://blaster.docking.org/filtering/rules_default.txt.
 
     Args:
-        mol: rdkit mol object
+        mol: Rdkit mol object
     
     :rtype:
         :class:`bool`, returns True if molecule is okay (ie does not match any of
@@ -273,8 +273,8 @@ def reward_target_molecule_similarity(mol, target, radius=2, nBits=2048,
     between the ECFP fingerprints of the x molecule and target molecule.
 
     Args:
-        mol: rdkit mol object
-        target: rdkit mol object
+        mol: Rdkit mol object
+        target: Rdkit mol object
     
     :rtype:
         :class:`float`, [0.0, 1.0]

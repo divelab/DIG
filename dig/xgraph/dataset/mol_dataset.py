@@ -65,20 +65,19 @@ e_map = {
 
 class MoleculeDataset(InMemoryDataset):
     r"""
-    .. _MoleculeNet: http://moleculenet.ai/datasets-1
-    .. _MUTAG: https://pubs.acs.org/doi/10.1021/jm00106a046
+    The extension of MoleculeNet with `MUTAG <https://pubs.acs.org/doi/10.1021/jm00106a046>`_.
 
-    The extension of MoleculeNet_ with MUTAG_.
-    The `MoleculeNet `_ benchmark
-    collection  from the `"MoleculeNet: A Benchmark for Molecular Machine
-    Learning" <https://arxiv.org/abs/1703.00564>`_ paper, containing datasets
-    from physical chemistry, biophysics and physiology.
-    All datasets come with the additional node and edge features introduced by
-    the `Open Graph Benchmark <https://ogb.stanford.edu/docs/graphprop/>`_.
+    The `MoleculeNet benchmark collection <http://moleculenet.ai/datasets-1>`_ from the
+    `MoleculeNet: A Benchmark for Molecular Machine Learning <https://arxiv.org/abs/1703.00564>`_
+    paper, containing datasets from physical chemistry, biophysics and physiology.
+
+    The MoleculeNet datasets come with the additional node and edge features introduced by
+    the `Open Graph Benchmark <https://ogb.stanford.edu/docs/graphprop/>`_, and the node features
+    in MUTAG dataset are one hot features denoting the atom types.
 
     Args:
         root (string): Root directory where the dataset should be saved.
-        name (string): The name of the dataset (:obj:`"ESOL"`,
+        name (string): The name of the dataset (:obj:`"MUTAG"`, :obj:`"ESOL"`,
             :obj:`"FreeSolv"`, :obj:`"Lipo"`, :obj:`"PCBA"`, :obj:`"MUV"`,
             :obj:`"HIV"`, :obj:`"BACE"`, :obj:`"BBPB"`, :obj:`"Tox21"`,
             :obj:`"ToxCast"`, :obj:`"SIDER"`, :obj:`"ClinTox"`).

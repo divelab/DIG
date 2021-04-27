@@ -7,14 +7,14 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="dive_into_graphs",
     version=__version__,
-    author="xxx",
-    author_email="xxx",
+    author="DIVE Lab@TAMU",
+    author_email="sji@tamu.edu",
     # entry_points={
     #     'console_scripts': [
     #         'dig=dig.xxx.xxx'
     #     ]
     # },
-#     maintainer="xxx",
+    maintainer="DIVE Lab@TAMU",
 #     maintainer_email="xxx",
     license="GPLv3",
 #     keywords="xxx",
@@ -25,7 +25,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU General Public License v3",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
     install_requires=['scipy',
