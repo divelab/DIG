@@ -37,10 +37,10 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
 
 It includes unified implementations of **data interfaces**, **common algorithms**, and **evaluation metrics** for several advanced tasks. Our goal is to enable researchers to easily implement and benchmark algorithms. Currently, we consider the following research directions.
 
-* **Graph Generation**: `ggraph`
-* **Self-supervised Learning on Graphs**: `sslgraph`
-* **Explainability of Graph Neural Networks**: `xgraph`
-* **Deep Learning on 3D Graphs**: `3dgraph`
+* **Graph Generation**: `dig.ggraph`
+* **Self-supervised Learning on Graphs**: `dig.sslgraph`
+* **Explainability of Graph Neural Networks**: `dig.xgraph`
+* **Deep Learning on 3D Graphs**: `dig.3dgraph`
 
 
 
@@ -53,7 +53,7 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 
 ## Installation
 
-### Install from pip
+### Install from pip (available soon)
 The key dependencies of DIG: Dive into Graphs are PyTorch (>=1.6.0), PyTorch Geometric (>=1.6.0), and RDKit.
 
 1. Install [PyTorch](https://pytorch.org/get-started/locally/) (>=1.6.0)
