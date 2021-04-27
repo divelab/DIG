@@ -94,7 +94,13 @@ python setup.py install
 
 ## Usage
 
-We provide [benchmark implementations](https://github.com/divelab/DIG/tree/dig/benchmarks) as examples to use APIs provided in *DIG*. For details of all included APIs, please refer to the [documentation](https://diveintographs.readthedocs.io/).
+For details of all included APIs, please refer to the [documentation](https://diveintographs.readthedocs.io/). We also provide [benchmark implementations](https://github.com/divelab/DIG/tree/dig/benchmarks) as examples to use APIs provided in *DIG*. You can get started with your interested directions by clicking the following links.
+
+* [Graph Generation](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph): [`JT-VAE`](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/JT-VAE), [`GraphAF`](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphAF), [`GraphDF`](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphDF), [`GraphEBM`](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphEBM).
+* [Self-supervised Learning on Graphs](https://github.com/divelab/DIG/tree/dig/benchmarks/sslgraph): [`InfoGraph`](https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_infograph.ipynb), [`GRACE`](https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_grace.ipynb), [`MVGRL`](https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_mvgrl.ipynb), [`GraphCL`](https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_graphcl.ipynb).
+* [Explainability of Graph Neural Networks](https://github.com/divelab/DIG/tree/dig/benchmarks/xgraph): [`DeepLIFT`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/deeplift.ipynb), [`GNN-LRP`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/gnn_lrp.ipynb), [`GNNExplainer`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/gnnexplainer.ipynb), [GradCAM](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/gradcam.ipynb), [`PGExplainer`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/pgexplainer.ipynb), [`SubgraphX`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/subgraphx.ipynb).
+* [Deep Learning on 3D Graphs](https://github.com/divelab/DIG/tree/dig/benchmarks/3dgraph): [`SchNet`](), [`DimeNet++`](), [`SphereNet`]().
+
 
 ## Contributing
 
