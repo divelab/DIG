@@ -13,7 +13,7 @@
 [contributor-image]:https://img.shields.io/github/contributors/divelab/DIG
 [contributor-url]:https://github.com/divelab/DIG/graphs/contributors
 [contributing-image]:https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
-[contributing-url]:https://diveintographs.readthedocs.io/en/latest/intro/introduction.html
+[contributing-url]:https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html
 
 
 ![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG)
@@ -80,6 +80,15 @@ conda install -y -c conda-forge rdkit
 
 ```shell script
 pip install dive-into-graphs
+```
+
+
+After installation, you can check the version. You have successfully installed DIG: Dive into Graphs if no error occurs.
+
+``` shell script
+$ python
+>>> from dig.version import __version__
+>>> print(__version__)
 ```
 
 ### Install from source
