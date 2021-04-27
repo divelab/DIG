@@ -1,7 +1,7 @@
 Datasets
 ======
-Dataset interfaces under :obj:`dig.3dgraph.dataset`.
+Dataset interfaces under :obj:`dig.threedgraph.dataset`.
 
-.. automodule:: dig.3dgraph.dataset
+.. automodule:: dig.threedgraph.dataset
     :members:
     :special-members:

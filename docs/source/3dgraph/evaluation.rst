@@ -1,8 +1,8 @@
 Evaluations
 ======
-Evaluation interfaces under :obj:`dig.3dgraph.evaluation`.
+Evaluation interfaces under :obj:`dig.threedgraph.evaluation`.
 
-.. automodule:: dig.3dgraph.evaluation
+.. automodule:: dig.threedgraph.evaluation
     :members:
     :special-members:
     :autosummary:

@@ -1,9 +1,9 @@
 Utils
 ======
 
-Utilities under :obj:`dig.3dgraph.utils`.
+Utilities under :obj:`dig.threedgraph.utils`.
 
-.. automodule:: dig.3dgraph.utils
+.. automodule:: dig.threedgraph.utils
     :members:
     :special-members:
     :autosummary:

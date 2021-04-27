@@ -1,9 +1,9 @@
 Methods
 ======
 
-Method classes under :obj:`dig.3dgraph.method`.
+Method classes under :obj:`dig.threedgraph.method`.
 
-.. automodule:: dig.3dgraph.method
+.. automodule:: dig.threedgraph.method
     :members:
     :special-members:
     :autosummary:
