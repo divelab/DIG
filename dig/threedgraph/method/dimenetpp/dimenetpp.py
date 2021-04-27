@@ -7,34 +7,31 @@ from torch_geometric.nn import radius_graph
 from torch_scatter import scatter
 from math import sqrt
 
-import sys
-sys.path.append('..')
-from utils import xyztodat
-from features import dist_emb, angle_emb, torsion_emb
+# import sys
+# sys.path.append('..')
+from ...utils import xyztoda
+from .features import dist_emb, angle_emb
 
 try:
     import sympy as sym
 except ImportError:
     sym = None
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 class emb(torch.nn.Module):
     def __init__(self, num_spherical, num_radial, cutoff, envelope_exponent):
         super(emb, self).__init__()
         self.dist_emb = dist_emb(num_radial, cutoff, envelope_exponent)
         self.angle_emb = angle_emb(num_spherical, num_radial, cutoff, envelope_exponent)
-        self.torsion_emb = torsion_emb(num_spherical, num_radial, cutoff, envelope_exponent)
         self.reset_parameters()
     
     def reset_parameters(self):
         self.dist_emb.reset_parameters()
 
-    def forward(self, dist, angle, torsion, idx_kj):
+    def forward(self, dist, angle, idx_kj):
         dist_emb = self.dist_emb(dist)
         angle_emb = self.angle_emb(dist, angle, idx_kj)
-        torsion_emb = self.torsion_emb(dist, angle, torsion, idx_kj)
-        return dist_emb, angle_emb, torsion_emb
+        return dist_emb, angle_emb
+
 
 class ResidualLayer(torch.nn.Module):
     def __init__(self, hidden_channels, act=swish):
@@ -72,7 +69,7 @@ class init(torch.nn.Module):
         glorot_orthogonal(self.lin_rbf_1.weight, scale=2.0)
 
     def forward(self, x, emb, i, j):
-        rbf,_,_ = emb
+        rbf,_ = emb
         x = self.emb(x)
         rbf0 = self.act(self.lin_rbf_0(rbf))
         e1 = self.act(self.lin(torch.cat([x[i], x[j], rbf0], dim=-1)))
@@ -90,8 +87,6 @@ class update_e(torch.nn.Module):
         self.lin_rbf2 = nn.Linear(basis_emb_size, hidden_channels, bias=False)
         self.lin_sbf1 = nn.Linear(num_spherical * num_radial, basis_emb_size, bias=False)
         self.lin_sbf2 = nn.Linear(basis_emb_size, int_emb_size, bias=False)
-        self.lin_t1 = nn.Linear(num_spherical * num_spherical * num_radial, basis_emb_size, bias=False)
-        self.lin_t2 = nn.Linear(basis_emb_size, int_emb_size, bias=False)
         self.lin_rbf = nn.Linear(num_radial, hidden_channels, bias=False)
 
         self.lin_kj = nn.Linear(hidden_channels, hidden_channels)
@@ -117,8 +112,6 @@ class update_e(torch.nn.Module):
         glorot_orthogonal(self.lin_rbf2.weight, scale=2.0)
         glorot_orthogonal(self.lin_sbf1.weight, scale=2.0)
         glorot_orthogonal(self.lin_sbf2.weight, scale=2.0)
-        glorot_orthogonal(self.lin_t1.weight, scale=2.0)
-        glorot_orthogonal(self.lin_t2.weight, scale=2.0)
 
         glorot_orthogonal(self.lin_kj.weight, scale=2.0)
         self.lin_kj.bias.data.fill_(0)
@@ -138,7 +131,7 @@ class update_e(torch.nn.Module):
         glorot_orthogonal(self.lin_rbf.weight, scale=2.0)
 
     def forward(self, x, emb, idx_kj, idx_ji):
-        rbf0, sbf, t = emb
+        rbf0, sbf = emb
         x1,_ = x
 
         x_ji = self.act(self.lin_ji(x1))
@@ -154,10 +147,6 @@ class update_e(torch.nn.Module):
         sbf = self.lin_sbf2(sbf)
         x_kj = x_kj[idx_kj] * sbf
 
-        t = self.lin_t1(t)
-        t = self.lin_t2(t)
-        x_kj = x_kj * t
-
         x_kj = scatter(x_kj, idx_ji, dim=0, dim_size=x1.size(0))
         x_kj = self.act(self.lin_up(x_kj))
 
@@ -169,7 +158,7 @@ class update_e(torch.nn.Module):
             e1 = layer(e1)
         e2 = self.lin_rbf(rbf0) * e1
 
-        return e1, e2
+        return e1, e2 
 
 
 class update_v(torch.nn.Module):
@@ -215,14 +204,14 @@ class update_u(torch.nn.Module):
         return u
 
 
-class spherenet(torch.nn.Module):
+class dimenetpp(torch.nn.Module):
     def __init__(
         self, energy_and_force, cutoff, num_layers, 
         hidden_channels, out_channels, int_emb_size, basis_emb_size, out_emb_channels, 
         num_spherical, num_radial, envelope_exponent=5, 
         num_before_skip=1, num_after_skip=2, num_output_layers=3, 
         act=swish, output_init='GlorotOrthogonal'):
-        super(spherenet, self).__init__()
+        super(dimenetpp, self).__init__()
 
         self.cutoff = cutoff
         self.energy_and_force = energy_and_force
@@ -236,7 +225,14 @@ class spherenet(torch.nn.Module):
             update_v(hidden_channels, out_emb_channels, out_channels, num_output_layers, act, output_init) for _ in range(num_layers)])
 
         self.update_es = torch.nn.ModuleList([
-            update_e(hidden_channels, int_emb_size, basis_emb_size, num_spherical, num_radial, num_before_skip, num_after_skip,act) for _ in range(num_layers)])
+            update_e(
+                hidden_channels, int_emb_size, basis_emb_size,
+                num_spherical, num_radial,
+                num_before_skip, num_after_skip,
+                act,
+            )
+            for _ in range(num_layers)
+        ])
 
         self.update_us = torch.nn.ModuleList([update_u() for _ in range(num_layers)])
 
@@ -258,9 +254,9 @@ class spherenet(torch.nn.Module):
             pos.requires_grad_()
         edge_index = radius_graph(pos, r=self.cutoff, batch=batch)
         num_nodes=z.size(0)
-        dist, angle, torsion, i, j, idx_kj, idx_ji = xyztodat(pos, edge_index, num_nodes)
+        dist, angle, i, j, idx_kj, idx_ji = xyztoda(pos, edge_index, num_nodes)
 
-        emb = self.emb(dist, angle, torsion, idx_kj)
+        emb = self.emb(dist, angle, idx_kj)
 
         #Initialize edge, node, graph features
         e = self.init_e(z, emb, i, j)

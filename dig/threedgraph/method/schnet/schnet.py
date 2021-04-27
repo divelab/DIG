@@ -1,7 +1,3 @@
-# Based on the code from: 
-# https://github.com/rusty1s/pytorch_geometric/blob/master/torch_geometric/nn/models/schnet.py
-
-
 import os
 from math import pi as PI
 import torch
