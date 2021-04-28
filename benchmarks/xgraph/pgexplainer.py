@@ -1,10 +1,11 @@
-from dig.xgraph.dataset import SynGraphDataset
-from dig.xgraph.models import *
+import os
 import torch
+import os.path as osp
+from dig.xgraph.models import *
+from dig.xgraph.dataset import SynGraphDataset
 from torch_geometric.data import DataLoader
 from torch_geometric.data import Data, InMemoryDataset, download_url, extract_zip
-import os.path as osp
-import os
+
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -13,6 +14,7 @@ def index_to_mask(index, size):
     mask = torch.zeros(size, dtype=torch.bool, device=index.device)
     mask[index] = 1
     return mask
+
 
 def split_dataset(dataset):
     indices = []
@@ -36,7 +38,8 @@ def split_dataset(dataset):
 
     return dataset
 
-dataset = SynGraphDataset('./datasets', 'BA_shapes')
+
+dataset = SynGraphDataset('./datasets', 'ba_2motifs')
 dataset.data.x = dataset.data.x.to(torch.float32)
 dataset.data.x = dataset.data.x[:, :1]
 # dataset.data.y = dataset.data.y[:, 2]
@@ -45,10 +48,10 @@ dim_edge = dataset.num_edge_features
 # num_targets = dataset.num_classes
 num_classes = dataset.num_classes
 
-splitted_dataset = split_dataset(dataset)
-splitted_dataset.data.mask = splitted_dataset.data.test_mask
-splitted_dataset.slices['mask'] = splitted_dataset.slices['train_mask']
-dataloader = DataLoader(splitted_dataset, batch_size=1, shuffle=False)
+# splitted_dataset = split_dataset(dataset)
+# splitted_dataset.data.mask = splitted_dataset.data.test_mask
+# splitted_dataset.slices['mask'] = splitted_dataset.slices['train_mask']
+# dataloader = DataLoader(splitted_dataset, batch_size=1, shuffle=False)
 
 
 def check_checkpoints(root='./'):
@@ -59,45 +62,99 @@ def check_checkpoints(root='./'):
     extract_zip(path, root)
     os.unlink(path)
 
-model = GCN_2l(model_level='node', dim_node=dim_node, dim_hidden=300, num_classes=num_classes)
+
+model = GCN_2l_mask(model_level='graph', dim_node=dim_node, dim_hidden=300, num_classes=num_classes)
 model.to(device)
 check_checkpoints()
 ckpt_path = osp.join('checkpoints', 'ba_shapes', 'GCN_2l', '0', 'GCN_2l_best.ckpt')
-model.load_state_dict(torch.load(ckpt_path)['state_dict'])
+# model.load_state_dict(torch.load(ckpt_path)['state_dict'])
 
 
 from dig.xgraph.method import PGExplainer
-explainer = PGExplainer(model, in_channels=600, device=device, explain_graph=False)
+explainer = PGExplainer(model, in_channels=600, device=device, explain_graph=True)
 
-explainer.train_explanation_network(splitted_dataset)
 
 # --- Create data collector and explanation processor ---
-from dig.xgraph.evaluation import XCollector, ExplanationProcessor
+from dig.xgraph.evaluation import XCollector
 x_collector = XCollector()
 
+data = dataset[0]
+
+from dig.xgraph.method.pgexplainer import PlotUtils
+plotutils = PlotUtils(dataset_name='ba_2motifs')
+
+
+# graph classification
+max_nodes = 5
 index = -1
-for i, data in enumerate(dataloader):
-    for j, node_idx in enumerate(torch.where(data.test_mask)[0].tolist()):
-        index += 1
-        print(f'explain graph {i} node {node_idx}')
-        data.to(device)
+for i, data in enumerate(dataset):
+    index += 1
+    print(f'explain graph {index}')
+    data.to(device)
 
-        if torch.isnan(data.y[0].squeeze()):
-            continue
+    if torch.isnan(data.y[0].squeeze()):
+        continue
 
-        walks, masks, related_preds = \
-            explainer(data.x, data.edge_index, node_idx=node_idx, y=data.y, top_k=10)
+    logits = model(data.x, data.edge_index)
+    prediction = logits.argmax(-1).item()
 
-        x_collector.collect_data(masks, related_preds)
-
-        # if you only have the edge masks without related_pred, please feed sparsity controlled mask to
-        # obtain the result: x_processor(data, masks, x_collector)
-        if index >= 99:
-            break
-
-    if index >= 99:
+    _, masks, related_preds = \
+        explainer(data.x, data.edge_index, max_nodes=max_nodes, y=data.y)
+    explainer.visualization(data, edge_mask=masks[0], top_k=5, plot_utils=plotutils)
+    x_collector.collect_data(masks, related_preds)
+    if index >= 20:
         break
-
 
 print(f'Fidelity: {x_collector.fidelity:.4f}\n'
       f'Sparsity: {x_collector.sparsity:.4f}')
+
+
+# node classification
+# # explainer.train_explanation_network(splitted_dataset)
+# torch.save(explainer.state_dict(), 'tmp.pt')
+# state_dict = torch.load('tmp.pt')
+# explainer.load_state_dict(state_dict)
+#
+# # --- Create data collector and explanation processor ---
+# from dig.xgraph.evaluation import XCollector, ExplanationProcessor
+# x_collector = XCollector()
+#
+# random_seed = 0
+# import random
+# import numpy as np
+# random.seed(random_seed)
+# np.random.seed(random_seed)
+# torch.manual_seed(random_seed)
+# torch.cuda.manual_seed_all(random_seed)
+#
+# node_indices = torch.where(dataset[0].test_mask * dataset[0].y != 0)[0].tolist()
+# from dig.xgraph.method.pgexplainer import PlotUtils
+# plotutils = PlotUtils(dataset_name='ba_shapes')
+# data = dataset[0]
+# node_idx = node_indices[6]
+# walks, masks, related_preds = \
+#     explainer(data.x, data.edge_index, node_idx=node_idx, y=data.y, top_k=5)
+#
+# explainer.visualization(data, edge_mask=masks[0], top_k=5, plot_utils=plotutils, node_idx=node_idx)
+#
+# index = -1
+# for i, data in enumerate(dataloader):
+#     for j, node_idx in enumerate(node_indices):
+#         index += 1
+#         print(f'explain graph {i} node {node_idx}')
+#         data.to(device)
+#
+#         walks, masks, related_preds = \
+#             explainer(data.x, data.edge_index, node_idx=node_idx, y=data.y, top_k=5)
+#
+#         x_collector.collect_data(masks, related_preds)
+#
+#         if index >= 99:
+#             break
+#
+#     if index >= 99:
+#         break
+#
+#
+# print(f'Fidelity: {x_collector.fidelity:.4f}\n'
+#       f'Sparsity: {x_collector.sparsity:.4f}')

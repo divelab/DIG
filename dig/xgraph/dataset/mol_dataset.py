@@ -266,7 +266,7 @@ class MoleculeDataset(InMemoryDataset):
                     perm = (edge_index[0] * x.size(0) + edge_index[1]).argsort()
                     edge_index, edge_attr = edge_index[:, perm], edge_attr[perm]
 
-                data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y,
+                data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y.squeeze(-1).type(torch.int64),
                             smiles=smiles)
 
                 if self.pre_filter is not None and not self.pre_filter(data):
