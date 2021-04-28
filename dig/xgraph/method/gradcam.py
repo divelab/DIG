@@ -38,7 +38,7 @@ EPS = 1e-15
 class GradCAM(WalkBase):
     r"""
     An implementation of GradCAM on graph in
-    `Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization <https://arxiv.org/abs/1610.02391>`_
+    `Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization <https://arxiv.org/abs/1610.02391>`_.
 
     Args:
         model (torch.nn.Module): The target model prepared to explain.

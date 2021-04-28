@@ -13,7 +13,7 @@ EPS = 1e-15
 class GNN_LRP(WalkBase):
     r"""
     An implementation of GNN-LRP in
-    `Higher-Order Explanations of Graph Neural Networks via Relevant Walks <https://arxiv.org/abs/2006.03589>`_
+    `Higher-Order Explanations of Graph Neural Networks via Relevant Walks <https://arxiv.org/abs/2006.03589>`_.
 
     Args:
         model (torch.nn.Module): The target model prepared to explain.

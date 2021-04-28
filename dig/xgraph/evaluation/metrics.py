@@ -136,6 +136,10 @@ class XCollector(object):
     def fidelity(self):
         r"""
         Return the Fidelity+ value according to collected data.
+
+        .. note::
+            Please refer to `Explainability in Graph Neural Networks: A Taxonomic Survey
+            <https://arxiv.org/abs/2012.15445>`_ for details.
         """
         if self.__fidelity:
             return self.__fidelity
@@ -152,6 +156,10 @@ class XCollector(object):
     def fidelity_inv(self):
         r"""
         Return the Fidelity- value according to collected data.
+
+        .. note::
+            Please refer to `Explainability in Graph Neural Networks: A Taxonomic Survey
+            <https://arxiv.org/abs/2012.15445>`_ for details.
         """
         if self.__fidelity_inv:
             return self.__fidelity_inv
@@ -257,7 +265,7 @@ class ExplanationProcessor(nn.Module):
 
     def forward(self, data, masks, x_collector: XCollector, **kwargs):
         r"""
-        Please refer to the main function here.
+        Please refer to the main function in `metric.py`.
         """
 
         data.to(self.device)

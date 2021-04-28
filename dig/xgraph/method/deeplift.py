@@ -11,7 +11,7 @@ EPS = 1e-15
 class DeepLIFT(WalkBase):
     r"""
     An implementation of DeepLIFT on graph in
-    `Learning Important Features Through Propagating Activation Differences <https://arxiv.org/abs/1704.02685>`_
+    `Learning Important Features Through Propagating Activation Differences <https://arxiv.org/abs/1704.02685>`_.
 
     Args:
         model (torch.nn.Module): The target model prepared to explain.
