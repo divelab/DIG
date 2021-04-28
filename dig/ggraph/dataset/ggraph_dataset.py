@@ -74,6 +74,15 @@ class ZINC250k(PygDataset):
     >>> data = next(iter(denseloader))
     >>> data
     Batch(adj=[32, 4, 38, 38], bfs_perm_origin=[32, 38], num_atom=[32, 1], smile=[32], x=[32, 38, 9], y=[32, 1])
+    
+    Where the attributes of the output data indicates:
+    * :obj:`x`: The node features.
+    * :obj:`y`: The property labels for the graph.
+    * :obj:`adj`: The edge features in the form of adjacent matrices.
+    * :obj:`batch`: The assignment vector which maps each node to its respective graph identifier and can help reconstructe single graphs
+    * :obj:`bfs_perm_origin`: The bfs-searching order for single graph
+    * :obj:`num_atom`: Number of atoms for each graph.
+    * :obj:`smile`: Original SMILE sequences for the graphs.
         
     The dataset object is provided with training-validation split indices :obj:`get_split_idx()`, a list for all atom types :obj:`atom_list`, and the maximum number of nodes (atoms) among all molecules :obj:`num_max_node`.
     
