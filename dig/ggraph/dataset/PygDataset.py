@@ -343,25 +343,27 @@ class PygDataset(InMemoryDataset):
         :rtype: A dictionary for training-validation split with key :obj:`train_idx` and :obj:`valid_idx`.
         """
         if self.name.find('zinc250k') != -1:
-            if not osp.exists('./raw/valid_idx_zinc250k.json'):
-                path = './raw/valid_idx_zinc250k.json'
+            path = os.path.join(self.root, 'raw/valid_idx_zinc250k.json')
+            
+            if not osp.exists(path):
                 url = 'https://raw.githubusercontent.com/divelab/DIG_storage/main/ggraph/valid_idx_zinc250k.json'
                 context = ssl._create_unverified_context()
                 data = urllib.request.urlopen(url, context=context)
                 with open(path, 'wb') as f:
                     f.write(data.read())
-            with open('./raw/valid_idx_zinc250k.json') as f:
+            with open(path) as f:
                 valid_idx = json.load(f)
                 
         elif self.name.find('qm9') != -1:
-            if not osp.exists('./raw/valid_idx_qm9.json'):
-                path = './raw/valid_idx_qm9.json'
+            path = os.path.join(self.root, '/raw/valid_idx_qm9.json')
+            
+            if not osp.exists(path):
                 url = 'https://raw.githubusercontent.com/divelab/DIG_storage/main/ggraph/valid_idx_qm9.json'
                 context = ssl._create_unverified_context()
                 data = urllib.request.urlopen(url, context=context)
                 with open(path, 'wb') as f:
                     f.write(data.read())
-            with open('./raw/valid_idx_qm9.json') as f:
+            with open(path) as f:
                 valid_idx = json.load(f)['valid_idxs']
                 valid_idx = list(map(int, valid_idx))
         else:
