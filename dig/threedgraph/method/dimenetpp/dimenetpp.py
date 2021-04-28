@@ -206,7 +206,7 @@ class update_u(torch.nn.Module):
 
 class dimenetpp(torch.nn.Module):
     r"""
-        The continuous-filter convolutional neural network SchNet from the `"SchNet: A Continuous-filter Convolutional Neural Network for Modeling Quantum Interactions" <https://arxiv.org/abs/1706.08566>`_ paper
+         The directional message passing neural network’s DimeNet from the `"Directional Message Passing for Molecular Graphs" <https://arxiv.org/abs/2003.03123>`_ paper
         
         Args:
         energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces.
