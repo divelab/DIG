@@ -107,7 +107,7 @@ class ShiftedSoftplus(torch.nn.Module):
 
 class schnet(torch.nn.Module):
     r"""
-        The continuous-filter convolutional neural network SchNet from the `"SchNet: A Continuous-filter Convolutional Neural Network for Modeling Quantum Interactions" <https://arxiv.org/abs/1706.08566>`_ paper
+        The continuous-filter convolutional neural network SchNet from the `"SchNet: A Continuous-filter Convolutional Neural Network for Modeling Quantum Interactions" <https://arxiv.org/abs/1706.08566>`_ paper.
         
         Args:
         energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces.
