@@ -217,39 +217,24 @@ class update_u(torch.nn.Module):
 
 class spherenet(torch.nn.Module):
     r"""
-         The spherical message passing neural network SphereNet from the `"Spherical Message Passing for 3D Graph Networks" <https://arxiv.org/abs/2102.05013>`_ paper.
+         The improved version of directional message passing neural network DimeNet++ from the `"Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules" <https://arxiv.org/abs/2011.14115>`_ paper.
         
         Args:
-        energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces.
-            (default: :obj:`False`)
-        cutoff (float, optional): Cutoff distance for interatomic interactions.
-            (default: :obj:`6.0`).
-        num_layers (int, optional): Number of building blocks.
-            (default: :obj:`6`)
-        hidden_channels (int, optional): Hidden embedding size.
-            (default: :obj:`128`)
-        out_channels (int, optional): Size of each output sample.
-            (default: :obj:`256`)
-        int_emb_size (int, optional): Embedding size used for interaction triplets.
-            (default: :obj:`64`)
-        basis_emb_size (int, optional): Embedding size used in the basis transformation.
-            (default: :obj:`8`)
-        out_emb_channels (int, optional): Embedding size used for atoms in the output block.
-            (default: :obj:`256`)
-        num_spherical (int, optional): Number of spherical harmonics.
-            (default: :obj:`7`)
-        num_radial (int, optional): Number of radial basis functions.
-            (default: :obj:`6`)
-        envelop_exponent (int, optional): Shape of the smooth cutoff.
-            (default: :obj:`5`)
-        num_before_skip (int, optional): Number of residual layers in the interaction blocks before the skip connection.
-            (default: :obj:`1`)
-        num_after_skip (int, optional): Number of residual layers in the interaction blocks before the skip connection.
-            (default: :obj:`2`)
-        num_output_layers (int, optional): Number of linear layers for the output blocks. 
-            (default: :obj:`3`)
-        act: (function, optional): The activation funtion.
-            (default: :obj:`swish`)  
+            energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)
+            cutoff (float, optional): Cutoff distance for interatomic interactions. (default: :obj:`6.0`)
+            num_layers (int, optional): Number of building blocks. (default: :obj:`6`)
+            hidden_channels (int, optional): Hidden embedding size. (default: :obj:`128`)
+            out_channels (int, optional): Size of each output sample. (default: :obj:`256`)
+            int_emb_size (int, optional): Embedding size used for interaction triplets. (default: :obj:`64`)
+            basis_emb_size (int, optional): Embedding size used in the basis transformation. (default: :obj:`8`)
+            out_emb_channels (int, optional): Embedding size used for atoms in the output block. (default: :obj:`256`)
+            num_spherical (int, optional): Number of spherical harmonics. (default: :obj:`7`)
+            num_radial (int, optional): Number of radial basis functions. (default: :obj:`6`)
+            envelop_exponent (int, optional): Shape of the smooth cutoff. (default: :obj:`5`)
+            num_before_skip (int, optional): Number of residual layers in the interaction blocks before the skip connection. (default: :obj:`1`)
+            num_after_skip (int, optional): Number of residual layers in the interaction blocks before the skip connection. (default: :obj:`2`)
+            num_output_layers (int, optional): Number of linear layers for the output blocks. (default: :obj:`3`)
+            act: (function, optional): The activation funtion. (default: :obj:`swish`)
             
     """
     def __init__(
