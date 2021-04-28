@@ -6,7 +6,7 @@ DIG includes unified implementations of **data interfaces**, **common algorithms
 * **Graph Generation**: :obj:`dig.ggraph`
 * **Self-supervised Learning on Graphs**: :obj:`dig.sslgraph`
 * **Explainability of Graph Neural Networks**: :obj:`dig.xgraph`
-* **Deep Learning on 3D Graphs**: :obj:`dig.3dgraph`
+* **Deep Learning on 3D Graphs**: :obj:`dig.threedgraph`
 
 You can refer to `benchmark implementations <https://github.com/divelab/DIG/tree/dig/benchmarks>`_ as examples to use APIs provided in DIG.
 

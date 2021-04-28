@@ -13,7 +13,7 @@
 [contributor-image]:https://img.shields.io/github/contributors/divelab/DIG
 [contributor-url]:https://github.com/divelab/DIG/graphs/contributors
 [contributing-image]:https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
-[contributing-url]:https://diveintographs.readthedocs.io/en/latest/intro/introduction.html
+[contributing-url]:https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html
 
 
 ![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG)
@@ -40,7 +40,7 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 * **Graph Generation**: `dig.ggraph`
 * **Self-supervised Learning on Graphs**: `dig.sslgraph`
 * **Explainability of Graph Neural Networks**: `dig.xgraph`
-* **Deep Learning on 3D Graphs**: `dig.3dgraph`
+* **Deep Learning on 3D Graphs**: `dig.threedgraph`
 
 
 
@@ -82,6 +82,15 @@ conda install -y -c conda-forge rdkit
 pip install dive-into-graphs
 ```
 
+
+After installation, you can check the version. You have successfully installed DIG: Dive into Graphs if no error occurs.
+
+``` shell script
+$ python
+>>> from dig.version import __version__
+>>> print(__version__)
+```
+
 ### Install from source
 If you want to try the latest features that have not been released yet, you can install dig from source.
 
@@ -99,7 +108,7 @@ For details of all included APIs, please refer to the [documentation](https://di
 * [Graph Generation](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph): [`JT-VAE`](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/JT-VAE), [`GraphAF`](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphAF), [`GraphDF`](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphDF), [`GraphEBM`](https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphEBM).
 * [Self-supervised Learning on Graphs](https://github.com/divelab/DIG/tree/dig/benchmarks/sslgraph): [`InfoGraph`](https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_infograph.ipynb), [`GRACE`](https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_grace.ipynb), [`MVGRL`](https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_mvgrl.ipynb), [`GraphCL`](https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_graphcl.ipynb).
 * [Explainability of Graph Neural Networks](https://github.com/divelab/DIG/tree/dig/benchmarks/xgraph): [`DeepLIFT`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/deeplift.ipynb), [`GNN-LRP`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/gnn_lrp.ipynb), [`GNNExplainer`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/gnnexplainer.ipynb), [`GradCAM`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/gradcam.ipynb), [`PGExplainer`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/pgexplainer.ipynb), [`SubgraphX`](https://github.com/divelab/DIG/blob/dig/benchmarks/xgraph/subgraphx.ipynb).
-* [Deep Learning on 3D Graphs](https://github.com/divelab/DIG/tree/dig/benchmarks/3dgraph): [`SchNet`](), [`DimeNet++`](), [`SphereNet`]().
+* [Deep Learning on 3D Graphs](https://github.com/divelab/DIG/tree/dig/benchmarks/threedgraph): [`SchNet`](), [`DimeNet++`](), [`SphereNet`]().
 
 
 ## Contributing
@@ -127,6 +136,6 @@ Please cite our paper if you find *DIG* useful in your work:
 
 If you have any technical questions, please submit new issues.
 
-If you have any other questions, please contact us: Meng Liu [mengliu@tamu.edu] or Shuiwang Ji [sji@tamu.edu].
+If you have any other questions, please contact us: Meng Liu [mengliu@tamu.edu] and Shuiwang Ji [sji@tamu.edu].
 
 

@@ -39,7 +39,15 @@ The key dependencies of DIG: Dive into Graphs are PyTorch (>=1.6.0), PyTorch Geo
     .. code-block:: none
     
             pip install dive-into-graphs
-            
+
+
+After installation, you can check the version. You have successfully installed DIG: Dive into Graphs if no error occurs.
+
+    .. code-block:: none
+    
+            $ python
+            >>> from dig.version import __version__
+            >>> print(__version__)
             
 Install from source
 --------

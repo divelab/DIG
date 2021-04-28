@@ -27,6 +27,10 @@ import dig.ggraph.evaluation
 import dig.xgraph.dataset
 import dig.xgraph.method
 import dig.xgraph.evaluation
+import dig.threedgraph.dataset
+import dig.threedgraph.method
+import dig.threedgraph.utils
+import dig.threedgraph.evaluation
 
 import torch_geometric
 
