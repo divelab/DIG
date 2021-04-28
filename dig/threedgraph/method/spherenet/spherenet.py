@@ -217,7 +217,7 @@ class update_u(torch.nn.Module):
 
 class spherenet(torch.nn.Module):
     r"""
-         The improved version of directional message passing neural network DimeNet++ from the `"Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules" <https://arxiv.org/abs/2011.14115>`_ paper.
+         The spherical message passing neural network SphereNet from the `"Spherical Message Passing for 3D Graph Networks" <https://arxiv.org/abs/2102.05013>`_ paper.
         
         Args:
             energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)
