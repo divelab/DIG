@@ -76,6 +76,7 @@ class ZINC250k(PygDataset):
     Batch(adj=[32, 4, 38, 38], bfs_perm_origin=[32, 38], num_atom=[32, 1], smile=[32], x=[32, 38, 9], y=[32, 1])
     
     Where the attributes of the output data indicates:
+    
     * :obj:`x`: The node features.
     * :obj:`y`: The property labels for the graph.
     * :obj:`adj`: The edge features in the form of adjacent matrices.
