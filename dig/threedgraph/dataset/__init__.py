@@ -1,6 +1,7 @@
-from .QM9_pyg import PygQM9Dataset
-# from .MD17_pyg import PygMD17Dataset , 'PygMD17Dataset'
+from .QM9_pyg import QM9_3D
+from .MD17_pyg import MD17
 
 __all__ = [
-    'PygQM9Dataset'
+    'QM9_3D',
+    'MD17'
 ]

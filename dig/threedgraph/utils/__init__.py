@@ -1,7 +1,6 @@
-from .geometric_computing import xyztoda, xyztodat
+from .geometric_computing import xyztoda, xyztodat #    'xyztoda',
 
 __all__ = [
-    'xyztoda',
     'xyztodat'
 ]
 

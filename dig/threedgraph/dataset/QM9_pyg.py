@@ -9,18 +9,24 @@ from torch_geometric.data import InMemoryDataset, download_url
 from torch_geometric.data import Data
 
 
-class PygQM9Dataset(InMemoryDataset):
+class QM9_3D(InMemoryDataset):
+    r"""
+        A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`QM9` dataset 
+        which is from `"Quantum chemistry structures and properties of 134 kilo molecules" <https://www.nature.com/articles/sdata201422>`_ paper 
+        and connsists of about 130,000 equilibrium molecules with 12 property optimization targets: 
+        :obj:`mu`, :obj:`alpha`, :obj:`homo`, :obj:`lumo`, :obj:`gap`, :obj:`r2`, :obj:`zpve`, :obj:`U0`, :obj:`U`, :obj:`H`, :obj:`G`, :obj:`Cv`.
+    
+        Args:
+            root (string, optional): Root directory where the dataset should be saved.
+            prop_name (string, optional): The molecular property desired and used as the optimization target. (default: :obj:`U0`)
+    """
     def __init__(self, root = 'dataset/qm9', prop_name = 'U0'):
-        '''
-            Pytorch Geometric QM9 dataset object
-                - root (str): the dataset folder will be located at root
-        '''
 
         self.prop_name = prop_name
         self.url = 'https://github.com/klicperajo/dimenet/blob/master/data/qm9_eV.npz'
 
 
-        super(PygQM9Dataset, self).__init__(root, prop_name)
+        super(QM9_3D, self).__init__(root, prop_name)
 
         self.data, self.slices = torch.load(self.processed_paths[0])
 
@@ -37,7 +43,7 @@ class PygQM9Dataset(InMemoryDataset):
 
     def process(self):
         
-        data = np.load('/mnt/dive/shared/limei/DIG/dataset/qm9/raw/qm9_eV.npz',allow_pickle=True) #(osp.join(self.raw_dir, self.raw_file_names))
+        data = np.load(osp.join(self.raw_dir, self.raw_file_names))
 
         R = data['R']
         Z = data['Z']

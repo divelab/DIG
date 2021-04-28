@@ -41,7 +41,16 @@ def xyztoda(pos, edge_index, num_nodes):
     return dist, angle, i, j, idx_kj, idx_ji
 
 
-def xyztodat(pos, edge_index, num_nodes):
+def xyztodat(pos, edge_index, num_nodes, use_torsion = False):
+    """
+    Compute the diatance, angle, and torsion from geometric information.
+
+    Args:
+        pos: Geometric information for every node in the graph.
+        edgee_index: Edge index of the graph.
+        number_nodes: Number of nodes in the graph.
+        use_torsion: If set to :obj:`True`, will return distance, angle and torsion, otherwise only return distance and angle. (default: :obj:`False`)
+    """
     j, i = edge_index  # j->i
 
     # Calculate distances. # number of edges
@@ -82,19 +91,23 @@ def xyztodat(pos, edge_index, num_nodes):
     idx_i_t, idx_j_t, idx_k_t, idx_k_n, idx_batch_t = idx_i_t[mask], idx_j_t[mask], idx_k_t[mask], idx_k_n[mask], idx_batch_t[mask]
 
     # Calculate torsions.
-    pos_j0 = pos[idx_k_t] - pos[idx_j_t]
-    pos_ji = pos[idx_i_t] - pos[idx_j_t]
-    pos_jk = pos[idx_k_n] - pos[idx_j_t]
-    dist_ji = pos_ji.pow(2).sum(dim=-1).sqrt()
-    plane1 = torch.cross(pos_ji, pos_j0)
-    plane2 = torch.cross(pos_ji, pos_jk)
-    a = (plane1 * plane2).sum(dim=-1) # cos_angle * |plane1| * |plane2|
-    b = (torch.cross(plane1, plane2) * pos_ji).sum(dim=-1) / dist_ji
-    torsion1 = torch.atan2(b, a) # -pi to pi
-    torsion1[torsion1<=0]+=2*PI # 0 to 2pi
-    torsion = scatter(torsion1,idx_batch_t,reduce='min')
+    if use_torsion:
+        pos_j0 = pos[idx_k_t] - pos[idx_j_t]
+        pos_ji = pos[idx_i_t] - pos[idx_j_t]
+        pos_jk = pos[idx_k_n] - pos[idx_j_t]
+        dist_ji = pos_ji.pow(2).sum(dim=-1).sqrt()
+        plane1 = torch.cross(pos_ji, pos_j0)
+        plane2 = torch.cross(pos_ji, pos_jk)
+        a = (plane1 * plane2).sum(dim=-1) # cos_angle * |plane1| * |plane2|
+        b = (torch.cross(plane1, plane2) * pos_ji).sum(dim=-1) / dist_ji
+        torsion1 = torch.atan2(b, a) # -pi to pi
+        torsion1[torsion1<=0]+=2*PI # 0 to 2pi
+        torsion = scatter(torsion1,idx_batch_t,reduce='min')
 
-    return dist, angle, torsion, i, j, idx_kj, idx_ji
+        return dist, angle, torsion, i, j, idx_kj, idx_ji
+    
+    else:
+        return dist, angle, i, j, idx_kj, idx_ji
 
 
 
