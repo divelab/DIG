@@ -1,4 +1,4 @@
-Utils
+dig.threedgraph.utils
 ======
 
 Utilities under :obj:`dig.threedgraph.utils`.

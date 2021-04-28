@@ -1,4 +1,4 @@
-Methods
+dig.xgraph.method
 ========
 Methods interfaces under :obj:`dig.xgraph.method`.
 

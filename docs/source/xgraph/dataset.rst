@@ -1,4 +1,4 @@
-Datasets
+dig.xgraph.dataset
 =========
 Dataset interfaces under :obj:`dig.xgraph.dataset`.
 

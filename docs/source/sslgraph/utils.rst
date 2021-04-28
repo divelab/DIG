@@ -1,4 +1,4 @@
-Utils
+dig.sslgraph.utils
 ======
 Utilities under :obj:`dig.sslgraph.utils`.
 
