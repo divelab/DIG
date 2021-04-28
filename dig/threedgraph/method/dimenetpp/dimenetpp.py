@@ -211,16 +211,33 @@ class dimenetpp(torch.nn.Module):
         Args:
         energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces.
             (default: :obj:`False`)
+        cutoff (float, optional): Cutoff distance for interatomic interactions.
+            (default: :obj:`10.0`).
         num_layers (int, optional): The number of layers.
             (default: :obj:`6`)
         hidden_channels (int, optional): Hidden embedding size.
             (default: :obj:`128`)
-        num_filters (int, optional): The number of filters to use.
+        out_channels (int, optional): Hidden embedding size.
             (default: :obj:`128`)
-        num_gaussians (int, optional): The number of gaussians :math:`\mu`.
-            (default: :obj:`50`)
-        cutoff (float, optional): Cutoff distance for interatomic interactions.
-            (default: :obj:`10.0`).
+        int_emb_size (int, optional): Hidden embedding size.
+            (default: :obj:`128`)
+        basis_emb_size (int, optional): Hidden embedding size.
+            (default: :obj:`128`)
+        out_emb_channels (int, optional): Hidden embedding size.
+            (default: :obj:`128`)
+        num_spherical (int, optional): Hidden embedding size.
+            (default: :obj:`128`)
+        num_radial (int, optional): The number of filters to use.
+            (default: :obj:`128`)
+        envelop_exponent (int, optional): Hidden embedding size.
+            (default: :obj:`128`)
+        num_before_skip (int, optional): Hidden embedding size.
+            (default: :obj:`128`)
+        num_after_skip (int, optional): Hidden embedding size.
+            (default: :obj:`128`)
+        num_output_layers (int, optional): Hidden embedding size.
+            (default: :obj:`128`)
+            
     """
     def __init__(
         self, energy_and_force, cutoff, num_layers, 
