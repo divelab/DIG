@@ -13,12 +13,32 @@ from torch.utils.tensorboard import SummaryWriter
 
 class run():
     r"""
-    The method base class for graph generation. To write a new graph generation method, create a new class
-    inheriting from this class and implement the functions.
+    The base script for running different 3DGN methods.
     """
 
     def run(self, train_dataset, val_dataset, test_dataset, save_dir, log_dir, model, epochs, batch_size, lr, lr_decay_factor, lr_decay_step_size, weight_decay, 
         energy_and_force, num_atom, p):
+        r"""
+        The run script for traning and validation.
+        
+        Args:
+            train_dataset (str): The path of the training set.
+            val_dataset (str): The path of the validation set.
+            test_dataset (str): The path of the test set.
+            save_dir (str): The path to save trained models.
+            log_dir (str): The path to save log files.
+            model (str): Which 3DGN model to use. Should be one of the schnet, dimenetpp, and spherenet.
+            epochs (int): Number of total training epochs.
+            batch_size (int, optinal): Number of samples in each minibatch. (default: :obj:`32`)
+            lr (float, optinal): Initial learning rate. (default: :obj:`0.0001`)
+            lr_decay_factor (float, optinal): Learning rate decay factor. (default: :obj:`0.1`)
+            lr_decay_step_size (int, optinal): epochs at which lr_initial <- lr_initial * lr_decay_factor. (default: :obj:`8`)
+            weight_decay (float, optinal): weight decay factor at the regularization term. (default: :obj:`0.9999`)
+            energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
+            num_atom (int, optinal): Maximal number of atoms for a training sample. A sample with larger value is skipped and not used. (default: :obj:`2000`)
+            p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy during training. (default: :obj:`100`)
+        
+        """        
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = model.to(device)
@@ -72,6 +92,20 @@ class run():
         writer.close()
 
     def train(self, model, optimizer, train_loader, energy_and_force, num_atom, p, loss_func, device):
+        r"""
+        The script for training.
+        
+        Args:
+            model (str): Which 3DGN model to use. Should be one of the schnet, dimenetpp, and spherenet.
+            optimizer (Optimizer): Pytorch optimizer for trainable parameters in training.
+            train_loader (Dataloader): Dataloader for training.
+            energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
+            num_atom (int, optinal): Maximal number of atoms for a training sample. A sample with larger value is skipped and not used. (default: :obj:`2000`)
+            p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy during training. (default: :obj:`100`)
+            loss_func (function, optional): The used loss funtion for training. (default: MSE)
+            device (torch.device, optional): The device where the model is deployed.
+        
+        """   
         model.train()
         losses = []
         for batch_data in train_loader:
@@ -91,6 +125,20 @@ class run():
         return sum(losses).item()
 
     def val(self, model, val_loader, energy_and_force, num_atom, p, loss_func, metric_func, device):
+        r"""
+        The script for validation.
+        
+        Args:
+            model (str): Which 3DGN model to use. Should be one of the schnet, dimenetpp, and spherenet.
+            val_loader (Dataloader): Dataloader for validation.
+            energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
+            num_atom (int, optinal): Maximal number of atoms for a training sample. A sample with larger value is skipped and not used. (default: :obj:`2000`)
+            p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy during training. (default: :obj:`100`)
+            loss_func (function, optional): The used loss funtion in training. (default: MSE)
+            metric_func (function, optional): The used funtion for evaluation. (default: MSE)
+            device (torch.device, optional): The device where the model is deployed.
+        
+        """   
         model.eval()
         losses = torch.Tensor([0.0]).to(device)
         if energy_and_force:
