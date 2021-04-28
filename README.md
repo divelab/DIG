@@ -97,7 +97,7 @@ If you want to try the latest features that have not been released yet, you can 
 ```shell script
 git clone https://github.com/divelab/DIG.git
 cd DIG
-python setup.py install
+pip install .
 ```
 
 
