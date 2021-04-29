@@ -1,13 +1,13 @@
 import os
 import torch
 from tqdm import tqdm
-from models import GnnNets
-from load_dataset import get_dataset, get_dataloader
-from forgraph.mcts import MCTS, reward_func
+from SubgraphX.models import GnnNets
+from SubgraphX.load_dataset import get_dataset, get_dataloader
+from SubgraphX.forgraph.mcts import MCTS, reward_func
 from torch_geometric.data import Batch
-from Configures import data_args, mcts_args, reward_args, model_args, train_args
-from shapley import GnnNets_GC2value_func, gnn_score
-from utils import PlotUtils, find_closest_node_result
+from SubgraphX.Configures import data_args, mcts_args, reward_args, model_args, train_args
+from SubgraphX.shapley import GnnNets_GC2value_func, gnn_score
+from SubgraphX.utils import PlotUtils, find_closest_node_result
 
 
 def pipeline(max_nodes):
@@ -37,7 +37,7 @@ def pipeline(max_nodes):
                             f"{model_args.model_name}_"
                             f"{reward_args.reward_method}")
     if not os.path.isdir(save_dir):
-        os.mkdir(save_dir)
+        os.makedirs(save_dir)
 
     fidelity_score_list = []
     sparsity_score_list = []

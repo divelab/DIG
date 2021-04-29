@@ -5,7 +5,7 @@ import torch
 import pickle
 import numpy as np
 import os.path as osp
-from dig.xgraph.resources.PGExplainer.Configures import data_args
+from PGExplainer.Configures import data_args
 from torch_geometric.datasets import MoleculeNet
 from torch_geometric.data import Data, InMemoryDataset, DataLoader
 from torch_geometric.utils import dense_to_sparse

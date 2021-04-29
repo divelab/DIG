@@ -4,11 +4,12 @@ import torch
 import networkx as nx
 from torch_geometric.data import Batch, Data
 from torch_geometric.utils.num_nodes import maybe_num_nodes
-from Configures import mcts_args
+from SubgraphX.Configures import mcts_args
 from functools import partial
 from collections import Counter
-from shapley import gnn_score, NC_mc_l_shapley
-from pipeline import MCTSNode
+from SubgraphX.shapley import gnn_score, NC_mc_l_shapley
+from SubgraphX.pipeline import MCTSNode
+
 
 def k_hop_subgraph_with_default_whole_graph(node_idx, num_hops,
     edge_index, relabel_nodes=False, num_nodes=None, flow='source_to_target'):

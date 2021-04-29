@@ -17,19 +17,10 @@ from tqdm import tqdm
 import networkx as nx
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import to_networkx
-from dig.xgraph.resources.PGExplainer.utils import k_hop_subgraph_with_default_whole_graph
-from dig.xgraph.resources.PGExplainer.Configures import model_args, data_args, explainer_args
+from PGExplainer.utils import k_hop_subgraph_with_default_whole_graph
+from PGExplainer.Configures import model_args, data_args, explainer_args
 
 EPS = 1e-6
-
-
-def inv_sigmoid(t: torch.Tensor):
-    """ except the case t is 0 or 1 """
-    if t.shape[0] != 0:
-        if t.min().item() == 0 or t.max().item() == 1:
-            t = 0.99 * t + 0.005
-    ret = - torch.log(1 / t - 1)
-    return ret
 
 
 class PGExplainer(nn.Module):
@@ -164,8 +155,6 @@ class PGExplainer(nn.Module):
         sym_mask = (self.mask_sigmoid + self.mask_sigmoid.transpose(0, 1)) / 2
         edge_mask = sym_mask[edge_index[0], edge_index[1]]
 
-        # inverse the weights before sigmoid in MessagePassing Module
-        edge_mask = inv_sigmoid(edge_mask)
         self.__clear_masks__()
         self.__set_masks__(x, edge_index, edge_mask)
 

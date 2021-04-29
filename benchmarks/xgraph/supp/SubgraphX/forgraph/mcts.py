@@ -1,13 +1,13 @@
 import math
 import torch
 import networkx as nx
-from Configures import mcts_args
+from SubgraphX.Configures import mcts_args
 from torch_geometric.data import Data, Batch
 from torch_geometric.utils import to_networkx
-from shapley import mc_shapley, l_shapley, mc_l_shapley, gnn_score, NC_mc_l_shapley
+from SubgraphX.shapley import mc_shapley, l_shapley, mc_l_shapley, gnn_score, NC_mc_l_shapley
 from functools import partial
 from collections import Counter
-from pipeline import MCTSNode
+from SubgraphX.pipeline import MCTSNode
 
 
 class MCTSNode():
@@ -162,40 +162,3 @@ def reward_func(reward_args, value_func):
                        sample_num=reward_args.sample_num)
     else:
         raise NotImplementedError
-
-
-# def reward_func(reward_args, value_func, node_idx=-1):
-#     if reward_args.reward_method.lower() == 'gnn_score':
-#         return partial(gnn_score,
-#                        value_func=value_func,
-#                        subgraph_build_method=reward_args.subgraph_build_method)
-#
-#     elif reward_args.reward_method.lower() == 'mc_shapley':
-#         return partial(mc_shapley,
-#                        value_func=value_func,
-#                        subgraph_build_method=reward_args.subgraph_build_method,
-#                        sample_num=reward_args.sample_num)
-#
-#     elif reward_args.reward_method.lower() == 'l_shapley':
-#         return partial(l_shapley,
-#                        local_raduis=reward_args.local_raduis,
-#                        value_func=value_func,
-#                        subgraph_build_method=reward_args.subgraph_build_method)
-#
-#     elif reward_args.reward_method.lower() == 'mc_l_shapley':
-#         return partial(mc_l_shapley,
-#                        local_raduis=reward_args.local_raduis,
-#                        value_func=value_func,
-#                        subgraph_build_method=reward_args.subgraph_build_method,
-#                        sample_num=reward_args.sample_num)
-#
-#     elif reward_args.reward_method.lower() == 'nc_mc_l_shapley':
-#         return partial(NC_mc_l_shapley,
-#                        node_idx=node_idx,
-#                        local_raduis=reward_args.local_raduis,
-#                        value_func=value_func,
-#                        subgraph_build_method=reward_args.subgraph_build_method,
-#                        sample_num=reward_args.sample_num)
-#
-#     else:
-#         raise NotImplementedError
