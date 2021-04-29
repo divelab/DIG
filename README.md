@@ -113,7 +113,7 @@ For details of all included APIs, please refer to the [documentation](https://di
 
 ## Contributing
 
-We welcome any forms of contributions, such as reporting bugs and adding new algorithms. Please refer to our [contributing guidelines](https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html) for details.
+We welcome any forms of contributions, such as reporting bugs and adding new features. Please refer to our [contributing guidelines](https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html) for details.
 
 
 ## Citing DIG
