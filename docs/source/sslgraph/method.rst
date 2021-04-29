@@ -1,4 +1,4 @@
-Methods
+dig.sslgraph.method
 ========    
 
 .. contents:: Contents

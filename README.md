@@ -97,7 +97,7 @@ If you want to try the latest features that have not been released yet, you can 
 ```shell script
 git clone https://github.com/divelab/DIG.git
 cd DIG
-python setup.py install
+pip install .
 ```
 
 
@@ -113,7 +113,7 @@ For details of all included APIs, please refer to the [documentation](https://di
 
 ## Contributing
 
-We welcome any forms of contributions, such as reporting bugs and adding new algorithms. Please refer to our [contributing guidelines](https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html) for details.
+We welcome any forms of contributions, such as reporting bugs and adding new features. Please refer to our [contributing guidelines](https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html) for details.
 
 
 ## Citing DIG

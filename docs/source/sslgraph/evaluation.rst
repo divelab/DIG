@@ -1,4 +1,4 @@
-Evaluations
+dig.sslgraph.evaluation
 ============
 Evaluation interfaces under :obj:`dig.sslgraph.evaluation`.
 

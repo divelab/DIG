@@ -1,4 +1,4 @@
-Datasets
+dig.ggraph.dataset
 =========
 Dataset interfaces under :obj:`dig.ggraph.dataset`.
 
