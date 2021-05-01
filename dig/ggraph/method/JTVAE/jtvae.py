@@ -1,19 +1,18 @@
 import os
-from mol_tree import MolTree
 import pickle
 import math, random, sys
 from optparse import OptionParser
 from multiprocessing import Pool
 
-from vocab import Vocab
-from jtnn_vae import JTNNVAE
-from datautils import MolTreeFolder, PairTreeFolder, MolTreeDataset
+from .vocab import Vocab
+from .jtnn_vae import JTNNVAE
+from .datautils import MolTreeFolder, PairTreeFolder, MolTreeDataset
 
 import numpy as np
 
 import rdkit
 from rdkit import RDLogger
-from mol_tree import MolTree
+from .mol_tree import MolTree
 
 from tqdm import tqdm
 
