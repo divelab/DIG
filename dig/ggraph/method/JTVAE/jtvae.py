@@ -1,21 +1,16 @@
 import os
 from mol_tree import MolTree
 import pickle
+import math, random, sys
+from optparse import OptionParser
+from multiprocessing import Pool
 
 from vocab import Vocab
 from jtnn_vae import JTNNVAE
 from datautils import MolTreeFolder, PairTreeFolder, MolTreeDataset
 
-from multiprocessing import Pool
-
-import os
-import math, random, sys
-from optparse import OptionParser
-import pickle
-
 import numpy as np
 
-#from fast_jtnn import *
 import rdkit
 from rdkit import RDLogger
 from mol_tree import MolTree
@@ -29,10 +24,9 @@ import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 
+from dig.ggraph.method import Generator
 
-#from dig.ggraph.method import Generator
-
-class JTVAE(object): #TODO: implement child of Generator):
+class JTVAE(Generator):
     r"""
     The method class for the JTVAE algorithm proposed in the paper `Junction Tree Variational Autoencoder for Molecular Graph Generation <https://arxiv.org/abs/1802.04364>`_. This class provides interfaces for running random generation with the JTVAE algorithm. Please refer to the `benchmark codes <https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/JTVAE>`_ for usage examples.
 
@@ -46,11 +40,13 @@ class JTVAE(object): #TODO: implement child of Generator):
         self.vocab = self.build_vocabulary(list_smiles)
         self.vae = JTNNVAE(Vocab(self.vocab), 450, 56, 20, 3).cuda()
         
-    def build_vocabulary(self, list_smiles: str):
+    def build_vocabulary(self, list_smiles):
         r"""
             Building the vocabulary for training.
             Args:
-                dataset (str): the path to the dataset.
+                dataset (list): the list of smiles strings in the dataset.
+            :rtype:
+                cset (list): A list of smiles that contains the vocabulary for the training data.       
         """
         cset = set()
         for smiles in list_smiles:
@@ -76,40 +72,36 @@ class JTVAE(object): #TODO: implement child of Generator):
     def preprocess(self, list_smiles):
         r"""
             Preprocess the molecules.
+            Args:
+                list_smiles (list): The list of smiles strings in the dataset.
+            :rtype:
+            preprocessed (list): A list of preprocessed MolTree objects.
+                
         """
-        num_splits = 1  # TODO Reassign
-#         if not os.path.exists("moses-preprocessed"):
-#             os.mkdir("moses-preprocessed")
-#         with open(os.path.join("datasets", "moses.csv"), "r") as f:
-#             data = [line.strip("\r\n ").split()[0] for line in f]
-
-#         pool = Pool(8)  # TODO arg
-#         all_data = pool.map(self._tensorize, list_smiles)
-
-#         le = (len(all_data) + num_splits - 1) // num_splits
-
-#         for split_id in range(num_splits):
-#             st = split_id * le
-#             sub_data = all_data[st : st + le]
-
-#             with open('moses-processed/tensors-%d.pkl' % split_id, 'wb') as f:
-#                 pickle.dump(sub_data, f, pickle.HIGHEST_PROTOCOL)
-        return list(map(self._tensorize, tqdm(list_smiles, leave=True)))
+        preprocessed = list(map(self._tensorize, tqdm(list_smiles, leave=True)))
+        return preprocessed
 
 
-    def train(self, preprocessed):
+    def train_rand_gen(self, loader, load_epoch, lr, anneal_rate, clip_norm, num_epochs, beta, max_beta, step_beta, anneal_iter, kl_anneal_iter, print_iter, save_iter):
         r"""
             Train the Junction Tree Variational Autoencoder.
-        """
-        # Constants TODO remove
-        load_epoch = 0
-        lr = 1e-3
-        anneal_rate = 0.9
-        clip_norm = 50.0
-        num_epochs = 1
-        
-        vocab = Vocab(self.vocab)
+            Args:
+                loader (MolTreeFolder): The MolTreeFolder loader.
+                load_epoch (int): The epoch to load from state dictionary.
+                lr (float): The learning rate for training.
+                anneal_rate (float): The learning rate annealing.
+                clip_norm (float): Clips gradient norm of an iterable of parameters.
+                num_epochs (int): The number of training epochs.
+                beta (float): The KL regularization weight.
+                max_beta (float): The maximum KL regularization weight.
+                step_beta (float): The KL regularization weight step size.
+                anneal_iter (int): How often to step in annealing the learning rate.
+                kl_anneal_iter (int): How often to step in annealing the KL regularization weight.
+                print_iter (int): How often to print the iteration statistics.
+                save_iter (int): How often to save the iteration statistics.
 
+        """
+        vocab = Vocab(self.vocab)
 
         for param in self.vae.parameters():
             if param.dim() == 1:
@@ -129,12 +121,10 @@ class JTVAE(object): #TODO: implement child of Generator):
         param_norm = lambda m: math.sqrt(sum([p.norm().item() ** 2 for p in m.parameters()]))
         grad_norm = lambda m: math.sqrt(sum([p.grad.norm().item() ** 2 for p in m.parameters() if p.grad is not None]))
 
-        total_step = 0  # TODO args.load_epoch
-        beta = 0.0  # TODO args.beta
+        total_step = load_epoch
         meters = np.zeros(4)
 
         for epoch in range(num_epochs):
-            loader = MolTreeFolder(preprocessed, vocab, 32, num_workers=4)
             for batch in loader:
                 total_step += 1
                 try:
@@ -149,34 +139,31 @@ class JTVAE(object): #TODO: implement child of Generator):
 
                 meters = meters + np.array([kl_div, wacc * 100, tacc * 100, sacc * 100])
 
-                if total_step % 50 == 0:  # TODO all save_iters replace
+                if total_step % print_iter == 0:
                     meters /= 50
                     print("[%d] Beta: %.3f, KL: %.2f, Word: %.2f, Topo: %.2f, Assm: %.2f, PNorm: %.2f, GNorm: %.2f" % (total_step, beta, meters[0], meters[1], meters[2], meters[3], param_norm(self.vae), grad_norm(self.vae)))
                     sys.stdout.flush()
                     meters *= 0
 
-                if total_step % 5000 == 0:
+                if total_step % save_iter == 0:
                     torch.save(self.vae.state_dict(), "saved" + "/model.iter-" + str(total_step))
 
-                if total_step % 40000 == 0:
+                if total_step % anneal_iter == 0:
                     scheduler.step()
                     print("learning rate: %.6f" % scheduler.get_lr()[0])
 
-                if total_step % 2000 == 0 and total_step >= 40000:
-                    beta = min(1.0, beta + 0.002)
+                if total_step % kl_anneal_iter == 0 and total_step >= anneal_iter:
+                    beta = min(max_beta, beta + step_beta)
                     
-    def sample(self, num_samples):
+    def run_rand_gen(self, num_samples):
         r"""
         Sample new molecules from the trained model.
+        Args:
+            num_samples (int): Number of samples to generate from the trained model.
+        :rtype:
+            samples (list): samples is a list of generated molecules.
+                
         """
-#         vocab = [x.strip("\r\n ") for x in open(args.vocab)] 
-#         vocab = Vocab(vocab)
-
-#         model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depthT, args.depthG)
-#         model.load_state_dict(torch.load(args.model))
-#         model = model.cuda()
-
         torch.manual_seed(0)
-#         for i in range(num_samples):
-#             print(self.vae.sample_prior())
-        return [self.vae.sample_prior() for _ in range(num_samples)]
+        samples = [self.vae.sample_prior() for _ in range(num_samples)]
+        return samples
