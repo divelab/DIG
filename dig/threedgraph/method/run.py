@@ -17,30 +17,28 @@ class run():
     def __init__(self):
         pass
         
-    def run(self, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=300, batch_size=32, lr=0.001, lr_decay_factor=0.5, lr_decay_step_size=50, weight_decay=0, 
+    def run(self, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=300, batch_size=128, lr=0.001, lr_decay_factor=0.5, lr_decay_step_size=50, weight_decay=0, 
         energy_and_force=False, p=100, save_dir='', log_dir=''):
         r"""
         The run script for training and validation.
         
         Args:
-            train_dataset
-            valid_dataset
-            test_dataset
-            save_dir (str): The path to save trained models.
-            log_dir (str): The path to save log files.
+            train_dataset: Training data.
+            valid_dataset: Validation data.
+            test_dataset: Test data.
             model: Which 3DGN model to use. Should be one of the SchNet, DimeNetPP, and SphereNet.
             loss_func (function): The used loss funtion for training.
             evaluation (function): The evaluation function. 
             epochs (int, optinal): Number of total training epochs. (default: :obj:`300`)
-            batch_size (int, optinal): Number of samples in each minibatch. (default: :obj:`32`)
+            batch_size (int, optinal): Number of samples in each minibatch. (default: :obj:`128`)
             lr (float, optinal): Initial learning rate. (default: :obj:`0.001`)
             lr_decay_factor (float, optinal): Learning rate decay factor. (default: :obj:`0.5`)
             lr_decay_step_size (int, optinal): epochs at which lr_initial <- lr_initial * lr_decay_factor. (default: :obj:`50`)
             weight_decay (float, optinal): weight decay factor at the regularization term. (default: :obj:`0`)
-            energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
+            energy_and_force (bool, optional): If set to :obj:`True`, will predict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
             p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy during training. (default: :obj:`100`)
-            save_dir (str): The path to save trained models.
-            log_dir (str): The path to save log files.
+            save_dir (str, optinal): The path to save trained models. If set to :obj:`''`, will not save the model. (default: :obj:`''`)
+            log_dir (str, optinal): The path to save log files. If set to :obj:`''`, will not save the log files. (default: :obj:`''`)
         
         """        
 
@@ -64,17 +62,18 @@ class run():
             writer = SummaryWriter(log_dir=log_dir)
         
         for epoch in range(1, epochs + 1):
-            print("=====Epoch {}".format(epoch))
+            print("\n=====Epoch {}".format(epoch), flush=True)
             
-            print('Training...')
+            print('\nTraining...', flush=True)
             train_mae = self.train(model, optimizer, train_loader, energy_and_force, p, loss_func, device)
 
-            print('Evaluating...')
-            valid_mae = self.val(model, valid_loader, energy_and_force, p, loss_func, evaluation, device)
+            print('\n\nEvaluating...', flush=True)
+            valid_mae = self.val(model, valid_loader, energy_and_force, p, evaluation, device)
 
-            print('Testing...')
-            test_mae = self.val(model, test_loader, energy_and_force, p, loss_func, evaluation, device)
+            print('\n\nTesting...', flush=True)
+            test_mae = self.val(model, test_loader, energy_and_force, p, evaluation, device)
 
+            print()
             print({'Train': train_mae, 'Validation': valid_mae, 'Test': test_mae})
 
             if log_dir != '':
@@ -103,13 +102,15 @@ class run():
         The script for training.
         
         Args:
-            model (str): Which 3DGN model to use. Should be one of the schnet, dimenetpp, and spherenet.
+            model: Which 3DGN model to use. Should be one of the SchNet, DimeNetPP, and SphereNet.
             optimizer (Optimizer): Pytorch optimizer for trainable parameters in training.
             train_loader (Dataloader): Dataloader for training.
             energy_and_force (bool, optional): If set to :obj:`True`, will predict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
             p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy during training. (default: :obj:`100`)
-            loss_func (function, optional): The used loss funtion for training. (default: MSE)
-            device (torch.device, optional): The device where the model is deployed.
+            loss_func (function): The used loss funtion for training. 
+            device (torch.device): The device where the model is deployed.
+
+        :rtype: Traning loss. ( :obj:`mae`)
         
         """   
         model.train()
@@ -130,18 +131,19 @@ class run():
             loss_accum += loss.detach().cpu().item()
         return loss_accum / (step + 1)
 
-    def val(self, model, valid_loader, energy_and_force, p, loss_func, evaluation, device):
+    def val(self, model, data_loader, energy_and_force, p, evaluation, device):
         r"""
-        The script for validation.
+        The script for validation/test.
         
         Args:
-            model (str): Which 3DGN model to use. Should be one of the schnet, dimenetpp, and spherenet.
-            valid_loader (Dataloader): Dataloader for validation.
-            energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
-            p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy during training. (default: :obj:`100`)
-            loss_func (function, optional): The used loss funtion in training. (default: MSE)
-            evaluation (function, optional): The used funtion for evaluation. (default: MSE)
+            model: Which 3DGN model to use. Should be one of the SchNet, DimeNetPP, and SphereNet.
+            data_loader (Dataloader): Dataloader for validation or test.
+            energy_and_force (bool, optional): If set to :obj:`True`, will predict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
+            p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy. (default: :obj:`100`)
+            evaluation (function): The used funtion for evaluation.
             device (torch.device, optional): The device where the model is deployed.
+
+        :rtype: Evaluation result. ( :obj:`mae`)
         
         """   
         model.eval()
@@ -153,7 +155,7 @@ class run():
             preds_force = torch.Tensor([]).to(device)
             targets_force = torch.Tensor([]).to(device)
         
-        for batch_data in tqdm(valid_loader):
+        for step, batch_data in enumerate(tqdm(data_loader)):
             batch_data = batch_data.to(device)
             out = model(batch_data)
             preds = torch.cat([preds, out.detach_()], dim=0)
