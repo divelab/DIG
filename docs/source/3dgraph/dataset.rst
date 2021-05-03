@@ -1,4 +1,4 @@
-Datasets
+dig.threedgraph.dataset
 ======
 Dataset interfaces under :obj:`dig.threedgraph.dataset`.
 

@@ -1,4 +1,4 @@
-Datasets
+dig.sslgraph.dataset
 =========
 Dataset interfaces under :obj:`dig.sslgraph.dataset`.
 

@@ -1,4 +1,4 @@
-Evaluations
+dig.threedgraph.evaluation
 ======
 Evaluation interfaces under :obj:`dig.threedgraph.evaluation`.
 

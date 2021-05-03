@@ -2,13 +2,13 @@ import os
 import torch
 import networkx as nx
 from tqdm import tqdm
-from models import GnnNets_NC
-from load_dataset import get_dataset
-from fornode.mcts import MCTS, reward_func
-from shapley import gnn_score, GnnNets_NC2value_func
+from SubgraphX.models import GnnNets_NC
+from SubgraphX.load_dataset import get_dataset
+from SubgraphX.fornode.mcts import MCTS, reward_func
+from SubgraphX.shapley import gnn_score, GnnNets_NC2value_func
 from torch_geometric.utils import to_networkx
-from Configures import data_args, mcts_args, reward_args, model_args
-from utils import PlotUtils, find_closest_node_result
+from SubgraphX.Configures import data_args, mcts_args, reward_args, model_args
+from SubgraphX.utils import PlotUtils, find_closest_node_result
 
 
 def pipeline(subgraph_max_nodes):
@@ -27,7 +27,7 @@ def pipeline(subgraph_max_nodes):
                                          f"_{model_args.model_name}"
                                          f"_{reward_args.reward_method}")
     if not os.path.isdir(save_dir):
-        os.mkdir(save_dir)
+        os.makedirs(save_dir)
 
     plotutils = PlotUtils(dataset_name=data_args.dataset_name)
     fidelity_score_list = []

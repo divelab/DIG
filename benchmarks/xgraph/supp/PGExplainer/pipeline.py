@@ -3,27 +3,23 @@ import glob
 import time
 import torch
 from tqdm import tqdm
-from dig.xgraph.resources.PGExplainer.models import GnnNets, GnnNets_NC
-from dig.xgraph.resources.PGExplainer.utils import PlotUtils
-from pgexplainer import PGExplainer
 from torch_geometric.data import Data
 from torch_geometric.utils import to_networkx
-from dig.xgraph.resources.PGExplainer.metrics import top_k_fidelity, top_k_sparsity
-from dig.xgraph.resources.PGExplainer.load_dataset import get_dataset, get_dataloader
-from dig.xgraph.resources.PGExplainer.Configures import data_args, model_args, train_args
+from PGExplainer.utils import PlotUtils
+from PGExplainer.pgexplainer import PGExplainer
+from PGExplainer.models import GnnNets, GnnNets_NC
+from PGExplainer.metrics import top_k_fidelity, top_k_sparsity
+from PGExplainer.load_dataset import get_dataset, get_dataloader
+from PGExplainer.Configures import data_args, model_args, train_args
 
 
 def pipeline_GC(top_k):
-    dataset = get_dataset(data_args.dataset_dir, data_args.dataset_name)
+    dataset = get_dataset(data_args)
     if data_args.dataset_name == 'mutag':
         data_indices = list(range(len(dataset)))
         pgexplainer_trainset = dataset
     else:
-        loader = get_dataloader(dataset,
-                                batch_size=train_args.batch_size,
-                                random_split_flag=data_args.random_split,
-                                data_split_ratio=data_args.data_split_ratio,
-                                seed=data_args.seed)
+        loader = get_dataloader(dataset, data_args, train_args)
         data_indices = loader['test'].dataset.indices
         pgexplainer_trainset = loader['train'].dataset
 
@@ -39,7 +35,7 @@ def pipeline_GC(top_k):
                                          f"{model_args.model_name}_"
                                          f"pgexplainer")
     if not os.path.isdir(save_dir):
-        os.mkdir(save_dir)
+        os.makedirs(save_dir)
 
     pgexplainer = PGExplainer(gnnNets)
 
@@ -110,7 +106,7 @@ def pipeline_GC(top_k):
 
 
 def pipeline_NC(top_k):
-    dataset = get_dataset(data_args.dataset_dir, data_args.dataset_name)
+    dataset = get_dataset(data_args)
     input_dim = dataset.num_node_features
     output_dim = dataset.num_classes
     data = dataset[0]
@@ -126,7 +122,7 @@ def pipeline_NC(top_k):
                                          f"{model_args.model_name}_"
                                          f"pgexplainer")
     if not os.path.isdir(save_dir):
-        os.mkdir(save_dir)
+        os.makedirs(save_dir)
 
     pgexplainer = PGExplainer(gnnNets)
 

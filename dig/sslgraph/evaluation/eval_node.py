@@ -136,6 +136,57 @@ class NodeUnsupervised(object):
         std = test_scores_sd[idx]
         print('Best epoch %d: acc %.4f (+/- %.4f).'%((idx+1)*self.log_interval, acc, std))
         return acc
+    
+    
+    def evaluate_multisplits(self, learning_model, encoder, split_masks):
+        r"""Run evaluation with given learning model and encoder(s), return averaged scores 
+        on multiple different splits.
+        
+        Args:
+            learning_model: An object of a contrastive model or a predictive model.
+            encoder (torch.nn.Module): List or trainable pytorch model.
+            split_masks (list, or generator): A list or generator that contains or yields masks for 
+                train, val and test splits.
+                
+        Example
+        -------
+        >>> split_masks = [(train1, val1, test1), (train2, val2, test2), ..., (train20, val20, test20)]
+        """
+        
+        full_loader = DataLoader(self.full_dataset, 1)
+        if isinstance(encoder, list):
+            params = [{'params': enc.parameters()} for enc in encoder]
+        else:
+            params = encoder.parameters()
+        
+        p_optimizer = self.get_optim(self.p_optim)(params, lr=self.p_lr, 
+                                                   weight_decay=self.p_weight_decay)
+
+        test_scores_m, test_scores_sd = [], []
+        per_epoch_out = (self.log_interval<self.p_epoch)
+        for i, enc in enumerate(learning_model.train(encoder, full_loader, 
+                                                     p_optimizer, self.p_epoch, per_epoch_out)):
+            if not per_epoch_out or (i+1)%self.log_interval==0:
+                embed, lbls = self.get_embed(enc.to(self.device), full_loader)
+                lbs = np.array(preprocessing.LabelEncoder().fit_transform(lbls))
+                
+                test_scores = []
+                for train_mask, val_mask, test_mask in split_masks:
+                    test_score = self.get_clf()(embed[train_mask], lbls[train_mask],
+                                                embed[test_mask], lbls[test_mask])
+                    test_scores.append(test_score)
+                
+                test_scores = torch.tensor(test_scores)
+                test_score_mean = test_scores.mean().item()
+                test_score_std = test_scores.std().item() 
+                test_scores_m.append(test_score_mean)
+                test_scores_sd.append(test_score_std)
+                
+        idx = np.argmax(test_scores_m)
+        acc = test_scores_m[idx]
+        std = test_scores_sd[idx]
+        print('Best epoch %d: acc %.4f (+/- %.4f).'%((idx+1)*self.log_interval, acc, std))
+        return acc
 
 
     def grid_search(self, learning_model, encoder, p_lr_lst=[0.1,0.01,0.001], 

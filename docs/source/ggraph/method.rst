@@ -1,4 +1,4 @@
-Methods
+dig.ggraph.method
 ========    
 
 

@@ -21,7 +21,6 @@ def read_ba2motif_data(folder: str, prefix):
     return data_list
 
 
-
 class SynGraphDataset(InMemoryDataset):
     r"""
     The Synthetic datasets used in
@@ -129,7 +128,7 @@ class BA_LRP(InMemoryDataset):
     The second class in :class:`~BA_LRP` has a slightly higher growth model and nodes are selected
     without replacement with the inverse preferential attachment model.
 
-    .. math:: p(\mathcal{V}) = \frac{Degree(\mathcal{V})}{\sum_{\mathcal{V}'^{-1} \in \mathcal{G}} Degree(\mathcal{V}')^{-1}}
+    .. math:: p(\mathcal{V}) = \frac{Degree(\mathcal{V})^{-1}}{\sum_{\mathcal{V}' \in \mathcal{G}} Degree(\mathcal{V}')^{-1}}
 
     Args:
         root (:obj:`str`): Root data directory to save datasets
@@ -145,6 +144,20 @@ class BA_LRP(InMemoryDataset):
 
     .. note:: :class:`~BA_LRP` will automatically generate the dataset
       if the dataset file is not existed in the root directory.
+
+    Example:
+        >>> dataset = BA_LRP(root='./datasets')
+        >>> loader = Dataloader(dataset, batch_size=32)
+        >>> data = next(iter(loader))
+        # Batch(batch=[640], edge_index=[2, 1344], x=[640, 1], y=[32, 1])
+
+    Where the attributes of data indices:
+
+    - :obj:`batch`: The assignment vector mapping each node to its graph index
+    - :obj:`x`: The node features
+    - :obj:`edge_index`: The edge matrix
+    - :obj:`y`: The graph label
+
     """
     url = ('https://github.com/divelab/DIG_storage/raw/main/xgraph/datasets/ba_lrp.pt')
 
@@ -189,6 +202,7 @@ class BA_LRP(InMemoryDataset):
             node_pick = prob_dist.sample().squeeze()
             data.edge_index = torch.cat([data.edge_index,
                                          torch.tensor([[node_pick, i], [i, node_pick]], dtype=torch.long)], dim=1)
+            data.y = torch.cat([data.y, torch.tensor([[0]], dtype=torch.float)], dim=0)
 
         return data
 
@@ -212,7 +226,7 @@ class BA_LRP(InMemoryDataset):
                 node_pick = new_node_pick
                 data.edge_index = torch.cat([data.edge_index,
                                              torch.tensor([[node_pick, i], [i, node_pick]], dtype=torch.long)], dim=1)
-
+                data.y = torch.cat([data.y, torch.tensor([[1]], dtype=torch.float)], dim=0)
         return data
 
     def process(self):

@@ -231,7 +231,7 @@ def gnn_score(coalition: list, data: Data, value_func: str,
     ret_x, ret_edge_index = subgraph_build_func(data.x, data.edge_index, mask)
     mask_data = Data(x=ret_x, edge_index=ret_edge_index)
     mask_data = Batch.from_data_list([mask_data])
-    score = value_func(data=mask_data)
+    score = value_func(mask_data)
     # get the score of predicted class for graph or specific node idx
     return score.item()
 

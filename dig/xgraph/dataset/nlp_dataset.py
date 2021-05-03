@@ -84,6 +84,9 @@ class SentiGraphDataset(InMemoryDataset):
     and dependency tree as edges to transfer the text sentiment datasets into
     graph classification datasets.
 
+    The dataset `Graph-SST2 <https://drive.google.com/file/d/1-PiLsjepzT8AboGMYLdVHmmXPpgR8eK1/view?usp=sharing>`_
+    should be downloaded to the proper directory before running.
+
     Args:
         root (:obj:`str`): Root directory where the datasets are saved
         name (:obj:`str`): The name of the datasets.

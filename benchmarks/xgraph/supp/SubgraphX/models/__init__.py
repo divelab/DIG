@@ -1,7 +1,7 @@
 import torch.nn as nn
-from models import GCNNet, GCNNet_NC
-from models import GATNet, GATNet_NC
-from models import GINNet, GINNet_NC
+from SubgraphX.models.GCN import GCNNet, GCNNet_NC
+from SubgraphX.models.GAT import GATNet, GATNet_NC
+from SubgraphX.models.GIN import GINNet, GINNet_NC
 
 __all__ = ['GnnNets', 'GnnNets_NC']
 

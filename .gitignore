@@ -6,5 +6,7 @@ dig/xgraph/results/
 benchmarks/xgraph/datasets/
 benchmarks/xgraph/checkpoints/
 benchmarks/xgraph/.ipynb_checkpoints/
+benchmarks/xgraph/tmp.pt
+benchmarks/xgraph/filename.png
 **/__pycache__/
 docs/build/

@@ -3,7 +3,7 @@ import networkx as nx
 from torch_geometric.data import Data
 
 
-class MCTSNode():
+class MCTSNode(object):
 
     def __init__(self, coalition: list, data: Data,
                  ori_graph: nx.Graph, c_puct: float = 10.0,

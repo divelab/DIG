@@ -1,4 +1,4 @@
-Utils
+dig.ggraph.utils
 ======
 Utilities under :obj:`dig.ggraph.utils`.
 

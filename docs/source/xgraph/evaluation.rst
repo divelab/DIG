@@ -1,4 +1,4 @@
-Evaluation
+dig.xgraph.evaluation
 ======
 Evaluation interfaces under :obj:`dig.xgraph.evaluation`.
 
