@@ -31,7 +31,7 @@ We use the GitHub `issues <https://github.com/divelab/DIG/issues>`_ tracker to m
 General process of contributing to code
 -------
 
-#. Fork the DIG repository by clicking "Fork" in the top right of the screen at `this URL <(https://github.com/divelab/DIG)>`_.
+#. Fork the DIG repository by clicking "Fork" in the top right of the screen at `this URL <https://github.com/divelab/DIG>`_.
 
 #. Uninstall existing DIG (if applicable):
 
