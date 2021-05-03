@@ -1,4 +1,4 @@
-from .geometric_computing import xyztoda, xyztodat #    'xyztoda',
+from .geometric_computing import xyztodat
 
 __all__ = [
     'xyztodat'

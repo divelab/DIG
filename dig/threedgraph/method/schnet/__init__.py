@@ -1,5 +1,5 @@
-from .schnet import schnet
+from .schnet import SchNet
 
 __all__ = [
-    'schnet'
+    'SchNet'
 ]

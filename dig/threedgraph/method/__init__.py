@@ -1,12 +1,12 @@
 from .run import run
-from .schnet import schnet
-from .dimenetpp import dimenetpp
-from .spherenet import spherenet
+from .schnet import SchNet
+from .dimenetpp import DimeNetPP
+from .spherenet import SphereNet
 
 
 __all__ = [
     'run', 
-    'schnet',
-    'dimenetpp',
-    'spherenet'
+    'SchNet',
+    'DimeNetPP',
+    'SphereNet'
 ]

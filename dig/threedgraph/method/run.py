@@ -7,91 +7,98 @@ from torch_geometric.data import DataLoader
 import numpy as np
 from torch.autograd import grad
 from torch.utils.tensorboard import SummaryWriter
-# import sys
-# sys.path.append('..')
-# from utils import compute_mae
+from torch.optim.lr_scheduler import StepLR
+from tqdm import tqdm
 
 class run():
     r"""
     The base script for running different 3DGN methods.
     """
-
-    def run(self, train_dataset, val_dataset, test_dataset, save_dir, log_dir, model, epochs, batch_size, lr, lr_decay_factor, lr_decay_step_size, weight_decay, 
-        energy_and_force, num_atom, p):
+    def __init__(self):
+        pass
+        
+    def run(self, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=300, batch_size=32, lr=0.001, lr_decay_factor=0.5, lr_decay_step_size=50, weight_decay=0, 
+        energy_and_force=False, p=100, save_dir='', log_dir=''):
         r"""
-        The run script for traning and validation.
+        The run script for training and validation.
         
         Args:
-            train_dataset (str): The path of the training set.
-            val_dataset (str): The path of the validation set.
-            test_dataset (str): The path of the test set.
+            train_dataset
+            valid_dataset
+            test_dataset
             save_dir (str): The path to save trained models.
             log_dir (str): The path to save log files.
-            model (str): Which 3DGN model to use. Should be one of the schnet, dimenetpp, and spherenet.
-            epochs (int): Number of total training epochs.
+            model: Which 3DGN model to use. Should be one of the SchNet, DimeNetPP, and SphereNet.
+            loss_func (function): The used loss funtion for training.
+            evaluation (function): The evaluation function. 
+            epochs (int, optinal): Number of total training epochs. (default: :obj:`300`)
             batch_size (int, optinal): Number of samples in each minibatch. (default: :obj:`32`)
-            lr (float, optinal): Initial learning rate. (default: :obj:`0.0001`)
-            lr_decay_factor (float, optinal): Learning rate decay factor. (default: :obj:`0.1`)
-            lr_decay_step_size (int, optinal): epochs at which lr_initial <- lr_initial * lr_decay_factor. (default: :obj:`8`)
-            weight_decay (float, optinal): weight decay factor at the regularization term. (default: :obj:`0.9999`)
+            lr (float, optinal): Initial learning rate. (default: :obj:`0.001`)
+            lr_decay_factor (float, optinal): Learning rate decay factor. (default: :obj:`0.5`)
+            lr_decay_step_size (int, optinal): epochs at which lr_initial <- lr_initial * lr_decay_factor. (default: :obj:`50`)
+            weight_decay (float, optinal): weight decay factor at the regularization term. (default: :obj:`0`)
             energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
-            num_atom (int, optinal): Maximal number of atoms for a training sample. A sample with larger value is skipped and not used. (default: :obj:`2000`)
             p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy during training. (default: :obj:`100`)
+            save_dir (str): The path to save trained models.
+            log_dir (str): The path to save log files.
         
         """        
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = model.to(device)
         optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-        loss_func = torch.nn.L1Loss(reduction='none')
-        metric_func = torch.nn.L1Loss(reduction='none') #compute_mae #the metrics can be different with the loss function
+        scheduler = StepLR(optimizer, step_size=lr_decay_factor, gamma=lr_decay_factor)
 
-        val_loader = DataLoader(val_dataset, batch_size, shuffle=False)
-        best_val = float('inf')
-        epoch_best_val = 0
+        train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
+        valid_loader = DataLoader(valid_dataset, batch_size, shuffle=False)
+        test_loader = DataLoader(test_dataset, batch_size, shuffle=False)
+        best_valid = float('inf')
+        best_test = float('inf')
             
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-        save_dir = os.path.join(save_dir, 'model.ckpt') 
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
-        log_dir = os.path.join(log_dir)
-        writer = SummaryWriter(log_dir=log_dir)
+        if save_dir != '':
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+        if log_dir != '':
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir)
+            writer = SummaryWriter(log_dir=log_dir)
         
         for epoch in range(1, epochs + 1):
-            if torch.cuda.is_available():
-                torch.cuda.synchronize()
-                
-            train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
-            t_start = time.perf_counter()
-
-            train_loss = self.train(model, optimizer, train_loader, energy_and_force, num_atom, p, loss_func, device)/len(train_dataset) 
-            val_metric, val_loss = self.val(model, val_loader, energy_and_force, num_atom, p, loss_func, metric_func, device)
-            val_loss = val_loss/len(val_dataset)
-
-            writer.add_scalar('train_loss', train_loss, epoch)
-            writer.add_scalar('val_loss', val_loss, epoch)
-            writer.add_scalar('val_metric', val_metric, epoch)
+            print("=====Epoch {}".format(epoch))
             
-            if val_metric < best_val:
-                epoch_best_val = epoch
-                best_val = val_metric
-                torch.save(model.state_dict(), save_dir)
+            print('Training...')
+            train_mae = self.train(model, optimizer, train_loader, energy_and_force, p, loss_func, device)
+
+            print('Evaluating...')
+            valid_mae = self.val(model, valid_loader, energy_and_force, p, loss_func, evaluation, device)
+
+            print('Testing...')
+            test_mae = self.val(model, test_loader, energy_and_force, p, loss_func, evaluation, device)
+
+            print({'Train': train_mae, 'Validation': valid_mae, 'Test': test_mae})
+
+            if log_dir != '':
+                writer.add_scalar('train_mae', train_mae, epoch)
+                writer.add_scalar('valid_mae', valid_mae, epoch)
+                writer.add_scalar('test_mae', test_mae, epoch)
             
-            if torch.cuda.is_available():
-                torch.cuda.synchronize()
+            if valid_mae < best_valid:
+                best_valid = valid_mae
+                best_test = test_mae
+                if save_dir != '':
+                    print('Saving checkpoint...')
+                    checkpoint = {'epoch': epoch, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 'scheduler_state_dict': scheduler.state_dict(), 'best_valid_mae': best_validid_mae, 'num_params': num_params}
+                    torch.save(checkpoint, os.path.join(save_dir, 'valid_checkpoint.pt'))
 
-            t_end = time.perf_counter()
-            
-            print('Epoch: {:03d}, Training Loss: {:.4f}, Val Loss: {:.4f}, Epoch_best_val: {:03d}, Duration: {:.2f}'.format(
-                epoch, train_loss,  val_loss, epoch_best_val, t_end - t_start))
+            scheduler.step()
 
-            if epoch % lr_decay_step_size == 0:
-                for param_group in optimizer.param_groups:
-                    param_group['lr'] = lr_decay_factor * param_group['lr']
-        writer.close()
+        print(f'Best validation MAE so far: {best_valid}')
+        print(f'Test MAE when got best validation result: {best_test}')
+        
+        if log_dir != '':
+            writer.close()
 
-    def train(self, model, optimizer, train_loader, energy_and_force, num_atom, p, loss_func, device):
+    def train(self, model, optimizer, train_loader, energy_and_force, p, loss_func, device):
         r"""
         The script for training.
         
@@ -99,16 +106,15 @@ class run():
             model (str): Which 3DGN model to use. Should be one of the schnet, dimenetpp, and spherenet.
             optimizer (Optimizer): Pytorch optimizer for trainable parameters in training.
             train_loader (Dataloader): Dataloader for training.
-            energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
-            num_atom (int, optinal): Maximal number of atoms for a training sample. A sample with larger value is skipped and not used. (default: :obj:`2000`)
+            energy_and_force (bool, optional): If set to :obj:`True`, will predict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
             p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy during training. (default: :obj:`100`)
             loss_func (function, optional): The used loss funtion for training. (default: MSE)
             device (torch.device, optional): The device where the model is deployed.
         
         """   
         model.train()
-        losses = []
-        for batch_data in train_loader:
+        loss_accum = 0
+        for step, batch_data in enumerate(tqdm(train_loader)):
             optimizer.zero_grad()
             batch_data = batch_data.to(device)
             out = model(batch_data)
@@ -116,58 +122,51 @@ class run():
                 force = -grad(outputs=out, inputs=batch_data.pos, grad_outputs=torch.ones_like(out),create_graph=True,retain_graph=True)[0]
                 e_loss = loss_func(out, batch_data.y.unsqueeze(1))
                 f_loss = loss_func(force, batch_data.force)
-                loss = e_loss.sum() + p/(3*num_atom) * f_loss.sum()
+                loss = e_loss + p * f_loss
             else:
-                loss = loss_func(out, batch_data.y.unsqueeze(1)).sum()
+                loss = loss_func(out, batch_data.y.unsqueeze(1))
             loss.backward()
             optimizer.step()
-            losses.append(loss)
-        return sum(losses).item()
+            loss_accum += loss.detach().cpu().item()
+        return loss_accum / (step + 1)
 
-    def val(self, model, val_loader, energy_and_force, num_atom, p, loss_func, metric_func, device):
+    def val(self, model, valid_loader, energy_and_force, p, loss_func, evaluation, device):
         r"""
         The script for validation.
         
         Args:
             model (str): Which 3DGN model to use. Should be one of the schnet, dimenetpp, and spherenet.
-            val_loader (Dataloader): Dataloader for validation.
+            valid_loader (Dataloader): Dataloader for validation.
             energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)    
-            num_atom (int, optinal): Maximal number of atoms for a training sample. A sample with larger value is skipped and not used. (default: :obj:`2000`)
             p (int, optinal): The forces’ weight for a joint loss of forces and conserved energy during training. (default: :obj:`100`)
             loss_func (function, optional): The used loss funtion in training. (default: MSE)
-            metric_func (function, optional): The used funtion for evaluation. (default: MSE)
+            evaluation (function, optional): The used funtion for evaluation. (default: MSE)
             device (torch.device, optional): The device where the model is deployed.
         
         """   
         model.eval()
-        losses = torch.Tensor([0.0]).to(device)
+
+        preds = torch.Tensor([]).to(device)
+        targets = torch.Tensor([]).to(device)
+
         if energy_and_force:
-            preds_energy = torch.Tensor([]).to(device)
             preds_force = torch.Tensor([]).to(device)
-            targets_energy = torch.Tensor([]).to(device)
             targets_force = torch.Tensor([]).to(device)
-        else:
-            preds = torch.Tensor([]).to(device)
-            targets = torch.Tensor([]).to(device)
-        for batch_data in val_loader:
+        
+        for batch_data in tqdm(valid_loader):
             batch_data = batch_data.to(device)
             out = model(batch_data)
+            preds = torch.cat([preds, out.detach_()], dim=0)
+            targets = torch.cat([targets, batch_data.y.unsqueeze(1)], dim=0)
             if energy_and_force:
                 force = -grad(outputs=out, inputs=batch_data.pos, grad_outputs=torch.ones_like(out),create_graph=True,retain_graph=True)[0]
                 preds_force = torch.cat([preds_force,force.detach_()], dim=0)
-                preds_energy = torch.cat([preds_energy, out.detach_()], dim=0)
                 targets_force = torch.cat([targets_force,batch_data.force], dim=0)
-                targets_energy = torch.cat([targets_energy, batch_data.y.unsqueeze(1)], dim=0)
-                e_loss = loss_func(out, batch_data.y.unsqueeze(1))
-                f_loss = loss_func(force, batch_data.force)
-                loss = e_loss.sum() + p/(3*num_atom) * f_loss.sum()
-            else:
-                preds = torch.cat([preds, out.detach_()], dim=0)
-                targets = torch.cat([targets, batch_data.y.unsqueeze(1)], dim=0)
-                loss = loss_func(out, batch_data.y.unsqueeze(1)).sum()
-            losses += loss.sum().item()
+
+        input_dict = {"y_true": targets, "y_pred": preds}
+
         if energy_and_force:
-            energy_metric = metric_func(targets_energy.cpu().detach().numpy(), preds_energy.cpu().detach().numpy())
-            force_metric = metric_func(targets_force.cpu().detach().numpy(), preds_force.cpu().detach().numpy(), num_tasks=num_atom*3)
-            return np.mean(energy_metric) + p * np.mean(force_metric), losses[0]
-        return np.mean(metric_func(targets.cpu().detach().numpy(), preds.cpu().detach().numpy())), losses[0]
+            input_dict_force = {"y_true": targets_force, "y_pred": preds_force}
+            return evaluation.eval(input_dict)['mae'] + p * evaluation.eval(input_dict_force)['mae']
+
+        return evaluation.eval(input_dict)['mae']
