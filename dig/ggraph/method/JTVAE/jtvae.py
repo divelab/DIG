@@ -28,13 +28,15 @@ class JTVAE(Generator):
     The method class for the JTVAE algorithm proposed in the paper `Junction Tree Variational Autoencoder for Molecular Graph Generation <https://arxiv.org/abs/1802.04364>`_. This class provides interfaces for running random generation with the JTVAE algorithm. Please refer to the `benchmark codes <https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/JTVAE>`_ for usage examples.
 
     Args:
+        list_smiles (list): List of smiles in training data.
         training (boolean): If we are training (as opposed to testing).
         build_vocab (boolean): If we need to build the vocabulary (first time training with this dataset).
         device (torch.device, optional): The device where the model is deployed.
     """
-    def __init__(self, list_smiles, training=True, build_vocab=True, device=None):
+    def __init__(self, list_smiles, build_vocab=True, device=None):
         super().__init__()
-        self.vocab = self.build_vocabulary(list_smiles)
+        if build_vocab:
+            self.vocab = self.build_vocabulary(list_smiles)
         self.model = None
         
 
@@ -48,17 +50,20 @@ class JTVAE(Generator):
         elif task == 'cons_optim':
             self.prop_vae = jtnn.JTPropVAE(jtnn.Vocab(self.vocab), **config_dict).cuda()
         else:
-            raise ValueError('Task {} is not supported in GraphDF!'.format(task))        
+            raise ValueError('Task {} is not supported in JTVAE!'.format(task))        
             
         
         
     def build_vocabulary(self, list_smiles):
         r"""
             Building the vocabulary for training.
+            
             Args:
-                dataset (list): the list of smiles strings in the dataset.
+                list_smiles (list): the list of smiles strings in the dataset.
+                
             :rtype:
-                cset (list): A list of smiles that contains the vocabulary for the training data.       
+                cset (list): A list of smiles that contains the vocabulary for the training data. 
+            
         """
         cset = set()
         for smiles in list_smiles:
@@ -84,11 +89,13 @@ class JTVAE(Generator):
     def preprocess(self, list_smiles):
         r"""
             Preprocess the molecules.
+            
             Args:
                 list_smiles (list): The list of smiles strings in the dataset.
-            :rtype:
-            preprocessed (list): A list of preprocessed MolTree objects.
                 
+            :rtype:
+                preprocessed (list): A list of preprocessed MolTree objects.
+            
         """
         preprocessed = list(map(self._tensorize, tqdm(list_smiles, leave=True)))
         return preprocessed
@@ -96,7 +103,8 @@ class JTVAE(Generator):
 
     def train_rand_gen(self, loader, load_epoch, lr, anneal_rate, clip_norm, num_epochs, beta, max_beta, step_beta, anneal_iter, kl_anneal_iter, print_iter, save_iter):
         r"""
-            Train the Junction Tree Variational Autoencoder.
+            Train the Junction Tree Variational Autoencoder for the random generation task.
+            
             Args:
                 loader (MolTreeFolder): The MolTreeFolder loader.
                 load_epoch (int): The epoch to load from state dictionary.
@@ -170,8 +178,10 @@ class JTVAE(Generator):
     def run_rand_gen(self, num_samples):
         r"""
         Sample new molecules from the trained model.
+        
         Args:
             num_samples (int): Number of samples to generate from the trained model.
+            
         :rtype:
             samples (list): samples is a list of generated molecules.
                 
@@ -181,6 +191,19 @@ class JTVAE(Generator):
         return samples
     
     def train_cons_optim(self, loader, batch_size, hidden_size, latent_size, depth, beta, lr):
+        r"""
+            Train the Junction Tree Variational Autoencoder for the constrained optimization task.
+            
+            Args:
+                loader (MolTreeFolder): The MolTreeFolder loader.
+                batch_size (int): The batch size.
+                hidden_size (int): The hidden size.
+                latent_size (int): The latent size.
+                depth (int): The depth of the network.
+                lr (float): The learning rate for training.
+                beta (float): The KL regularization weight.
+                
+        """
         for param in self.prop_vae.parameters():
             if param.dim() == 1:
                 nn.init.constant(param, 0)
