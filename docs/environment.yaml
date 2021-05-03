@@ -17,7 +17,7 @@ dependencies:
     - torch-cluster==1.5.9
     - torch-spline-conv==1.2.1
     - torch-geometric==1.7.0
-    - autodocsumm
+    - git+https://github.com/Chilipp/autodocsumm.git
     - captum==0.2.0
     - cilog
     - typed-argument-parser==1.5.4 
