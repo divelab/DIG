@@ -6,7 +6,9 @@ from dig.sslgraph.method.contrastive.views_fn import NodeAttrMask, EdgePerturbat
 class GRACE(Contrastive):
     r"""
     Contrastive learning method proposed in the paper `Deep Graph Contrastive Representation 
-    Learning <https://arxiv.org/abs/2006.04131>`_.
+    Learning <https://arxiv.org/abs/2006.04131>`_. You can refer to `the benchmark code 
+    <https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_grace.ipynb>`_ for
+    an example of usage.
     
     *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`GRACE`.
         

@@ -30,7 +30,9 @@ class LogReg(nn.Module):
 class NodeUnsupervised(object):
     r"""
     The evaluation interface for unsupervised graph representation learning evaluated with 
-    linear classification.
+    linear classification. You can refer to `the benchmark code 
+    <https://github.com/divelab/DIG/tree/dig/benchmarks/sslgraph>`_ 
+    for examples of usage.
     
     Args:
         full_dataset (torch_geometric.data.Dataset): The graph classification dataset.

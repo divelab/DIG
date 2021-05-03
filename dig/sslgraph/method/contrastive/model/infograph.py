@@ -37,7 +37,9 @@ class InfoGraph(Contrastive):
     r"""
     Contrastive learning method proposed in the paper `InfoGraph: Unsupervised and 
     Semi-supervised Graph-Level Representation Learning via Mutual Information 
-    Maximization <https://arxiv.org/abs/1908.01000>`_.
+    Maximization <https://arxiv.org/abs/1908.01000>`_. You can refer to `the benchmark code 
+    <https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_infograph.ipynb>`_ 
+    for an example of usage.
 
     *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`InfoGraph`.
     
