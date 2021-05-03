@@ -4,15 +4,13 @@ import math, random, sys
 from optparse import OptionParser
 from multiprocessing import Pool
 
-from .vocab import Vocab
-from .jtnn_vae import JTNNVAE
-from .datautils import MolTreeFolder, PairTreeFolder, MolTreeDataset
+from . import jtnn
+from . import fast_jtnn
 
 import numpy as np
 
 import rdkit
 from rdkit import RDLogger
-from .mol_tree import MolTree
 
 from tqdm import tqdm
 
@@ -35,9 +33,24 @@ class JTVAE(Generator):
         device (torch.device, optional): The device where the model is deployed.
     """
     def __init__(self, list_smiles, training=True, build_vocab=True, device=None):
-        #super().__init__()
+        super().__init__()
         self.vocab = self.build_vocabulary(list_smiles)
-        self.vae = JTNNVAE(Vocab(self.vocab), 450, 56, 20, 3).cuda()
+        self.model = None
+        
+
+    def get_model(self, task, config_dict):
+        if task == 'rand_gen':
+            #hidden_size, latent_size, depthT, depthG
+            self.vae = JTNNVAE(fast_jtnn.Vocab(self.vocab), config_dict).cuda()
+        elif task == 'prop_optim':
+            self.model = GraphFlowModel_con_rl(model_conf_dict)  # TODO Replace
+            #hidden_size, latent_size, depth
+        elif task == 'cons_optim':
+            self.prop_vae = jtnn.JTPropVAE(jtnn.Vocab(self.vocab), **config_dict).cuda()
+        else:
+            raise ValueError('Task {} is not supported in GraphDF!'.format(task))        
+            
+        
         
     def build_vocabulary(self, list_smiles):
         r"""
@@ -49,7 +62,7 @@ class JTVAE(Generator):
         """
         cset = set()
         for smiles in list_smiles:
-            mol = MolTree(smiles)
+            mol = fast_jtnn.MolTree(smiles)
             for c in mol.nodes:
                 cset.add(c.smiles)
        # cset_newline = list(map(lambda x: x + "\n", cset))
@@ -166,3 +179,60 @@ class JTVAE(Generator):
         torch.manual_seed(0)
         samples = [self.vae.sample_prior() for _ in range(num_samples)]
         return samples
+    
+    def train_cons_optim(self, loader, batch_size, hidden_size, latent_size, depth, beta, lr):
+        for param in self.prop_vae.parameters():
+            if param.dim() == 1:
+                nn.init.constant(param, 0)
+            else:
+                nn.init.xavier_normal(param)
+
+        print("Model #Params: %dK" % (sum([x.nelement() for x in self.prop_vae.parameters()]) / 1000,))
+
+        optimizer = optim.Adam(self.prop_vae.parameters(), lr=lr)
+        scheduler = lr_scheduler.ExponentialLR(optimizer, 0.9)
+        scheduler.step()
+
+        MAX_EPOCH = 6
+        PRINT_ITER = 20
+
+        for epoch in range(MAX_EPOCH):
+            word_acc,topo_acc,assm_acc,steo_acc,prop_acc = 0,0,0,0,0
+
+            for it, batch in enumerate(loader):
+                for mol_tree,_ in batch:
+                    for node in mol_tree.nodes:
+                        if node.label not in node.cands:
+                            node.cands.append(node.label)
+                            node.cand_mols.append(node.label_mol)
+
+                self.prop_vae.zero_grad()
+                loss, kl_div, wacc, tacc, sacc, dacc, pacc = self.prop_vae(batch, beta)
+                loss.backward()
+                optimizer.step()
+
+                word_acc += wacc
+                topo_acc += tacc
+                assm_acc += sacc
+                steo_acc += dacc
+                prop_acc += pacc
+
+                if (it + 1) % PRINT_ITER == 0:
+                    word_acc = word_acc / PRINT_ITER * 100
+                    topo_acc = topo_acc / PRINT_ITER * 100
+                    assm_acc = assm_acc / PRINT_ITER * 100
+                    steo_acc = steo_acc / PRINT_ITER * 100
+                    prop_acc /= PRINT_ITER
+
+                    print("KL: %.1f, Word: %.2f, Topo: %.2f, Assm: %.2f, Steo: %.2f, Prop: %.4f" % (kl_div, word_acc, topo_acc, assm_acc, steo_acc, prop_acc))
+                    word_acc,topo_acc,assm_acc,steo_acc,prop_acc = 0,0,0,0,0
+                    sys.stdout.flush()
+
+                if (it + 1) % 1500 == 0: #Fast annealing
+                    scheduler.step()
+                    print("learning rate: %.6f" % scheduler.get_lr()[0])
+                    torch.save(self.prop_vae.state_dict(), opts.save_path + "/model.iter-%d-%d" % (epoch, it + 1))
+
+            scheduler.step()
+            print("learning rate: %.6f" % scheduler.get_lr()[0])
+            torch.save(self.prop_vae.state_dict(), opts.save_path + "/model.iter-" + str(epoch))
