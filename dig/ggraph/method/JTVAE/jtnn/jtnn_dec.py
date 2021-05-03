@@ -11,7 +11,7 @@ MAX_DECODE_LEN = 100
 class JTNNDecoder(nn.Module):
 
     def __init__(self, vocab, hidden_size, latent_size, embedding=None):
-        super(JTNNDecoder, self).__init__()
+        super().__init__()
         self.hidden_size = hidden_size
         self.vocab_size = vocab.size()
         self.vocab = vocab
@@ -28,6 +28,7 @@ class JTNNDecoder(nn.Module):
         self.W_h = nn.Linear(2 * hidden_size, hidden_size)
 
         #Feature Aggregate Weights
+        print(latent_size, hidden_size)
         self.W = nn.Linear(latent_size + hidden_size, hidden_size)
         self.U = nn.Linear(latent_size + 2 * hidden_size, hidden_size)
 

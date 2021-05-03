@@ -25,7 +25,7 @@ def set_batch_nodeID(mol_batch, vocab):
 class JTPropVAE(nn.Module):
 
     def __init__(self, vocab, hidden_size, latent_size, depth):
-        super(JTPropVAE, self).__init__()
+        super().__init__()
         self.vocab = vocab
         self.hidden_size = hidden_size
         self.latent_size = latent_size
@@ -35,12 +35,12 @@ class JTPropVAE(nn.Module):
         self.jtnn = JTNNEncoder(vocab, hidden_size, self.embedding)
         self.jtmpn = JTMPN(hidden_size, depth)
         self.mpn = MPN(hidden_size, depth)
-        self.decoder = JTNNDecoder(vocab, hidden_size, latent_size / 2, self.embedding)
+        self.decoder = JTNNDecoder(vocab, hidden_size, latent_size // 2, self.embedding)
 
-        self.T_mean = nn.Linear(hidden_size, latent_size / 2)
-        self.T_var = nn.Linear(hidden_size, latent_size / 2)
-        self.G_mean = nn.Linear(hidden_size, latent_size / 2)
-        self.G_var = nn.Linear(hidden_size, latent_size / 2)
+        self.T_mean = nn.Linear(hidden_size, latent_size // 2)
+        self.T_var = nn.Linear(hidden_size, latent_size // 2)
+        self.G_mean = nn.Linear(hidden_size, latent_size // 2)
+        self.G_var = nn.Linear(hidden_size, latent_size // 2)
         
         self.propNN = nn.Sequential(
                 nn.Linear(self.latent_size, self.hidden_size),
