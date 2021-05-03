@@ -1,6 +1,5 @@
-from .eval import compute_mae, compute_rmse
+from .eval import threedEvaluator
 
 __all__ = [
-    'compute_mae', 
-    'compute_rmse'
+    'threedEvaluator'
 ]

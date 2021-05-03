@@ -215,16 +215,16 @@ class update_u(torch.nn.Module):
         return u
 
 
-class spherenet(torch.nn.Module):
+class SphereNet(torch.nn.Module):
     r"""
          The spherical message passing neural network SphereNet from the `"Spherical Message Passing for 3D Graph Networks" <https://arxiv.org/abs/2102.05013>`_ paper.
         
         Args:
-            energy_and_force (bool, optional): If set to :obj:`True`, will preddict energy and take the minus derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)
-            cutoff (float, optional): Cutoff distance for interatomic interactions. (default: :obj:`6.0`)
-            num_layers (int, optional): Number of building blocks. (default: :obj:`6`)
+            energy_and_force (bool, optional): If set to :obj:`True`, will predict energy and take the negative of the derivative of the energy with respect to the atomic positions as predicted forces. (default: :obj:`False`)
+            cutoff (float, optional): Cutoff distance for interatomic interactions. (default: :obj:`5.0`)
+            num_layers (int, optional): Number of building blocks. (default: :obj:`4`)
             hidden_channels (int, optional): Hidden embedding size. (default: :obj:`128`)
-            out_channels (int, optional): Size of each output sample. (default: :obj:`256`)
+            out_channels (int, optional): Size of each output sample. (default: :obj:`1`)
             int_emb_size (int, optional): Embedding size used for interaction triplets. (default: :obj:`64`)
             basis_emb_size (int, optional): Embedding size used in the basis transformation. (default: :obj:`8`)
             out_emb_channels (int, optional): Embedding size used for atoms in the output block. (default: :obj:`256`)
@@ -235,15 +235,16 @@ class spherenet(torch.nn.Module):
             num_after_skip (int, optional): Number of residual layers in the interaction blocks before the skip connection. (default: :obj:`2`)
             num_output_layers (int, optional): Number of linear layers for the output blocks. (default: :obj:`3`)
             act: (function, optional): The activation funtion. (default: :obj:`swish`)
+            output_init: (str, optional): The initialization fot the output. It could be :obj:`GlorotOrthogonal` and :obj:`zeros`. (default: :obj:`GlorotOrthogonal`)
             
     """
     def __init__(
-        self, energy_and_force, cutoff, num_layers, 
-        hidden_channels, out_channels, int_emb_size, basis_emb_size, out_emb_channels, 
-        num_spherical, num_radial, envelope_exponent=5, 
+        self, energy_and_force=False, cutoff=5.0, num_layers=4, 
+        hidden_channels=128, out_channels=1, int_emb_size=64, basis_emb_size=8, out_emb_channels=256, 
+        num_spherical=7, num_radial=6, envelope_exponent=5, 
         num_before_skip=1, num_after_skip=2, num_output_layers=3, 
         act=swish, output_init='GlorotOrthogonal'):
-        super(spherenet, self).__init__()
+        super(SphereNet, self).__init__()
 
         self.cutoff = cutoff
         self.energy_and_force = energy_and_force
@@ -279,7 +280,7 @@ class spherenet(torch.nn.Module):
             pos.requires_grad_()
         edge_index = radius_graph(pos, r=self.cutoff, batch=batch)
         num_nodes=z.size(0)
-        dist, angle, torsion, i, j, idx_kj, idx_ji = xyztodat(pos, edge_index, num_nodes)
+        dist, angle, torsion, i, j, idx_kj, idx_ji = xyztodat(pos, edge_index, num_nodes, use_torsion=True)
 
         emb = self.emb(dist, angle, torsion, idx_kj)
 

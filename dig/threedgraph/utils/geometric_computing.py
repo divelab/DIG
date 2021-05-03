@@ -8,38 +8,6 @@ from math import sqrt, pi as PI
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def xyztoda(pos, edge_index, num_nodes):
-    j, i = edge_index  # j->i
-
-    # Calculate distances. # number of edges
-    dist = (pos[i] - pos[j]).pow(2).sum(dim=-1).sqrt()
-
-    value = torch.arange(j.size(0), device=j.device)
-    adj_t = SparseTensor(row=i, col=j, value=value, sparse_sizes=(num_nodes, num_nodes))
-    adj_t_row = adj_t[j]
-    num_triplets = adj_t_row.set_value(None).sum(dim=1).to(torch.long)
-
-    # Node indices (k->j->i) for triplets.
-    idx_i = i.repeat_interleave(num_triplets)
-    idx_j = j.repeat_interleave(num_triplets)
-    idx_k = adj_t_row.storage.col()
-    mask = idx_i != idx_k
-    idx_i, idx_j, idx_k = idx_i[mask], idx_j[mask], idx_k[mask]
-
-    # Edge indices (k-j, j->i) for triplets.
-    idx_kj = adj_t_row.storage.value()[mask]
-    idx_ji = adj_t_row.storage.row()[mask]
-
-    # Calculate angles. 0 to pi
-    pos_ji = pos[idx_i] - pos[idx_j]
-    pos_jk = pos[idx_k] - pos[idx_j]
-    a = (pos_ji * pos_jk).sum(dim=-1) # cos_angle * |pos_ji| * |pos_jk|
-    b = torch.cross(pos_ji, pos_jk).norm(dim=-1) # sin_angle * |pos_ji| * |pos_jk|
-    angle = torch.atan2(b, a)
-            
-
-    return dist, angle, i, j, idx_kj, idx_ji
-
 
 def xyztodat(pos, edge_index, num_nodes, use_torsion = False):
     """
@@ -49,7 +17,7 @@ def xyztodat(pos, edge_index, num_nodes, use_torsion = False):
         pos: Geometric information for every node in the graph.
         edgee_index: Edge index of the graph.
         number_nodes: Number of nodes in the graph.
-        use_torsion: If set to :obj:`True`, will return distance, angle and torsion, otherwise only return distance and angle. (default: :obj:`False`)
+        use_torsion: If set to :obj:`True`, will return distance, angle and torsion, otherwise only return distance and angle (also retrun some useful index). (default: :obj:`False`)
     """
     j, i = edge_index  # j->i
 
