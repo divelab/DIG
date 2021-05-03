@@ -65,6 +65,9 @@ class MVGRL(Contrastive):
     r'''
     Contrastive learning method for graph-level tasks proposed in the paper `Contrastive 
     Multi-View Representation Learning on Graphs (MVGRL) <https://arxiv.org/pdf/2006.05582v1.pdf>`_. 
+    You can refer to `the benchmark code 
+    <https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_mvgrl.ipynb>`_ 
+    for an example of usage.
     
     *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`MVGRL`.
         
