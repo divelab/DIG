@@ -7,7 +7,10 @@
 
 
 
-
+[pypi-image]:https://badge.fury.io/py/dive-into-graphs.svg
+[pypi-url]:https://pypi.org/project/dive-into-graphs/
+[docs-image]: https://readthedocs.org/projects/diveintographs/badge/?version=latest
+[docs-url]: https://diveintographs.readthedocs.io/en/latest/?badge=latest
 [license-image]:https://img.shields.io/badge/license-GPL3.0-green.svg
 [license-url]:https://github.com/divelab/DIG/blob/main/LICENSE
 [contributor-image]:https://img.shields.io/github/contributors/divelab/DIG
@@ -15,7 +18,8 @@
 [contributing-image]:https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
 [contributing-url]:https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html
 
-
+[![PyPI Version][pypi-image]][pypi-url]
+[![Docs Status][docs-image]][docs-url]
 ![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG)
 [![Contributors][contributor-image]][contributor-url]
 [![Contributing][contributing-image]][contributing-url]
