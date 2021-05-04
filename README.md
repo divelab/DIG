@@ -53,7 +53,7 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 
 ## Installation
 
-### Install from pip (available soon)
+### Install from pip
 The key dependencies of DIG: Dive into Graphs are PyTorch (>=1.6.0), PyTorch Geometric (>=1.6.0), and RDKit.
 
 1. Install [PyTorch](https://pytorch.org/get-started/locally/) (>=1.6.0)
