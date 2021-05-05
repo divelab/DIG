@@ -3,6 +3,9 @@ language: shell
 os:
   - linux
 
+vm:
+  size: large
+
 branches:
   only:
   - dig
