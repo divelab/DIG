@@ -16,7 +16,7 @@ install:
   - conda create --yes -n test python="${PYTHON_VERSION}"
   - source activate test
   - conda install pytorch==${TORCH_VERSION} ${TOOLKIT} -c pytorch -c conda-forge --yes
-  - conda install -c rdkit rdkit
+  - conda install -c conda-forge rdkit
   - pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-${TORCH_VERSION}+${IDX}.html
   - pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-${TORCH_VERSION}+${IDX}.html
   - pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${TORCH_VERSION}+${IDX}.html
