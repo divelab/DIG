@@ -1,4 +1,5 @@
 from dig.ggraph.dataset import ggraph_dataset
+from torch_geometric.data import DataLoader
 
 def test_zinc250k():
     dataset = ggraph_dataset.ZINC250k(root='./dataset', prop_name='penalized_logp')
