@@ -4,6 +4,9 @@ from dig.version import __version__
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+setup_requires = ['pytest-runner']
+tests_require = ['pytest', 'pytest-cov', 'mock']
+
 setuptools.setup(
     name="dive_into_graphs",
     version=__version__,
@@ -36,4 +39,7 @@ setuptools.setup(
                       'IPython',
                       'tqdm'],
     python_requires='>=3.6',
+    setup_requires=setup_requires,
+    tests_require=tests_require,
+    extras_require={'test': tests_require},
 )
