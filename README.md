@@ -23,9 +23,9 @@
 [![Build Status](https://travis-ci.com/divelab/DIG.svg?branch=dig)](https://travis-ci.com/divelab/DIG)
 [![codecov](https://codecov.io/gh/divelab/DIG/branch/dig/graph/badge.svg?token=KBJ1P31VCH)](https://codecov.io/gh/divelab/DIG)
 ![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG)
-<!--- [![Contributors][contributor-image]][contributor-url] -->
 [![Contributing][contributing-image]][contributing-url]
 [![License][license-image]][license-url]
+<!--- [![Contributors][contributor-image]][contributor-url] -->
 
 
 **[Documentation](https://diveintographs.readthedocs.io)** | **[Paper](https://arxiv.org/abs/2103.12608)** | **[Benchmarks/Examples](https://github.com/divelab/DIG/tree/dig/benchmarks)**
