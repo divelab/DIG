@@ -1,7 +1,7 @@
 include README.md
 include LICENSE
 include dig/ggraph/dataset/config.csv
-inlcude dig/ggraph/utils/fpscores.pkl.gz
+include dig/ggraph/utils/fpscores.pkl.gz
 
 recursive-exclude test *
 recursive-exclude docs *
