@@ -1,4 +1,4 @@
-from dig.ggraph.dataset.ggraph_dataset import ZINC250k
+from dig.ggraph.dataset import ZINC250k
 
 def test_zinc250k():
     dataset = ZINC250k(root='./dataset', prop_name='penalized_logp')
