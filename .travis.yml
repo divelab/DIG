@@ -34,13 +34,14 @@ install:
   - pip install cilog
   - pip install typed-argument-parser==1.5.4 
   - pip install tensorboard
+  - pip install codecov
   - python setup.py install
 
 script:
   - python setup.py test
 
-# after_success:
-#   - codecov
+after_success:
+  - codecov
 
 notifications:
   email: false
