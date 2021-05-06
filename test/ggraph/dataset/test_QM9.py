@@ -1,7 +1,7 @@
 from dig.ggraph.dataset import QM9
 
 def test_qm9():
-    dataset = QM9(root='./dataset', prop_name='penalized_logp')
+    dataset = QM9(root='./dataset/QM9', prop_name='penalized_logp')
 
     assert len(dataset) == 133885
     assert dataset.num_features == 4
