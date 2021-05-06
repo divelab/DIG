@@ -1,4 +1,4 @@
-from dig.ggraph.dataset.ggraph_dataset import QM9
+from dig.ggraph.dataset import QM9
 
 def test_qm9():
     dataset = QM9(root='./dataset', prop_name='penalized_logp')
