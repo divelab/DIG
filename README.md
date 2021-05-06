@@ -14,7 +14,7 @@
 [license-image]:https://img.shields.io/badge/license-GPL3.0-green.svg
 [license-url]:https://github.com/divelab/DIG/blob/main/LICENSE
 [contributor-image]:https://img.shields.io/github/contributors/divelab/DIG
-[contributor-url]:https://github.com/divelab/DIG/graphs/contributors
+[contributor-url]:https://github.com/divelab/DIG/graphs/contributors 
 [contributing-image]:https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
 [contributing-url]:https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html
 
@@ -23,7 +23,7 @@
 [![Build Status](https://travis-ci.com/divelab/DIG.svg?branch=dig)](https://travis-ci.com/divelab/DIG)
 [![codecov](https://codecov.io/gh/divelab/DIG/branch/dig/graph/badge.svg?token=KBJ1P31VCH)](https://codecov.io/gh/divelab/DIG)
 ![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG)
-[![Contributors][contributor-image]][contributor-url]
+<!--- [![Contributors][contributor-image]][contributor-url] -->
 [![Contributing][contributing-image]][contributing-url]
 [![License][license-image]][license-url]
 
