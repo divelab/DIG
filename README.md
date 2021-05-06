@@ -20,6 +20,7 @@
 
 [![PyPI Version][pypi-image]][pypi-url]
 [![Docs Status][docs-image]][docs-url]
+[![Build Status](https://travis-ci.com/divelab/DIG.svg?branch=dig)](https://travis-ci.com/divelab/DIG)
 ![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG)
 [![Contributors][contributor-image]][contributor-url]
 [![Contributing][contributing-image]][contributing-url]
