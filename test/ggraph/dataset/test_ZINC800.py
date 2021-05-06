@@ -1,7 +1,9 @@
 from dig.ggraph.dataset import ZINC800
+import shutil
 
 def test_zinc800():
-    dataset = ZINC800(root='./dataset/ZINC800')
+    root = './dataset/ZINC800'
+    dataset = ZINC800(root)
 
     assert len(dataset) == 800
     assert dataset.num_features == 9
@@ -13,3 +15,5 @@ def test_zinc800():
     assert dataset[0].adj.size() == (4, 38, 38)
     assert dataset[0].bfs_perm_origin.size() == (38,)
     assert dataset[0].num_atom.size() == (1,)
+
+    shutil.rmtree(root)
