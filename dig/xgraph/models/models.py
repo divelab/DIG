@@ -38,10 +38,10 @@ class GNNBasic(torch.nn.Module):
                 x, edge_index = kwargs['x'], kwargs['edge_index'],
                 batch = kwargs.get('batch')
                 if batch is None:
-                    batch = torch.zeros(kwargs['x'].shape[0], dtype=torch.int64, device=torch.device('cuda'))
+                    batch = torch.zeros(kwargs['x'].shape[0], dtype=torch.int64, device=x.device)
             elif len(args) == 2:
                 x, edge_index, batch = args[0], args[1], \
-                                       torch.zeros(args[0].shape[0], dtype=torch.int64, device=torch.device('cuda'))
+                                       torch.zeros(args[0].shape[0], dtype=torch.int64, device=x.device)
             elif len(args) == 3:
                 x, edge_index, batch = args[0], args[1], args[2]
             else:
