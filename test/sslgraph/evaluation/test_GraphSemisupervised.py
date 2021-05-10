@@ -13,7 +13,7 @@ def test_GraphSemisupervised():
     encoder = Encoder(feat_dim, embed_dim, n_layers=3, gnn='resgcn')
     graphcl = GraphCL(embed_dim, aug_1='subgraph', aug_2='subgraph')
 
-    evaluator = GraphSemisupervised(dataset, dataset_pretrain, label_rate=0.01, p_epoch = 5, f_epoch = 5)
+    evaluator = GraphSemisupervised(dataset, dataset_pretrain, label_rate=0.01, p_epoch = 1, f_epoch = 1)
 
     test_mean, test_std = evaluator.evaluate(learning_model=graphcl, encoder=encoder)
 
