@@ -48,7 +48,7 @@ class SynGraphDataset(InMemoryDataset):
         'ba_shapes': ['BA_shapes', 'BA_shapes.pkl', 'BA_shapes'],
         'ba_community': ['BA_Community', 'BA_Community.pkl', 'BA_Community'],
         'tree_grid': ['Tree_Grid', 'Tree_Grid.pkl', 'Tree_Grid'],
-        'tree_cycle': ['Tree_Cycle', 'Tree_Cycles.pkl', 'Tree_Cycle'],
+        'tree_cycle': ['Tree_Cycle', 'Tree_Cycles.pkl', 'Tree_Cycles'],
         'ba_2motifs': ['BA_2Motifs', 'BA_2Motifs.pkl', 'BA_2Motifs']
     }
 

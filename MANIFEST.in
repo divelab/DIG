@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+include dig/ggraph/dataset/config.csv
+include dig/ggraph/utils/fpscores.pkl.gz
+
+recursive-exclude test *
+recursive-exclude docs *
+recursive-exclude benchmarks *

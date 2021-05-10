@@ -2,15 +2,17 @@ import os
 import re
 import torch
 import numpy as np
-import os.path as osp
 from torch_geometric.utils import dense_to_sparse
 from torch_geometric.data import Data, InMemoryDataset, \
-    download_url, extract_zip, extract_gz
+    download_url
 
 try:
     from rdkit import Chem
 except ImportError:
     Chem = None
+import os.path as osp
+import zipfile
+import gzip
 
 x_map = {
     'atomic_num':
@@ -63,6 +65,32 @@ e_map = {
 }
 
 
+def maybe_log(path, log=True):
+    if log:
+        print('Extracting', path)
+
+
+def extract_gz(path, folder, log=True):
+    maybe_log(path, log)
+    with gzip.open(path, 'r') as r:
+        with open(osp.join(folder, '.'.join(os.path.basename(path).split('.')[:-1])), 'wb') as w:
+            w.write(r.read())
+
+
+def extract_zip(path, folder, log=True):
+    r"""Extracts a zip archive to a specific folder.
+
+    Args:
+        path (string): The path to the tar archive.
+        folder (string): The folder.
+        log (bool, optional): If :obj:`False`, will not print anything to the
+            console. (default: :obj:`True`)
+    """
+    maybe_log(path, log)
+    with zipfile.ZipFile(path, 'r') as f:
+        f.extractall(folder)
+
+
 class MoleculeDataset(InMemoryDataset):
     r"""
     The extension of MoleculeNet with `MUTAG <https://pubs.acs.org/doi/10.1021/jm00106a046>`_.
@@ -110,7 +138,7 @@ class MoleculeDataset(InMemoryDataset):
                 slice(0, 17)],
         'hiv': ['HIV', 'HIV.csv', 'HIV.csv', 0, -1],
         'bace': ['BACE', 'bace.csv', 'bace.csv', 0, 2],
-        'bbbp': ['BBPB', 'BBBP.csv', 'BBBP.csv', -1, -2],
+        'bbbp': ['BBBP', 'BBBP.csv', 'BBBP.csv', -1, -2],
         'tox21': ['Tox21', 'tox21.csv.gz', 'tox21.csv', -1,
                   slice(0, 12)],
         'toxcast':
@@ -266,7 +294,7 @@ class MoleculeDataset(InMemoryDataset):
                     perm = (edge_index[0] * x.size(0) + edge_index[1]).argsort()
                     edge_index, edge_attr = edge_index[:, perm], edge_attr[perm]
 
-                data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y.squeeze(-1).type(torch.int64),
+                data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y,
                             smiles=smiles)
 
                 if self.pre_filter is not None and not self.pre_filter(data):
@@ -276,7 +304,6 @@ class MoleculeDataset(InMemoryDataset):
                     data = self.pre_transform(data)
 
                 data_list.append(data)
-
         torch.save(self.collate(data_list), self.processed_paths[0])
 
     def __repr__(self):

@@ -32,7 +32,9 @@ class LogReg(nn.Module):
 class GraphUnsupervised(object):
     r"""
     The evaluation interface for unsupervised graph representation learning evaluated with 
-    linear classification.
+    linear classification. You can refer to `the benchmark code 
+    <https://github.com/divelab/DIG/tree/dig/benchmarks/sslgraph>`_ 
+    for examples of usage.
     
     Args:
         dataset (torch_geometric.data.Dataset): The graph classification dataset.
@@ -283,7 +285,8 @@ class PredictionModel(nn.Module):
 class GraphSemisupervised(object):
     r"""
     The evaluation interface for semi-supervised learning and transfer learning for 
-    graph-level tasks with pretraining and finetuning datasets.
+    graph-level tasks with pretraining and finetuning datasets. You can refer to `the benchmark 
+    code <https://github.com/divelab/DIG/tree/dig/benchmarks/sslgraph>`_ for examples of usage.
     
     Args:
         dataset (torch_geometric.data.Dataset): The graph dataset for finetuning and evaluation.

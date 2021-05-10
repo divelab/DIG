@@ -7,7 +7,9 @@ from dig.sslgraph.method.contrastive.views_fn import NodeAttrMask, EdgePerturbat
 class GraphCL(Contrastive):
     r"""    
     Contrastive learning method proposed in the paper `Graph Contrastive Learning with 
-    Augmentations <https://arxiv.org/abs/2010.13902>`_.
+    Augmentations <https://arxiv.org/abs/2010.13902>`_. You can refer to `the benchmark code 
+    <https://github.com/divelab/DIG/blob/dig/benchmarks/sslgraph/example_graphcl.ipynb>`_ for
+    an example of usage.
 
     *Alias*: :obj:`dig.sslgraph.method.contrastive.model.`:obj:`GraphCL`.
     

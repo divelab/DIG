@@ -21,9 +21,9 @@ $ cd GraphAF
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --train --data=qm9 
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --train --data=zinc250k
 ```
-To generate molecules using trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphAF/saved_ckpts/rand_gen), then:
+To generate molecules using trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphAF/), then:
 ```shell script
-$ cd GraphDF
+$ cd GraphAF
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=qm9
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --num_mols=100 --model_path=${path_to_the_model} --data=zinc250k
 ```
@@ -37,7 +37,7 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --train --prop=pl
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --train --prop=qed
 ```
 
-To generate molecules using our trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphAF/saved_ckpts/prop_optim), then:
+To generate molecules using our trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphAF/), then:
 ```shell scrip
 $ cd GraphAF
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --num_mols=100 --model_path=${path_to_the_model} --prop=plogp
@@ -52,7 +52,7 @@ $ cd GraphAF
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_cons_optim.py --train --data=graphaf
 ```
 
-To optimize molecules using trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphAF/saved_ckpts/cons_optim), then:
+To optimize molecules using trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphAF/), then:
 ```shell script
 $ cd GraphAF
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_cons_optim.py --model_path=${path_to_the_model} --data=graphaf

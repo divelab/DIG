@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 import os.path as osp
 from torch_geometric.data import Data, InMemoryDataset
-
+import traceback
 
 def undirected_graph(data):
     """
@@ -85,7 +85,9 @@ class SentiGraphDataset(InMemoryDataset):
     graph classification datasets.
 
     The dataset `Graph-SST2 <https://drive.google.com/file/d/1-PiLsjepzT8AboGMYLdVHmmXPpgR8eK1/view?usp=sharing>`_
-    should be downloaded to the proper directory before running.
+    should be downloaded to the proper directory before running. All the three datasets Graph-SST2, Graph-SST5, and
+    Graph-Twitter can be download in this
+    `link <https://drive.google.com/drive/folders/1dt0aGMBvCEUYzaG00TYu1D03GPO7305z?usp=sharing>`_.
 
     Args:
         root (:obj:`str`): Root directory where the datasets are saved
@@ -110,30 +112,34 @@ class SentiGraphDataset(InMemoryDataset):
 
     @property
     def raw_dir(self):
-
         return osp.join(self.root, self.name, 'raw')
 
     @property
     def processed_dir(self):
-
         return osp.join(self.root, self.name, 'processed')
 
     @property
     def raw_file_names(self):
-
         return ['node_features', 'node_indicator', 'sentence_tokens', 'edge_index',
                 'graph_labels', 'split_indices']
 
     @property
     def processed_file_names(self):
-
         return ['data.pt']
 
     def process(self):
-
         # Read data into huge `Data` list.
-        self.data, self.slices, self.supplement \
-              = read_sentigraph_data(self.raw_dir, self.name)
+        try:
+            self.data, self.slices, self.supplement \
+                  = read_sentigraph_data(self.raw_dir, self.name)
+        except Exception as e:
+            print(e)
+            print(traceback.format_exc())
+            if type(e) is FileNotFoundError:
+                print("Please download the required datasets file to the root directory.")
+                print("The google drive link is "
+                      "https://drive.google.com/drive/folders/1dt0aGMBvCEUYzaG00TYu1D03GPO7305z?usp=sharing")
+            raise SystemExit()
 
         if self.pre_filter is not None:
             data_list = [self.get(idx) for idx in range(len(self))]
@@ -145,3 +151,9 @@ class SentiGraphDataset(InMemoryDataset):
             data_list = [self.pre_transform(data) for data in data_list]
             self.data, self.slices = self.collate(data_list)
         torch.save((self.data, self.slices, self.supplement), self.processed_paths[0])
+
+
+if __name__ == '__main__':
+    dataset = SentiGraphDataset(root='.datasets', name='Graph-SST2')
+    import pdb; pdb.set_trace()
+
