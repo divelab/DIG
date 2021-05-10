@@ -10,7 +10,7 @@ def test_GraphUnsupervised():
     embed_dim = 32
     encoder = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, n_layers=3, gnn='gin', bn=True)
     graphcl = GraphCL(embed_dim*3, aug_1=None, aug_2='random2', tau=0.2)
-    evaluator = GraphUnsupervised(dataset, log_interval=1, p_epoch=5)
+    evaluator = GraphUnsupervised(dataset, log_interval=1, p_epoch=1)
     test_mean, test_std = evaluator.evaluate(learning_model=graphcl, encoder=encoder)
 
     assert test_mean <= 1.0 and test_mean >= 0.0
