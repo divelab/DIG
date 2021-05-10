@@ -136,7 +136,7 @@ Please cite our paper if you find *DIG* useful in your work:
 
 ## The Team
 
-*DIG: Dive into Graphs* is developed by [DIVE](https://github.com/divelab/)@TAMU. Contributors are Meng Liu*, Youzhi Luo*, Limei Wang*, Yaochen Xie*, Hao Yuan*, Shurui Gui, Zhao Xu, Haiyang Yu, Jingtun Zhang, Yi Liu, Keqiang Yan, Bora Oztekin, Haoran Liu, Xuan Zhang, Cong Fu, and Shuiwang Ji.
+*DIG: Dive into Graphs* is developed by [DIVE](https://github.com/divelab/)@TAMU. Contributors are Meng Liu*, Youzhi Luo*, Limei Wang*, Yaochen Xie*, Hao Yuan*, Shurui Gui*, Haiyang Yu*, Zhao Xu, Jingtun Zhang, Yi Liu, Keqiang Yan, Haoran Liu, Cong Fu, Bora Oztekin, Xuan Zhang, and Shuiwang Ji.
 
 ## Contact
 
