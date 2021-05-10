@@ -27,7 +27,7 @@ class threedEvaluator:
                 or
                 (isinstance(y_true, torch.Tensor) and isinstance(y_pred, torch.Tensor)))
         assert(y_true.shape == y_pred.shape)
-        assert(len(y_true.shape) == 1)
+        # assert(len(y_true.shape) == 1)
 
         if isinstance(y_true, torch.Tensor):
             return {'mae': torch.mean(torch.abs(y_pred - y_true)).cpu().item()}
