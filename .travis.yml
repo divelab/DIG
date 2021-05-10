@@ -38,7 +38,7 @@ install:
   - python setup.py install
 
 script:
-  - python setup.py test
+  - travis_wait python setup.py test
 
 after_success:
   - codecov
