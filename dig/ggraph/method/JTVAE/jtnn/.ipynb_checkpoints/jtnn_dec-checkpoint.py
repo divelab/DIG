@@ -71,7 +71,7 @@ class JTNNDecoder(nn.Module):
         padding = create_var(torch.zeros(self.hidden_size), False)
         h = {}
 
-        for t in xrange(max_iter):
+        for t in range(max_iter):
             prop_list = []
             batch_list = []
             for i,plist in enumerate(traces):
@@ -204,7 +204,7 @@ class JTNNDecoder(nn.Module):
 
         all_nodes = [root]
         h = {}
-        for step in xrange(MAX_DECODE_LEN):
+        for step in range(MAX_DECODE_LEN):
             node_x,fa_slot = stack[-1]
             cur_h_nei = [ h[(node_y.idx,node_x.idx)] for node_y in node_x.neighbors ]
             if len(cur_h_nei) > 0:

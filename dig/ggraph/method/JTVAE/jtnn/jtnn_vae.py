@@ -199,12 +199,12 @@ class JTNNVAE(nn.Module):
         mol_log_var = -torch.abs(self.G_var(mol_vec)) #Following Mueller et al.
         
         all_smiles = []
-        for i in xrange(10):
+        for i in range(10):
             epsilon = create_var(torch.randn(1, self.latent_size / 2), False)
             tree_vec = tree_mean + torch.exp(tree_log_var / 2) * epsilon
             epsilon = create_var(torch.randn(1, self.latent_size / 2), False)
             mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
-            for j in xrange(10):
+            for j in range(10):
                 new_smiles = self.decode(tree_vec, mol_vec, prob_decode=True)
                 all_smiles.append(new_smiles)
         return all_smiles
@@ -218,7 +218,7 @@ class JTNNVAE(nn.Module):
         tree_vec = create_var(torch.randn(1, self.latent_size / 2), False)
         mol_vec = create_var(torch.randn(1, self.latent_size / 2), False)
         all_smiles = []
-        for i in xrange(100):
+        for i in range(100):
             s = self.decode(tree_vec, mol_vec, prob_decode=True)
             all_smiles.append(s)
         return all_smiles
@@ -290,7 +290,7 @@ class JTNNVAE(nn.Module):
             _,cand_idx = torch.sort(scores, descending=True)
 
         backup_mol = Chem.RWMol(cur_mol)
-        for i in xrange(cand_idx.numel()):
+        for i in range(cand_idx.numel()):
             cur_mol = Chem.RWMol(backup_mol)
             pred_amap = cand_amap[cand_idx[i].item()]
             new_global_amap = copy.deepcopy(global_amap)

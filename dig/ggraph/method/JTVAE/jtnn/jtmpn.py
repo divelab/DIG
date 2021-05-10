@@ -14,7 +14,7 @@ MAX_NB = 10
 def onek_encoding_unk(x, allowable_set):
     if x not in allowable_set:
         x = allowable_set[-1]
-    return map(lambda s: x == s, allowable_set)
+    return list(map(lambda s: x == s, allowable_set))
 
 def atom_features(atom):
     return torch.Tensor(onek_encoding_unk(atom.GetSymbol(), ELEM_LIST) 
@@ -44,7 +44,7 @@ class JTMPN(nn.Module):
         total_atoms = 0
         scope = []
 
-        for e,vec in tree_mess.iteritems():
+        for e,vec in tree_mess.items():
             mess_dict[e] = len(all_mess)
             all_mess.append(vec)
 
@@ -97,11 +97,11 @@ class JTMPN(nn.Module):
         bgraph = torch.zeros(total_bonds,MAX_NB).long()
         tree_message = torch.stack(all_mess, dim=0)
 
-        for a in xrange(total_atoms):
+        for a in range(total_atoms):
             for i,b in enumerate(in_bonds[a]):
                 agraph[a,i] = b
 
-        for b1 in xrange(total_bonds):
+        for b1 in range(total_bonds):
             x,y = all_bonds[b1]
             for i,b2 in enumerate(in_bonds[x]): #b2 is offseted by len(all_mess)
                 if b2 < total_mess or all_bonds[b2-total_mess][0] != y:
@@ -115,7 +115,7 @@ class JTMPN(nn.Module):
         binput = self.W_i(fbonds)
         graph_message = nn.ReLU()(binput)
 
-        for i in xrange(self.depth - 1):
+        for i in range(self.depth - 1):
             message = torch.cat([tree_message,graph_message], dim=0)
             nei_message = index_select_ND(message, 0, bgraph)
             nei_message = nei_message.sum(dim=1)

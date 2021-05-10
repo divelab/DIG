@@ -5,6 +5,7 @@ import numpy as np
 from .jtnn_enc import JTNNEncoder
 from .mpn import MPN
 from .jtmpn import JTMPN
+from .vocab import Vocab
 import pickle
 import os, random
 
@@ -92,7 +93,7 @@ class MolTreeDataset(Dataset):
 
     def __init__(self, data, vocab, assm=True):
         self.data = data
-        self.vocab = vocab
+        self.vocab = Vocab(vocab)
         self.assm = assm
 
     def __len__(self):

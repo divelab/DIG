@@ -10,7 +10,8 @@ from . import fast_jtnn
 import numpy as np
 
 import rdkit
-from rdkit import RDLogger
+from rdkit import RDLogger, Chem
+from rdkit.Chem import Descriptors
 
 from tqdm import tqdm
 
@@ -43,10 +44,7 @@ class JTVAE(Generator):
     def get_model(self, task, config_dict):
         if task == 'rand_gen':
             #hidden_size, latent_size, depthT, depthG
-            self.vae = JTNNVAE(fast_jtnn.Vocab(self.vocab), config_dict).cuda()
-        elif task == 'prop_optim':
-            self.model = GraphFlowModel_con_rl(model_conf_dict)  # TODO Replace
-            #hidden_size, latent_size, depth
+            self.vae = fast_jtnn.JTNNVAE(fast_jtnn.Vocab(self.vocab), **config_dict).cuda()
         elif task == 'cons_optim':
             self.prop_vae = jtnn.JTPropVAE(jtnn.Vocab(self.vocab), **config_dict).cuda()
         else:
@@ -74,7 +72,7 @@ class JTVAE(Generator):
         return list(cset)
             
     def _tensorize(self, smiles, assm=True):
-        mol_tree = MolTree(smiles)
+        mol_tree = fast_jtnn.MolTree(smiles)
         mol_tree.recover()
         if assm:
             mol_tree.assemble()
@@ -121,7 +119,7 @@ class JTVAE(Generator):
                 save_iter (int): How often to save the iteration statistics.
 
         """
-        vocab = Vocab(self.vocab)
+        vocab = fast_jtnn.Vocab(self.vocab)
 
         for param in self.vae.parameters():
             if param.dim() == 1:
@@ -190,13 +188,14 @@ class JTVAE(Generator):
         samples = [self.vae.sample_prior() for _ in range(num_samples)]
         return samples
     
-    def train_cons_optim(self, loader, batch_size, hidden_size, latent_size, depth, beta, lr):
+    def train_cons_optim(self, loader, batch_size, num_epochs, hidden_size, latent_size, depth, beta, lr):
         r"""
             Train the Junction Tree Variational Autoencoder for the constrained optimization task.
             
             Args:
                 loader (MolTreeFolder): The MolTreeFolder loader.
                 batch_size (int): The batch size.
+                num_epochs (int): The number of epochs.
                 hidden_size (int): The hidden size.
                 latent_size (int): The latent size.
                 depth (int): The depth of the network.
@@ -216,13 +215,12 @@ class JTVAE(Generator):
         scheduler = lr_scheduler.ExponentialLR(optimizer, 0.9)
         scheduler.step()
 
-        MAX_EPOCH = 6
         PRINT_ITER = 20
 
-        for epoch in range(MAX_EPOCH):
+        for epoch in range(num_epochs):
             word_acc,topo_acc,assm_acc,steo_acc,prop_acc = 0,0,0,0,0
 
-            for it, batch in enumerate(loader):
+            for it, batch in enumerate(tqdm(loader)):
                 for mol_tree,_ in batch:
                     for node in mol_tree.nodes:
                         if node.label not in node.cands:
@@ -254,8 +252,34 @@ class JTVAE(Generator):
                 if (it + 1) % 1500 == 0: #Fast annealing
                     scheduler.step()
                     print("learning rate: %.6f" % scheduler.get_lr()[0])
-                    torch.save(self.prop_vae.state_dict(), opts.save_path + "/model.iter-%d-%d" % (epoch, it + 1))
+#                     torch.save(self.prop_vae.state_dict(), opts.save_path + "/model.iter-%d-%d" % (epoch, it + 1))
 
             scheduler.step()
             print("learning rate: %.6f" % scheduler.get_lr()[0])
-            torch.save(self.prop_vae.state_dict(), opts.save_path + "/model.iter-" + str(epoch))
+#             torch.save(self.prop_vae.state_dict(), opts.save_path + "/model.iter-" + str(epoch))
+
+    def run_cons_optim(self, list_smiles, sim_cutoff=0.0):
+        r"""
+        Optimize a set of molecules.
+        
+        Args:
+            list_smiles (list): List of smiles in training data.
+            sim_cutoff (float): Simulation cutoff.
+                
+        """
+#         data = []
+#         with open(opts.test_path) as f:
+#             for line in f:
+#                 s = line.strip("\r\n ").split()[0]
+#                 data.append(s)
+
+        res = []
+        for smiles in tqdm(list_smiles):
+            mol = Chem.MolFromSmiles(smiles)
+            score = Descriptors.MolLogP(mol) - jtnn.sascorer.calculateScore(mol)
+            new_smiles, sim = self.prop_vae.optimize(smiles, sim_cutoff=sim_cutoff, lr=2, num_iter=80)
+            new_mol = Chem.MolFromSmiles(new_smiles)
+            new_score = Descriptors.MolLogP(new_mol) - jtnn.sascorer.calculateScore(new_mol)
+            res.append((new_score - score, sim, score, new_score, smiles, new_smiles))
+            print(new_score - score, sim, score, new_score, smiles, new_smiles)
+        print(sum([x[0] for x in res]), sum([x[1] for x in res]))

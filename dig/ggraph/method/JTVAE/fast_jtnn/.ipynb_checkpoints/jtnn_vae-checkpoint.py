@@ -16,8 +16,8 @@ import copy, math
 
 class JTNNVAE(nn.Module):
 
-    def __init__(self, vocab, **kwargs):
-        super(JTNNVAE, self).__init__()
+    def __init__(self, vocab, hidden_size, latent_size, depthT, depthG):
+        super().__init__()
         self.vocab = vocab
         self.hidden_size = hidden_size
         self.latent_size = latent_size = latent_size // 2 #Tree and Mol has two vectors
