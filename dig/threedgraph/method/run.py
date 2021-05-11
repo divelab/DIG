@@ -17,12 +17,13 @@ class run():
     def __init__(self):
         pass
         
-    def run(self, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=300, batch_size=128, lr=0.001, lr_decay_factor=0.5, lr_decay_step_size=50, weight_decay=0, 
+    def run(self, device, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=300, batch_size=128, lr=0.001, lr_decay_factor=0.5, lr_decay_step_size=50, weight_decay=0, 
         energy_and_force=False, p=100, save_dir='', log_dir=''):
         r"""
         The run script for training and validation.
         
         Args:
+            device (torch.device): Device for computation.
             train_dataset: Training data.
             valid_dataset: Validation data.
             test_dataset: Test data.
@@ -42,10 +43,10 @@ class run():
         
         """        
 
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = model.to(device)
         optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-        scheduler = StepLR(optimizer, step_size=lr_decay_factor, gamma=lr_decay_factor)
+        scheduler = StepLR(optimizer, step_size=lr_decay_step_size, gamma=lr_decay_factor)
 
         train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
         valid_loader = DataLoader(valid_dataset, batch_size, shuffle=False)
