@@ -12,21 +12,17 @@ def test_SynGraphDataset():
 
     for dataset_idx, name in enumerate(dataset_names):
         dataset = SynGraphDataset(root, name)
-        dataset_length.append(len(dataset))
-        dataset_x_shape.append(dataset.data.x.size())
-        dataset_edge_index_shape.append(dataset.data.edge_index.size())
-        dataset_y_shape.append(dataset.data.y.size())
 
         assert len(dataset) == dataset_length[dataset_idx]
         assert dataset.data.x.size() == dataset_x_shape[dataset_idx]
         assert dataset.data.edge_index.size() == dataset_edge_index_shape[dataset_idx]
         assert dataset.data.y.size() == dataset_y_shape[dataset_idx]
 
-    if name == 'ba_2motifs':
-        data = dataset[0]
-        assert data.x.size() == (25, 10)
-        assert data.edge_index.size() == (2, 50)
-        assert data.y.size() == (1, )
+        if name == 'ba_2motifs':
+            data = dataset[0]
+            assert data.x.size() == (25, 10)
+            assert data.edge_index.size() == (2, 50)
+            assert data.y.size() == (1, )
 
     shutil.rmtree(root)
 
