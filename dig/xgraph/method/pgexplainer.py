@@ -571,7 +571,7 @@ class PGExplainer(nn.Module):
                     data = dataset[gid]
                     data.to(self.device)
                     prob, _ = self.explain(data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
-                    loss_tmp = self.__loss__(prob, ori_pred_dict[gid])
+                    loss_tmp = self.__loss__(prob.squeeze(), ori_pred_dict[gid])
                     loss_tmp.backward()
                     loss += loss_tmp.item()
                     pred_label = prob.argmax(-1).item()
