@@ -128,7 +128,7 @@ Please cite our paper if you find *DIG* useful in your work:
 ```
 @article{liu2021dig,
       title={{DIG}: A Turnkey Library for Diving into Graph Deep Learning Research}, 
-      author={Meng Liu and Youzhi Luo and Limei Wang and Yaochen Xie and Hao Yuan and Shurui Gui and Zhao Xu and Haiyang Yu and Jingtun Zhang and Yi Liu and Keqiang Yan and Bora Oztekin and Haoran Liu and Xuan Zhang and Cong Fu and Shuiwang Ji},
+      author={Meng Liu and Youzhi Luo and Limei Wang and Yaochen Xie and Hao Yuan and Shurui Gui and Haiyang Yu and Zhao Xu and Jingtun Zhang and Yi Liu and Keqiang Yan and Haoran Liu and Cong Fu and Bora Oztekin and Xuan Zhang and Shuiwang Ji},
       journal={arXiv preprint arXiv:2103.12608},
       year={2021},
 }
