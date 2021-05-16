@@ -552,7 +552,7 @@ class PGExplainer(nn.Module):
                 emb_dict = {}
                 ori_pred_dict = {}
                 for gid in tqdm.tqdm(dataset_indices):
-                    data = dataset[gid]
+                    data = dataset[gid].to(self.device)
                     logits = self.model(data.x, data.edge_index)
                     emb = self.model.get_emb(data.x, data.edge_index)
                     emb_dict[gid] = emb.data.cpu()
