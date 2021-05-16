@@ -24,6 +24,7 @@ from torch_geometric.utils.num_nodes import maybe_num_nodes
 from typing import Tuple, List, Dict, Optional
 from .shapley import GnnNets_GC2value_func, GnnNets_NC2value_func, gnn_score
 from torch_geometric.datasets import MoleculeNet
+from rdkit import Chem
 
 EPS = 1e-6
 
