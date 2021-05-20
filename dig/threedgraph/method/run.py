@@ -17,7 +17,7 @@ class run():
     def __init__(self):
         pass
         
-    def run(self, device, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=300, batch_size=128, lr=0.001, lr_decay_factor=0.5, lr_decay_step_size=50, weight_decay=0, 
+    def run(self, device, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=300, batch_size=128, vt_batch_size=128, lr=0.001, lr_decay_factor=0.5, lr_decay_step_size=50, weight_decay=0, 
         energy_and_force=False, p=100, save_dir='', log_dir=''):
         r"""
         The run script for training and validation.
@@ -31,7 +31,8 @@ class run():
             loss_func (function): The used loss funtion for training.
             evaluation (function): The evaluation function. 
             epochs (int, optinal): Number of total training epochs. (default: :obj:`300`)
-            batch_size (int, optinal): Number of samples in each minibatch. (default: :obj:`128`)
+            batch_size (int, optinal): Number of samples in each minibatch in training. (default: :obj:`128`)
+            vt_batch_size (int, optinal): Number of samples in each minibatch in validation/testing. (default: :obj:`128`)
             lr (float, optinal): Initial learning rate. (default: :obj:`0.001`)
             lr_decay_factor (float, optinal): Learning rate decay factor. (default: :obj:`0.5`)
             lr_decay_step_size (int, optinal): epochs at which lr_initial <- lr_initial * lr_decay_factor. (default: :obj:`50`)
@@ -49,8 +50,8 @@ class run():
         scheduler = StepLR(optimizer, step_size=lr_decay_step_size, gamma=lr_decay_factor)
 
         train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
-        valid_loader = DataLoader(valid_dataset, batch_size, shuffle=False)
-        test_loader = DataLoader(test_dataset, batch_size, shuffle=False)
+        valid_loader = DataLoader(valid_dataset, vt_batch_size, shuffle=False)
+        test_loader = DataLoader(test_dataset, vt_batch_size, shuffle=False)
         best_valid = float('inf')
         best_test = float('inf')
             
@@ -159,17 +160,20 @@ class run():
         for step, batch_data in enumerate(tqdm(data_loader)):
             batch_data = batch_data.to(device)
             out = model(batch_data)
-            preds = torch.cat([preds, out.detach_()], dim=0)
-            targets = torch.cat([targets, batch_data.y.unsqueeze(1)], dim=0)
             if energy_and_force:
                 force = -grad(outputs=out, inputs=batch_data.pos, grad_outputs=torch.ones_like(out),create_graph=True,retain_graph=True)[0]
                 preds_force = torch.cat([preds_force,force.detach_()], dim=0)
                 targets_force = torch.cat([targets_force,batch_data.force], dim=0)
+            preds = torch.cat([preds, out.detach_()], dim=0)
+            targets = torch.cat([targets, batch_data.y.unsqueeze(1)], dim=0)
 
         input_dict = {"y_true": targets, "y_pred": preds}
 
         if energy_and_force:
             input_dict_force = {"y_true": targets_force, "y_pred": preds_force}
-            return evaluation.eval(input_dict)['mae'] + p * evaluation.eval(input_dict_force)['mae']
+            energy_mae = evaluation.eval(input_dict)['mae']
+            force_mae = evaluation.eval(input_dict_force)['mae']
+            print({'Energy MAE': energy_mae, 'Force MAE': force_mae})
+            return energy_mae + p * force_mae
 
         return evaluation.eval(input_dict)['mae']
