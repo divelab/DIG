@@ -68,7 +68,7 @@ def marginal_contribution(data: Data, exclude_mask: np.array, include_mask: np.a
                           value_func, subgraph_build_func):
     """ Calculate the marginal value for each pair. Here exclude_mask and include_mask are node mask. """
     marginal_subgraph_dataset = MarginalSubgraphDataset(data, exclude_mask, include_mask, subgraph_build_func)
-    dataloader = DataLoader(marginal_subgraph_dataset, batch_size=256, shuffle=False, pin_memory=True, num_workers=0)
+    dataloader = DataLoader(marginal_subgraph_dataset, batch_size=256, shuffle=False, pin_memory=False, num_workers=0)
 
     marginal_contribution_list = []
 
