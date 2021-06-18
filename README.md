@@ -124,7 +124,7 @@ We welcome any forms of contributions, such as reporting bugs and adding new fea
 
 ## Citing DIG
 
-Please cite our paper if you find *DIG* useful in your work:
+Please cite our [paper](https://arxiv.org/abs/2103.12608) if you find *DIG* useful in your work:
 ```
 @article{liu2021dig,
       title={{DIG}: A Turnkey Library for Diving into Graph Deep Learning Research}, 
