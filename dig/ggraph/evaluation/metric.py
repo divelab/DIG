@@ -4,7 +4,7 @@ import numpy as np
 
 
 
-class Rand_Gen_Evaluator:
+class RandGenEvaluator:
     r"""
     Evaluator for random generation task. Metric is validity ratio, uniqueness ratio, and novelty ratio (all represented in percentage).
     """
@@ -20,10 +20,10 @@ class Rand_Gen_Evaluator:
                 "mols" --- the list of generated molecules reprsented by rdkit Chem.RWMol or Chem.Mol objects;
                 "train_smiles" --- the list of SMILES strings used for training.
             
-        :rtype: :class:`dict` (a python dict with the following items:
+        :rtype: :class:`dict` a python dict with the following items:
                     "valid_ratio" --- validity percentage;
                     "unique_ratio" --- uniqueness percentage;
-                    "novel_ratio" --- novelty percentage).
+                    "novel_ratio" --- novelty percentage.
         """
 
         mols = input_dict['mols']
@@ -47,7 +47,7 @@ class Rand_Gen_Evaluator:
         return results
 
 
-class Prop_Optim_Evaluator:
+class PropOptimEvaluator:
     r"""
     Evaluator for property optimization task. Metric is top-3 property scores among generated molecules.
 
@@ -67,7 +67,7 @@ class Prop_Optim_Evaluator:
             input_dict (dict): A python dict with the following items:
                 "mols" --- a list of generated molecules reprsented by rdkit Chem.Mol or Chem.RWMol objects.
             
-        :rtype: :class:`dict` (a python dict with the following items:
+        :rtype: :class:`dict` a python dict with the following items:
                     1 --- information of molecule with the highest property score;
                     2 --- information of molecule with the second highest property score;
                     3 --- information of molecule with the third highest property score.
@@ -91,7 +91,7 @@ class Prop_Optim_Evaluator:
         return results
 
 
-class Cons_Optim_Evaluator:
+class ConsOptimEvaluator:
     r"""
     Evaluator for constrained optimization task. Metric is the average property improvements, similarities and success rates under the similarity threshold 0.0, 0.2, 0.4, 0.6.
     """
@@ -107,7 +107,7 @@ class Cons_Optim_Evaluator:
                 "mols_0", "mols_2", "mols_4", "mols_6" --- the list of optimized molecules under the similarity threshold 0.0, 0.2, 0.4, 0.6, all represented by rdkit Chem.RWMol or Chem.Mol objects;
                 "inp_smiles" --- the list of SMILES strings of input molecules to be optimized.
             
-        :rtype: :class:`dict` (a python dict with the following items:
+        :rtype: :class:`dict` a python dict with the following items:
                     0, 2, 4, 6 --- the metric values under the similarity threshold 0.0, 0.2, 0.4, 0.6.
                     The metric values are given in the form of a tuple (success rate, mean of similarity, standard deviation of similarity,
                     mean of property improvement, standard deviation of property improvement).
