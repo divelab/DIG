@@ -346,7 +346,7 @@ class GraphEBM(Generator):
             print('==========================================')
     
 
-    def run_prop_optim(self, checkpoint_path, initialization_loader, c, ld_step, ld_noise, ld_step_size, clamp, atomic_num_list, train_smiles):
+    def run_prop_opt(self, checkpoint_path, initialization_loader, c, ld_step, ld_noise, ld_step_size, clamp, atomic_num_list, train_smiles):
         r"""
             Running graph generation for goal-directed generation task: property optimization.
 
@@ -430,7 +430,7 @@ class GraphEBM(Generator):
         return save_mols_list, prop_list
     
     
-    def run_cons_optim(self, checkpoint_path, initialization_loader, c, ld_step, ld_noise, ld_step_size, clamp, atomic_num_list, train_smiles):
+    def run_const_prop_opt(self, checkpoint_path, initialization_loader, c, ld_step, ld_noise, ld_step_size, clamp, atomic_num_list, train_smiles):
         r"""
             Running graph generation for goal-directed generation task: constrained property optimization.
 
