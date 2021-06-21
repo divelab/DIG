@@ -1,7 +1,7 @@
 import copy
 import torch
 import numpy as np
-from typing import Union
+from typing import Callable, Union
 from scipy.special import comb
 from itertools import combinations
 import torch.nn.functional as F
@@ -19,7 +19,7 @@ def GnnNets_GC2value_func(gnnNets, target_class):
     return value_func
 
 
-def GnnNets_NC2value_func(gnnNets_NC, node_idx: Union[int, torch.tensor], target_class: torch.tensor):
+def GnnNets_NC2value_func(gnnNets_NC, node_idx: Union[int, torch.Tensor], target_class: torch.Tensor):
     def value_func(data):
         with torch.no_grad():
             logits = gnnNets_NC(data=data)
@@ -64,7 +64,7 @@ class MarginalSubgraphDataset(Dataset):
         return exclude_data, include_data
 
 
-def marginal_contribution(data: Data, exclude_mask: np.array, include_mask: np.array,
+def marginal_contribution(data: Data, exclude_mask: np.ndarray, include_mask: np.ndarray,
                           value_func, subgraph_build_func):
     """ Calculate the marginal value for each pair. Here exclude_mask and include_mask are node mask. """
     marginal_subgraph_dataset = MarginalSubgraphDataset(data, exclude_mask, include_mask, subgraph_build_func)
@@ -82,13 +82,13 @@ def marginal_contribution(data: Data, exclude_mask: np.array, include_mask: np.a
     return marginal_contributions
 
 
-def graph_build_zero_filling(X, edge_index, node_mask: np.array):
+def graph_build_zero_filling(X, edge_index, node_mask: torch.Tensor):
     """ subgraph building through masking the unselected nodes with zero features """
     ret_X = X * node_mask.unsqueeze(1)
     return ret_X, edge_index
 
 
-def graph_build_split(X, edge_index, node_mask: np.array):
+def graph_build_split(X, edge_index, node_mask: torch.Tensor):
     """ subgraph building through spliting the selected nodes from the original graph """
     row, col = edge_index
     edge_mask = (node_mask[row] == 1) & (node_mask[col] == 1)
@@ -97,7 +97,7 @@ def graph_build_split(X, edge_index, node_mask: np.array):
 
 
 def l_shapley(coalition: list, data: Data, local_raduis: int,
-              value_func: str, subgraph_building_method='zero_filling'):
+              value_func: Callable, subgraph_building_method='zero_filling'):
     """ shapley value where players are local neighbor nodes """
     graph = to_networkx(data)
     num_nodes = graph.number_of_nodes()
@@ -145,7 +145,7 @@ def l_shapley(coalition: list, data: Data, local_raduis: int,
 
 
 def mc_shapley(coalition: list, data: Data,
-               value_func: str, subgraph_building_method='zero_filling',
+               value_func: Callable, subgraph_building_method='zero_filling',
                sample_num=1000) -> float:
     """ monte carlo sampling approximation of the shapley value """
     subset_build_func = get_graph_build_func(subgraph_building_method)
@@ -179,7 +179,7 @@ def mc_shapley(coalition: list, data: Data,
 
 
 def mc_l_shapley(coalition: list, data: Data, local_raduis: int,
-                 value_func: str, subgraph_building_method='zero_filling',
+                 value_func: Callable, subgraph_building_method='zero_filling',
                  sample_num=1000) -> float:
     """ monte carlo sampling approximation of the l_shapley value """
     graph = to_networkx(data)
@@ -221,7 +221,7 @@ def mc_l_shapley(coalition: list, data: Data, local_raduis: int,
     return mc_l_shapley_value
 
 
-def gnn_score(coalition: list, data: Data, value_func: str,
+def gnn_score(coalition: list, data: Data, value_func: Callable,
               subgraph_building_method='zero_filling') -> torch.Tensor:
     """ the value of subgraph with selected nodes """
     num_nodes = data.num_nodes
@@ -237,7 +237,7 @@ def gnn_score(coalition: list, data: Data, value_func: str,
 
 
 def NC_mc_l_shapley(coalition: list, data: Data, local_raduis: int,
-                    value_func: str, node_idx: int=-1, subgraph_building_method='zero_filling', sample_num=1000) -> float:
+                    value_func: Callable, node_idx: int=-1, subgraph_building_method='zero_filling', sample_num=1000) -> float:
     """ monte carlo approximation of l_shapley where the target node is kept in both subgraph """
     graph = to_networkx(data)
     num_nodes = graph.number_of_nodes()
