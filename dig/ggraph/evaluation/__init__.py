@@ -1,7 +1,7 @@
-from .metric import RandGenEvaluator, PropOptimEvaluator, ConsOptimEvaluator
+from .metric import RandGenEvaluator, PropOptEvaluator, ConstPropOptEvaluator
 
 __all__ = [
     'RandGenEvaluator',
-    'PropOptimEvaluator',
-    'ConsOptimEvaluator'
+    'PropOptEvaluator',
+    'ConstPropOptEvaluator'
 ]

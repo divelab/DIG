@@ -20,28 +20,28 @@ class Generator():
 
         raise NotImplementedError("The function run_rand_gen is not implemented!")
 
-    def train_prop_optim(self, *args, **kwargs):
+    def train_prop_opt(self, *args, **kwargs):
         r"""
         Running training for property optimization task.
         """
 
         raise NotImplementedError("The function train_prop_optim is not implemented!")
     
-    def run_prop_optim(self, *args, **kwargs):
+    def run_prop_opt(self, *args, **kwargs):
         r"""
         Running graph generation for property optimization task.
         """
 
         raise NotImplementedError("The function run_prop_optim is not implemented!")
     
-    def train_cons_optim(self, loader, *args, **kwargs):
+    def train_const_prop_opt(self, loader, *args, **kwargs):
         r"""
         Running training for constrained optimization task.
         """
 
         raise NotImplementedError("The function train_cons_optim is not implemented!")
     
-    def run_cons_optim(self, loader, *args, **kwargs):
+    def run_const_prop_opt(self, loader, *args, **kwargs):
         r"""
         Running molecule optimization for constrained optimization task.
         """

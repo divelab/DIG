@@ -47,7 +47,7 @@ class RandGenEvaluator:
         return results
 
 
-class PropOptimEvaluator:
+class PropOptEvaluator:
     r"""
     Evaluator for property optimization task. Metric is top-3 property scores among generated molecules.
 
@@ -91,7 +91,7 @@ class PropOptimEvaluator:
         return results
 
 
-class ConsOptimEvaluator:
+class ConstPropOptEvaluator:
     r"""
     Evaluator for constrained optimization task. Metric is the average property improvements, similarities and success rates under the similarity threshold 0.0, 0.2, 0.4, 0.6.
     """
