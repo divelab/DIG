@@ -76,13 +76,8 @@ $ python -c "import torch_geometric; print(torch_geometric.__version__)"
 >>> 1.6.0
 ```
 
-3. Install [RDKit](https://github.com/rdkit/rdkit).
-
-```shell script
-conda install -y -c conda-forge rdkit
-```
     
-4. Install DIG: Dive into Graphs.
+3. Install DIG: Dive into Graphs.
 
 ```shell script
 pip install dive-into-graphs

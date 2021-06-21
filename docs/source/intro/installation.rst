@@ -27,13 +27,6 @@ The key dependencies of DIG: Dive into Graphs are PyTorch (>=1.6.0), PyTorch Geo
             >>> 1.6.0
             
             
-#. Install `RDKit <https://github.com/rdkit/rdkit>`_.
-
-    .. code-block:: none
-    
-            conda install -y -c conda-forge rdkit
-            
-            
 #. Install DIG: Dive into Graphs.
 
     .. code-block:: none
