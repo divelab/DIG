@@ -1,6 +1,6 @@
 import json
 from dig.ggraph.method import GraphDF
-from dig.ggraph.evaluation import Cons_Optim_Evaluator
+from dig.ggraph.evaluation import ConstPropOptEvaluator
 from dig.ggraph.dataset import ZINC800
 from torch_geometric.data import DenseDataLoader
 
@@ -31,11 +31,11 @@ runner = GraphDF()
 
 if args.train:
     loader = DenseDataLoader(dataset, batch_size=conf['batch_size'], shuffle=True)
-    runner.train_cons_optim(loader, conf['lr'], conf['weight_decay'], conf['max_iters'], conf['warm_up'], conf['model'], conf['pretrain_model'], conf['save_interval'], conf['save_dir'])
+    runner.train_const_prop_opt(loader, conf['lr'], conf['weight_decay'], conf['max_iters'], conf['warm_up'], conf['model'], conf['pretrain_model'], conf['save_interval'], conf['save_dir'])
 else:
-    mols_0, mols_2, mols_4, mols_6 = runner.run_cons_optim(dataset, conf['model'], args.model_path, conf['repeat_time'], conf['min_optim_time'], conf['num_max_node'], conf['temperature'], conf['atom_list'])
+    mols_0, mols_2, mols_4, mols_6 = runner.run_const_prop_opt(dataset, conf['model'], args.model_path, conf['repeat_time'], conf['min_optim_time'], conf['num_max_node'], conf['temperature'], conf['atom_list'])
     smiles = [data.smile for data in dataset]
-    evaluator = Cons_Optim_Evaluator()
+    evaluator = ConstPropOptEvaluator()
     input_dict = {'mols_0': mols_0, 'mols_2': mols_2, 'mols_4': mols_4, 'mols_6': mols_6, 'inp_smiles':smiles}
 
     print('Evaluating...')

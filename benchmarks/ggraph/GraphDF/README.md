@@ -34,15 +34,15 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_rand_gen.py --num_mols=100 --mo
 For property optimization, we aim to generate molecules with desirable properties (*i.e.*, QED and plogp in this work). You can use our trained models or train the model from scratch by reinforcement learning:
 ```shell script
 $ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --train --prop=plogp
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --train --prop=qed
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_opt.py --train --prop=plogp
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_opt.py --train --prop=qed
 ```
 
 To generate molecules using our trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphDF/saved_ckpts/prop_optim), then:
 ```shell script
 $ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --num_mols=100 --model_path=${path_to_the_model} --prop=plogp
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --num_mols=100 --model_path=${path_to_the_model} --prop=qed
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_opt.py --num_mols=100 --model_path=${path_to_the_model} --prop=plogp
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_opt.py --num_mols=100 --model_path=${path_to_the_model} --prop=qed
 ```
 
 ### Constrained Optimization
@@ -50,15 +50,15 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_optim.py --num_mols=100 --
 For constrained optimization, we aim to optimize molecules with desirable properties (plogp in this work). You can use our trained models or train the model from scratch by reinforcement learning:
 ```shell script
 $ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_cons_optim.py --train --data=graphaf
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_cons_optim.py --train --data=jt
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_const_prop_opt.py --train --data=graphaf
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_const_prop_opt.py --train --data=jt
 ```
 
 To optimize molecules using our trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphDF/saved_ckpts/cons_optim), then:
 ```shell script
 $ cd GraphDF
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_cons_optim.py --model_path=${path_to_the_model} --data=graphaf
-$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_cons_optim.py --model_path=${path_to_the_model} --data=jt
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_const_prop_opt.py --model_path=${path_to_the_model} --data=graphaf
+$ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_const_prop_opt.py --model_path=${path_to_the_model} --data=jt
 ```
 ### Citation
 ```

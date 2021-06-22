@@ -1,7 +1,7 @@
 import json
 from dig.ggraph.dataset import QM9, ZINC250k, MOSES
 from dig.ggraph.method import GraphDF
-from dig.ggraph.evaluation import Rand_Gen_Evaluator
+from dig.ggraph.evaluation import RandGenEvaluator
 from torch_geometric.data import DenseDataLoader
 
 from rdkit import RDLogger
@@ -40,7 +40,7 @@ if args.train:
 else:
     mols, pure_valids = runner.run_rand_gen(conf['model'], args.model_path, args.num_mols, conf['num_min_node'], conf['num_max_node'], conf['temperature'], conf['atom_list'])
     smiles = [data.smile for data in dataset]
-    evaluator = Rand_Gen_Evaluator()
+    evaluator = RandGenEvaluator()
     input_dict = {'mols': mols, 'train_smiles': smiles}
 
     print('Evaluating...')

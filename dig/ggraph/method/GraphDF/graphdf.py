@@ -124,7 +124,7 @@ class GraphDF(Generator):
         return all_mols, pure_valids
 
 
-    def train_prop_optim(self, lr, wd, max_iters, warm_up, model_conf_dict, pretrain_path, save_interval, save_dir):
+    def train_prop_opt(self, lr, wd, max_iters, warm_up, model_conf_dict, pretrain_path, save_interval, save_dir):
         r"""
             Running fine-tuning for property optimization task.
 
@@ -169,7 +169,7 @@ class GraphDF(Generator):
         print("Finetuning (Reinforce) Finished!")
     
 
-    def run_prop_optim(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):
+    def run_prop_opt(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):
         r"""
             Running graph generation for property optimization task.
 
@@ -205,7 +205,7 @@ class GraphDF(Generator):
         return all_mols
 
 
-    def train_cons_optim(self, loader, lr, wd, max_iters, warm_up, model_conf_dict, pretrain_path, save_interval, save_dir):
+    def train_const_prop_opt(self, loader, lr, wd, max_iters, warm_up, model_conf_dict, pretrain_path, save_interval, save_dir):
         r"""
             Running fine-tuning for constrained optimization task.
 
@@ -262,7 +262,7 @@ class GraphDF(Generator):
         print("Finetuning (Reinforce) Finished!")
     
 
-    def run_cons_optim_one_mol(self, adj, x, org_smile, mol_size, bfs_perm_origin, max_size_rl=38, temperature=[0.3,0.3], atom_list=[6, 7, 8, 9]):
+    def run_const_prop_opt_one_mol(self, adj, x, org_smile, mol_size, bfs_perm_origin, max_size_rl=38, temperature=[0.3,0.3], atom_list=[6, 7, 8, 9]):
         best_mol0 = None
         best_mol2 = None
         best_mol4 = None
@@ -312,7 +312,7 @@ class GraphDF(Generator):
         return [best_mol0, best_mol2, best_mol4, best_mol6], [best_imp0, best_imp2, best_imp4, best_imp6], [final_sim0, final_sim2, final_sim4, final_sim6]
 
 
-    def run_cons_optim(self, dataset, model_conf_dict, checkpoint_path, repeat_time=200, min_optim_time=50, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):
+    def run_const_prop_opt(self, dataset, model_conf_dict, checkpoint_path, repeat_time=200, min_optim_time=50, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):
         r"""
             Running molecule optimization for constrained optimization task.
 
@@ -356,7 +356,7 @@ class GraphDF(Generator):
                 if optim_success_dict[raw_smile][0] > min_optim_time and optim_success_dict[raw_smile][1] > 0: # reach min time and imp is positive
                     continue # not optimize this one
 
-                best_mol0246, best_score0246, final_sim0246 = self.run_cons_optim_one_mol(inp_adj_features, 
+                best_mol0246, best_score0246, final_sim0246 = self.run_const_prop_opt_one_mol(inp_adj_features, 
                                                                     inp_node_features, raw_smile, mol_size, bfs_perm_origin, num_max_node, temperature, atomic_num_list)
                 if best_score0246[0] > best_score[0]:
                     best_score[0] = best_score0246[0]
