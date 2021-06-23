@@ -30,8 +30,15 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
 
    intro/installation
    intro/introduction
-   
-   
+
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+   :caption: Tutorials
+
+   tutorials/subgraphx
+
 .. toctree::
    :glob:
    :maxdepth: 1
@@ -64,7 +71,6 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
    xgraph/method
    xgraph/evaluation
    xgraph/utils
-
 
 .. toctree::
    :glob:

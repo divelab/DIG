@@ -80,7 +80,9 @@ html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # html_theme = "furo"
 
-intersphinx_mapping = {'python': ('https://docs.python.org/', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/', None),
+                       'torch': ('https://pytorch.org/docs/master/', None),
+                       'torch_geometric': ('https://pytorch-geometric.readthedocs.io/en/latest/', None)}
 
 add_module_names = False
 
@@ -89,7 +91,7 @@ add_module_names = False
 # so a file named "default.css" will overwrite the builtin "default.css".
 
 autodoc_default_options = {'autosummary-no-titles': True,
-#                            'autosummary-force-inline': True,
+                           'autosummary-force-inline': True,
                            'autosummary-nosignatures': True,
                           }
 

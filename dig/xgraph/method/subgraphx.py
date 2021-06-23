@@ -62,7 +62,7 @@ def reward_func(reward_method, value_func, node_idx=None,
                        subgraph_building_method=subgraph_building_method,
                        sample_num=sample_num)
 
-    elif reward_args.reward_method.lower() == 'nc_mc_l_shapley':
+    elif reward_method.lower() == 'nc_mc_l_shapley':
         assert node_idx is None, " Wrong node idx input "
         return partial(NC_mc_l_shapley,
                        node_idx=node_idx,
@@ -259,6 +259,7 @@ class PlotUtils(object):
         plt.axis('off')
         if title_sentence is not None:
             plt.title('\n'.join(wrap(title_sentence, width=60)))
+        plt.savefig(figname)
         plt.show()
 
     @staticmethod
@@ -344,11 +345,27 @@ class MCTSNode(object):
 
 
 class MCTS(object):
+    r"""
+    Monte Carlo Tree Search Method
+
+    Args:
+        X (:obj:`torch.Tensor`): Input node features
+        edge_index (:obj:`torch.Tensor`): The edge indices.
+        num_hops (:obj:`int`): The number of hops :math:`k`.
+        n_rollout (:obj:`int`): The number of sequence to build the monte carlo tree.
+        min_atoms (:obj:`int`): The number of atoms for the subgraph in the monte carlo tree leaf node.
+        c_puct (:obj:`float`): The hyper-parameter to encourage exploration while searching.
+        expand_atoms (:obj:`int`): The number of children to expand.
+        high2low (:obj:`bool`): Whether to expand children tree node from high degree nodes to low degree nodes.
+        node_idx (:obj:`int`): The target node index to extract the neighborhood.
+        score_func (:obj:`Callable`): The reward function for tree node, such as mc_shapely and mc_l_shapely.
+
+    """
     def __init__(self, X: torch.Tensor, edge_index: torch.Tensor, num_hops: int,
                  n_rollout: int = 10, min_atoms: int = 3, c_puct: float = 10.0,
                  expand_atoms: int = 14, high2low: bool = False,
                  node_idx: int = None, score_func: Callable = None):
-        """ graph is a networkX graph """
+
         self.X = X
         self.edge_index = edge_index
         self.num_hops = num_hops
@@ -385,7 +402,8 @@ class MCTS(object):
     def set_score_func(self, score_func):
         self.score_func = score_func
 
-    def __subgraph__(self, node_idx, x, edge_index, num_hops, **kwargs):
+    @staticmethod
+    def __subgraph__(node_idx, x, edge_index, num_hops, **kwargs):
         num_nodes, num_edges = x.size(0), edge_index.size(1)
         subset, edge_index, _, edge_mask = k_hop_subgraph_with_default_whole_graph(
             edge_index, node_idx, num_hops, relabel_nodes=True, num_nodes=num_nodes)
