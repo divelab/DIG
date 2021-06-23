@@ -378,7 +378,6 @@ class PGExplainer(nn.Module):
         (N, F), E = x.size(), edge_index.size(1)
         std = 0.1
         init_bias = self.init_bias
-        self.node_feat_mask = torch.nn.Parameter(torch.randn(F) * std)
         std = torch.nn.init.calculate_gain('relu') * sqrt(2.0 / (2 * N))
 
         if edge_mask is None:
@@ -398,7 +397,6 @@ class PGExplainer(nn.Module):
             if isinstance(module, MessagePassing):
                 module.__explain__ = False
                 module.__edge_mask__ = None
-        self.node_feat_masks = None
         self.edge_mask = None
 
     def update_num_hops(self, num_hops: int):
