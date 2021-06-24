@@ -100,7 +100,7 @@ class GNN_LRP(WalkBase):
                     # clear nodes that are not created by user
                 gamma_module = copy.deepcopy(modules[0])
                 if hasattr(modules[0], 'nn'):
-                    for i, fc_step in enumerate(gamma_module.fc_steps):
+                    for j, fc_step in enumerate(gamma_module.fc_steps):
                         fc_modules = fc_step['module']
                         if hasattr(fc_modules[0], 'weight'):
                             ori_fc_weight = fc_modules[0].weight.data

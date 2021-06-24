@@ -25,7 +25,8 @@ EPS = 1e-15
 
 class ExplainerBase(nn.Module):
 
-    def __init__(self, model: nn.Module, epochs=0, lr=0, explain_graph=False, molecule=False):
+    def __init__(self, model: nn.Module, epochs: int = 0, lr: float = 0, explain_graph: bool = False,
+                 molecule: bool = False):
         super().__init__()
         self.model = model
         self.lr = lr
@@ -45,7 +46,7 @@ class ExplainerBase(nn.Module):
         self.device = None
         self.table = Chem.GetPeriodicTable().GetElementSymbol
 
-    def __set_masks__(self, x, edge_index, init="normal"):
+    def __set_masks__(self, x: Tensor, edge_index: Tensor, init="normal"):
         (N, F), E = x.size(), edge_index.size(1)
 
         std = 0.1
@@ -81,7 +82,7 @@ class ExplainerBase(nn.Module):
                 return module.flow
         return 'source_to_target'
 
-    def __subgraph__(self, node_idx, x, edge_index, **kwargs):
+    def __subgraph__(self, node_idx: int, x: Tensor, edge_index: Tensor, **kwargs):
         num_nodes, num_edges = x.size(0), edge_index.size(1)
 
         subset, edge_index, mapping, edge_mask = subgraph(
@@ -109,7 +110,7 @@ class ExplainerBase(nn.Module):
         self.device = x.device
 
 
-    def control_sparsity(self, mask, sparsity=None, **kwargs):
+    def control_sparsity(self, mask: Tensor, sparsity=None, **kwargs):
         r"""
 
         :param mask: mask that need to transform
@@ -146,8 +147,8 @@ class ExplainerBase(nn.Module):
         return trans_mask
 
 
-    def visualize_graph(self, node_idx, edge_index, edge_mask, y=None,
-                           threshold=None, nolabel=True, **kwargs) -> Tuple[Axes, nx.DiGraph]:
+    def visualize_graph(self, node_idx: int, edge_index: Tensor, edge_mask: Tensor, y: Tensor = None,
+                           threshold: float = None, nolabel: bool = True, **kwargs) -> Tuple[Axes, nx.DiGraph]:
         r"""Visualizes the subgraph around :attr:`node_idx` given an edge mask
         :attr:`edge_mask`.
 
@@ -253,150 +254,7 @@ class ExplainerBase(nn.Module):
 
         return ax, G
 
-    def visualize_walks(self, node_idx, edge_index, walks, edge_mask, y=None,
-                        threshold=None, nolabel=True, **kwargs) -> Tuple[Axes, nx.DiGraph]:
-        r"""Visualizes the subgraph around :attr:`node_idx` given an edge mask
-        :attr:`edge_mask`.
-
-        Args:
-            node_idx (int): The node id to explain.
-            edge_index (LongTensor): The edge indices.
-            edge_mask (Tensor): The edge mask.
-            y (Tensor, optional): The ground-truth node-prediction labels used
-                as node colorings. (default: :obj:`None`)
-            threshold (float, optional): Sets a threshold for visualizing
-                important edges. If set to :obj:`None`, will visualize all
-                edges with transparancy indicating the importance of edges.
-                (default: :obj:`None`)
-            **kwargs (optional): Additional arguments passed to
-                :func:`nx.draw`.
-
-        :rtype: :class:`matplotlib.axes.Axes`, :class:`networkx.DiGraph`
-        """
-        self_loop_edge_index, _ = add_self_loops(edge_index, num_nodes=kwargs.get('num_nodes'))
-        assert edge_mask.size(0) == self_loop_edge_index.size(1)
-
-        if self.molecule:
-            atomic_num = torch.clone(y)
-
-        # Only operate on a k-hop subgraph around `node_idx`.
-        subset, edge_index, _, hard_edge_mask = subgraph(
-            node_idx, self.__num_hops__, self_loop_edge_index, relabel_nodes=True,
-            num_nodes=None, flow=self.__flow__())
-
-        edge_mask = edge_mask[hard_edge_mask]
-
-        # --- temp ---
-        edge_mask[edge_mask == float('inf')] = 1
-        edge_mask[edge_mask == - float('inf')] = 0
-        # ---
-
-        if threshold is not None:
-            edge_mask = (edge_mask >= threshold).to(torch.float)
-
-        if kwargs.get('dataset_name') == 'ba_lrp':
-            y = torch.zeros(edge_index.max().item() + 1,
-                            device=edge_index.device)
-        if y is None:
-            y = torch.zeros(edge_index.max().item() + 1,
-                            device=edge_index.device)
-        else:
-            y = y[subset]
-
-        if self.molecule:
-            atom_colors = {6: '#8c69c5', 7: '#71bcf0', 8: '#aef5f1', 9: '#bdc499', 15: '#c22f72', 16: '#f3ea19',
-                           17: '#bdc499', 35: '#cc7161'}
-            node_colors = [None for _ in range(y.shape[0])]
-            for y_idx in range(y.shape[0]):
-                node_colors[y_idx] = atom_colors[y[y_idx].int().tolist()]
-        else:
-            atom_colors = {0: '#8c69c5', 1: '#c56973', 2: '#a1c569', 3: '#69c5ba'}
-            node_colors = [None for _ in range(y.shape[0])]
-            for y_idx in range(y.shape[0]):
-                node_colors[y_idx] = atom_colors[y[y_idx].int().tolist()]
-
-        data = Data(edge_index=edge_index, att=edge_mask, y=y,
-                    num_nodes=y.size(0)).to('cpu')
-        G = to_networkx(data, node_attrs=['y'], edge_attrs=['att'])
-        mapping = {k: i for k, i in enumerate(subset.tolist())}
-        G = nx.relabel_nodes(G, mapping)
-
-        kwargs['with_labels'] = kwargs.get('with_labels') or True
-        kwargs['font_size'] = kwargs.get('font_size') or 8
-        kwargs['node_size'] = kwargs.get('node_size') or 200
-        kwargs['cmap'] = kwargs.get('cmap') or 'cool'
-
-        # calculate Graph positions
-        pos = nx.kamada_kawai_layout(G)
-        ax = plt.gca()
-
-        for source, target, data in G.edges(data=True):
-            ax.annotate(
-                '', xy=pos[target], xycoords='data', xytext=pos[source],
-                textcoords='data', arrowprops=dict(
-                    arrowstyle="-",
-                    lw=1.5,
-                    alpha=0.5,  # alpha control transparency
-                    color='grey',  # color control color
-                    shrinkA=sqrt(kwargs['node_size']) / 2.0,
-                    shrinkB=sqrt(kwargs['node_size']) / 2.0,
-                    connectionstyle="arc3,rad=0",  # rad control angle
-                ))
-
-
-        # --- try to draw a walk ---
-        walks_ids = walks['ids']
-        walks_score = walks['score']
-        walks_node_list = []
-        for i in range(walks_ids.shape[1]):
-            if i == 0:
-                walks_node_list.append(self_loop_edge_index[:, walks_ids[:, i].view(-1)].view(2, -1))
-            else:
-                walks_node_list.append(self_loop_edge_index[1, walks_ids[:, i].view(-1)].view(1, -1))
-        walks_node_ids = torch.cat(walks_node_list, dim=0).T
-
-        walks_mask = torch.zeros(walks_node_ids.shape, dtype=bool, device=self.device)
-        for n in G.nodes():
-            walks_mask = walks_mask | (walks_node_ids == n)
-        walks_mask = walks_mask.sum(1) == walks_node_ids.shape[1]
-
-        sub_walks_node_ids = walks_node_ids[walks_mask]
-        sub_walks_score = walks_score[walks_mask]
-
-        for i, walk in enumerate(sub_walks_node_ids):
-            verts = [pos[n.item()] for n in walk]
-            if walk.shape[0] == 3:
-                codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
-            else:
-                codes = [Path.MOVETO, Path.CURVE4, Path.CURVE4, Path.CURVE4]
-            path = Path(verts, codes)
-            if sub_walks_score[i] > 0:
-                patch = PathPatch(path, facecolor='none', edgecolor='red', lw=1.5,#e1442a
-                                  alpha=(sub_walks_score[i] / (sub_walks_score.max() * 2)).item())
-            else:
-                patch = PathPatch(path, facecolor='none', edgecolor='blue', lw=1.5,#18d66b
-                                  alpha=(sub_walks_score[i] / (sub_walks_score.min() * 2)).item())
-            ax.add_patch(patch)
-
-
-        nx.draw_networkx_nodes(G, pos, node_color=node_colors, **kwargs)
-        # define node labels
-        if self.molecule:
-            if nolabel:
-                node_labels = {n: f'{self.table(atomic_num[n].int().item())}'
-                               for n in G.nodes()}
-                nx.draw_networkx_labels(G, pos, labels=node_labels, **kwargs)
-            else:
-                node_labels = {n: f'{n}:{self.table(atomic_num[n].int().item())}'
-                               for n in G.nodes()}
-                nx.draw_networkx_labels(G, pos, labels=node_labels, **kwargs)
-        else:
-            if not nolabel:
-                nx.draw_networkx_labels(G, pos, **kwargs)
-
-        return ax, G
-
-    def eval_related_pred(self, x, edge_index, edge_masks, **kwargs):
+    def eval_related_pred(self, x: Tensor, edge_index: Tensor, edge_masks: List[Tensor], **kwargs):
 
         node_idx = kwargs.get('node_idx')
         node_idx = 0 if node_idx is None else node_idx  # graph level: 0, node level: node_idx
@@ -432,10 +290,10 @@ class ExplainerBase(nn.Module):
 
 class WalkBase(ExplainerBase):
 
-    def __init__(self, model: nn.Module, epochs=0, lr=0, explain_graph=False, molecule=False):
+    def __init__(self, model: nn.Module, epochs: int = 0, lr: float = 0, explain_graph: bool = False, molecule: bool = False):
         super().__init__(model, epochs, lr, explain_graph, molecule)
 
-    def extract_step(self, x, edge_index, detach=True, split_fc=False):
+    def extract_step(self, x: Tensor, edge_index: Tensor, detach: bool = True, split_fc: bool = False):
 
         layer_extractor = []
         hooks = []
@@ -522,7 +380,7 @@ class WalkBase(ExplainerBase):
 
         return walk_indices_list
 
-    def eval_related_pred(self, x, edge_index, masks, **kwargs):
+    def eval_related_pred(self, x: Tensor, edge_index: Tensor, masks: List[Tensor], **kwargs):
 
         node_idx = kwargs.get('node_idx')
         node_idx = 0 if node_idx is None else node_idx # graph level: 0, node level: node_idx

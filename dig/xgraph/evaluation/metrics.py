@@ -11,7 +11,7 @@ import torch.nn as nn
 from typing import List, Union
 from torch import Tensor
 import numpy as np
-import cilog
+from torch_geometric.data.data import Data
 from torch_geometric.nn import MessagePassing
 
 
@@ -195,7 +195,7 @@ class ExplanationProcessor(nn.Module):
 
     """
 
-    def __init__(self, model, device):
+    def __init__(self, model: nn.Module, device: torch.device):
         super().__init__()
         self.edge_mask = None
         self.model = model
@@ -223,7 +223,7 @@ class ExplanationProcessor(nn.Module):
             for idx, module in enumerate(self.cls.mp_layers):
                 module.__explain__ = False
 
-    def eval_related_pred(self, x, edge_index, masks, **kwargs):
+    def eval_related_pred(self, x: torch.Tensor, edge_index: torch.Tensor, masks: List[torch.Tensor], **kwargs):
 
         node_idx = kwargs.get('node_idx')
         node_idx = 0 if node_idx is None else node_idx # graph level: 0, node level: node_idx
@@ -262,7 +262,7 @@ class ExplanationProcessor(nn.Module):
 
         return related_preds
 
-    def forward(self, data, masks, x_collector: XCollector, **kwargs):
+    def forward(self, data: Data, masks: List[torch.Tensor], x_collector: XCollector, **kwargs):
         r"""
         Please refer to the main function in `metric.py`.
         """

@@ -21,7 +21,7 @@ class GNN_GI(WalkBase):
 
     """
 
-    def __init__(self, model: nn.Module, explain_graph=False):
+    def __init__(self, model: nn.Module, explain_graph: bool = False):
         super().__init__(model=model, explain_graph=explain_graph)
 
     def forward(self,

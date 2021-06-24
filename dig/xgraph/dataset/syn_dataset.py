@@ -188,7 +188,8 @@ class BA_LRP(InMemoryDataset):
         path = download_url(url, self.raw_dir)
         shutil.move(path, path.replace('ba_lrp.pt', 'raw.pt'))
 
-    def gen_class1(self):
+    @staticmethod
+    def gen_class1():
         x = torch.tensor([[1], [1]], dtype=torch.float)
         edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
         data = Data(x=x, edge_index=edge_index, y=torch.tensor([[0]], dtype=torch.float))
@@ -206,7 +207,8 @@ class BA_LRP(InMemoryDataset):
 
         return data
 
-    def gen_class2(self):
+    @staticmethod
+    def gen_class2():
         x = torch.tensor([[1], [1]], dtype=torch.float)
         edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
         data = Data(x=x, edge_index=edge_index, y=torch.tensor([[1]], dtype=torch.float))

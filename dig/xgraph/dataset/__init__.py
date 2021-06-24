@@ -1,6 +1,6 @@
-from .mol_dataset import *
-from .nlp_dataset import *
-from .syn_dataset import *
+from .mol_dataset import MoleculeDataset
+from .nlp_dataset import SentiGraphDataset
+from .syn_dataset import BA_LRP, SynGraphDataset
 
 __all__ = ['MoleculeDataset',
            'SentiGraphDataset',

@@ -8,24 +8,12 @@ from torch_geometric.utils.loop import add_self_loops
 from ..models.utils import subgraph, normalize
 import captum.attr as ca
 from captum.attr._utils.typing import (
-    BaselineType,
-    Literal,
     TargetType,
-    TensorOrTupleOfTensorsGeneric,
 )
 from captum.attr._utils.common import (
-    ExpansionTypes,
-    _call_custom_attribution_func,
-    _compute_conv_delta_and_format_attrs,
-    _expand_additional_forward_args,
-    _expand_target,
     _format_additional_forward_args,
     _format_attributions,
-    _format_baseline,
-    _format_callable_baseline,
     _format_input,
-    _tensorize_baseline,
-    _validate_input,
 )
 from captum.attr._utils.gradient import (
     apply_gradient_requirements,
@@ -52,7 +40,7 @@ class GradCAM(WalkBase):
 
     """
 
-    def __init__(self, model, explain_graph=False):
+    def __init__(self, model: nn.Module, explain_graph: bool = False):
         super().__init__(model, explain_graph)
 
     def forward(self, x: Tensor, edge_index: Tensor, **kwargs)\
@@ -268,7 +256,7 @@ class GraphLayerGradCam(ca.LayerGradCam):
 
         # Gradient Calculation end
 
-        # what I add: shape from PyG to General PyTorch
+        # Addition: shape from PyG to General PyTorch
         layer_gradients = tuple(layer_grad.transpose(0, 1).unsqueeze(0)
                                 for layer_grad in layer_gradients)
 

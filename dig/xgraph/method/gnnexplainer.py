@@ -5,6 +5,7 @@ from dig.version import debug
 from ..models.utils import subgraph
 from torch.nn.functional import cross_entropy
 from .base_explainer import ExplainerBase
+from typing import Union
 EPS = 1e-15
 
 def cross_entropy_with_logit(y_pred: torch.Tensor, y_true: torch.Tensor, **kwargs):
@@ -37,12 +38,10 @@ class GNNExplainer(ExplainerBase):
         'node_feat_ent': 0.1,
     }
 
-    def __init__(self, model, epochs=100, lr=0.01, explain_graph=False):
+    def __init__(self, model: torch.nn.Module, epochs: int = 100, lr: float = 0.01, explain_graph: bool = False):
         super(GNNExplainer, self).__init__(model, epochs, lr, explain_graph)
 
-
-
-    def __loss__(self, raw_preds, x_label):
+    def __loss__(self, raw_preds: Tensor, x_label: Union[Tensor, int]):
         if self.explain_graph:
             loss = cross_entropy_with_logit(raw_preds, x_label)
         else:

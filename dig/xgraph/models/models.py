@@ -8,12 +8,8 @@ Author: Shurui Gui
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch_geometric as tg
 import torch_geometric.nn as gnn
 from torch_geometric.utils.loop import add_self_loops, remove_self_loops
-from torch_geometric.utils import add_remaining_self_loops
-from torch_geometric.utils.num_nodes import maybe_num_nodes
 from torch_geometric.data.batch import Batch
 
 from typing import Callable, Union, Tuple
