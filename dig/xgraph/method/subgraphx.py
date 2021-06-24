@@ -63,7 +63,7 @@ def reward_func(reward_method, value_func, node_idx=None,
                        sample_num=sample_num)
 
     elif reward_method.lower() == 'nc_mc_l_shapley':
-        assert node_idx is None, " Wrong node idx input "
+        assert node_idx is not None, " Wrong node idx input "
         return partial(NC_mc_l_shapley,
                        node_idx=node_idx,
                        local_raduis=local_radius,
@@ -259,7 +259,6 @@ class PlotUtils(object):
         plt.axis('off')
         if title_sentence is not None:
             plt.title('\n'.join(wrap(title_sentence, width=60)))
-        plt.savefig(figname)
         plt.show()
 
     @staticmethod

@@ -57,7 +57,7 @@ In this example, the prediction and label are both 2. Therefore, we are explaini
 
     data = dataset[0].to(device)
     node_indices = torch.where(dataset[0].test_mask * dataset[0].y != 0)[0].tolist()
-    node_idx = node_indices[6]  # node_idx: 515
+    node_idx = node_indices[20]  # node_idx: 515
     logits = model(data.x, data.edge_index)
     prediction = logits[node_idx].argmax(dim=-1)
     # prediction class is 2, the middle node of the house motif
@@ -87,7 +87,8 @@ Next, we use the SubgraphX method from our DIG library to explain this predictio
 .. code-block::
 
     from dig.xgraph.method import SubgraphX
-    explainer = SubgraphX(model, num_classes=4, device=device, explain_graph=False)
+    explainer = SubgraphX(model, num_classes=4, device=device, explain_graph=False,
+                            reward_method='nc_mc_l_shapley')
 
 For more details of our DIG implementations, please refer to
 
@@ -104,7 +105,7 @@ After MCTS searching and Shapley value computation, the subgraph with the highes
 
     # Visualization
     max_nodes = 5
-    node_idx = node_indices[6]
+    node_idx = node_indices[20]
     print(f'explain graph node {node_idx}')
     data.to(device)
     logits = model(data.x, data.edge_index)
@@ -112,14 +113,14 @@ After MCTS searching and Shapley value computation, the subgraph with the highes
 
     _, explanation_results, related_preds = \
         explainer(data.x, data.edge_index, node_idx=node_idx, max_nodes=max_nodes)
-        result = find_closest_node_result(explanation_results[prediction], max_nodes=max_nodes)
+    result = find_closest_node_result(explanation_results[prediction], max_nodes=max_nodes)
 
-        plotutils = PlotUtils(dataset_name='ba_shapes')
-        explainer.visualization(explanation_results,
-                                prediction,
-                                max_nodes=max_nodes,
-                                plot_utils=plotutils,
-                                y=data.y)
+    plotutils = PlotUtils(dataset_name='ba_shapes')
+    explainer.visualization(explanation_results,
+                            prediction,
+                            max_nodes=max_nodes,
+                            plot_utils=plotutils,
+                            y=data.y)
 
 .. image:: imgs/subgraphx_explanation.png
     :width: 80%
