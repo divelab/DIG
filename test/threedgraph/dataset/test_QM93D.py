@@ -1,15 +1,15 @@
-from dig.threedgraph.dataset import QM9_3D
+from dig.threedgraph.dataset import QM93D
 import shutil
 
-def test_qm9_3d():
+def test_QM93D():
     root = './dataset'
 
-    dataset = QM9_3D(root=root) 
+    dataset = QM93D(root=root) 
     target='mu'
     dataset.data.y = dataset.data[target]
 
     assert len(dataset) == 130831
-    assert dataset.__repr__() == 'QM9_3D(130831)'
+    assert dataset.__repr__() == 'QM93D(130831)'
 
     assert len(dataset[0]) == 15
     assert dataset[0].y.size() == (1,)

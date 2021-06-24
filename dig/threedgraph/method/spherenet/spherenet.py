@@ -9,7 +9,7 @@ from math import sqrt
 
 # import sys
 # sys.path.append('..')
-from ...utils import xyztodat
+from ...utils import xyz_to_dat
 from .features import dist_emb, angle_emb, torsion_emb
 
 try:
@@ -280,7 +280,7 @@ class SphereNet(torch.nn.Module):
             pos.requires_grad_()
         edge_index = radius_graph(pos, r=self.cutoff, batch=batch)
         num_nodes=z.size(0)
-        dist, angle, torsion, i, j, idx_kj, idx_ji = xyztodat(pos, edge_index, num_nodes, use_torsion=True)
+        dist, angle, torsion, i, j, idx_kj, idx_ji = xyz_to_dat(pos, edge_index, num_nodes, use_torsion=True)
 
         emb = self.emb(dist, angle, torsion, idx_kj)
 

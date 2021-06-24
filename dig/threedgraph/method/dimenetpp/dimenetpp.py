@@ -7,7 +7,7 @@ from torch_geometric.nn import radius_graph
 from torch_scatter import scatter
 from math import sqrt
 
-from ...utils import xyztodat
+from ...utils import xyz_to_dat
 from .features import dist_emb, angle_emb
 
 try:
@@ -274,7 +274,7 @@ class DimeNetPP(torch.nn.Module):
             pos.requires_grad_()
         edge_index = radius_graph(pos, r=self.cutoff, batch=batch)
         num_nodes=z.size(0)
-        dist, angle, i, j, idx_kj, idx_ji = xyztodat(pos, edge_index, num_nodes, use_torsion=False)
+        dist, angle, i, j, idx_kj, idx_ji = xyz_to_dat(pos, edge_index, num_nodes, use_torsion=False)
 
         emb = self.emb(dist, angle, idx_kj)
 

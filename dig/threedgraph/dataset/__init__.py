@@ -1,7 +1,7 @@
-from .QM9_pyg import QM9_3D
-from .MD17_pyg import MD17
+from .PygQM93D import QM93D
+from .PygMD17 import MD17
 
 __all__ = [
-    'QM9_3D',
+    'QM93D',
     'MD17'
 ]

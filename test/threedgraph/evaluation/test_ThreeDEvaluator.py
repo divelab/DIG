@@ -1,19 +1,19 @@
-from dig.threedgraph.evaluation import threedEvaluator
+from dig.threedgraph.evaluation import ThreeDEvaluator
 import numpy as np
 import torch
 import math
 
 
-def test_threedEvaluator():
+def test_ThreeDEvaluator():
     input_dict = {'y_true':np.array([1.0, -0.5]), 'y_pred':np.array([0.6, 0.0])}
-    evaluator = threedEvaluator()
+    evaluator = ThreeDEvaluator()
     result = evaluator.eval(input_dict)
     assert len(result) == 1
     assert type(result['mae']) == float
     assert result['mae'] == 0.45
 
     input_dict = {'y_true':torch.Tensor([1.0, -0.5]), 'y_pred':torch.Tensor([0.6, 0.0])}
-    evaluator = threedEvaluator()
+    evaluator = ThreeDEvaluator()
     result = evaluator.eval(input_dict)
     assert len(result) == 1
     assert type(result['mae']) == float
@@ -22,4 +22,4 @@ def test_threedEvaluator():
 
 
 if __name__ == '__main__':
-    test_threedEvaluator()
+    test_ThreeDEvaluator()

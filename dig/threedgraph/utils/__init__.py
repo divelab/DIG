@@ -1,7 +1,7 @@
-from .geometric_computing import xyztodat
+from .geometric_computing import xyz_to_dat
 
 __all__ = [
-    'xyztodat'
+    'xyz_to_dat'
 ]
 
 

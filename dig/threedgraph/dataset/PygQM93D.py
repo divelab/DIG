@@ -9,7 +9,7 @@ from torch_geometric.data import InMemoryDataset, download_url
 from torch_geometric.data import Data, DataLoader
 
 
-class QM9_3D(InMemoryDataset):
+class QM93D(InMemoryDataset):
     r"""
         A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for :obj:`QM9` dataset 
         which is from `"Quantum chemistry structures and properties of 134 kilo molecules" <https://www.nature.com/articles/sdata201422>`_ paper.
@@ -40,7 +40,7 @@ class QM9_3D(InMemoryDataset):
         Example:
         --------
 
-        >>> dataset = QM9_3D()
+        >>> dataset = QM93D()
         >>> target = 'mu'
         >>> dataset.data.y = dataset.data[target]
         >>> split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=110000, valid_size=10000, seed=42)
@@ -62,7 +62,7 @@ class QM9_3D(InMemoryDataset):
         self.url = 'https://github.com/klicperajo/dimenet/raw/master/data/qm9_eV.npz'
         self.folder = osp.join(root, 'qm9')
 
-        super(QM9_3D, self).__init__(self.folder, transform, pre_transform, pre_filter)
+        super(QM93D, self).__init__(self.folder, transform, pre_transform, pre_filter)
 
         self.data, self.slices = torch.load(self.processed_paths[0])
 
@@ -118,7 +118,7 @@ class QM9_3D(InMemoryDataset):
         return split_dict
 
 if __name__ == '__main__':
-    dataset = QM9_3D()
+    dataset = QM93D()
     print(dataset)
     print(dataset.data.z.shape)
     print(dataset.data.pos.shape)

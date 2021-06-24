@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-class threedEvaluator:
+class ThreeDEvaluator:
     r"""
         Evaluator for the 3D datasets, including QM9, MD17.
         Metric is Mean Absolute Error.

@@ -1,7 +1,7 @@
 from dig.threedgraph.dataset import MD17
 import shutil
 
-def test_md17():
+def test_MD17():
     root = './dataset'
 
     dataset = MD17(root=root, name='aspirin')

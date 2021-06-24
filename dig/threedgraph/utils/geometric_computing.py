@@ -9,7 +9,7 @@ from math import sqrt, pi as PI
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def xyztodat(pos, edge_index, num_nodes, use_torsion = False):
+def xyz_to_dat(pos, edge_index, num_nodes, use_torsion = False):
     """
     Compute the diatance, angle, and torsion from geometric information.
 
