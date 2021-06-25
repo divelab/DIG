@@ -6,7 +6,6 @@ And modified for PyTorch.
 """
 import torch
 import torch.nn.functional as F
-from torch import nn
 import numpy as np
 
 def one_hot(inputs, vocab_size = None):
@@ -38,7 +37,6 @@ def multiplicative_inverse(a, n):
     """
 
     vocab_size = a.shape[-1]
-    a_dtype = a.dtype
     sparse_a = torch.argmax(a, dim=-1)
     sparse_outputs = torch.tensor(py_multiplicative_inverse( sparse_a, n))
     z = one_hot(sparse_outputs, vocab_size)

@@ -47,7 +47,6 @@ class GraphFlowModel_rl(nn.Module):
     def reinforce_optim_one_mol(self, atom_list, temperature=[0.3, 0.3], max_size_rl=38):
         num2bond = {0: Chem.rdchem.BondType.SINGLE, 1: Chem.rdchem.BondType.DOUBLE, 2: Chem.rdchem.BondType.TRIPLE}
         num2atom = {i:atom_list[i] for i in range(len(atom_list))}
-        prop_fn = qed if self.conf_rl['property_type'] == 'qed' else calculate_min_plogp
 
         if self.dp:
             cur_node_features = torch.zeros([1, max_size_rl, self.node_dim]).cuda()
@@ -414,7 +413,7 @@ class GraphFlowModel_rl(nn.Module):
                         traj_node_inputs['baseline_index'].pop(-1)
                    
                         ## pop adj
-                        for pop_cnt in range(step_num_data_edge):
+                        for _ in range(step_num_data_edge):
                             traj_adj_inputs['node_features'].pop(-1)
                             traj_adj_inputs['adj_features'].pop(-1)
                             traj_adj_inputs['edge_features_cont'].pop(-1)
@@ -542,18 +541,18 @@ class GraphFlowModel_rl(nn.Module):
             node_function_old = self.flow_core_old.forward_rl_node
             edge_function_old = self.flow_core_old.forward_rl_edge
 
-        z_node, logdet_node = node_function(node_inputs_node_features, node_inputs_adj_features,
+        z_node, _ = node_function(node_inputs_node_features, node_inputs_adj_features,
                                             node_inputs_node_features_cont)  # (total_step, 9), (total_step, )
 
-        z_edge, logdet_edge = edge_function(adj_inputs_node_features, adj_inputs_adj_features,
+        z_edge, _ = edge_function(adj_inputs_node_features, adj_inputs_adj_features,
                                             adj_inputs_edge_features_cont, adj_inputs_index) # (total_step, 4), (total_step, )
 
 
         with torch.no_grad():
-            z_node_old, logdet_node_old = node_function_old(node_inputs_node_features, node_inputs_adj_features,
+            z_node_old, _ = node_function_old(node_inputs_node_features, node_inputs_adj_features,
                                                 node_inputs_node_features_cont)  # (total_step, 9), (total_step, )
 
-            z_edge_old, logdet_edge_old = edge_function_old(adj_inputs_node_features, adj_inputs_adj_features,
+            z_edge_old, _ = edge_function_old(adj_inputs_node_features, adj_inputs_adj_features,
                                                 adj_inputs_edge_features_cont, adj_inputs_index) # (total_step, 4), (total_step, )
 
         node_total_length = z_node.size(0) * float(self.node_dim)

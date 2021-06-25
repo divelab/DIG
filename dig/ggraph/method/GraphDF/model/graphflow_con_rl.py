@@ -119,8 +119,6 @@ class GraphFlowModel_con_rl(nn.Module):
                 cur_node_features[:, keep_size:, :] = 0.
                 cur_adj_features[:, :, keep_size:, :] = 0.
                 cur_adj_features[:, :, :, keep_size:] = 0.
-            
-            s_inp = Chem.MolToSmiles(mol)
 
             assert check_chemical_validity(org_mol_true_raw) is True, 's_raw is %s' % (s_raw)
             assert check_chemical_validity(mol) is True
@@ -942,8 +940,6 @@ class GraphFlowModel_con_rl(nn.Module):
                         reward_valid -= 1 #TODO: check the magnitude of this reward.
                     if not zinc_molecule_filter(final_mol):  # does not contain any problematic functional groups
                         reward_valid -= 1
-
-                    similairty = reward_target_molecule_similarity(final_mol, org_mol_true_raw)
                     
                     try:
                         score = calculate_min_plogp(final_mol)
@@ -954,7 +950,6 @@ class GraphFlowModel_con_rl(nn.Module):
                             reward_property += (score * self.conf_rl['linear_coeff'])
                         elif self.conf_rl['reward_type'] == 'imp':
                             reward_property += (score - score_raw)
-                        imp = score - score_raw
                     except:
                         print('generated mol does not pass qed/plogp')
 
@@ -1042,18 +1037,18 @@ class GraphFlowModel_con_rl(nn.Module):
             node_function_old = self.flow_core_old.forward_rl_node
             edge_function_old = self.flow_core_old.forward_rl_edge
 
-        z_node, logdet_node = node_function(node_inputs_node_features, node_inputs_adj_features,
+        z_node, _ = node_function(node_inputs_node_features, node_inputs_adj_features,
                                             node_inputs_node_features_cont)  # (total_step, 9), (total_step, )
 
-        z_edge, logdet_edge = edge_function(adj_inputs_node_features, adj_inputs_adj_features,
+        z_edge, _ = edge_function(adj_inputs_node_features, adj_inputs_adj_features,
                                             adj_inputs_edge_features_cont, adj_inputs_index) # (total_step, 4), (total_step, )
 
 
         with torch.no_grad():
-            z_node_old, logdet_node_old = node_function_old(node_inputs_node_features, node_inputs_adj_features,
+            z_node_old, _ = node_function_old(node_inputs_node_features, node_inputs_adj_features,
                                                 node_inputs_node_features_cont)  # (total_step, 9), (total_step, )
 
-            z_edge_old, logdet_edge_old = edge_function_old(adj_inputs_node_features, adj_inputs_adj_features,
+            z_edge_old, _ = edge_function_old(adj_inputs_node_features, adj_inputs_adj_features,
                                                 adj_inputs_edge_features_cont, adj_inputs_index) # (total_step, 4), (total_step, )
 
         node_total_length = z_node.size(0) * float(self.node_dim)

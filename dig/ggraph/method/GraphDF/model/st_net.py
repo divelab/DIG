@@ -1,6 +1,6 @@
-import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from .df_utils import one_hot_argmax
 
 class ST_Net_Sigmoid(nn.Module):
