@@ -160,6 +160,11 @@ class PygDataset(InMemoryDataset):
 #         os.rename(osp.join(folder), self.raw_dir)
 
     def process(self):
+        r"""Processes the dataset from raw data file to the :obj:`self.processed_dir` folder.
+        
+            If one-hot format is required, the processed data type will include an extra dimension of virtual node and edge feature.
+        """
+        
         print('Processing...')
         if self.one_shot:
             self.data, self.slices = self.one_hot_process()
@@ -187,6 +192,12 @@ class PygDataset(InMemoryDataset):
         return '{}({})'.format(self.name, len(self))
     
     def get(self, idx):
+        r"""Gets the data object at index :idx:.
+        
+        Args:
+            idx: The index of the data that you want to reach.
+        :rtype: A data object corresponding to the input index :obj:`idx` .
+        """
         data = self.data.__class__()
 
         if hasattr(self.data, '__num_nodes__'):
@@ -339,7 +350,8 @@ class PygDataset(InMemoryDataset):
         return data, slices
     
     def get_split_idx(self):
-        r"""
+        r"""Gets the train-valid set split indices of the dataset.
+        
         :rtype: A dictionary for training-validation split with key :obj:`train_idx` and :obj:`valid_idx`.
         """
         if self.name.find('zinc250k') != -1:
