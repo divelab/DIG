@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from .df_utils import *
+from .df_utils import one_hot_argmax
 
 class ST_Net_Sigmoid(nn.Module):
     def __init__(self, input_dim, output_dim, hid_dim=64, num_layers=2, bias=True, scale_weight_norm=False, sigmoid_shift=2., apply_batch_norm=False):

@@ -1,10 +1,8 @@
-import numpy as np
 import torch
 from torch import nn
-import torch.nn.functional as F
 from .st_net import ST_Dis
-from .df_utils import *
-from .rgcn import *
+from .df_utils import one_hot_add, one_hot_minus
+from .rgcn import RGCN
 
 class DisGraphAF(nn.Module):
     def __init__(self, mask_node, mask_edge, index_select_edge, num_flow_layer=12, graph_size=38,
