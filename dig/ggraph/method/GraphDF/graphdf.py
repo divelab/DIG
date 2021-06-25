@@ -350,7 +350,7 @@ class GraphDF(Generator):
             mol_size = batch_data.num_atom
             bfs_perm_origin = batch_data.bfs_perm_origin
 
-            for cur_iter in range(repeat_time):
+            for _ in range(repeat_time):
                 if raw_smile not in optim_success_dict:
                     optim_success_dict[raw_smile] = [0, -1] #(try_time, imp)
                 if optim_success_dict[raw_smile][0] > min_optim_time and optim_success_dict[raw_smile][1] > 0: # reach min time and imp is positive

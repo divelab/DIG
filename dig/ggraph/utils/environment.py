@@ -13,7 +13,7 @@ from rdkit import DataStructs
 
 def convert_radical_electrons_to_hydrogens(mol):
     """
-    Converts radical electrons in a molecule into bonds to hydrogens. Only
+    Convert radical electrons in a molecule into bonds to hydrogens. Only
     use this if molecule is valid. Return a new mol object.
 
     Args:
@@ -38,7 +38,7 @@ def convert_radical_electrons_to_hydrogens(mol):
 
 def check_chemical_validity(mol):
     """
-    Checks the chemical validity of the mol object. Existing mol object is
+    Check the chemical validity of the mol object. Existing mol object is
     not modified. Radicals pass this test.
 
     Args:
@@ -58,7 +58,7 @@ def check_chemical_validity(mol):
 
 def check_valency(mol):
     """
-    Checks that no atoms in the mol have exceeded their possible
+    Check that no atoms in the mol have exceeded their possible
     valency.
 
     Args:
@@ -79,7 +79,7 @@ def check_valency(mol):
 
 def penalized_logp(mol):
     """
-    Reward that consists of log p penalized by SA and # long cycles,
+    Calculate the reward that consists of log p penalized by SA and # long cycles,
     as described in (Kusner et al. 2017). Scores are normalized based on the
     statistics of 250k_rndm_zinc_drugs_clean.smi dataset.
 
@@ -123,7 +123,7 @@ def penalized_logp(mol):
 
 def calculate_min_plogp(mol):
     """
-    Reward that consists of log p penalized by SA and # long cycles,
+    Calculate the eward that consists of log p penalized by SA and # long cycles,
     as described in (Kusner et al. 2017). Scores are normalized based on the
     statistics of 250k_rndm_zinc_drugs_clean.smi dataset.
 
@@ -148,7 +148,7 @@ def calculate_min_plogp(mol):
 
 def steric_strain_filter(mol, cutoff=0.82, max_attempts_embed=20, max_num_iters=200):
     """
-    Flags molecules based on a steric energy cutoff after max_num_iters
+    Flag molecules based on a steric energy cutoff after max_num_iters
     iterations of MMFF94 forcefield minimization. Cutoff is based on average
     angle bend strain energy of molecule
 
@@ -249,7 +249,7 @@ def steric_strain_filter(mol, cutoff=0.82, max_attempts_embed=20, max_num_iters=
 ### YES/NO filters ###
 def zinc_molecule_filter(mol):
     """
-    Flags molecules based on problematic functional groups as
+    Flag molecules based on problematic functional groups as
     provided set of ZINC rules from
     http://blaster.docking.org/filtering/rules_default.txt.
 
@@ -269,7 +269,7 @@ def zinc_molecule_filter(mol):
 def reward_target_molecule_similarity(mol, target, radius=2, nBits=2048,
                                       useChirality=True):
     """
-    Reward for a target molecule similarity, based on tanimoto similarity
+    Calculate the similarity, based on tanimoto similarity
     between the ECFP fingerprints of the x molecule and target molecule.
 
     Args:
