@@ -15,10 +15,10 @@ parser.add_argument('--train', action='store_true', default=False, help='specify
 args = parser.parse_args()
 
 if args.prop == 'plogp':
-    with open('config/prop_optim_plogp_config_dict.json') as f:
+    with open('config/prop_opt_plogp_config_dict.json') as f:
         conf = json.load(f)
 elif args.prop == 'qed':
-    with open('config/prop_optim_qed_config_dict.json') as f:
+    with open('config/prop_opt_qed_config_dict.json') as f:
         conf = json.load(f)
 else:
     print('Only plogp and qed properties are supported!')

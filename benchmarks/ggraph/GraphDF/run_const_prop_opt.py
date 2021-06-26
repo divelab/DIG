@@ -16,11 +16,11 @@ parser.add_argument('--train', action='store_true', default=False, help='specify
 args = parser.parse_args()
 
 if args.data == 'graphaf':
-    with open('config/cons_optim_graphaf_config_dict.json') as f:
+    with open('config/const_prop_opt_graphaf_config_dict.json') as f:
         conf = json.load(f)
     dataset = ZINC800(method='graphaf', conf_dict=conf['data'], one_shot=False, use_aug=False)
 elif args.data == 'jt':
-    with open('config/cons_optim_jt_config_dict.json') as f:
+    with open('config/const_prop_opt_jt_config_dict.json') as f:
         conf = json.load(f)
     dataset = ZINC800(method='jt', conf_dict=conf['data'], one_shot=False, use_aug=False)
 else:
