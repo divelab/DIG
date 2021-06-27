@@ -38,6 +38,8 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
    :caption: Tutorials
 
    tutorials/subgraphx
+   tutorials/graphdf
+
 
 .. toctree::
    :glob:
