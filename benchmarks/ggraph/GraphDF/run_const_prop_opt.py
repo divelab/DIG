@@ -10,7 +10,7 @@ RDLogger.DisableLog('rdApp.*')
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, default='graphaf', choices=['graphaf', 'jt'], help='dataset name')
-parser.add_argument('--model_path', type=str, default='./saved_ckpts/cons_optim/cons_optim_graphaf.pth', help='The path to the saved model file')
+parser.add_argument('--model_path', type=str, default='./saved_ckpts/const_prop_opt/const_prop_opt_graphaf.pth', help='The path to the saved model file')
 parser.add_argument('--train', action='store_true', default=False, help='specify it to be true if you are running training')
 
 args = parser.parse_args()

@@ -51,9 +51,9 @@
     "batch_size": 16,
     "max_iters": 200,
     "warm_up": 24,
-    "pretrain_model": "saved_ckpts/cons_optim/pretrain_graphaf.pth",
+    "pretrain_model": "saved_ckpts/const_prop_opt/pretrain_graphaf.pth",
     "save_interval": 20,
-    "save_dir": "cons_optim_graphaf",
+    "save_dir": "const_prop_opt_graphaf",
     "num_max_node": 38,
     "temperature": [
         1.0,

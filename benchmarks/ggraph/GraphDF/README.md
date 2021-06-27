@@ -38,7 +38,7 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_opt.py --train --prop=plog
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_opt.py --train --prop=qed
 ```
 
-To generate molecules using our trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphDF/saved_ckpts/prop_optim), then:
+To generate molecules using our trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphDF/saved_ckpts/prop_opt), then:
 ```shell script
 $ cd GraphDF
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_prop_opt.py --num_mols=100 --model_path=${path_to_the_model} --prop=plogp
@@ -54,7 +54,7 @@ $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_const_prop_opt.py --train --dat
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_const_prop_opt.py --train --data=jt
 ```
 
-To optimize molecules using our trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphDF/saved_ckpts/cons_optim), then:
+To optimize molecules using our trained model, first download models from [this link](https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphDF/saved_ckpts/const_prop_opt), then:
 ```shell script
 $ cd GraphDF
 $ CUDA_VISIBLE_DEVICES=${your_gpu_id} python run_const_prop_opt.py --model_path=${path_to_the_model} --data=graphaf

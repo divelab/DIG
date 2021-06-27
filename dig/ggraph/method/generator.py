@@ -28,14 +28,14 @@ class Generator():
         Running training for property optimization task.
         """
 
-        raise NotImplementedError("The function train_prop_optim is not implemented!")
+        raise NotImplementedError("The function train_prop_opt is not implemented!")
     
     def run_prop_opt(self, *args, **kwargs):
         r"""
         Running graph generation for property optimization task.
         """
 
-        raise NotImplementedError("The function run_prop_optim is not implemented!")
+        raise NotImplementedError("The function run_prop_opt is not implemented!")
     
     def train_const_prop_opt(self, loader, *args, **kwargs):
         r"""
@@ -45,11 +45,11 @@ class Generator():
             loader: The data loader for loading training samples.
         """
 
-        raise NotImplementedError("The function train_cons_optim is not implemented!")
+        raise NotImplementedError("The function train_const_prop_opt is not implemented!")
     
     def run_const_prop_opt(self, *args, **kwargs):
         r"""
         Running molecule optimization for constrained optimization task.
         """
 
-        raise NotImplementedError("The function run_cons_optim is not implemented!")
+        raise NotImplementedError("The function run_const_prop_opt is not implemented!")

@@ -45,9 +45,9 @@
     "weight_decay": 0,
     "max_iters": 200,
     "warm_up": 0,
-    "pretrain_model": "saved_ckpts/prop_optim/pretrain_plogp.pth",
+    "pretrain_model": "saved_ckpts/prop_opt/pretrain_plogp.pth",
     "save_interval": 20,
-    "save_dir": "prop_optim_plogp",
+    "save_dir": "prop_opt_plogp",
     "num_min_node": 1,
     "num_max_node": 48,
     "temperature": [

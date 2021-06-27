@@ -23,9 +23,9 @@ class GraphDF(Generator):
             model_conf_dict['use_gpu'] = False
         if task == 'rand_gen':
             self.model = GraphFlowModel(model_conf_dict)
-        elif task == 'prop_optim':
+        elif task == 'prop_opt':
             self.model = GraphFlowModel_rl(model_conf_dict)
-        elif task == 'cons_optim':
+        elif task == 'const_prop_opt':
             self.model = GraphFlowModel_con_rl(model_conf_dict)
         else:
             raise ValueError('Task {} is not supported in GraphDF!'.format(task))
@@ -140,7 +140,7 @@ class GraphDF(Generator):
                 save_dir (str): The directory to save the model parameters.
         """
 
-        self.get_model('prop_optim', model_conf_dict)
+        self.get_model('prop_opt', model_conf_dict)
         self.load_pretrain_model(pretrain_path)
         self.model.train()
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
@@ -164,7 +164,7 @@ class GraphDF(Generator):
             print('Iter {} | reward {}, score {}, loss {}'.format(cur_iter, avg_reward, avg_score, loss.item()))
 
             if cur_iter % save_interval == save_interval - 1:
-                torch.save(self.model.state_dict(), os.path.join(save_dir, 'prop_optim_net_{}.pth'.format(cur_iter)))
+                torch.save(self.model.state_dict(), os.path.join(save_dir, 'prop_opt_net_{}.pth'.format(cur_iter)))
 
         print("Finetuning (Reinforce) Finished!")
     
@@ -186,7 +186,7 @@ class GraphDF(Generator):
                 all_mols, a list of generated molecules represented by rdkit Chem.Mol objects.
         """
 
-        self.get_model('prop_optim', model_conf_dict, checkpoint_path)
+        self.get_model('prop_opt', model_conf_dict, checkpoint_path)
         self.model.eval()
         all_mols, all_smiles = [], []
         cnt_mol = 0
@@ -223,7 +223,7 @@ class GraphDF(Generator):
                 save_dir (str): The directory to save the model parameters.
         """
 
-        self.get_model('cons_optim', model_conf_dict)
+        self.get_model('const_prop_opt', model_conf_dict)
         self.load_pretrain_model(pretrain_path)
         self.model.train()
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
@@ -257,7 +257,7 @@ class GraphDF(Generator):
             print('Iter {} | reward {}, score {}, loss {}'.format(cur_iter, avg_reward, avg_score, loss.item()))
 
             if cur_iter % save_interval == save_interval - 1:
-                torch.save(self.model.state_dict(), os.path.join(save_dir, 'con_optim_net_{}.pth'.format(cur_iter)))
+                torch.save(self.model.state_dict(), os.path.join(save_dir, 'const_prop_opt_net_{}.pth'.format(cur_iter)))
 
         print("Finetuning (Reinforce) Finished!")
     
@@ -330,7 +330,7 @@ class GraphDF(Generator):
                 (mols_0, mols_2, mols_4, mols_6), they are lists of optimized molecules (represented by rdkit Chem.Mol objects) under the threshold 0.0, 0.2, 0.4, 0.6, respectively.
         """
 
-        self.get_model('cons_optim', model_conf_dict, checkpoint_path)
+        self.get_model('const_prop_opt', model_conf_dict, checkpoint_path)
         self.model.eval()
 
         data_len = len(dataset)
