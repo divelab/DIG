@@ -521,7 +521,7 @@ class PGExplainer(nn.Module):
         else:
             f1 = embed.unsqueeze(1).repeat(1, nodesize, 1).reshape(-1, feature_dim)
             f2 = embed.unsqueeze(0).repeat(nodesize, 1, 1).reshape(-1, feature_dim)
-            self_embed = embed[node_idx]
+            self_embed = embed[node_idx].repeat(nodesize * nodesize, 1)
             f12self = torch.cat([f1, f2, self_embed], dim=-1)
 
         # using the node embedding to calculate the edge weight
@@ -592,6 +592,7 @@ class PGExplainer(nn.Module):
                 data.to(self.device)
                 self.model.eval()
                 x_dict = {}
+                new_node_dict = {}
                 edge_index_dict = {}
                 node_idx_dict = {}
                 pred_dict = {}
@@ -603,6 +604,7 @@ class PGExplainer(nn.Module):
                     emb = self.model.get_emb(data.x, data.edge_index)
 
                     x_dict[node_idx] = x.to(self.device)
+                    new_node_dict[node_idx] = torch.where(subset == node_idx)[0]
                     edge_index_dict[node_idx] = edge_index.to(self.device)
                     emb_dict[node_idx] = emb.to(self.device)
 
@@ -619,7 +621,8 @@ class PGExplainer(nn.Module):
                 tic = time.perf_counter()
                 for iter_idx, node_idx in tqdm.tqdm(enumerate(x_dict.keys())):
                     pred, edge_mask = self.explain(x_dict[node_idx], edge_index_dict[node_idx],
-                                                   emb_dict[node_idx], tmp, training=True)
+                                                   emb_dict[node_idx], tmp, training=True,
+                                                   node_idx=new_node_dict[node_idx])
                     loss_tmp = self.__loss__(pred[node_idx_dict[node_idx]], pred_dict[node_idx])
                     loss_tmp.backward()
                     loss += loss_tmp.item()
@@ -682,10 +685,9 @@ class PGExplainer(nn.Module):
             label = y[node_idx]
             # masked value
             x, edge_index, _, subset, _ = self.get_subgraph(node_idx, x, edge_index)
-            new_node_index = torch.where(subset == node_idx)[0]
             new_node_idx = torch.where(subset == node_idx)[0]
             embed = self.model.get_emb(x, edge_index)
-            _, edge_mask = self.explain(x, edge_index, embed, tmp=1.0, training=False, node_idx=new_node_index)
+            _, edge_mask = self.explain(x, edge_index, embed, tmp=1.0, training=False, node_idx=new_node_idx)
 
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
