@@ -1,13 +1,13 @@
 import json
+import argparse
+from rdkit import RDLogger
 from dig.ggraph.method import GraphDF
 from dig.ggraph.evaluation import ConstPropOptEvaluator
 from dig.ggraph.dataset import ZINC800
 from torch_geometric.data import DenseDataLoader
 
-from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 
-import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, default='graphaf', choices=['graphaf', 'jt'], help='dataset name')
 parser.add_argument('--model_path', type=str, default='./saved_ckpts/const_prop_opt/const_prop_opt_graphaf.pth', help='The path to the saved model file')

@@ -1,11 +1,11 @@
 import json
+import argparse
+from rdkit import RDLogger
 from dig.ggraph.method import GraphDF
 from dig.ggraph.evaluation import PropOptEvaluator
 
-from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 
-import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--prop', type=str, default='plogp', choices=['plogp', 'qed'], help='property name')
 parser.add_argument('--model_path', type=str, default='./saved_ckpts/prop_opt/prop_opt_plogp.pth', help='The path to the saved model file')

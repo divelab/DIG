@@ -1,6 +1,6 @@
-from dig.ggraph.utils import check_chemical_validity, qed, calculate_min_plogp, reward_target_molecule_similarity
 from rdkit import Chem
 import numpy as np
+from dig.ggraph.utils import check_chemical_validity, qed, calculate_min_plogp, reward_target_molecule_similarity
 
 
 
@@ -12,7 +12,8 @@ class RandGenEvaluator:
     def __init__(self):
         pass
 
-    def eval(self, input_dict):
+    @staticmethod
+    def eval(input_dict):
         r"""Run evaluation in random generation task. Compute the validity ratio, uniqueness ratio and novelty ratio of generated molecules (all represented in percentage).
 
         Args:
@@ -99,7 +100,8 @@ class ConstPropOptEvaluator:
     def __init__(self):
         pass
 
-    def eval(self, input_dict):
+    @staticmethod
+    def eval(input_dict):
         r""" Run evaluation in constrained optimization task. Compute the average property improvements, similarities and success rates under the similarity threshold 0.0, 0.2, 0.4, 0.6.
         
         Args:

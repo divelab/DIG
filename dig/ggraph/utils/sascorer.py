@@ -17,16 +17,13 @@
 #
 from __future__ import print_function
 
+import math
+import pickle as cPickle
+import os.path as op
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 # from rdkit.six.moves import cPickle
-import pickle as cPickle
 from rdkit.six import iteritems
-
-import math
-from collections import defaultdict
-
-import os.path as op
 
 _fscores = None
 
@@ -100,9 +97,9 @@ def calculateScore(m):
   sascore = score1 + score2 + score3
 
   # need to transform "raw" value into scale between 1 and 10
-  min = -4.0
-  max = 2.5
-  sascore = 11. - (sascore - min + 1) / (max - min) * 9.
+  min_score = -4.0
+  max_score = 2.5
+  sascore = 11. - (sascore - min_score + 1) / (max_score - min_score) * 9.
   # smooth the 10-end
   if sascore > 8.:
     sascore = 8. + math.log(sascore + 1. - 9.)
@@ -116,7 +113,7 @@ def calculateScore(m):
 
 def processMols(mols):
   print('smiles\tName\tsa_score')
-  for i, m in enumerate(mols):
+  for m in mols:
     if m is None:
       continue
 

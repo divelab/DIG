@@ -1,13 +1,13 @@
 import json
+import argparse
+from rdkit import RDLogger
 from dig.ggraph.dataset import QM9, ZINC250k, MOSES
 from dig.ggraph.method import GraphDF
 from dig.ggraph.evaluation import RandGenEvaluator
 from torch_geometric.data import DenseDataLoader
 
-from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 
-import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, default='qm9', choices=['qm9', 'zinc250k', 'moses'], help='dataset name')
 parser.add_argument('--model_path', type=str, default='./saved_ckpts/rand_gen/rand_gen_qm9.pth', help='The path to the saved model file')

@@ -1,6 +1,6 @@
+import os
 import torch
 import torch.nn as nn
-import os
 from rdkit import Chem
 from dig.ggraph.method import Generator
 from .model import GraphFlowModel, GraphFlowModel_rl, GraphFlowModel_con_rl
@@ -80,11 +80,11 @@ class GraphDF(Generator):
                 total_loss += loss.to('cpu').item()
                 print('Training iteration {} | loss {}'.format(batch, loss.to('cpu').item()))
 
-            avg_loss = self._train_epoch()
+            avg_loss = total_loss / (batch + 1)
             print("Training | Average loss {}".format(avg_loss))
             
             if epoch % save_interval == 0:
-                torch.save(self.model.state_dict(), os.path.join(self.out_path, 'rand_gen_ckpt_{}.pth'.format(epoch)))
+                torch.save(self.model.state_dict(), os.path.join(save_dir, 'rand_gen_ckpt_{}.pth'.format(epoch)))
 
 
     def run_rand_gen(self, model_conf_dict, checkpoint_path, n_mols=100, num_min_node=7, num_max_node=25, temperature=[0.3, 0.3], atomic_num_list=[6, 7, 8, 9]):

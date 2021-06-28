@@ -30,8 +30,8 @@ class DisGraphAF(nn.Module):
         if use_bn:
             self.batchNorm = nn.BatchNorm1d(nout)
 
-        self.node_st_net = nn.ModuleList([ST_Dis(nout, self.num_node_type, hid_dim=nhid, bias=True) for i in range(num_flow_layer)])
-        self.edge_st_net = nn.ModuleList([ST_Dis(nout*3, self.num_edge_type, hid_dim=nhid, bias=True) for i in range(num_flow_layer)])
+        self.node_st_net = nn.ModuleList([ST_Dis(nout, self.num_node_type, hid_dim=nhid, bias=True) for _ in range(num_flow_layer)])
+        self.edge_st_net = nn.ModuleList([ST_Dis(nout*3, self.num_edge_type, hid_dim=nhid, bias=True) for _ in range(num_flow_layer)])
         
 
     def forward(self, x, adj, x_deq, adj_deq):

@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 import numpy as np
 from rdkit import Chem
-from .disgraphaf import DisGraphAF
 from dig.ggraph.utils import check_chemical_validity, check_valency, calculate_min_plogp, reward_target_molecule_similarity
 from dig.ggraph.utils import convert_radical_electrons_to_hydrogens, steric_strain_filter, zinc_molecule_filter
+from .disgraphaf import DisGraphAF
 
 
 class GraphFlowModel_con_rl(nn.Module):
@@ -695,7 +695,7 @@ class GraphFlowModel_con_rl(nn.Module):
                             traj_node_inputs['node_cnt'].pop(-1)
                 
                             ## pop adj
-                            for pop_cnt in range(step_num_data_edge):
+                            for _ in range(step_num_data_edge):
                                 traj_adj_inputs['node_features'].pop(-1)
                                 traj_adj_inputs['adj_features'].pop(-1)
                                 traj_adj_inputs['edge_features_cont'].pop(-1)

@@ -1,14 +1,11 @@
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem.Descriptors import qed, MolLogP
-from rdkit.Chem import rdMolDescriptors
-from rdkit.Chem import Descriptors
-from rdkit.Chem.FilterCatalog import FilterCatalogParams, FilterCatalog
 import copy
-import networkx as nx
-from .sascorer import calculateScore
 import itertools
-from rdkit import DataStructs
+import networkx as nx
+from rdkit import Chem, DataStructs
+from rdkit.Chem import AllChem, rdMolDescriptors
+from rdkit.Chem.Descriptors import MolLogP
+from rdkit.Chem.FilterCatalog import FilterCatalogParams, FilterCatalog
+from .sascorer import calculateScore
 
 
 def convert_radical_electrons_to_hydrogens(mol):
@@ -279,11 +276,6 @@ def reward_target_molecule_similarity(mol, target, radius=2, nBits=2048,
     :rtype:
         :class:`float`, [0.0, 1.0]
     """
-    x = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=radius,
-                                                        nBits=nBits,
-                                                        useChirality=useChirality)
-    target = rdMolDescriptors.GetMorganFingerprintAsBitVect(target,
-                                                            radius=radius,
-                                                        nBits=nBits,
-                                                        useChirality=useChirality)
+    x = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=radius, nBits=nBits, useChirality=useChirality)
+    target = rdMolDescriptors.GetMorganFingerprintAsBitVect(target, radius=radius, nBits=nBits, useChirality=useChirality)
     return DataStructs.TanimotoSimilarity(x, target)

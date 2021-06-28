@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import numpy as np
 from rdkit import Chem
-from .disgraphaf import DisGraphAF
 from dig.ggraph.utils import check_valency, convert_radical_electrons_to_hydrogens
+from .disgraphaf import DisGraphAF
 
 
 class GraphFlowModel(nn.Module):
