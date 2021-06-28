@@ -493,7 +493,8 @@ class PGExplainer(nn.Module):
                 edge_index: Tensor,
                 embed: Tensor,
                 tmp: float = 1.0,
-                training: bool = False)\
+                training: bool = False,
+                **kwargs)\
             -> Tuple[float, Tensor]:
         r""" explain the GNN behavior for graph with explanation network
 
@@ -510,13 +511,20 @@ class PGExplainer(nn.Module):
             probs (:obj:`torch.Tensor`): The classification probability for graph with edge mask
             edge_mask (:obj:`torch.Tensor`): The probability mask for graph edges
         """
+        node_idx = kwargs.get('node_idx')
         nodesize = embed.shape[0]
         feature_dim = embed.shape[1]
-        f1 = embed.unsqueeze(1).repeat(1, nodesize, 1).reshape(-1, feature_dim)
-        f2 = embed.unsqueeze(0).repeat(nodesize, 1, 1).reshape(-1, feature_dim)
+        if self.explain_graph:
+            f1 = embed.unsqueeze(1).repeat(1, nodesize, 1).reshape(-1, feature_dim)
+            f2 = embed.unsqueeze(0).repeat(nodesize, 1, 1).reshape(-1, feature_dim)
+            f12self = torch.cat([f1, f2], dim=-1)
+        else:
+            f1 = embed.unsqueeze(1).repeat(1, nodesize, 1).reshape(-1, feature_dim)
+            f2 = embed.unsqueeze(0).repeat(nodesize, 1, 1).reshape(-1, feature_dim)
+            self_embed = embed[node_idx]
+            f12self = torch.cat([f1, f2, self_embed], dim=-1)
 
         # using the node embedding to calculate the edge weight
-        f12self = torch.cat([f1, f2], dim=-1)
         h = f12self.to(self.device)
         for elayer in self.elayers:
             h = elayer(h)
@@ -674,9 +682,10 @@ class PGExplainer(nn.Module):
             label = y[node_idx]
             # masked value
             x, edge_index, _, subset, _ = self.get_subgraph(node_idx, x, edge_index)
+            new_node_index = torch.where(subset == node_idx)[0]
             new_node_idx = torch.where(subset == node_idx)[0]
             embed = self.model.get_emb(x, edge_index)
-            _, edge_mask = self.explain(x, edge_index, embed, tmp=1.0, training=False)
+            _, edge_mask = self.explain(x, edge_index, embed, tmp=1.0, training=False, node_idx=new_node_index)
 
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
