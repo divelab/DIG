@@ -3,7 +3,7 @@ import itertools
 import networkx as nx
 from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem, rdMolDescriptors
-from rdkit.Chem.Descriptors import MolLogP
+from rdkit.Chem.Descriptors import MolLogP, qed
 from rdkit.Chem.FilterCatalog import FilterCatalogParams, FilterCatalog
 from .sascorer import calculateScore
 
