@@ -1,15 +1,15 @@
 import torch
 
 
-def rescale_adj(adj, type='all'):
+def rescale_adj(adj, dim='all'):
     
-    if type=='view':
+    if dim=='view':
         out_degree = adj.sum(dim=-1)
         out_degree_sqrt_inv = out_degree.pow(-1)
         out_degree_sqrt_inv[out_degree_sqrt_inv == float('inf')] = 0
         adj_prime = out_degree_sqrt_inv.unsqueeze(-1) * adj
     
-    elif type=='all':
+    elif dim=='all':
         num_neighbors = adj.sum(dim=(1, 2)).float()
         num_neighbors_inv = num_neighbors.pow(-1)
         num_neighbors_inv[num_neighbors_inv == float('inf')] = 0
@@ -22,7 +22,7 @@ def requires_grad(parameters, flag=True):
         p.requires_grad = flag
         
         
-def clip_grad(parameters, optimizer):
+def clip_grad(optimizer):
     with torch.no_grad():
         for group in optimizer.param_groups:
             for p in group['params']:

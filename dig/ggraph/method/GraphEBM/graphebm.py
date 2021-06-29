@@ -136,7 +136,7 @@ class GraphEBM(Generator):
                 loss = loss_en + alpha * loss_reg
                 loss = loss.mean()
                 loss.backward()
-                clip_grad(parameters, optimizer)
+                clip_grad(optimizer)
                 optimizer.step()
 
 
@@ -326,7 +326,7 @@ class GraphEBM(Generator):
                 loss = loss_en + alpha * loss_reg
                 loss = loss.mean()
                 loss.backward()
-                clip_grad(parameters, optimizer)
+                clip_grad(optimizer)
                 optimizer.step()
 
 
