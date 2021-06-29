@@ -1,5 +1,5 @@
 ================================
-Tutorial for graph generation
+Tutorial for Graph Generation
 ================================
 
 
