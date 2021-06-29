@@ -36,8 +36,8 @@ class MaskedGraphAF(nn.Module):
         self.st_net_fn_dict = {'sigmoid': ST_Net_Sigmoid, 'exp': ST_Net_Exp, 'softplus': ST_Net_Softplus}
         assert st_type in ['sigmoid', 'exp', 'softplus'], 'unsupported st_type, choices are [sigmoid, exp, softplus, ]'
         st_net_fn = self.st_net_fn_dict[st_type]
-        self.node_st_net = nn.ModuleList([st_net_fn(nout, self.num_node_type, hid_dim=nhid, bias=True) for i in range(num_flow_layer)])
-        self.edge_st_net = nn.ModuleList([st_net_fn(nout*3, self.num_edge_type, hid_dim=nhid, bias=True) for i in range(num_flow_layer)])
+        self.node_st_net = nn.ModuleList([st_net_fn(nout, self.num_node_type, hid_dim=nhid, bias=True) for _ in range(num_flow_layer)])
+        self.edge_st_net = nn.ModuleList([st_net_fn(nout*3, self.num_edge_type, hid_dim=nhid, bias=True) for _ in range(num_flow_layer)])
 
 
     def forward(self, x, adj, x_deq, adj_deq):
