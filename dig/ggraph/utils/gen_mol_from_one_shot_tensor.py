@@ -1,8 +1,8 @@
 ### Code adapted from MoFlow (under MIT License) https://github.com/calvin-zcx/moflow
-
+import re
 import numpy as np
 from rdkit import Chem
-import re
+
 
 
 ATOM_VALENCY = {6:4, 7:3, 8:2, 9:1, 15:3, 16:2, 17:1, 35:1, 53:1}
@@ -60,7 +60,6 @@ def check_valency(mol):
 
     
 def correct_mol(x):
-    xsm = Chem.MolToSmiles(x, isomericSmiles=True)
     mol = x
     while True:
         flag, atomid_valence = check_valency(mol)
@@ -69,7 +68,6 @@ def correct_mol(x):
         else:
             assert len (atomid_valence) == 2
             idx = atomid_valence[0]
-            v = atomid_valence[1]
             queue = []
             for b in mol.GetAtomWithIdx(idx).GetBonds():
                 queue.append(
