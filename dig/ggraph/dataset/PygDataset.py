@@ -1,19 +1,13 @@
-import csv
+import os, torch, json, ast
+import os.path as osp
+import ssl
+from itertools import repeat
 import numpy as np
 from rdkit import Chem
-import os, shutil, re, torch, json, ast
-import os.path as osp
 import pandas as pd
-# import scipy.sparse as sp
-from torch.utils.data import Dataset
 import networkx as nx
-import ssl
 from six.moves import urllib
-
-from itertools import repeat, product
-from torch_geometric.data import Data, InMemoryDataset, download_url, extract_zip
-from torch_geometric.io import read_tu_data
-from torch_geometric.utils import to_networkx
+from torch_geometric.data import Data, InMemoryDataset, download_url
 
 bond_type_to_int = {Chem.BondType.SINGLE: 0, Chem.BondType.DOUBLE: 1, Chem.BondType.TRIPLE: 2}
 zinc_atom_list = [6, 7, 8, 9, 15, 16, 17, 35, 53]
@@ -154,10 +148,6 @@ class PygDataset(InMemoryDataset):
             os.makedirs(self.raw_dir)
         url = self.url
         path = download_url(url, self.raw_dir)
-#         extract_zip(path, folder)
-#         os.unlink(path)
-#         shutil.rmtree(self.raw_dir)
-#         os.rename(osp.join(folder), self.raw_dir)
 
     def process(self):
         r"""Processes the dataset from raw data file to the :obj:`self.processed_dir` folder.
@@ -245,7 +235,7 @@ class PygDataset(InMemoryDataset):
         smile_list = list(input_df[self.smile_col])
         if self.available_prop:
                 prop_list = list(input_df[self.prop_name])
-                
+        
         self.all_smiles = smile_list
         data_list = []
         
@@ -391,20 +381,21 @@ class PygDataset(InMemoryDataset):
         start = [start_id]
         output = [start_id]
         while len(start) > 0:
-            next = []
+            next_vertex = []
             while len(start) > 0:
                 current = start.pop(0)
                 neighbor = dictionary.get(current)
                 if neighbor is not None:
-                    next = next + neighbor
-            output = output + next
-            start = next
+                    next_vertex = next_vertex + neighbor
+            output = output + next_vertex
+            start = next_vertex
         return output
     
 if __name__ == '__main__':
-    name = pd.read_csv('config.csv', index_col = 0)
-    for i in name:
-        test = PygDataset(name = i)
+    dataset_names = pd.read_csv('config.csv', index_col = 0)
+    for i in dataset_names:
+        test = PygDataset(name=i, root='')
         print(test)
         print(test[0])
         print(test[0].y)
+        

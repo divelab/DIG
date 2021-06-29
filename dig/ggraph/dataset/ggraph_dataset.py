@@ -1,18 +1,6 @@
-import csv
 import numpy as np
 from rdkit import Chem
-import os, shutil, re, torch, json, ast
-import os.path as osp
-import pandas as pd
-# import scipy.sparse as sp
-from torch.utils.data import Dataset
-import networkx as nx
 from dig.ggraph.dataset import PygDataset
-
-from itertools import repeat, product
-from torch_geometric.data import Data, InMemoryDataset, download_url, extract_zip
-from torch_geometric.io import read_tu_data
-from torch_geometric.utils import to_networkx
 
 bond_type_to_int = {Chem.BondType.SINGLE: 0, Chem.BondType.DOUBLE: 1, Chem.BondType.TRIPLE: 2}
 zinc_atom_list = [6, 7, 8, 9, 15, 16, 17, 35, 53]
@@ -196,4 +184,3 @@ if __name__ == '__main__':
     test = MOSES()
     print(test[0])
     
-   
