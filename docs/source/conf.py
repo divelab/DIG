@@ -14,8 +14,9 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 import sys
-sys.path.insert(0,'..')
-sys.path.insert(0,'../..')
+import torch_geometric
+import sphinx_rtd_theme
+
 import dig.sslgraph.dataset
 import dig.sslgraph.method
 import dig.sslgraph.utils
@@ -32,9 +33,8 @@ import dig.threedgraph.method
 import dig.threedgraph.utils
 import dig.threedgraph.evaluation
 
-import torch_geometric
-
-import sphinx_rtd_theme
+sys.path.insert(0,'..')
+sys.path.insert(0,'../..')
 
 # -- Project information -----------------------------------------------------
 
