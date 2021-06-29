@@ -1,10 +1,12 @@
+import time
+import os
+import copy
+
 import torch
 from torch.optim import Adam
-import time
 from tqdm import tqdm
-import os
 from rdkit import Chem
-import copy
+
 
 
 from dig.ggraph.method import Generator
@@ -70,7 +72,7 @@ class GraphEBM(Generator):
             losses_reg = []
             losses_en = []
             losses = []
-            for i, batch in enumerate(tqdm(loader)):
+            for _, batch in enumerate(tqdm(loader)):
                 ### Dequantization
                 pos_x = batch.x.to(self.device).to(dtype=torch.float32)
                 pos_x += c * torch.rand_like(pos_x, device=self.device)  
@@ -95,7 +97,7 @@ class GraphEBM(Generator):
 
                 noise_x = torch.randn_like(neg_x, device=self.device)
                 noise_adj = torch.randn_like(neg_adj, device=self.device)
-                for k in range(ld_step):
+                for _ in range(ld_step):
 
                     noise_x.normal_(0, ld_noise)
                     noise_adj.normal_(0, ld_noise)
@@ -193,7 +195,7 @@ class GraphEBM(Generator):
         
         ### Langevin dynamics
         print("Generating samples...")
-        for k in range(ld_step):
+        for _ in range(ld_step):
             noise_x.normal_(0, ld_noise)
             noise_adj.normal_(0, ld_noise)
             gen_x.data.add_(noise_x.data)
@@ -258,7 +260,7 @@ class GraphEBM(Generator):
             losses_reg = []
             losses_en = []
             losses = []
-            for i, batch in enumerate(tqdm(loader)):
+            for _, batch in enumerate(tqdm(loader)):
                 ### Dequantization
                 pos_x = batch.x.to(self.device).to(dtype=torch.float32)
                 pos_x += c * torch.rand_like(pos_x, device=self.device)  
@@ -285,7 +287,7 @@ class GraphEBM(Generator):
 
                 noise_x = torch.randn_like(neg_x, device=self.device)
                 noise_adj = torch.randn_like(neg_adj, device=self.device)
-                for k in range(ld_step):
+                for _ in range(ld_step):
 
                     noise_x.normal_(0, ld_noise)
                     noise_adj.normal_(0, ld_noise)
@@ -372,7 +374,7 @@ class GraphEBM(Generator):
         save_mols_list = []
         prop_list = []
         
-        for i, batch in enumerate(tqdm(initialization_loader)): 
+        for _, batch in enumerate(tqdm(initialization_loader)): 
             ### Initialization
             gen_x = batch.x.to(self.device).to(dtype=torch.float32)
             gen_adj = batch.adj.to(self.device).to(dtype=torch.float32)
@@ -386,7 +388,7 @@ class GraphEBM(Generator):
             noise_adj = torch.randn_like(gen_adj, device=self.device)
 
             ### Langevin dynamics
-            for k in range(ld_step):
+            for _ in range(ld_step):
                 noise_x.normal_(0, ld_noise)
                 noise_adj.normal_(0, ld_noise)
                 gen_x.data.add_(noise_x.data)
@@ -442,7 +444,7 @@ class GraphEBM(Generator):
                 ld_noise (float): The standard deviation of the added noise in Langevin dynamics.
                 ld_step_size (int): The step size of Langevin dynamics.
                 clamp (bool): Whether to use gradient clamp in Langevin dynamics.
-                atomic_num_list (list): The list used to indicate atom types. 
+                atomic_num_list (list): The list used to indicate atom types.
                 train_smiles (list): A list of smiles string corresponding to training samples.
             
             :rtype:
@@ -514,9 +516,7 @@ class GraphEBM(Generator):
                 for mol_idx in range(len(gen_smiles)):
                     if gen_mols[mol_idx] is not None:
                         tmp_mol = gen_mols[mol_idx]
-                        tmp_smiles = gen_smiles[mol_idx]
                         ori_mol = ori_mols[mol_idx]
-                        ori_smile = ori_smiles[mol_idx]
                         imp_p = calculate_min_plogp(tmp_mol) - calculate_min_plogp(ori_mol)
                         current_sim = reward_target_molecule_similarity(tmp_mol, ori_mol)
                         if current_sim >= 0.:
@@ -579,7 +579,7 @@ class GraphEBM(Generator):
         
         ### Langevin dynamics
         print("Generating samples...")
-        for k in range(ld_step):
+        for _ in range(ld_step):
             noise_x.normal_(0, ld_noise)
             noise_adj.normal_(0, ld_noise)
             gen_x.data.add_(noise_x.data)
