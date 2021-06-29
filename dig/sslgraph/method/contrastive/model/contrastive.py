@@ -149,7 +149,11 @@ class Contrastive(nn.Module):
             encoder.train()
             encoders = [encoder]*len(self.views_fn)
 
-        self.proj_head_g.train()
+        try:
+            self.proj_head_g.train()
+        except:
+            pass
+        
         min_loss = 1e9
         with trange(epochs) as t:
             for epoch in t:
@@ -211,7 +215,11 @@ class Contrastive(nn.Module):
             encoder.train()
             encoders = [encoder]*len(self.views_fn)
         
-        self.proj_head_n.train()
+        try:
+            self.proj_head_n.train()
+        except:
+            pass
+        
         min_loss = 1e9
         with trange(epochs) as t:
             for epoch in t:
@@ -274,8 +282,11 @@ class Contrastive(nn.Module):
             encoder.train()
             encoders = [encoder]*len(self.views_fn)
         
-        self.proj_head_n.train()
-        self.proj_head_g.train()
+        try:
+            self.proj_head_n.train()
+            self.proj_head_g.train()
+        except:
+            pass
         min_loss = 1e9
         with trange(epochs) as t:
             for epoch in t:
