@@ -55,9 +55,9 @@
     "max_iters": 300,
     "warm_up": 24,
     "pretrain_model": "ckpt/dense_gen_net_10.pth",
-    "dense_gen_model": "saved_ckpts/cons_optim/checkpoint277.pth",
+    "dense_gen_model": "saved_ckpts/const_prop_opt/checkpoint277.pth",
     "save_interval": 20,
-    "save_dir": "cons_optim_graphaf",
+    "save_dir": "const_prop_opt_graphaf",
     "num_max_node": 38,
     "temperature": 0.75,
     "atom_list": [

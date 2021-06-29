@@ -1,14 +1,14 @@
 import json
+import argparse
+from rdkit import RDLogger
 from dig.ggraph.method import GraphAF
 from dig.ggraph.evaluation import Prop_Optim_Evaluator
 
-from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 
-import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--prop', type=str, default='plogp', choices=['plogp', 'qed'], help='property name')
-parser.add_argument('--model_path', type=str, default='./saved_ckpts/prop_optim/prop_optim_plogp.pth', help='The path to the saved model file')
+parser.add_argument('--model_path', type=str, default='./saved_ckpts/prop_opt/prop_opt_plogp.pth', help='The path to the saved model file')
 parser.add_argument('--num_mols', type=int, default=100, help='The number of molecules to be generated')
 parser.add_argument('--train', action='store_true', default=False, help='specify it to be true if you are running training')
 
