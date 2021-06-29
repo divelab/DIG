@@ -85,7 +85,7 @@ class GraphConv(nn.Module):
         self.out_ch = out_channels
 
     def forward(self, adj, h):
-        mb, node, ch = h.shape 
+        mb, node, _ = h.shape 
         if self.add_self:
             h_node = self.linear_node(h) 
         m = self.linear_edge(h)
