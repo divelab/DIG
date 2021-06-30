@@ -17,6 +17,9 @@ import sys
 import torch_geometric
 import sphinx_rtd_theme
 
+sys.path.insert(0,'..')
+sys.path.insert(0,'../..')
+
 import dig.sslgraph.dataset
 import dig.sslgraph.method
 import dig.sslgraph.utils
@@ -32,9 +35,6 @@ import dig.threedgraph.dataset
 import dig.threedgraph.method
 import dig.threedgraph.utils
 import dig.threedgraph.evaluation
-
-sys.path.insert(0,'..')
-sys.path.insert(0,'../..')
 
 # -- Project information -----------------------------------------------------
 
