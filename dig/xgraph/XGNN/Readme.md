@@ -37,7 +37,7 @@ Place the checkpoint of the GNNs to be explained in the checkpoint folder. Also,
 
 In "gnn.py" we provide an example showing the training of GNNs, and then the trained GNNs become the model to be explained. 
 
-Our data and checkpoint are available upon request. 
+Our data and checkpoint are available (https://drive.google.com/drive/u/2/folders/1To5IQa-3H_m48OwhJzEhIwz1swnHcOoz). 
 
 ## The XGNN Algorithm
 
