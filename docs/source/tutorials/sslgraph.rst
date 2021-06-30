@@ -8,9 +8,6 @@ description of the constrastive SSL framework following the survey [2]_, based o
 the :class:`~dig.sslgraph.method.Contrastive` base class. We further provide two examples to demonstrate 
 how to build up customized contrastive framework and the GraphCL [3]_ framework using the base class.
 
-.. contents::
-    :local:
-
 Contrastive Learning Frameworks
 -------------------------------
 
