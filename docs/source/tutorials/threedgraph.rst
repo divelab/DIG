@@ -24,7 +24,7 @@ Generally, the use of 3D position information usually results in improved perfor
 Code Example
 ================ 
 We use QM9 [8]_ dataset as an example to show how to use SphereNet method in our DIG library. 
-QM9 connsists of about 130,000 equilibrium molecules with 12 regression targets: mu, alpha, homo, lumo, gap, r2, zpve, U0, U, H, G, Cv. 
+QM9 consists of about 130,000 equilibrium molecules with 12 regression targets: mu, alpha, homo, lumo, gap, r2, zpve, U0, U, H, G, Cv. 
 
 Firstly, we load QM9 data. We train a separate model for each target except for gap, which was predicted by taking homo-lumo.
 
@@ -44,11 +44,10 @@ Next, we load SphereNet model and evaluation function.
     from dig.threedgraph.method import SphereNet
     from dig.threedgraph.evaluation import ThreeDEvaluator
     model = SphereNet(energy_and_force=False, cutoff=5.0, num_layers=4, 
-    hidden_channels=128, out_channels=1, int_emb_size=64, 
-    basis_emb_size_dist=8, basis_emb_size_angle=8, basis_emb_size_torsion=8, out_emb_channels=256, 
-    num_spherical=7, num_radial=6, envelope_exponent=5, 
-    num_before_skip=1, num_after_skip=2, num_output_layers=3 
-    )
+                      hidden_channels=128, out_channels=1, int_emb_size=64, 
+                      basis_emb_size_dist=8, basis_emb_size_angle=8, basis_emb_size_torsion=8, out_emb_channels=256, 
+                      num_spherical=7, num_radial=6, envelope_exponent=5, 
+                      num_before_skip=1, num_after_skip=2, num_output_layers=3)
     loss_func = torch.nn.L1Loss()
     evaluation = ThreeDEvaluator()
 
@@ -58,7 +57,8 @@ Finally, we train the model and print test results.
 
     from dig.threedgraph.method import run
     run3d = run()
-    run3d.run(device, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=20, batch_size=32, vt_batch_size=32, lr=0.0005, lr_decay_factor=0.5, lr_decay_step_size=15)
+    run3d.run(device, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, 
+              epochs=20, batch_size=32, vt_batch_size=32, lr=0.0005, lr_decay_factor=0.5, lr_decay_step_size=15)
 
 Output:
 
@@ -97,6 +97,6 @@ Output:
 .. [4] Wu, Z., Ramsundar, B., Feinberg, E.N., Gomes, J., Geniesse, C., Pappu, A.S., Leswing, K. and Pande, V., 2018. MoleculeNet: a benchmark for molecular machine learning. Chemical science, 9(2), pp.513-530.
 .. [5] Wang, Z., Liu, M., Luo, Y., Xu, Z., Xie, Y., Wang, L., Cai, L. and Ji, S., 2020. Advanced graph and sequence neural networks for molecular property prediction and drug discovery. arXiv preprint arXiv:2012.01981.
 .. [6] Schütt, K.T., Sauceda, H.E., Kindermans, P.J., Tkatchenko, A. and Müller, K.R., 2018. Schnet–a deep learning architecture for molecules and materials. The Journal of Chemical Physics, 148(24), p.241722.
-.. [7] Klicpera, J., Groß, J. and Günnemann, S., 2020. Directional message passing for molecular graphs. arXiv preprint arXiv:2003.03123.
+.. [7] Klicpera, J., Groß, J. and Günnemann, S., 2020. Directional message passing for molecular graphs. In International Conference on Learning Representations (ICLR), 2020.
 .. [8] Ramakrishnan, R., Dral, P.O., Rupp, M. and Von Lilienfeld, O.A., 2014. Quantum chemistry structures and properties of 134 kilo molecules. Scientific data, 1(1), pp.1-7.
 
