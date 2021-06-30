@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from scipy.optimize import brentq
 from scipy import special as sp
-from math import sqrt, pi as PI
+from math import pi as PI
 
 try:
     import sympy as sym

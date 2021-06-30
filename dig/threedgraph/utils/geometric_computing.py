@@ -4,7 +4,7 @@
 import torch
 from torch_scatter import scatter
 from torch_sparse import SparseTensor
-from math import sqrt, pi as PI
+from math import pi as PI
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

@@ -1,9 +1,7 @@
-import os
 from math import pi as PI
 import torch
 import torch.nn.functional as F
-from torch.nn import Embedding, Sequential, Linear, ModuleList
-import numpy as np
+from torch.nn import Embedding, Sequential, Linear
 from torch_scatter import scatter
 from torch_geometric.nn import radius_graph
 
@@ -29,7 +27,7 @@ class update_e(torch.nn.Module):
         self.mlp[0].bias.data.fill_(0)
 
     def forward(self, v, dist, dist_emb, edge_index):
-        j, i = edge_index
+        j, _ = edge_index
         C = 0.5 * (torch.cos(dist * PI / self.cutoff) + 1.0)
         W = self.mlp(dist_emb) * C.view(-1, 1)
         v = self.lin(v)
@@ -53,7 +51,7 @@ class update_v(torch.nn.Module):
         self.lin2.bias.data.fill_(0)
 
     def forward(self, v, e, edge_index):
-        j, i = edge_index
+        _, i = edge_index
         out = scatter(e, i, dim=0)
         out = self.lin1(out)
         out = self.act(out)

@@ -7,8 +7,6 @@ from torch_geometric.nn import radius_graph
 from torch_scatter import scatter
 from math import sqrt
 
-# import sys
-# sys.path.append('..')
 from ...utils import xyz_to_dat
 from .features import dist_emb, angle_emb, torsion_emb
 
@@ -196,9 +194,9 @@ class update_v(torch.nn.Module):
         if self.output_init == 'GlorotOrthogonal':
             glorot_orthogonal(self.lin.weight, scale=2.0)
 
-    def forward(self, e, i, num_nodes=None):
+    def forward(self, e, i):
         _, e2 = e
-        v = scatter(e2, i, dim=0) #, dim_size=num_nodes
+        v = scatter(e2, i, dim=0)
         v = self.lin_up(v)
         for lin in self.lins:
             v = self.act(lin(v))
@@ -289,7 +287,7 @@ class SphereNet(torch.nn.Module):
 
         #Initialize edge, node, graph features
         e = self.init_e(z, emb, i, j)
-        v = self.init_v(e, i, num_nodes=pos.size(0))
+        v = self.init_v(e, i)
         u = self.init_u(torch.zeros_like(scatter(v, batch, dim=0)), v, batch) #scatter(v, batch, dim=0)
 
         for update_e, update_v, update_u in zip(self.update_es, self.update_vs, self.update_us):

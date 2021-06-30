@@ -5,7 +5,7 @@ import numpy as np
 from scipy.optimize import brentq
 from scipy import special as sp
 import torch
-from math import sqrt, pi as PI
+from math import pi as PI
 
 try:
     import sympy as sym
@@ -104,7 +104,6 @@ def real_sph_harm(l, zero_m_only=False, spherical_coordinates=True):
     Computes formula strings of the the real part of the spherical harmonics up to order l (excluded).
     Variables are either cartesian coordinates x,y,z on the unit sphere or spherical coordinates phi and theta.
     """
-    pi = np.pi
     if not zero_m_only:
         x = sym.symbols('x')
         y = sym.symbols('y')
