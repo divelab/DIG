@@ -39,6 +39,7 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
 
    tutorials/subgraphx
    tutorials/graphdf
+   tutorials/threedgraph
 
 
 .. toctree::
