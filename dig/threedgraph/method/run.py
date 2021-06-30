@@ -17,7 +17,7 @@ class run():
     def __init__(self):
         pass
         
-    def run(self, device, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=300, batch_size=128, vt_batch_size=128, lr=0.001, lr_decay_factor=0.5, lr_decay_step_size=50, weight_decay=0, 
+    def run(self, device, train_dataset, valid_dataset, test_dataset, model, loss_func, evaluation, epochs=500, batch_size=32, vt_batch_size=32, lr=0.0005, lr_decay_factor=0.5, lr_decay_step_size=50, weight_decay=0, 
         energy_and_force=False, p=100, save_dir='', log_dir=''):
         r"""
         The run script for training and validation.
@@ -30,10 +30,10 @@ class run():
             model: Which 3DGN model to use. Should be one of the SchNet, DimeNetPP, and SphereNet.
             loss_func (function): The used loss funtion for training.
             evaluation (function): The evaluation function. 
-            epochs (int, optinal): Number of total training epochs. (default: :obj:`300`)
-            batch_size (int, optinal): Number of samples in each minibatch in training. (default: :obj:`128`)
-            vt_batch_size (int, optinal): Number of samples in each minibatch in validation/testing. (default: :obj:`128`)
-            lr (float, optinal): Initial learning rate. (default: :obj:`0.001`)
+            epochs (int, optinal): Number of total training epochs. (default: :obj:`500`)
+            batch_size (int, optinal): Number of samples in each minibatch in training. (default: :obj:`32`)
+            vt_batch_size (int, optinal): Number of samples in each minibatch in validation/testing. (default: :obj:`32`)
+            lr (float, optinal): Initial learning rate. (default: :obj:`0.0005`)
             lr_decay_factor (float, optinal): Learning rate decay factor. (default: :obj:`0.5`)
             lr_decay_step_size (int, optinal): epochs at which lr_initial <- lr_initial * lr_decay_factor. (default: :obj:`50`)
             weight_decay (float, optinal): weight decay factor at the regularization term. (default: :obj:`0`)
@@ -44,8 +44,9 @@ class run():
         
         """        
 
-        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = model.to(device)
+        num_params = sum(p.numel() for p in model.parameters())
+        print(f'#Params: {num_params}')
         optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
         scheduler = StepLR(optimizer, step_size=lr_decay_step_size, gamma=lr_decay_factor)
 
@@ -88,7 +89,7 @@ class run():
                 best_test = test_mae
                 if save_dir != '':
                     print('Saving checkpoint...')
-                    checkpoint = {'epoch': epoch, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 'scheduler_state_dict': scheduler.state_dict(), 'best_valid_mae': best_validid_mae, 'num_params': num_params}
+                    checkpoint = {'epoch': epoch, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 'scheduler_state_dict': scheduler.state_dict(), 'best_valid_mae': best_valid, 'num_params': num_params}
                     torch.save(checkpoint, os.path.join(save_dir, 'valid_checkpoint.pt'))
 
             scheduler.step()

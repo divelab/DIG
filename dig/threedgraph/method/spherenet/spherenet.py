@@ -82,16 +82,16 @@ class init(torch.nn.Module):
 
 
 class update_e(torch.nn.Module):
-    def __init__(self, hidden_channels, int_emb_size, basis_emb_size, num_spherical, num_radial, 
+    def __init__(self, hidden_channels, int_emb_size, basis_emb_size_dist, basis_emb_size_angle, basis_emb_size_torsion, num_spherical, num_radial, 
         num_before_skip, num_after_skip, act=swish):
         super(update_e, self).__init__()
         self.act = act
-        self.lin_rbf1 = nn.Linear(num_radial, basis_emb_size, bias=False)
-        self.lin_rbf2 = nn.Linear(basis_emb_size, hidden_channels, bias=False)
-        self.lin_sbf1 = nn.Linear(num_spherical * num_radial, basis_emb_size, bias=False)
-        self.lin_sbf2 = nn.Linear(basis_emb_size, int_emb_size, bias=False)
-        self.lin_t1 = nn.Linear(num_spherical * num_spherical * num_radial, basis_emb_size, bias=False)
-        self.lin_t2 = nn.Linear(basis_emb_size, int_emb_size, bias=False)
+        self.lin_rbf1 = nn.Linear(num_radial, basis_emb_size_dist, bias=False)
+        self.lin_rbf2 = nn.Linear(basis_emb_size_dist, hidden_channels, bias=False)
+        self.lin_sbf1 = nn.Linear(num_spherical * num_radial, basis_emb_size_angle, bias=False)
+        self.lin_sbf2 = nn.Linear(basis_emb_size_angle, int_emb_size, bias=False)
+        self.lin_t1 = nn.Linear(num_spherical * num_spherical * num_radial, basis_emb_size_torsion, bias=False)
+        self.lin_t2 = nn.Linear(basis_emb_size_torsion, int_emb_size, bias=False)
         self.lin_rbf = nn.Linear(num_radial, hidden_channels, bias=False)
 
         self.lin_kj = nn.Linear(hidden_channels, hidden_channels)
@@ -226,7 +226,9 @@ class SphereNet(torch.nn.Module):
             hidden_channels (int, optional): Hidden embedding size. (default: :obj:`128`)
             out_channels (int, optional): Size of each output sample. (default: :obj:`1`)
             int_emb_size (int, optional): Embedding size used for interaction triplets. (default: :obj:`64`)
-            basis_emb_size (int, optional): Embedding size used in the basis transformation. (default: :obj:`8`)
+            basis_emb_size_dist (int, optional): Embedding size used in the basis transformation of distance. (default: :obj:`8`)
+            basis_emb_size_angle (int, optional): Embedding size used in the basis transformation of angle. (default: :obj:`8`)
+            basis_emb_size_torsion (int, optional): Embedding size used in the basis transformation of torsion. (default: :obj:`8`)
             out_emb_channels (int, optional): Embedding size used for atoms in the output block. (default: :obj:`256`)
             num_spherical (int, optional): Number of spherical harmonics. (default: :obj:`7`)
             num_radial (int, optional): Number of radial basis functions. (default: :obj:`6`)
@@ -240,7 +242,8 @@ class SphereNet(torch.nn.Module):
     """
     def __init__(
         self, energy_and_force=False, cutoff=5.0, num_layers=4, 
-        hidden_channels=128, out_channels=1, int_emb_size=64, basis_emb_size=8, out_emb_channels=256, 
+        hidden_channels=128, out_channels=1, int_emb_size=64, 
+        basis_emb_size_dist=8, basis_emb_size_angle=8, basis_emb_size_torsion=8, out_emb_channels=256, 
         num_spherical=7, num_radial=6, envelope_exponent=5, 
         num_before_skip=1, num_after_skip=2, num_output_layers=3, 
         act=swish, output_init='GlorotOrthogonal'):
@@ -258,7 +261,7 @@ class SphereNet(torch.nn.Module):
             update_v(hidden_channels, out_emb_channels, out_channels, num_output_layers, act, output_init) for _ in range(num_layers)])
 
         self.update_es = torch.nn.ModuleList([
-            update_e(hidden_channels, int_emb_size, basis_emb_size, num_spherical, num_radial, num_before_skip, num_after_skip,act) for _ in range(num_layers)])
+            update_e(hidden_channels, int_emb_size, basis_emb_size_dist, basis_emb_size_angle, basis_emb_size_torsion, num_spherical, num_radial, num_before_skip, num_after_skip,act) for _ in range(num_layers)])
 
         self.update_us = torch.nn.ModuleList([update_u() for _ in range(num_layers)])
 
