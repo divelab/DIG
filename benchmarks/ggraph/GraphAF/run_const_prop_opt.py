@@ -1,10 +1,11 @@
 import json
 import argparse
 from rdkit import RDLogger
-from dig.ggraph.method import GraphAF
-from dig.ggraph.evaluation import Cons_Optim_Evaluator
-from dig.ggraph.dataset import ZINC800
 from torch_geometric.data import DenseDataLoader
+from dig.ggraph.method import GraphAF
+from dig.ggraph.evaluation import ConstPropOptEvaluator
+from dig.ggraph.dataset import ZINC800
+
 
 
 RDLogger.DisableLog('rdApp.*')
