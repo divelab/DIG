@@ -2,7 +2,7 @@ import json
 import argparse
 from rdkit import RDLogger
 from dig.ggraph.method import GraphAF
-from dig.ggraph.evaluation import Prop_Optim_Evaluator
+from dig.ggraph.evaluation import PropOptEvaluator
 
 RDLogger.DisableLog('rdApp.*')
 
@@ -30,7 +30,7 @@ if args.train:
     runner.train_prop_optim(conf['lr'], conf['weight_decay'], conf['max_iters'], conf['warm_up'], conf['model'], conf['pretrain_model'], conf['save_interval'], conf['save_dir'])
 else:
     mols = runner.run_prop_optim(conf['model'], args.model_path, args.num_mols, conf['num_min_node'], conf['num_max_node'], conf['temperature'], conf['atom_list'])
-    evaluator = Prop_Optim_Evaluator(prop_name=args.prop)
+    evaluator = PropOptEvaluator(prop_name=args.prop)
     input_dict = {'mols': mols}
 
     print('Evaluating...')
