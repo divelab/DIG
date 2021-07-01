@@ -155,5 +155,3 @@ class SentiGraphDataset(InMemoryDataset):
 
 if __name__ == '__main__':
     dataset = SentiGraphDataset(root='.datasets', name='Graph-SST2')
-    import pdb; pdb.set_trace()
-

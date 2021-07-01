@@ -600,7 +600,8 @@ class PGExplainer(nn.Module):
                 for node_idx in tqdm.tqdm(torch.where(data.train_mask)[0].tolist()):
                     x, edge_index, y, subset, _ = \
                         self.get_subgraph(node_idx=node_idx, x=data.x, edge_index=data.edge_index, y=data.y)
-                    x_dict[node_idx] = x.to(self.device)emb = self.model.get_emb(data.x, data.edge_index)
+                    x_dict[node_idx] = x.to(self.device)
+                    emb = self.model.get_emb(data.x, data.edge_index)
                     new_node_dict[node_idx] = int(torch.where(subset == node_idx)[0])
                     edge_index_dict[node_idx] = edge_index.to(self.device)
                     emb_dict[node_idx] = emb.to(self.device)
