@@ -594,22 +594,17 @@ class PGExplainer(nn.Module):
                 x_dict = {}
                 new_node_dict = {}
                 edge_index_dict = {}
-                node_idx_dict = {}
                 pred_dict = {}
                 emb_dict = {}
+                logits = self.model(data.x, data.edge_index)
                 for node_idx in tqdm.tqdm(torch.where(data.train_mask)[0].tolist()):
                     x, edge_index, y, subset, _ = \
                         self.get_subgraph(node_idx=node_idx, x=data.x, edge_index=data.edge_index, y=data.y)
-                    logits = self.model(data.x, data.edge_index)
-                    emb = self.model.get_emb(data.x, data.edge_index)
-
-                    x_dict[node_idx] = x.to(self.device)
-                    new_node_dict[node_idx] = torch.where(subset == node_idx)[0]
+                    x_dict[node_idx] = x.to(self.device)emb = self.model.get_emb(data.x, data.edge_index)
+                    new_node_dict[node_idx] = int(torch.where(subset == node_idx)[0])
                     edge_index_dict[node_idx] = edge_index.to(self.device)
                     emb_dict[node_idx] = emb.to(self.device)
-
-                    node_idx_dict[node_idx] = int(torch.where(subset == node_idx)[0])
-                    pred_dict[node_idx] = logits[node_idx_dict[node_idx]].argmax(-1).cpu()
+                    pred_dict[node_idx] = logits[node_idx].argmax(-1).cpu()
 
             # train the mask generator
             duration = 0.0
@@ -623,7 +618,7 @@ class PGExplainer(nn.Module):
                     pred, edge_mask = self.explain(x_dict[node_idx], edge_index_dict[node_idx],
                                                    emb_dict[node_idx], tmp, training=True,
                                                    node_idx=new_node_dict[node_idx])
-                    loss_tmp = self.__loss__(pred[node_idx_dict[node_idx]], pred_dict[node_idx])
+                    loss_tmp = self.__loss__(pred[new_node_dict[node_idx]], pred_dict[node_idx])
                     loss_tmp.backward()
                     loss += loss_tmp.item()
 
