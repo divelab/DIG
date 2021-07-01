@@ -33,7 +33,7 @@ if args.train:
 else:
     mols_0, mols_2, mols_4, mols_6 = runner.run_cons_optim(dataset, conf['model'], args.model_path, conf['repeat_time'], conf['min_optim_time'], conf['num_max_node'], conf['temperature'], conf['atom_list'])
     smiles = [data.smile for data in dataset]
-    evaluator = Cons_Optim_Evaluator()
+    evaluator = ConstPropOptEvaluator()
     input_dict = {'mols_0': mols_0, 'mols_2': mols_2, 'mols_4': mols_4, 'mols_6': mols_6, 'inp_smiles':smiles}
 
     print('Evaluating...')
