@@ -557,8 +557,8 @@ def k_fold(n_folds, dataset, batch_size, label_rate=1, val=False, seed=12345):
     for i in range(n_folds):
         if batch_size is None:
             batch_size = len()
-        train_loader = DataLoader(dataset[train_indices[i]], batch_size, shuffle=True)
-        test_loader = DataLoader(dataset[test_indices[i]], batch_size, shuffle=False)
-        val_loader = DataLoader(dataset[val_indices[i]], batch_size, shuffle=False)
+        train_loader = DataLoader(dataset[train_indices[i].long()], batch_size, shuffle=True)
+        test_loader = DataLoader(dataset[test_indices[i].long()], batch_size, shuffle=False)
+        val_loader = DataLoader(dataset[val_indices[i].long()], batch_size, shuffle=False)
 
         yield i, train_loader, test_loader, val_loader
