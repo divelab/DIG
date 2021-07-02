@@ -28,7 +28,7 @@
 <!--- [![Contributors][contributor-image]][contributor-url] -->
 
 
-**[Documentation](https://diveintographs.readthedocs.io)** | **[Paper](https://arxiv.org/abs/2103.12608)** | **[Benchmarks/Examples](https://github.com/divelab/DIG/tree/dig/benchmarks)**
+**[Documentation](https://diveintographs.readthedocs.io)** | **[Paper](https://arxiv.org/abs/2103.12608)** | **[Benchmarks/Examples](https://github.com/divelab/DIG/tree/dig/benchmarks)** | **[Tutorials](https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html#)**
 
 *DIG: Dive into Graphs* is a turnkey library for graph deep learning research.
 
