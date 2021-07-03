@@ -16,11 +16,13 @@ from torch_geometric.nn import MessagePassing
 
 
 
-def control_sparsity(mask, sparsity=None):
+def control_sparsity(mask: torch.Tensor, sparsity: float=None):
     r"""
-    :param mask: mask that need to transform
-    :param sparsity: sparsity we need to control i.e. 0.7, 0.5
-    :return: transformed mask where top 1 - sparsity values are set to inf.
+    Transform the mask where top 1 - sparsity values are set to inf.
+    Args:
+        mask (torch.Tensor): Mask that need to transform.
+        sparsity (float): Sparsity we need to control i.e. 0.7, 0.5 (Default: :obj:`None`).
+    :rtype: torch.Tensor
     """
     if sparsity is None:
         sparsity = 0.7
@@ -55,6 +57,20 @@ def control_sparsity(mask, sparsity=None):
 
 
 def fidelity(ori_probs: torch.Tensor, unimportant_probs: torch.Tensor) -> float:
+    r"""
+    Return the Fidelity+ value according to collected data.
+
+    Args:
+        ori_probs (torch.Tensor): It is a vector providing original probabilities for Fidelity+ computation.
+        unimportant_probs (torch.Tensor): It is a vector providing probabilities without important features
+            for Fidelity+ computation.
+
+    :rtype: float
+
+    .. note::
+        Please refer to `Explainability in Graph Neural Networks: A Taxonomic Survey
+        <https://arxiv.org/abs/2012.15445>`_ for details.
+    """
 
     drop_probability = ori_probs - unimportant_probs
 
@@ -62,13 +78,27 @@ def fidelity(ori_probs: torch.Tensor, unimportant_probs: torch.Tensor) -> float:
 
 
 def fidelity_inv(ori_probs: torch.Tensor, important_probs: torch.Tensor) -> float:
+    r"""
+    Return the Fidelity+ value according to collected data.
+
+    Args:
+        ori_probs (torch.Tensor): It is a vector providing original probabilities for Fidelity- computation.
+        important_probs (torch.Tensor): It is a vector providing probabilities with only important features
+            for Fidelity- computation.
+
+    :rtype: float
+
+    .. note::
+        Please refer to `Explainability in Graph Neural Networks: A Taxonomic Survey
+        <https://arxiv.org/abs/2012.15445>`_ for details.
+    """
 
     drop_probability = ori_probs - important_probs
 
     return drop_probability.mean().item()
 
 
-class XCollector(object):
+class XCollector:
     r"""
     XCollector is a data collector which takes processed related prediction probabilities to calculate Fidelity+
     and Fidelity-.
@@ -96,6 +126,9 @@ class XCollector(object):
         return self.__targets
 
     def new(self):
+        r"""
+        Clear class members.
+        """
         self.__related_preds, self.__targets = {'zero': [], 'masked': [], 'maskout': [], 'origin': []}, []
         self.masks: Union[List, List[List[Tensor]]] = []
 
