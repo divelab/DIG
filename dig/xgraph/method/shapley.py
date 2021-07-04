@@ -6,10 +6,11 @@ from scipy.special import comb
 from itertools import combinations
 import torch.nn.functional as F
 from torch_geometric.utils import to_networkx
-from torch_geometric.data import Data, Batch, Dataset, DataLoader
+from torch_geometric.data import Data, Batch, DataLoader
+from dig.xgraph.dataset import MarginalSubgraphDataset
 
 
-def GnnNets_GC2value_func(gnnNets, target_class):
+def GnnNetsGC2valueFunc(gnnNets, target_class):
     def value_func(batch):
         with torch.no_grad():
             logits = gnnNets(data=batch)
@@ -19,7 +20,7 @@ def GnnNets_GC2value_func(gnnNets, target_class):
     return value_func
 
 
-def GnnNets_NC2value_func(gnnNets_NC, node_idx: Union[int, torch.Tensor], target_class: torch.Tensor):
+def GnnNetsNC2valueFunc(gnnNets_NC, node_idx: Union[int, torch.Tensor], target_class: torch.Tensor):
     def value_func(data):
         with torch.no_grad():
             logits = gnnNets_NC(data=data)
@@ -39,29 +40,6 @@ def get_graph_build_func(build_method):
         return graph_build_split
     else:
         raise NotImplementedError
-
-
-class MarginalSubgraphDataset(Dataset):
-    def __init__(self, data, exclude_mask, include_mask, subgraph_build_func):
-        self.num_nodes = data.num_nodes
-        self.X = data.x
-        self.edge_index = data.edge_index
-        self.device = self.X.device
-
-        self.label = data.y
-        self.exclude_mask = torch.tensor(exclude_mask).type(torch.float32).to(self.device)
-        self.include_mask = torch.tensor(include_mask).type(torch.float32).to(self.device)
-        self.subgraph_build_func = subgraph_build_func
-
-    def __len__(self):
-        return self.exclude_mask.shape[0]
-
-    def __getitem__(self, idx):
-        exclude_graph_X, exclude_graph_edge_index = self.subgraph_build_func(self.X, self.edge_index, self.exclude_mask[idx])
-        include_graph_X, include_graph_edge_index = self.subgraph_build_func(self.X, self.edge_index, self.include_mask[idx])
-        exclude_data = Data(x=exclude_graph_X, edge_index=exclude_graph_edge_index)
-        include_data = Data(x=include_graph_X, edge_index=include_graph_edge_index)
-        return exclude_data, include_data
 
 
 def marginal_contribution(data: Data, exclude_mask: np.ndarray, include_mask: np.ndarray,
@@ -84,8 +62,8 @@ def marginal_contribution(data: Data, exclude_mask: np.ndarray, include_mask: np
 
 def graph_build_zero_filling(X, edge_index, node_mask: torch.Tensor):
     """ subgraph building through masking the unselected nodes with zero features """
-    ret_X = X * node_mask.unsqueeze(1)
-    return ret_X, edge_index
+    ret_x = X * node_mask.unsqueeze(1)
+    return ret_x, edge_index
 
 
 def graph_build_split(X, edge_index, node_mask: torch.Tensor):
@@ -96,7 +74,7 @@ def graph_build_split(X, edge_index, node_mask: torch.Tensor):
     return X, ret_edge_index
 
 
-def l_shapley(coalition: list, data: Data, local_raduis: int,
+def l_shapley(coalition: list, data: Data, local_radius: int,
               value_func: Callable, subgraph_building_method='zero_filling'):
     """ shapley value where players are local neighbor nodes """
     graph = to_networkx(data)
@@ -104,7 +82,7 @@ def l_shapley(coalition: list, data: Data, local_raduis: int,
     subgraph_build_func = get_graph_build_func(subgraph_building_method)
 
     local_region = copy.copy(coalition)
-    for k in range(local_raduis - 1):
+    for k in range(local_radius - 1):
         k_neiborhoood = []
         for node in local_region:
             k_neiborhoood += list(graph.neighbors(node))
@@ -178,7 +156,7 @@ def mc_shapley(coalition: list, data: Data,
     return mc_shapley_value
 
 
-def mc_l_shapley(coalition: list, data: Data, local_raduis: int,
+def mc_l_shapley(coalition: list, data: Data, local_radius: int,
                  value_func: Callable, subgraph_building_method='zero_filling',
                  sample_num=1000) -> float:
     """ monte carlo sampling approximation of the l_shapley value """
@@ -187,7 +165,7 @@ def mc_l_shapley(coalition: list, data: Data, local_raduis: int,
     subgraph_build_func = get_graph_build_func(subgraph_building_method)
 
     local_region = copy.copy(coalition)
-    for k in range(local_raduis - 1):
+    for k in range(local_radius - 1):
         k_neiborhoood = []
         for node in local_region:
             k_neiborhoood += list(graph.neighbors(node))
@@ -236,15 +214,19 @@ def gnn_score(coalition: list, data: Data, value_func: Callable,
     return score.item()
 
 
-def NC_mc_l_shapley(coalition: list, data: Data, local_raduis: int,
-                    value_func: Callable, node_idx: int=-1, subgraph_building_method='zero_filling', sample_num=1000) -> float:
+def NC_mc_l_shapley(coalition: list,
+                    data: Data,
+                    local_radius: int,
+                    value_func: Callable, node_idx: int = -1,
+                    subgraph_building_method='zero_filling',
+                    sample_num=1000) -> float:
     """ monte carlo approximation of l_shapley where the target node is kept in both subgraph """
     graph = to_networkx(data)
     num_nodes = graph.number_of_nodes()
     subgraph_build_func = get_graph_build_func(subgraph_building_method)
 
     local_region = copy.copy(coalition)
-    for k in range(local_raduis - 1):
+    for k in range(local_radius - 1):
         k_neiborhoood = []
         for node in local_region:
             k_neiborhoood += list(graph.neighbors(node))

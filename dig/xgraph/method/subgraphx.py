@@ -16,9 +16,9 @@ from torch_geometric.utils import to_networkx
 from typing import Callable, Union, Optional
 import matplotlib.pyplot as plt
 from torch_geometric.utils.num_nodes import maybe_num_nodes
-from torch_geometric.nn import MessagePassing
+from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.datasets import MoleculeNet
-from .shapley import GnnNets_GC2value_func, GnnNets_NC2value_func, \
+from .shapley import GnnNetsGC2valueFunc, GnnNetsNC2valueFunc, \
     gnn_score, mc_shapley, l_shapley, mc_l_shapley, NC_mc_l_shapley
 
 
@@ -51,13 +51,13 @@ def reward_func(reward_method, value_func, node_idx=None,
 
     elif reward_method.lower() == 'l_shapley':
         return partial(l_shapley,
-                       local_raduis=local_radius,
+                       local_radius=local_radius,
                        value_func=value_func,
                        subgraph_building_method=subgraph_building_method)
 
     elif reward_method.lower() == 'mc_l_shapley':
         return partial(mc_l_shapley,
-                       local_raduis=local_radius,
+                       local_radius=local_radius,
                        value_func=value_func,
                        subgraph_building_method=subgraph_building_method,
                        sample_num=sample_num)
@@ -66,7 +66,7 @@ def reward_func(reward_method, value_func, node_idx=None,
         assert node_idx is not None, " Wrong node idx input "
         return partial(NC_mc_l_shapley,
                        node_idx=node_idx,
-                       local_raduis=local_radius,
+                       local_radius=local_radius,
                        value_func=value_func,
                        subgraph_building_method=subgraph_building_method,
                        sample_num=sample_num)
@@ -191,12 +191,12 @@ class PlotUtils(object):
             raise NotImplementedError
 
     @staticmethod
-    def plot_subgraph(graph, nodelist, colors='#FFA500', labels=None, edge_color='gray',
+    def plot_subgraph(graph, nodelist, colors: Union[list, str] = '#FFA500', labels=None, edge_color='gray',
                       edgelist=None, subgraph_edge_color='black', title_sentence=None, figname=None):
 
         if edgelist is None:
-            edgelist = [(n_frm, n_to) for (n_frm, n_to) in graph.edges() if
-                                  n_frm in nodelist and n_to in nodelist]
+            edgelist = [(n_frm, n_to) for (n_frm, n_to) in graph.edges()
+                        if n_frm in nodelist and n_to in nodelist]
         pos = nx.kamada_kawai_layout(graph)
         pos_nodelist = {k: v for k, v in pos.items() if k in nodelist}
 
@@ -216,19 +216,22 @@ class PlotUtils(object):
             nx.draw_networkx_labels(graph, pos, labels)
 
         plt.axis('off')
+        if figname is not None:
+            plt.savefig(figname)
         if title_sentence is not None:
             plt.title('\n'.join(wrap(title_sentence, width=60)))
         plt.show()
 
     @staticmethod
-    def plot_subgraph_with_nodes(graph, nodelist, node_idx, colors='#FFA500', labels=None, edge_color='gray',
-                                 edgelist=None, subgraph_edge_color='black', title_sentence=None, figname=None):
+    def plot_subgraph_with_nodes(graph, nodelist, node_idx, colors: Union[str, list] = '#FFA500',
+                                 labels=None, edge_color='gray', edgelist=None,
+                                 subgraph_edge_color='black', title_sentence=None, figname=None):
         node_idx = int(node_idx)
         if edgelist is None:
-            edgelist = [(n_frm, n_to) for (n_frm, n_to) in graph.edges() if
-                                  n_frm in nodelist and n_to in nodelist]
+            edgelist = [(n_frm, n_to) for (n_frm, n_to) in graph.edges()
+                        if n_frm in nodelist and n_to in nodelist]
 
-        pos = nx.kamada_kawai_layout(graph) # calculate according to graph.nodes()
+        pos = nx.kamada_kawai_layout(graph)  # calculate according to graph.nodes()
         pos_nodelist = {k: v for k, v in pos.items() if k in nodelist}
 
         nx.draw_networkx_nodes(graph, pos,
@@ -257,6 +260,8 @@ class PlotUtils(object):
             nx.draw_networkx_labels(graph, pos, labels)
 
         plt.axis('off')
+        if figname is not None:
+            plt.savefig(figname)
         if title_sentence is not None:
             plt.title('\n'.join(wrap(title_sentence, width=60)))
         plt.show()
@@ -272,10 +277,10 @@ class PlotUtils(object):
                                    node_color='yellow',
                                    node_shape='o',
                                    node_size=500)
-        if edgelist is None:
-            edgelist = [(n_frm, n_to) for (n_frm, n_to) in graph.edges()
-                        if n_frm in nodelist and n_to in nodelist]
-            nx.draw_networkx_edges(graph, pos=pos_coalition, edgelist=edgelist, width=5, edge_color='yellow')
+            if edgelist is None:
+                edgelist = [(n_frm, n_to) for (n_frm, n_to) in graph.edges()
+                            if n_frm in nodelist and n_to in nodelist]
+                nx.draw_networkx_edges(graph, pos=pos_coalition, edgelist=edgelist, width=5, edge_color='yellow')
 
         nx.draw_networkx_nodes(graph, pos, nodelist=list(graph.nodes()), node_size=300)
 
@@ -319,8 +324,10 @@ class PlotUtils(object):
         node_idxs = {k: int(v) for k, v in enumerate(y.reshape(-1).tolist())}
         node_color = ['#FFA500', '#4970C6', '#FE0000', 'green']
         colors = [node_color[v % len(node_color)] for k, v in node_idxs.items()]
-        self.plot_subgraph_with_nodes(graph, nodelist, node_idx, colors, edgelist=edgelist, figname=figname,
-                           subgraph_edge_color='black')
+        self.plot_subgraph_with_nodes(graph, nodelist, node_idx, colors,
+                                      edgelist=edgelist,
+                                      figname=figname,
+                                      subgraph_edge_color='black')
 
 
 class MCTSNode(object):
@@ -448,22 +455,22 @@ class MCTS(object):
                 new_graph_coalition = sorted(list(main_sub.nodes()))
 
                 # check the state map and merge the same sub-graph
-                Find_same = False
+                find_same = False
                 for old_graph_node in self.state_map.values():
                     if Counter(old_graph_node.coalition) == Counter(new_graph_coalition):
                         new_node = old_graph_node
-                        Find_same = True
+                        find_same = True
 
-                if Find_same == False:
+                if not find_same:
                     new_node = self.MCTSNodeClass(new_graph_coalition)
                     self.state_map[str(new_graph_coalition)] = new_node
 
-                Find_same_child = False
+                find_same_child = False
                 for cur_child in tree_node.children:
                     if Counter(cur_child.coalition) == Counter(new_graph_coalition):
-                        Find_same_child = True
+                        find_same_child = True
 
-                if Find_same_child == False:
+                if not find_same_child:
                     tree_node.children.append(new_node)
 
             scores = compute_scores(self.score_func, tree_node.children)
@@ -528,7 +535,7 @@ class SubgraphX(object):
                  rollout: int = 10, min_atoms: int = 3, c_puct: float = 10.0, expand_atoms=14,
                  high2low=False, local_radius=4, sample_num=100, reward_method='mc_l_shapley',
                  subgraph_building_method='zero_filling', save_dir: Optional[str] = None,
-                 filename: str = 'example', vis: bool =True):
+                 filename: str = 'example', vis: bool = True):
 
         self.model = model
         self.model.eval()
@@ -644,7 +651,7 @@ class SubgraphX(object):
         """
         node_idx = kwargs.get('node_idx')
         max_nodes = kwargs.get('max_nodes')
-        max_nodes = 14 if max_nodes is None else max_nodes # default max subgraph size
+        max_nodes = 14 if max_nodes is None else max_nodes  # default max subgraph size
 
         # collect all the class index
         labels = tuple(label for label in range(self.num_classes))
@@ -658,7 +665,7 @@ class SubgraphX(object):
         if self.explain_graph:
             prediction = probs.argmax(-1)
             for label in ex_labels:
-                value_func = GnnNets_GC2value_func(self.model, target_class=label)
+                value_func = GnnNetsGC2valueFunc(self.model, target_class=label)
                 payoff_func = self.get_reward_func(value_func)
                 self.mcts_state_map = self.get_mcts_class(x, edge_index, score_func=payoff_func)
                 results = self.mcts_state_map.mcts(verbose=False)
@@ -669,7 +676,7 @@ class SubgraphX(object):
                 maskout_node_list = [node for node in range(tree_node_x.data.x.shape[0])
                                      if node not in tree_node_x.coalition]
                 maskout_score = gnn_score(maskout_node_list, data, value_func,
-                                         subgraph_building_method='zero_filling')
+                                          subgraph_building_method='zero_filling')
                 sparsity_score = 1 - len(tree_node_x.coalition) / tree_node_x.ori_graph.number_of_nodes()
 
                 explanation_results.append(results)
@@ -682,9 +689,9 @@ class SubgraphX(object):
                 self.mcts_state_map = self.get_mcts_class(x, edge_index, node_idx=node_idx)
                 self.node_idx = self.mcts_state_map.node_idx
                 # mcts will extract the subgraph and relabel the nodes
-                value_func = GnnNets_NC2value_func(self.model,
-                                                   node_idx=self.mcts_state_map.node_idx,
-                                                   target_class=label)
+                value_func = GnnNetsNC2valueFunc(self.model,
+                                                 node_idx=self.mcts_state_map.node_idx,
+                                                 target_class=label)
                 payoff_func = self.get_reward_func(value_func, node_idx=self.mcts_state_map.node_idx)
                 self.mcts_state_map.set_score_func(payoff_func)
                 results = self.mcts_state_map.mcts(verbose=False)

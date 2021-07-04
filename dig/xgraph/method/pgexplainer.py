@@ -3,26 +3,24 @@ Description: The implement of PGExplainer model
 <https://arxiv.org/abs/2011.04573>
 """
 
-from typing import Optional
-from math import sqrt
-
+import tqdm
 import time
 import torch
 import numpy as np
 import torch.nn as nn
-from torch import Tensor
-from torch.optim import Adam
-import torch.nn.functional as F
-from torch_geometric.data import Data, Batch
-import tqdm
 import networkx as nx
+from math import sqrt
+from torch import Tensor
 from textwrap import wrap
+from torch.optim import Adam
 import matplotlib.pyplot as plt
-from torch_geometric.nn import MessagePassing
+import torch.nn.functional as F
+from torch_geometric.data import Data
+from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.utils import to_networkx
 from torch_geometric.utils.num_nodes import maybe_num_nodes
 from typing import Tuple, List, Dict, Optional
-from .shapley import GnnNets_GC2value_func, GnnNets_NC2value_func, gnn_score
+from .shapley import GnnNetsGC2valueFunc, GnnNetsNC2valueFunc, gnn_score
 from torch_geometric.datasets import MoleculeNet
 from rdkit import Chem
 
@@ -515,13 +513,15 @@ class PGExplainer(nn.Module):
         nodesize = embed.shape[0]
         feature_dim = embed.shape[1]
         if self.explain_graph:
-            f1 = embed.unsqueeze(1).repeat(1, nodesize, 1).reshape(-1, feature_dim)
-            f2 = embed.unsqueeze(0).repeat(nodesize, 1, 1).reshape(-1, feature_dim)
+            col, row = edge_index
+            f1 = embed[col]
+            f2 = embed[row]
             f12self = torch.cat([f1, f2], dim=-1)
         else:
-            f1 = embed.unsqueeze(1).repeat(1, nodesize, 1).reshape(-1, feature_dim)
-            f2 = embed.unsqueeze(0).repeat(nodesize, 1, 1).reshape(-1, feature_dim)
-            self_embed = embed[node_idx].repeat(nodesize * nodesize, 1)
+            col, row = edge_index
+            f1 = embed[col]
+            f2 = embed[row]
+            self_embed = embed[node_idx].repeat(f1.shape[0], 1)
             f12self = torch.cat([f1, f2, self_embed], dim=-1)
 
         # using the node embedding to calculate the edge weight
@@ -530,8 +530,10 @@ class PGExplainer(nn.Module):
             h = elayer(h)
         values = h.reshape(-1)
         values = self.concrete_sample(values, beta=tmp, training=training)
-        self.mask_sigmoid = values.reshape(nodesize, nodesize)
-
+        mask_sparse = torch.sparse_coo_tensor(
+            edge_index, values, (nodesize, nodesize)
+        )
+        self.mask_sigmoid = mask_sparse.to_dense()
         # set the symmetric edge weights
         sym_mask = (self.mask_sigmoid + self.mask_sigmoid.transpose(0, 1)) / 2
         edge_mask = sym_mask[edge_index[0], edge_index[1]]
@@ -591,21 +593,11 @@ class PGExplainer(nn.Module):
                 data = dataset[0]
                 data.to(self.device)
                 self.model.eval()
-                x_dict = {}
-                new_node_dict = {}
-                edge_index_dict = {}
+                explain_node_index_list = torch.where(data.train_mask)[0].tolist()
                 pred_dict = {}
-                emb_dict = {}
                 logits = self.model(data.x, data.edge_index)
-                for node_idx in tqdm.tqdm(torch.where(data.train_mask)[0].tolist()):
-                    x, edge_index, y, subset, _ = \
-                        self.get_subgraph(node_idx=node_idx, x=data.x, edge_index=data.edge_index, y=data.y)
-                    x_dict[node_idx] = x.to(self.device)
-                    emb = self.model.get_emb(data.x, data.edge_index)
-                    new_node_dict[node_idx] = int(torch.where(subset == node_idx)[0])
-                    edge_index_dict[node_idx] = edge_index.to(self.device)
-                    emb_dict[node_idx] = emb.to(self.device)
-                    pred_dict[node_idx] = logits[node_idx].argmax(-1).cpu()
+                for node_idx in tqdm.tqdm(explain_node_index_list):
+                    pred_dict[node_idx] = logits[node_idx].argmax(-1).item()
 
             # train the mask generator
             duration = 0.0
@@ -615,17 +607,20 @@ class PGExplainer(nn.Module):
                 tmp = float(self.t0 * np.power(self.t1 / self.t0, epoch / self.epochs))
                 self.elayers.train()
                 tic = time.perf_counter()
-                for iter_idx, node_idx in tqdm.tqdm(enumerate(x_dict.keys())):
-                    pred, edge_mask = self.explain(x_dict[node_idx], edge_index_dict[node_idx],
-                                                   emb_dict[node_idx], tmp, training=True,
-                                                   node_idx=new_node_dict[node_idx])
-                    loss_tmp = self.__loss__(pred[new_node_dict[node_idx]], pred_dict[node_idx])
+                for iter_idx, node_idx in tqdm.tqdm(enumerate(explain_node_index_list)):
+                    with torch.no_grad():
+                        x, edge_index, y, subset, _ = \
+                            self.get_subgraph(node_idx=node_idx, x=data.x, edge_index=data.edge_index, y=data.y)
+                        emb = self.model.get_emb(data.x, data.edge_index)
+                        new_node_index = int(torch.where(subset == node_idx)[0])
+                    pred, edge_mask = self.explain(x, edge_index, emb, tmp, training=True, node_idx=new_node_index)
+                    loss_tmp = self.__loss__(pred[new_node_index], pred_dict[node_idx])
                     loss_tmp.backward()
                     loss += loss_tmp.item()
 
                 optimizer.step()
                 duration += time.perf_counter() - tic
-                print(f'Epoch: {epoch} | Loss: {loss/len(x_dict)}')
+                print(f'Epoch: {epoch} | Loss: {loss/len(explain_node_index_list)}')
             print(f"training time is {duration:.5}s")
 
     def forward(self,
@@ -669,7 +664,7 @@ class PGExplainer(nn.Module):
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
             maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
-            value_func = GnnNets_GC2value_func(self.model, target_class=label)
+            value_func = GnnNetsGC2valueFunc(self.model, target_class=label)
             maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
                                     subgraph_building_method='zero_filling')
             sparsity_score = 1 - len(selected_nodes) / data.x.shape[0]
@@ -688,7 +683,7 @@ class PGExplainer(nn.Module):
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
             maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
-            value_func = GnnNets_NC2value_func(self.model,
+            value_func = GnnNetsNC2valueFunc(self.model,
                                                node_idx=new_node_idx,
                                                target_class=label)
             maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
