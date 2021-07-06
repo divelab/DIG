@@ -1,8 +1,9 @@
-import sys, torch
+import torch
 from tqdm import trange
 import torch.nn as nn
 from torch_geometric.data import Batch, Data
 from dig.sslgraph.method.contrastive.objectives import NCE_loss, JSE_loss
+
 
 class Contrastive(nn.Module):
     r"""
@@ -26,10 +27,10 @@ class Contrastive(nn.Module):
         z_dim (int, optional): The dimension of node-level representations. 
             Required if :obj:`node_level` = :obj:`True`. (default: :obj:`None`)
         proj (string, or Module, optional): Projection head for graph-level representation. 
-            If string, should be :obj:`"linear"` or :obj:`"MLP"`. Required if 
+            If string, should be one of :obj:`"linear"` or :obj:`"MLP"`. Required if
             :obj:`graph_level` = :obj:`True`. (default: :obj:`None`)
         proj_n (string, or Module, optional): Projection head for node-level representations. 
-            If string, should be one of 'linear' and 'MLP'. Required if 
+            If string, should be one of :obj:`"linear"` or :obj:`"MLP"`. Required if
             :obj:`node_level` = :obj:`True`. (default: :obj:`None`)
         neg_by_crpt (bool, optional): The mode to obtain negative samples in JSE. If True, 
             obtain negative samples by performing corruption. Otherwise, consider pairs of
@@ -82,7 +83,7 @@ class Contrastive(nn.Module):
         
         
     def train(self, encoder, data_loader, optimizer, epochs, per_epoch_out=False):
-        r"""Perform contrastive training and yield trained trained encoders per epoch or after 
+        r"""Perform contrastive training and yield trained encoders per epoch or after
         the last epoch.
         
         Args:

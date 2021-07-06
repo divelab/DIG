@@ -1,4 +1,3 @@
-import sys, torch
 import torch.nn as nn
 from .contrastive import Contrastive
 

@@ -1,7 +1,6 @@
-import sys, torch
-import torch.nn as nn
 from .contrastive import Contrastive
 from dig.sslgraph.method.contrastive.views_fn import NodeAttrMask, EdgePerturbation, Sequential
+
 
 class GRACE(Contrastive):
     r"""
@@ -15,9 +14,9 @@ class GRACE(Contrastive):
     Args:
         dim (int): The embedding dimension.
         dropE_rate_1, dropE_rate_2 (float): The ratio of the edge dropping augmentation for 
-            each view. A number between [0,1).
-        maskN_rate_1, maskN_rate_2 (float): The ratio of the node masking augmentation for each
-            view. A number between [0,1).
+            view 1. A number between [0,1).
+        maskN_rate_1, maskN_rate_2 (float): The ratio of the node masking augmentation for
+            view 2. A number between [0,1).
         **kwargs (optinal): Additional arguments of :class:`dig.sslgraph.method.Contrastive`.
     """
     

@@ -1,5 +1,6 @@
-from dig.sslgraph.dataset import get_dataset
 import shutil
+from dig.sslgraph.dataset import get_dataset
+
 
 def test_get_dataset():
     ## semisupervised

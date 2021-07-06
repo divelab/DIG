@@ -1,7 +1,7 @@
+import itertools
 import numpy as np
 import torch
 import torch.nn.functional as F
-import itertools
 import torch.nn as nn
 
 
@@ -22,10 +22,12 @@ def JSE_loss(zs, zs_n=None, batch=None, sigma=None, neg_by_crpt=False, **kwargs)
         sigma (ndarray, optional): A 2D-array of shape [n_views, n_views] with boolean values, 
             indicating contrast between which two views are computed. Only required 
             when number of views is greater than 2. If :obj:`sigma[i][j]` = :obj:`True`, 
-            JSE between view_i and view_j will be computed.
+            JSE between :math:`view_i` and :math:`view_j` will be computed.
         neg_by_crpt (bool, optional): The mode to obtain negative samples in JSE. If True, 
             obtain negative samples by performing corruption. Otherwise, consider pairs of
             different graph samples as negative pairs.
+
+    :rtype: :class:`Tensor`
     '''
     if zs_n is not None:
         assert len(zs_n) == len(zs)

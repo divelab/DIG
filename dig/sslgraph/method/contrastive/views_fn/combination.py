@@ -1,7 +1,6 @@
-import torch
-import numpy as np
 import random
 from torch_geometric.data import Batch
+
 
 class RandomView():
     r"""Generate views by random transformation (augmentation) on given batched graphs, 

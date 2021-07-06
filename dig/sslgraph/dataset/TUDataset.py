@@ -1,9 +1,8 @@
-import os, shutil, re, torch
 import os.path as osp
-import scipy.sparse as sp
+from itertools import repeat
+import os, shutil, torch
 import numpy as np
 
-from itertools import repeat, product
 from torch_geometric.data import InMemoryDataset, download_url, extract_zip
 from torch_geometric.io import read_tu_data
 
@@ -28,7 +27,7 @@ class TUDatasetExt(InMemoryDataset):
             <https://chrsmrrs.github.io/datasets/docs/datasets/>`_ of the
             dataset.
         task (string): The evaluation task. Either 'semisupervised' or
-            `unsupervised`.
+            'unsupervised'.
         transform (callable, optional): A function/transform that takes in an
             :obj:`torch_geometric.data.Data` object and returns a transformed
             version. The data object will be transformed before every access.
@@ -47,8 +46,10 @@ class TUDatasetExt(InMemoryDataset):
         use_edge_attr (bool, optional): If :obj:`True`, the dataset will
             contain additional continuous edge attributes (if present).
             (default: :obj:`False`)
-        cleaned: (bool, optional): If :obj:`True`, the dataset will
+        cleaned (bool, optional): If :obj:`True`, the dataset will
             contain only non-isomorphic graphs. (default: :obj:`False`)
+        processed_filename (string, optional): The name of the processed data file.
+            (default: obj: `data.pt`)
     """
     url = 'https://ls11-www.cs.tu-dortmund.de/people/morris/graphkerneldatasets'
 #     url = 'https://www.chrsmrrs.com/graphkerneldatasets'

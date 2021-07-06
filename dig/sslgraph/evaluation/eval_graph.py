@@ -1,4 +1,5 @@
-import sys, copy, torch
+import copy
+import torch
 import numpy as np
 import torch.nn as nn
 from tqdm import trange
@@ -107,8 +108,10 @@ class GraphUnsupervised(object):
         Args:
             learning_model: An object of a contrastive model (sslgraph.method.Contrastive) 
                 or a predictive model.
-            encoder (torch.nn.Module): List or trainable pytorch model.
+            encoder (torch.nn.Module): Trainable pytorch model or list of models.
             fold_seed (int, optional): Seed for fold split. (default: :obj:`None`)
+
+        :rtype: (float, float)
         """
         
         pretrain_loader = DataLoader(self.dataset, self.batch_size, shuffle=True)
@@ -155,9 +158,11 @@ class GraphUnsupervised(object):
         Args:
             learning_model: An object of a contrastive model (sslgraph.method.Contrastive) 
                 or a predictive model.
-            encoder (torch.nn.Module): List or trainable pytorch model.
+            encoder (torch.nn.Module): Trainable pytorch model or list of models.
             p_lr_lst (list, optional): List of learning rate candidates.
             p_epoch_lst (list, optional): List of epochs number candidates.
+
+        :rtype: (float, float, (float, int))
         """
         
         acc_m_lst = []
@@ -290,7 +295,7 @@ class GraphSemisupervised(object):
     
     Args:
         dataset (torch_geometric.data.Dataset): The graph dataset for finetuning and evaluation.
-        dataset (torch_geometric.data.Dataset): The graph dataset for pretraining.
+        dataset_pretrain (torch_geometric.data.Dataset): The graph dataset for pretraining.
         label_rate (float, optional): Ratio of labels to use in finetuning dataset.
             (default: :obj:`1`)
         epoch_select (string, optional): :obj:`"test_max"` or :obj:`"val_max"`.
@@ -375,10 +380,13 @@ class GraphSemisupervised(object):
         r"""Run evaluation with given learning model and encoder(s).
         
         Args:
-            learning_model: An instance of a contrastive model or a predictive model.
+            learning_model: An object of a contrastive model (sslgraph.method.Contrastive)
+                or a predictive model.
             encoder (torch.nn.Module, or list): Trainable pytorch model or list of models.
             pred_head (torch.nn.Module, optional): Prediction head. If None, will use linear 
                 projection. (default: :obj:`None`)
+
+        :rtype: (float, float)
         """
         pretrain_loader = DataLoader(self.dataset_pretrain, self.batch_size, shuffle=True)
         p_optimizer = self.get_optim(self.p_optim)(encoder.parameters(), lr=self.p_lr,
@@ -438,11 +446,13 @@ class GraphSemisupervised(object):
         Args:
             learning_model: An object of a contrastive model (sslgraph.method.Contrastive) 
                 or a predictive model.
-            encoder (torch.nn.Module): List or trainable pytorch model.
+            encoder (torch.nn.Module): Trainable pytorch model or list of models.
             pred_head (torch.nn.Module, optional): Prediction head. If None, will use linear 
                 projection. (default: :obj:`None`)
             p_lr_lst (list, optional): List of learning rate candidates.
             p_epoch_lst (list, optional): List of epochs number candidates.
+
+        :rtype: (float, float, (float, int))
         """
         
         acc_m_lst = []

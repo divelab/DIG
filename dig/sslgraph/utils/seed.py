@@ -1,6 +1,7 @@
-import torch
 import random
+import torch
 import numpy as np
+
 
 def setup_seed(seed):
     r"""To setup seed for reproducible experiments.

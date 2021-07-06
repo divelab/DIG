@@ -1,5 +1,6 @@
-from dig.sslgraph.dataset import get_node_dataset
 import shutil
+from dig.sslgraph.dataset import get_node_dataset
+
 
 def test_get_node_dataset():
     root = './dataset/Planetoid'
