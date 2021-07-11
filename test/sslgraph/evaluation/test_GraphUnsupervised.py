@@ -1,8 +1,9 @@
+import shutil
 from dig.sslgraph.evaluation import GraphUnsupervised
 from dig.sslgraph.utils import Encoder
 from dig.sslgraph.dataset import get_dataset
 from dig.sslgraph.method import GraphCL
-import shutil
+
 
 def test_GraphUnsupervised():
     root = './dataset'

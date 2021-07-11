@@ -1,6 +1,6 @@
+import random
 import torch
 import numpy as np
-import random
 from torch_geometric.data import Batch, Data
 
 

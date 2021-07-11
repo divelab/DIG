@@ -1,10 +1,6 @@
-import os, re, torch
-import os.path as osp
-import numpy as np
+import re
 
-from itertools import repeat, product
-from torch_geometric.datasets import TUDataset, Planetoid
-from torch_geometric.data import Batch, Data
+from torch_geometric.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
 
 from .TUDataset import TUDatasetExt
@@ -19,7 +15,7 @@ def get_dataset(name, task, feat_str="deg", root=None):
     Args:
         name (string): The `name <https://chrsmrrs.github.io/datasets/docs/datasets/>`_ of the dataset.
         task (string): The evaluation task. Either 'semisupervised' or
-            `unsupervised`.
+            'unsupervised'.
         feat_str (bool, optional): The node feature augmentations to be applied,
             *e.g.*, degrees and centrality. (default: :obj:`deg`)
         root (string, optional): Root directory where the dataset should be saved.

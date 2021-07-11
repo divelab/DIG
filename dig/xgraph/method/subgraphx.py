@@ -680,7 +680,7 @@ class SubgraphX(object):
                 sparsity_score = 1 - len(tree_node_x.coalition) / tree_node_x.ori_graph.number_of_nodes()
 
                 explanation_results.append(results)
-                related_preds.append({'masked': maskout_score,
+                related_preds.append({'maskout': maskout_score,
                                       'origin': probs[label],
                                       'sparsity': sparsity_score})
         else:

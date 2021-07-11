@@ -1,10 +1,9 @@
+from functools import partial
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 
-from functools import partial
 from torch.nn import Parameter
-from torch.nn import Sequential, Linear, ReLU, BatchNorm1d
+from torch.nn import Sequential, Linear, BatchNorm1d
 from torch_scatter import scatter_add
 from torch_geometric.nn import GINConv, GCNConv, global_add_pool, global_mean_pool
 from torch_geometric.nn.conv import MessagePassing

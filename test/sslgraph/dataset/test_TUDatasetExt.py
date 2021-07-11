@@ -1,5 +1,5 @@
 from dig.sslgraph.dataset import TUDatasetExt
-import shutil
+
 
 def test_TUDatasetExt():
     ## semisupervised

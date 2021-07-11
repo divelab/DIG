@@ -1,9 +1,8 @@
-import sys, copy, torch
+import copy
+import torch
 import numpy as np
 import torch.nn as nn
-from sklearn.model_selection import StratifiedKFold
 from torch_geometric.data import DataLoader
-from torch import optim
 from sklearn import preprocessing
 
 
@@ -100,8 +99,11 @@ class NodeUnsupervised(object):
         r"""Run evaluation with given learning model and encoder(s).
         
         Args:
-            learning_model: An object of a contrastive model or a predictive model.
-            encoder (torch.nn.Module): List or trainable pytorch model.
+            learning_model: An object of a contrastive model (sslgraph.method.Contrastive)
+                or a predictive model.
+            encoder (torch.nn.Module): Trainable pytorch model or list of models.
+
+        :rtype: (float, float)
         """
         
         full_loader = DataLoader(self.full_dataset, 1)
@@ -145,11 +147,14 @@ class NodeUnsupervised(object):
         on multiple different splits.
         
         Args:
-            learning_model: An object of a contrastive model or a predictive model.
-            encoder (torch.nn.Module): List or trainable pytorch model.
-            split_masks (list, or generator): A list or generator that contains or yields masks for 
+            learning_model: An object of a contrastive model (sslgraph.method.Contrastive)
+                or a predictive model.
+            encoder (torch.nn.Module): Trainable pytorch model or list of models.
+            split_masks (list, or generator): A list of generator that contains or yields masks for
                 train, val and test splits.
-                
+
+        :rtype: float
+
         Example
         -------
         >>> split_masks = [(train1, val1, test1), (train2, val2, test2), ..., (train20, val20, test20)]
@@ -198,9 +203,11 @@ class NodeUnsupervised(object):
         Args:
             learning_model: An object of a contrastive model (sslgraph.method.Contrastive) 
                 or a predictive model.
-            encoder (torch.nn.Module): List or trainable pytorch model.
+            encoder (torch.nn.Module): Trainable pytorch model or list of models.
             p_lr_lst (list, optional): List of learning rate candidates.
             p_epoch_lst (list, optional): List of epochs number candidates.
+
+        :rtype: (float, float, (float, int))
         """
         
         acc_m_lst = []
@@ -302,4 +309,4 @@ class NodeUnsupervised(object):
         optims = {'Adam': torch.optim.Adam}
         
         return optims[optim]
-    
+

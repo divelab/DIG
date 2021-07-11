@@ -1,8 +1,9 @@
+import shutil
 from dig.sslgraph.evaluation import NodeUnsupervised
 from dig.sslgraph.dataset import get_node_dataset
 from dig.sslgraph.utils import Encoder
 from dig.sslgraph.method import GRACE
-import shutil
+
 
 def test_NodeUnsupervised():
     root = './dataset'

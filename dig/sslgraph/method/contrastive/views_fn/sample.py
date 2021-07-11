@@ -47,7 +47,7 @@ class UniformSample():
 
 
 class RWSample():
-    """Subgraph sampling on the given graph or batched graphs. 
+    """Subgraph sampling based on random walk on the given graph or batched graphs.
     Class objects callable via method :meth:`views_fn`.
     
     Args:
