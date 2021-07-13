@@ -4,6 +4,8 @@ Utils for the discrete layers. Taken from https://github.com/google/edward2/blob
 Which is introduced and explained in the paper: https://arxiv.org/abs/1905.10347 
 And modified for PyTorch. 
 """
+import sys
+import warnings
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -114,12 +116,21 @@ def one_hot_add(inputs, shift):
     """
     inputs = torch.stack((inputs, torch.zeros_like(inputs)), dim = -1)
     shift = torch.stack((shift, torch.zeros_like(shift)), dim = -1)
-    inputs_fft = torch.fft(inputs, 1) #ignore last and first dimension to do batched fft
-    shift_fft = torch.fft(shift, 1)
+    if 'torch.fft' not in sys.modules:
+        with warnings.catch_warnings(record=True) as w:
+            inputs_fft = torch.fft(inputs, 1) #ignore last and first dimension to do batched fft
+            shift_fft = torch.fft(shift, 1)
+    else:
+        inputs_fft = torch.view_as_real(torch.fft.fft(torch.view_as_complex(inputs)))
+        shift_fft = torch.view_as_real(torch.fft.fft(torch.view_as_complex(shift)))
     result_fft_real = inputs_fft[...,0]*shift_fft[...,0] - inputs_fft[...,1]*shift_fft[...,1]
     result_fft_imag = inputs_fft[...,0]*shift_fft[...,1] + inputs_fft[...,1]*shift_fft[...,0]
     result_fft = torch.stack((result_fft_real,result_fft_imag), dim = -1)
-    return torch.ifft(result_fft, 1)[...,0] #return only the real part
+    if 'torch.fft' not in sys.modules:
+        with warnings.catch_warnings(record=True) as w:
+            return torch.ifft(result_fft, 1)[...,0] #return only the real part
+    else:
+        return torch.view_as_real(torch.fft.ifft(torch.view_as_complex(result_fft)))[...,0]
 
 def one_hot_multiply(inputs, scale):
     """Performs (inputs * scale) % vocab_size in the one-hot space.
