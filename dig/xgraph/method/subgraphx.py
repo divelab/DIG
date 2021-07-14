@@ -532,7 +532,7 @@ class SubgraphX(object):
 
     """
     def __init__(self, model, num_classes: int, device, num_hops: Optional[int] = None, explain_graph: bool = True,
-                 rollout: int = 10, min_atoms: int = 3, c_puct: float = 10.0, expand_atoms=14,
+                 rollout: int = 20, min_atoms: int = 5, c_puct: float = 10.0, expand_atoms=14,
                  high2low=False, local_radius=4, sample_num=100, reward_method='mc_l_shapley',
                  subgraph_building_method='zero_filling', save_dir: Optional[str] = None,
                  filename: str = 'example', vis: bool = True):
