@@ -12,6 +12,7 @@ __all__ = ['MoleculeDataset',
 
 
 class MarginalSubgraphDataset(Dataset):
+    """ Collect pair-wise graph data to calculate marginal contribution. """
     def __init__(self, data, exclude_mask, include_mask, subgraph_build_func):
         self.num_nodes = data.num_nodes
         self.X = data.x
