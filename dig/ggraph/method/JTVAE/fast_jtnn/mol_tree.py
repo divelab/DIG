@@ -2,7 +2,7 @@ import os
 import rdkit
 import rdkit.Chem as Chem
 from tqdm import tqdm
-from .chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble
+from .chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
 from .vocab import *
 
 import argparse
@@ -41,6 +41,7 @@ class MolTreeNode(object):
         label_mol = get_clique_mol(original_mol, clique)
         self.label = Chem.MolToSmiles(
             Chem.MolFromSmiles(get_smiles(label_mol)))
+        self.label_mol = get_mol(self.label)
 
         for cidx in clique:
             original_mol.GetAtomWithIdx(cidx).SetAtomMapNum(0)
@@ -70,15 +71,16 @@ class MolTreeNode(object):
 
 class MolTree(object):
 
-    def __init__(self, smiles):
+    def __init__(self, smiles, bayesian_optimization=False):
         self.smiles = smiles
         self.mol = get_mol(smiles)
 
-        # Stereo Generation (currently disabled)
-        #mol = Chem.MolFromSmiles(smiles)
-        #self.smiles3D = Chem.MolToSmiles(mol, isomericSmiles=True)
-        #self.smiles2D = Chem.MolToSmiles(mol)
-        #self.stereo_cands = decode_stereo(self.smiles2D)
+        # Stereo Generation
+        if bayesian_optimization:
+            mol = Chem.MolFromSmiles(smiles)
+            self.smiles3D = Chem.MolToSmiles(mol, isomericSmiles=True)
+            self.smiles2D = Chem.MolToSmiles(mol)
+            self.stereo_cands = decode_stereo(self.smiles2D)
 
         cliques, edges = tree_decomp(self.mol)
         self.nodes = []

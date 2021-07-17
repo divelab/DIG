@@ -1,14 +1,15 @@
+import pickle
+import os
+import random
 import torch
-from torch.utils.data import Dataset, DataLoader
-from .mol_tree import MolTree
 import numpy as np
+from torch.utils.data import Dataset, DataLoader
+
+from .mol_tree import MolTree
 from .jtnn_enc import JTNNEncoder
 from .mpn import MPN
 from .jtmpn import JTMPN
 from .vocab import Vocab
-import pickle
-import os
-import random
 
 
 class PairTreeFolder(object):
@@ -136,6 +137,40 @@ def tensorize(tree_batch, vocab, assm=True):
     batch_idx = torch.LongTensor(batch_idx)
 
     return tree_batch, jtenc_holder, mpn_holder, (jtmpn_holder, batch_idx)
+
+
+class MoleculeDataset(Dataset):
+
+    def __init__(self, data_file):
+        with open(data_file) as f:
+            self.data = [line.strip("\r\n ").split()[0] for line in f]
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        smiles = self.data[idx]
+        mol_tree = MolTree(smiles)
+        mol_tree.recover()
+        mol_tree.assemble()
+        return mol_tree
+
+
+class PropDataset(Dataset):
+
+    def __init__(self, data, prop_values):
+        self.prop_data = prop_values
+        self.data = data
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        smiles = self.data[idx]
+        mol_tree = MolTree(smiles)
+        mol_tree.recover()
+        mol_tree.assemble()
+        return mol_tree, self.prop_data[idx]
 
 
 def set_batch_nodeID(mol_batch, vocab):

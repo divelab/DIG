@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from collections import deque
-from .mol_tree import Vocab, MolTree
+from ..fast_jtnn.mol_tree import Vocab, MolTree
 from .nnutils import create_var, GRU
 
 MAX_NB = 8

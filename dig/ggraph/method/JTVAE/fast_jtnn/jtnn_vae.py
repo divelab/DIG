@@ -1,19 +1,20 @@
+import copy
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .mol_tree import Vocab, MolTree
-from .nnutils import create_var, flatten_tensor, avg_pool
+import rdkit
+import rdkit.Chem as Chem
+
+from .mol_tree import MolTree
+from .nnutils import create_var
 from .jtnn_enc import JTNNEncoder
 from .jtnn_dec import JTNNDecoder
 from .mpn import MPN
 from .jtmpn import JTMPN
 from .datautils import tensorize
-
 from .chemutils import enum_assemble, set_atommap, copy_edit_mol, attach_mols
-import rdkit
-import rdkit.Chem as Chem
-import copy
-import math
 
 
 class JTNNVAE(nn.Module):

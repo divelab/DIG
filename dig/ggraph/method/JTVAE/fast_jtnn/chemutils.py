@@ -282,7 +282,7 @@ def enum_attach(ctr_mol, nei_node, amap, singletons):
 # Try rings first: Speed-Up
 
 
-def enum_assemble(node, neighbors, prev_nodes=[], prev_amap=[]):
+def enum_assemble(node, neighbors, prev_nodes=[], prev_amap=[], bayesian_optimization=False):
     all_attach_confs = []
     singletons = [nei_node.nid for nei_node in neighbors +
                   prev_nodes if nei_node.mol.GetNumAtoms() == 1]
@@ -330,7 +330,10 @@ def enum_assemble(node, neighbors, prev_nodes=[], prev_amap=[]):
         candidates.append((smiles, amap))
         aroma_score.append(check_aroma(cand_mol, node, neighbors))
 
-    return candidates, aroma_score
+    if not bayesian_optimization:
+        return candidates, aroma_score
+    else:
+        return candidates
 
 
 def check_singleton(cand_mol, ctr_node, nei_nodes):
