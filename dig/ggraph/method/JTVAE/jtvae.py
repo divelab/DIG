@@ -1,30 +1,21 @@
-import os
-import pickle
 import math
-import random
 import sys
 from optparse import OptionParser
-from multiprocessing import Pool
-
-import jtnn
-import fast_jtnn
 
 import numpy as np
-
 import rdkit
 from rdkit import RDLogger, Chem
 from rdkit.Chem import Descriptors
-
 from tqdm import tqdm
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
-from torch.utils.data import DataLoader
-from torch.autograd import Variable
 
 from dig.ggraph.method import Generator
+
+from . import jtnn
+from . import fast_jtnn
 
 
 class JTVAE(Generator):
@@ -98,6 +89,7 @@ class JTVAE(Generator):
                 preprocessed (list): A list of preprocessed MolTree objects.
 
         """
+        # TODO In the future, this can be parallelized
         preprocessed = list(
             map(self._tensorize, tqdm(list_smiles, leave=True)))
         return preprocessed
