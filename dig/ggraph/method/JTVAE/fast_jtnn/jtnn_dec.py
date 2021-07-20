@@ -1,10 +1,9 @@
-from .chemutils import enum_assemble, set_atommap
-from .nnutils import create_var, GRU
-import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .mol_tree import MolTree, MolTreeNode
+from .chemutils import enum_assemble, set_atommap
+from .nnutils import create_var, GRU
 
 MAX_NB = 15
 MAX_DECODE_LEN = 100

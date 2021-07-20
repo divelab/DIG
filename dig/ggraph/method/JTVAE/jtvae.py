@@ -14,7 +14,6 @@ import torch.optim.lr_scheduler as lr_scheduler
 
 from dig.ggraph.method import Generator
 
-from . import jtnn
 from . import fast_jtnn
 
 

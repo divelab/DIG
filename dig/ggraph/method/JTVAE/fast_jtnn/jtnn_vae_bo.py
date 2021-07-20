@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
-from ..fast_jtnn.mol_tree import Vocab, MolTree
+from .mol_tree import Vocab, MolTree
 from .nnutils import create_var
-from .jtnn_enc import JTNNEncoder
+from .jtnn_enc_bo import JTNNEncoderBO
 from .jtnn_dec import JTNNDecoder
 from .mpn import MPN, mol2graph
 from .jtmpn import JTMPN
 
-from ..fast_jtnn.chemutils import enum_assemble, set_atommap, copy_edit_mol, attach_mols, atom_equal, decode_stereo
+from .chemutils import enum_assemble, set_atommap, copy_edit_mol, attach_mols, atom_equal, decode_stereo
 import rdkit
 import rdkit.Chem as Chem
 from rdkit import DataStructs
@@ -25,20 +25,20 @@ def set_batch_nodeID(mol_batch, vocab):
             tot += 1
 
 
-class JTNNVAE(nn.Module):
+class JTNNVAEBO(nn.Module):
 
     def __init__(self, vocab, hidden_size, latent_size, depth, stereo=True):
-        super(JTNNVAE, self).__init__()
+        super(JTNNVAEBO, self).__init__()
         self.vocab = vocab
         self.hidden_size = hidden_size
         self.latent_size = latent_size
         self.depth = depth
 
         self.embedding = nn.Embedding(vocab.size(), hidden_size)
-        self.jtnn = JTNNEncoder(vocab, hidden_size, self.embedding)
+        self.jtnn = JTNNEncoderBO(vocab, hidden_size, self.embedding)
         self.jtmpn = JTMPN(hidden_size, depth)
         self.mpn = MPN(hidden_size, depth)
-        self.decoder = JTNNDecoder(
+        self.decoder = JTNNDecoderBO(
             vocab, hidden_size, latent_size / 2, self.embedding)
 
         self.T_mean = nn.Linear(hidden_size, latent_size / 2)

@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from .nnutils import create_var, index_select_ND
-from ..fast_jtnn.chemutils import get_mol
 #from mpn import atom_features, bond_features, ATOM_FDIM, BOND_FDIM
 import rdkit.Chem as Chem
 
@@ -33,10 +32,10 @@ def bond_features(bond):
     return torch.Tensor([bt == Chem.rdchem.BondType.SINGLE, bt == Chem.rdchem.BondType.DOUBLE, bt == Chem.rdchem.BondType.TRIPLE, bt == Chem.rdchem.BondType.AROMATIC, bond.IsInRing()])
 
 
-class JTMPN(nn.Module):
+class JTMPNBO(nn.Module):
 
     def __init__(self, hidden_size, depth):
-        super(JTMPN, self).__init__()
+        super(JTMPNBO, self).__init__()
         self.hidden_size = hidden_size
         self.depth = depth
 
@@ -56,9 +55,8 @@ class JTMPN(nn.Module):
             mess_dict[e] = len(all_mess)
             all_mess.append(vec)
 
-        for mol, all_nodes, ctr_node in cand_batch:
+        for mol, all_nodes in cand_batch:
             n_atoms = mol.GetNumAtoms()
-            ctr_bid = ctr_node.idx
 
             for atom in mol.GetAtoms():
                 fatoms.append(atom_features(atom))

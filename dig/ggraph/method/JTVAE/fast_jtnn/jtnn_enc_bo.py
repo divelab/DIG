@@ -1,16 +1,15 @@
 import torch
 import torch.nn as nn
 from collections import deque
-from ..fast_jtnn.mol_tree import Vocab, MolTree
 from .nnutils import create_var, GRU
 
 MAX_NB = 8
 
 
-class JTNNEncoder(nn.Module):
+class JTNNEncoderBO(nn.Module):
 
     def __init__(self, vocab, hidden_size, embedding=None):
-        super(JTNNEncoder, self).__init__()
+        super(JTNNEncoderBO, self).__init__()
         self.hidden_size = hidden_size
         self.vocab_size = vocab.size()
         self.vocab = vocab
