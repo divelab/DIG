@@ -4,6 +4,7 @@ from torch_geometric.utils.random import barabasi_albert_graph
 from torch_geometric.data import Data
 import torch
 
+
 def test_metrics():
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -40,9 +41,6 @@ def test_metrics():
     assert x_collector.fidelity is not None
     assert x_collector.fidelity_inv is not None
     assert x_collector.sparsity is not None
-
-
-
 
 
 if __name__ == '__main__':

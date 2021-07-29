@@ -1,6 +1,7 @@
 from dig.xgraph.dataset import BA_LRP
 import shutil
 
+
 def test_BA_LRP():
     root = 'datasets'
     dataset = BA_LRP(root)
