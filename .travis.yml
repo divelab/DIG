@@ -12,7 +12,7 @@ branches:
 
 env:
   jobs:
-    - TORCH_VERSION=1.6.0 PYTHON_VERSION=3.8 IDX=cpu
+    - TORCH_VERSION=1.8.0 PYTHON_VERSION=3.8 IDX=cpu
 
 install:
   - source script/conda.sh
