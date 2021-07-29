@@ -1,6 +1,7 @@
-from .metrics import XCollector, ExplanationProcessor
+from .metrics import XCollector, ExplanationProcessor, control_sparsity
 
 __all__ = [
     'XCollector',
-    'ExplanationProcessor'
+    'ExplanationProcessor',
+    'control_sparsity'
 ]
