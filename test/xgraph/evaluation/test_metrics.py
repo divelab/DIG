@@ -1,5 +1,5 @@
 from dig.xgraph.evaluation import XCollector, ExplanationProcessor, control_sparsity
-from dig.xgraph.models import GCN_3l
+from torch_geometric.nn.conv import GCNConv
 from torch_geometric.utils.random import barabasi_albert_graph
 from torch_geometric.data import Data
 import torch
@@ -8,8 +8,8 @@ import torch
 def test_metrics():
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 
-    # --- Create a 3-layer GCN model ---
-    model = GCN_3l(model_level='graph', dim_node=1, dim_hidden=300, num_classes=2).to(device=device)
+    # --- Create a model ---
+    model = GCNConv(in_channels=1, out_channels=2).to(device)
 
     # --- Set the Sparsity to 0.5 ---
     sparsity = 0.5

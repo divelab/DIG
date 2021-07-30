@@ -4,15 +4,15 @@ import shutil
 
 def test_MoleculeDataset():
     root = 'datasets'
-    dataset_names = ['bbbp', 'Tox21', 'bace']
-    dataset_length = [2039, 7831, 1513]
-    dataset_x_shape = [(49068, 9), (145459, 9), (51577, 9)]
-    dataset_edge_index_shape = [(2, 105842), (2, 302190), (2, 111536)]
-    dataset_y_shape = [(2039, 1), (7831, 12), (1513, 1)]
+    dataset_names = ['mutag', 'bbbp', 'Tox21', 'bace']
+    dataset_length = [188, 2039, 7831, 1513]
+    dataset_x_shape = [(3371, 7), (49068, 9), (145459, 9), (51577, 9)]
+    dataset_edge_index_shape = [(2, 7442), (2, 105842), (2, 302190), (2, 111536)]
+    dataset_y_shape = [(188, ), (2039, 1), (7831, 12), (1513, 1)]
 
-    first_data_x_shape = [(20, 9), (16, 9), (32, 9)]
-    first_data_edge_index_shape = [(2, 40), (2, 34), (2, 70)]
-    first_data_y_shape = [(1, 1), (1, 12), (1, 1)]
+    first_data_x_shape = [(17, 7), (20, 9), (16, 9), (32, 9)]
+    first_data_edge_index_shape = [(2, 38), (2, 40), (2, 34), (2, 70)]
+    first_data_y_shape = [(1, ), (1, 1), (1, 12), (1, 1)]
 
     for dataset_idx, name in enumerate(dataset_names):
         dataset = MoleculeDataset(root, name)
