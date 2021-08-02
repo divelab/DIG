@@ -24,7 +24,7 @@ class emb(torch.nn.Module):
         self.angle_emb = angle_emb(num_spherical, num_radial, cutoff, envelope_exponent)
         self.torsion_emb = torsion_emb(num_spherical, num_radial, cutoff, envelope_exponent)
         self.reset_parameters()
-    
+
     def reset_parameters(self):
         self.dist_emb.reset_parameters()
 
@@ -54,24 +54,33 @@ class ResidualLayer(torch.nn.Module):
 
 
 class init(torch.nn.Module):
-    def __init__(self, num_radial, hidden_channels, act=swish):
+    def __init__(self, num_radial, hidden_channels, act=swish, use_node_features=True):
         super(init, self).__init__()
         self.act = act
-        self.emb = Embedding(95, hidden_channels)
+        self.use_node_features = use_node_features
+        if self.use_node_features:
+            self.emb = Embedding(95, hidden_channels)
+        else: # option to use no node features and a learned embedding vector for each node instead
+            self.node_embedding = nn.Parameter(torch.empty((hidden_channels,)))
+            nn.init.normal_(self.node_embedding)
         self.lin_rbf_0 = Linear(num_radial, hidden_channels)
         self.lin = Linear(3 * hidden_channels, hidden_channels)
         self.lin_rbf_1 = nn.Linear(num_radial, hidden_channels, bias=False)
         self.reset_parameters()
 
     def reset_parameters(self):
-        self.emb.weight.data.uniform_(-sqrt(3), sqrt(3))
+        if self.use_node_features:
+            self.emb.weight.data.uniform_(-sqrt(3), sqrt(3))
         self.lin_rbf_0.reset_parameters()
         self.lin.reset_parameters()
         glorot_orthogonal(self.lin_rbf_1.weight, scale=2.0)
 
     def forward(self, x, emb, i, j):
         rbf,_,_ = emb
-        x = self.emb(x)
+        if self.use_node_features:
+            x = self.emb(x)
+        else:
+            x = self.node_embedding[None, :].expand(x.shape[0], -1)
         rbf0 = self.act(self.lin_rbf_0(rbf))
         e1 = self.act(self.lin(torch.cat([x[i], x[j], rbf0], dim=-1)))
         e2 = self.lin_rbf_1(rbf) * e1
@@ -80,7 +89,7 @@ class init(torch.nn.Module):
 
 
 class update_e(torch.nn.Module):
-    def __init__(self, hidden_channels, int_emb_size, basis_emb_size_dist, basis_emb_size_angle, basis_emb_size_torsion, num_spherical, num_radial, 
+    def __init__(self, hidden_channels, int_emb_size, basis_emb_size_dist, basis_emb_size_angle, basis_emb_size_torsion, num_spherical, num_radial,
         num_before_skip, num_after_skip, act=swish):
         super(update_e, self).__init__()
         self.act = act
@@ -239,22 +248,22 @@ class SphereNet(torch.nn.Module):
             
     """
     def __init__(
-        self, energy_and_force=False, cutoff=5.0, num_layers=4, 
-        hidden_channels=128, out_channels=1, int_emb_size=64, 
-        basis_emb_size_dist=8, basis_emb_size_angle=8, basis_emb_size_torsion=8, out_emb_channels=256, 
-        num_spherical=7, num_radial=6, envelope_exponent=5, 
-        num_before_skip=1, num_after_skip=2, num_output_layers=3, 
-        act=swish, output_init='GlorotOrthogonal'):
+        self, energy_and_force=False, cutoff=5.0, num_layers=4,
+        hidden_channels=128, out_channels=1, int_emb_size=64,
+        basis_emb_size_dist=8, basis_emb_size_angle=8, basis_emb_size_torsion=8, out_emb_channels=256,
+        num_spherical=7, num_radial=6, envelope_exponent=5,
+        num_before_skip=1, num_after_skip=2, num_output_layers=3,
+        act=swish, output_init='GlorotOrthogonal', use_node_features=True):
         super(SphereNet, self).__init__()
 
         self.cutoff = cutoff
         self.energy_and_force = energy_and_force
 
-        self.init_e = init(num_radial, hidden_channels, act)
+        self.init_e = init(num_radial, hidden_channels, act, use_node_features=use_node_features)
         self.init_v = update_v(hidden_channels, out_emb_channels, out_channels, num_output_layers, act, output_init)
         self.init_u = update_u()
         self.emb = emb(num_spherical, num_radial, self.cutoff, envelope_exponent)
-        
+
         self.update_vs = torch.nn.ModuleList([
             update_v(hidden_channels, out_emb_channels, out_channels, num_output_layers, act, output_init) for _ in range(num_layers)])
 
