@@ -79,7 +79,7 @@ def fidelity(ori_probs: torch.Tensor, unimportant_probs: torch.Tensor) -> float:
 
 def fidelity_inv(ori_probs: torch.Tensor, important_probs: torch.Tensor) -> float:
     r"""
-    Return the Fidelity+ value according to collected data.
+    Return the Fidelity- value according to collected data.
 
     Args:
         ori_probs (torch.Tensor): It is a vector providing original probabilities for Fidelity- computation.
