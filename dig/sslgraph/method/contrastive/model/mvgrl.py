@@ -87,8 +87,6 @@ class MVGRL(Contrastive):
 
         self.views_fn = [lambda x: x,
                          Diffusion(mode=diffusion_type, alpha=alpha, t=t)]
-        self.graph_level = graph_level_output
-        self.node_level = node_level_output
         super(MVGRL, self).__init__(objective='JSE',
                                     views_fn=self.views_fn,
                                     node_level=True,
@@ -133,8 +131,6 @@ class NodeMVGRL(Contrastive):
     def __init__(self, z_dim, z_n_dim, diffusion_type='ppr', alpha=0.2, t=5, 
                  batch_size=2, num_nodes=2000, **kwargs):
 
-        self.graph_level = graph_level_output
-        self.node_level = node_level_output
         self.mode = diffusion_type
         self.alpha = alpha
         self.t = t

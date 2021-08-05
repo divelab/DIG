@@ -100,17 +100,17 @@ def test_get_dataset():
 #     assert dataset_pretrain[0].edge_index.size() == (2, 3776)
 #     shutil.rmtree(root)
 
-#     ## unsupervised
-#     # NCI1
-#     root = './dataset/TUDataset'
-#     dataset = get_dataset(name='NCI1', task='unsupervised', feat_str='deg+odeg100', root=root)
-#     assert len(dataset) == 4110
-#     assert dataset.num_features == 43
+    ## unsupervised
+    # NCI1
+    root = './dataset/TUDataset'
+    dataset = get_dataset(name='NCI1', task='unsupervised', feat_str='deg+odeg100', root=root)
+    assert len(dataset) == 4110
+    assert dataset.num_features == 43
 
-#     assert dataset[0].x.size() == (21, 43)
-#     assert dataset[0].y.size() == (1,)
-#     assert dataset[0].edge_index.size() == (2, 62)
-#     shutil.rmtree(root)
+    assert dataset[0].x.size() == (21, 43)
+    assert dataset[0].y.size() == (1,)
+    assert dataset[0].edge_index.size() == (2, 62)
+    shutil.rmtree(root)
 
 #     # PROTEINS
 #     root = './dataset/TUDataset'
