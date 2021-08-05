@@ -46,7 +46,7 @@ Next, we load SphereNet model and evaluation function.
     model = SphereNet(energy_and_force=False, cutoff=5.0, num_layers=4, 
                       hidden_channels=128, out_channels=1, int_emb_size=64, 
                       basis_emb_size_dist=8, basis_emb_size_angle=8, basis_emb_size_torsion=8, out_emb_channels=256, 
-                      num_spherical=7, num_radial=6, envelope_exponent=5, 
+                      num_spherical=3, num_radial=6, envelope_exponent=5, 
                       num_before_skip=1, num_after_skip=2, num_output_layers=3)
     loss_func = torch.nn.L1Loss()
     evaluation = ThreeDEvaluator()
@@ -64,29 +64,29 @@ Output:
 
 .. parsed-literal::
 
-    =====Epoch 1 {'Train': 0.7765793317604924, 'Validation': 0.829788088798523, 'Test': 0.8256096243858337}
-    =====Epoch 2 {'Train': 0.3513736664000606, 'Validation': 0.4852057099342346, 'Test': 0.4807925820350647}
-    =====Epoch 3 {'Train': 0.2866970902528785, 'Validation': 0.3925183415412903, 'Test': 0.3926387131214142}
-    =====Epoch 4 {'Train': 0.22851779905254582, 'Validation': 0.24750158190727234, 'Test': 0.24735336005687714}
-    =====Epoch 5 {'Train': 0.1882370650733606, 'Validation': 0.24951410293579102, 'Test': 0.2485261708498001}
-    =====Epoch 6 {'Train': 0.1729215220388387, 'Validation': 0.25098657608032227, 'Test': 0.2510414719581604}
-    =====Epoch 7 {'Train': 0.16714775081184313, 'Validation': 0.08707749098539352, 'Test': 0.08680126070976257}
-    =====Epoch 8 {'Train': 0.14790155550919, 'Validation': 0.22142618894577026, 'Test': 0.2184610813856125}
-    =====Epoch 9 {'Train': 0.14341841166521518, 'Validation': 0.08781412988901138, 'Test': 0.08708161860704422}
-    =====Epoch 10 {'Train': 0.13320978917723272, 'Validation': 0.09562557935714722, 'Test': 0.09474394470453262}
-    =====Epoch 11 {'Train': 0.12690318433471445, 'Validation': 0.10588052868843079, 'Test': 0.10465845465660095}
-    =====Epoch 12 {'Train': 0.11995585791554265, 'Validation': 0.1758851855993271, 'Test': 0.17593063414096832}
-    =====Epoch 13 {'Train': 0.11456177215925686, 'Validation': 0.0706050917506218, 'Test': 0.06988751143217087}
-    =====Epoch 14 {'Train': 0.10681104086179107, 'Validation': 0.057960350066423416, 'Test': 0.05731089040637016}
-    =====Epoch 15 {'Train': 0.11122639218064642, 'Validation': 0.12124070525169373, 'Test': 0.11959604173898697}
-    =====Epoch 16 {'Train': 0.05462940768005544, 'Validation': 0.04387890547513962, 'Test': 0.04229748249053955}
-    =====Epoch 17 {'Train': 0.057066445401964525, 'Validation': 0.07098211348056793, 'Test': 0.07055927067995071}
-    =====Epoch 18 {'Train': 0.05782321078129603, 'Validation': 0.04337486997246742, 'Test': 0.041813842952251434}
-    =====Epoch 19 {'Train': 0.05424516140513118, 'Validation': 0.040363702923059464, 'Test': 0.03920820727944374}
-    =====Epoch 20 {'Train': 0.0552880891001176, 'Validation': 0.040168143808841705, 'Test': 0.039053723216056824}
+    =====Epoch 1 {'Train': 0.8305539944409076, 'Validation': 0.7885677814483643, 'Test': 0.7943109273910522}
+    =====Epoch 2 {'Train': 0.3417653005923415, 'Validation': 0.16290859878063202, 'Test': 0.16250823438167572}
+    =====Epoch 3 {'Train': 0.2626579807482881, 'Validation': 0.10924234241247177, 'Test': 0.1091669574379921}
+    =====Epoch 4 {'Train': 0.2185871605092249, 'Validation': 0.1412947177886963, 'Test': 0.14113298058509827}
+    =====Epoch 5 {'Train': 0.18415136586759867, 'Validation': 0.08948442339897156, 'Test': 0.08791808038949966}
+    =====Epoch 6 {'Train': 0.17059671088246983, 'Validation': 0.10857655853033066, 'Test': 0.1086759939789772}
+    =====Epoch 7 {'Train': 0.15622219235277093, 'Validation': 0.08192159235477448, 'Test': 0.08170071989297867}
+    =====Epoch 8 {'Train': 0.1442768630192958, 'Validation': 0.08120342344045639, 'Test': 0.08138693124055862}
+    =====Epoch 9 {'Train': 0.13906806218478485, 'Validation': 0.07339970022439957, 'Test': 0.0732196718454361}
+    =====Epoch 10 {'Train': 0.12617339688792625, 'Validation': 0.11456501483917236, 'Test': 0.11438193917274475}
+    =====Epoch 11 {'Train': 0.12321726725571651, 'Validation': 0.0715189278125763, 'Test': 0.07092428207397461}
+    =====Epoch 12 {'Train': 0.11304465457233598, 'Validation': 0.1164650246500969, 'Test': 0.11696784943342209}
+    =====Epoch 13 {'Train': 0.11311055924429181, 'Validation': 0.1142609491944313, 'Test': 0.11372711509466171}
+    =====Epoch 14 {'Train': 0.1103381712277869, 'Validation': 0.05894898623228073, 'Test': 0.05792950466275215}
+    =====Epoch 15 {'Train': 0.09813584842398945, 'Validation': 0.13913576304912567, 'Test': 0.1383834183216095}
+    =====Epoch 16 {'Train': 0.05428033658000465, 'Validation': 0.06030373275279999, 'Test': 0.059175316244363785}
+    =====Epoch 17 {'Train': 0.054203004988561614, 'Validation': 0.03810606151819229, 'Test': 0.03703922778367996}
+    =====Epoch 18 {'Train': 0.0530719623151666, 'Validation': 0.04359658062458038, 'Test': 0.043418560177087784}
+    =====Epoch 19 {'Train': 0.05202796294149651, 'Validation': 0.04247582331299782, 'Test': 0.04204947501420975}
+    =====Epoch 20 {'Train': 0.04962607438894397, 'Validation': 0.04090351238846779, 'Test': 0.040894996374845505}
 
-    Best validation MAE so far: 0.040168143808841705
-    Test MAE when got best validation result: 0.039053723216056824
+    Best validation MAE so far: 0.03810606151819229
+    Test MAE when got best validation result: 0.03703922778367996
 
 
 

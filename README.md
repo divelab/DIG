@@ -78,7 +78,7 @@ train_dataset, valid_dataset, test_dataset = dataset[split_idx['train']], datase
 model = SphereNet(energy_and_force=False, cutoff=5.0, num_layers=4,
                   hidden_channels=128, out_channels=1, int_emb_size=64,
                   basis_emb_size_dist=8, basis_emb_size_angle=8, basis_emb_size_torsion=8, out_emb_channels=256,
-                  num_spherical=7, num_radial=6, envelope_exponent=5,
+                  num_spherical=3, num_radial=6, envelope_exponent=5,
                   num_before_skip=1, num_after_skip=2, num_output_layers=3)                 
 loss_func = torch.nn.L1Loss()
 evaluation = ThreeDEvaluator()
