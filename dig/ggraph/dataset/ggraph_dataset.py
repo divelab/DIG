@@ -170,17 +170,17 @@ class MOSES(PygDataset):
         super(MOSES, self).__init__(root, name, prop_name, conf_dict,transform, pre_transform, pre_filter, 
                                   processed_filename, use_aug, one_shot)
                         
-if __name__ == '__main__':
-    test = QM9()
-    print(test[0])
-    import pdb; pdb.set_trace()
+# if __name__ == '__main__':
+#     test = QM9()
+#     print(test[0])
+#     import pdb; pdb.set_trace()
     
-    test = ZINC250k()
-    print(test[0])
+#     test = ZINC250k()
+#     print(test[0])
     
-    test = ZINC800(method='jt')
-    print(test[0])
+#     test = ZINC800(method='jt')
+#     print(test[0])
     
-    test = MOSES()
-    print(test[0])
+#     test = MOSES()
+#     print(test[0])
     

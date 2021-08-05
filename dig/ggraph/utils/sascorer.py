@@ -111,32 +111,32 @@ def calculateScore(m):
   return sascore
 
 
-def processMols(mols):
-  print('smiles\tName\tsa_score')
-  for m in mols:
-    if m is None:
-      continue
+# def processMols(mols):
+#   print('smiles\tName\tsa_score')
+#   for m in mols:
+#     if m is None:
+#       continue
 
-    s = calculateScore(m)
+#     s = calculateScore(m)
 
-    smiles = Chem.MolToSmiles(m)
-    print(smiles + "\t" + m.GetProp('_Name') + "\t%3f" % s)
+#     smiles = Chem.MolToSmiles(m)
+#     print(smiles + "\t" + m.GetProp('_Name') + "\t%3f" % s)
 
 
-if __name__ == '__main__':
-  import sys, time
+# if __name__ == '__main__':
+#   import sys, time
 
-  t1 = time.time()
-  readFragmentScores("fpscores")
-  t2 = time.time()
+#   t1 = time.time()
+#   readFragmentScores("fpscores")
+#   t2 = time.time()
 
-  suppl = Chem.SmilesMolSupplier(sys.argv[1])
-  t3 = time.time()
-  processMols(suppl)
-  t4 = time.time()
+#   suppl = Chem.SmilesMolSupplier(sys.argv[1])
+#   t3 = time.time()
+#   processMols(suppl)
+#   t4 = time.time()
 
-  print('Reading took %.2f seconds. Calculating took %.2f seconds' % ((t2 - t1), (t4 - t3)),
-        file=sys.stderr)
+#   print('Reading took %.2f seconds. Calculating took %.2f seconds' % ((t2 - t1), (t4 - t3)),
+#         file=sys.stderr)
 
 #
 #  Copyright (c) 2013, Novartis Institutes for BioMedical Research Inc.

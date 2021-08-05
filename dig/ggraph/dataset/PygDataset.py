@@ -391,11 +391,11 @@ class PygDataset(InMemoryDataset):
             start = next_vertex
         return output
     
-if __name__ == '__main__':
-    dataset_names = pd.read_csv('config.csv', index_col = 0)
-    for i in dataset_names:
-        test = PygDataset(name=i, root='')
-        print(test)
-        print(test[0])
-        print(test[0].y)
+# if __name__ == '__main__':
+#     dataset_names = pd.read_csv('config.csv', index_col = 0)
+#     for i in dataset_names:
+#         test = PygDataset(name=i, root='')
+#         print(test)
+#         print(test[0])
+#         print(test[0].y)
         
