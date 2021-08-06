@@ -132,7 +132,7 @@ class PygDataset(InMemoryDataset):
         
         print('Processing...')
         if self.one_shot:
-            self.data, self.slices = self.one_hot_process()
+            self.data, self.slices = self.one_shot_process()
         else:
             self.data, self.slices = self.pre_process()
 
@@ -255,7 +255,7 @@ class PygDataset(InMemoryDataset):
         data, slices = self.collate(data_list)
         return data, slices
     
-    def one_hot_process(self):
+    def one_shot_process(self):
         input_path = self.raw_paths[0]
         input_df = pd.read_csv(input_path, sep=',', dtype='str')
         smile_list = list(input_df[self.smile_col])
