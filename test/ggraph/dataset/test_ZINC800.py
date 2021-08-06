@@ -31,3 +31,6 @@ def test_zinc800():
     assert dataset[0].num_atom.size() == (1,)
 
     shutil.rmtree(root)
+
+if __name__ == '__main__':
+    test_zinc800()
