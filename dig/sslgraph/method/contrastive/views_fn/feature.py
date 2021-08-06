@@ -33,9 +33,9 @@ class NodeAttrMask():
         
         node_num, feat_dim = data.x.size()
         x = data.x.detach().clone()
-        mask = torch.zeros(node_num)
 
         if self.mode == 'whole':
+            mask = torch.zeros(node_num)
             mask_num = int(node_num * self.mask_ratio)
             idx_mask = np.random.choice(node_num, mask_num, replace=False)
             x[idx_mask] = torch.tensor(np.random.normal(loc=self.mask_mean, scale=self.mask_std, 
@@ -43,6 +43,7 @@ class NodeAttrMask():
             mask[idx_mask] = 1
 
         elif self.mode == 'partial':
+            mask = torch.zeros((node_num, feat_dim))
             for i in range(node_num):
                 for j in range(feat_dim):
                     if random.random() < self.mask_ratio:
@@ -51,6 +52,7 @@ class NodeAttrMask():
                         mask[i][j] = 1
 
         elif self.mode == 'onehot':
+            mask = torch.zeros(node_num)
             mask_num = int(node_num * self.mask_ratio)
             idx_mask = np.random.choice(node_num, mask_num, replace=False)
             x[idx_mask] = torch.tensor(np.eye(feat_dim)[np.random.randint(0, feat_dim, size=(mask_num))], dtype=torch.float32)

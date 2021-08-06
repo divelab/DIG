@@ -19,7 +19,7 @@ def test_GraphUnsupervised():
     assert test_std is not None
 
     embed_dim = 512
-    encoder = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, n_layers=3, gnn='gin', node_level=True)
+    encoder = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, n_layers=4, gnn='gin', node_level=True)
     infograph = InfoGraph(embed_dim*4, embed_dim)
     evaluator = GraphUnsupervised(dataset, log_interval=1, p_epoch=1)
     test_mean, test_std = evaluator.evaluate(learning_model=infograph, encoder=encoder)

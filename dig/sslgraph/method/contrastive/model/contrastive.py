@@ -1,3 +1,4 @@
+import os
 import torch
 from tqdm import trange
 import torch.nn as nn
@@ -188,6 +189,13 @@ class Contrastive(nn.Module):
                 
                 if self.choice_model == 'best' and epoch_loss < min_loss:
                     min_loss = epoch_loss
+
+                    if not os.path.exists(self.model_path):
+                        try:
+                            os.mkdir(self.model_path)
+                        except:
+                            raise RuntimeError('cannot create model path')
+
                     if isinstance(encoder, list):
                         for i, enc in enumerate(encoder):
                             torch.save(enc.state_dict(), self.model_path+'/enc%d_best.pkl'%i)
@@ -195,6 +203,13 @@ class Contrastive(nn.Module):
                         torch.save(encoder.state_dict(), self.model_path+'/enc_best.pkl')
             
             if self.choice_model == 'best':
+                
+                if not os.path.exists(self.model_path):
+                    try:
+                        os.mkdir(self.model_path)
+                    except:
+                        raise RuntimeError('cannot create model path')
+
                 if isinstance(encoder, list):
                     for i, enc in enumerate(encoder):
                         enc.load_state_dict(torch.load(self.model_path+'/enc%d_best.pkl'%i))
