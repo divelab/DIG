@@ -332,7 +332,7 @@ class PygDataset(InMemoryDataset):
                 valid_idx = json.load(f)
                 
         elif self.name.find('qm9') != -1:
-            path = os.path.join(self.root, '/raw/valid_idx_qm9.json')
+            path = os.path.join(self.root, 'raw/valid_idx_qm9.json')
             
             if not osp.exists(path):
                 url = 'https://raw.githubusercontent.com/divelab/DIG_storage/main/ggraph/valid_idx_qm9.json'
