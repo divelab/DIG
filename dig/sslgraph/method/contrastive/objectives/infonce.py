@@ -100,7 +100,7 @@ def infoNCE_local_global(z_n, z_g, batch, tau=0.5, norm=True):
         norm: Boolean. Whether to apply normlization.
     '''
     # Not yet used in existing methods, to be implemented.
-    loss = None
+    loss = 0
 
     return loss
 
