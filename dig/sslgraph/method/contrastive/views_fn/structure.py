@@ -156,7 +156,7 @@ class DiffusionWithSample():
         self.add_self_loop = add_self_loop
         
     def __call__(self, data):
-        return self.view_fn(data)
+        return self.views_fn(data)
     
     def views_fn(self, data):
         r"""Method to be called when :class:`DiffusionWithSample` object is called.
