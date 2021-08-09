@@ -37,7 +37,7 @@ def NCE_loss(zs=None, zs_n=None, batch=None, sigma=None, **kwargs):
             return (infoNCE_local_intra_node(zs_n[0], zs_n[1], tau, norm)+
                     infoNCE_local_intra_node(zs_n[1], zs_n[0], tau, norm))*0.5
         else:
-            assert len(zs_n)==len(zs_g)
+            assert len(zs_n)==len(zs)
             assert batch is not None
             
             if len(zs)==1:
