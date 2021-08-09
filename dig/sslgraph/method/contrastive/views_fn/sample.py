@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from torch_geometric.utils import to_dense_adj, dense_to_sparse
+from torch_geometric.utils import to_dense_adj, dense_to_sparse, subgraph
 from torch_geometric.data import Batch, Data
 
 
@@ -21,14 +21,13 @@ class UniformSample():
         
         node_num, _ = data.x.size()
         _, edge_num = data.edge_index.size()
-
-        drop_num = int(node_num * self.ratio)
-        idx_drop = np.random.choice(node_num, drop_num, replace=False)
-        idx_nondrop = [n for n in range(node_num) if not n in idx_drop]
-        adj = to_dense_adj(data.edge_index, max_num_nodes=node_num)[0]
-        adj = adj[idx_nondrop, :][:, idx_nondrop]
         
-        return Data(x=data.x[idx_nondrop], edge_index=dense_to_sparse(adj)[0])
+        keep_num = int(node_num * (1-self.ratio))
+        idx_nondrop = torch.randperm(node_num)[:keep_num]
+        mask_nondrop = torch.zeros_like(data.x[:,0]).scatter_(0, idx_nondrop, 1.0).bool()
+        
+        edge_index, _ = subgraph(mask_nondrop, data.edge_index, relabel_nodes=True, num_nodes=node_num)
+        return Data(x=data.x[mask_nondrop], edge_index=edge_index)
     
     def views_fn(self, data):
         r"""Method to be called when :class:`UniformSample` object is called.
@@ -92,12 +91,10 @@ class RWSample():
             # idx_neigh.union(set([n for n in edge_index[1][edge_index[0]==idx_sub[-1]]]))
             idx_neigh.union(set([n.item() for n in edge_index[1][edge_index[0]==idx_sub[-1]]]))
 
-        idx_drop = [n for n in range(node_num) if not n in idx_sub]
-        idx_sampled = idx_sub
-        adj = to_dense_adj(edge_index, max_num_nodes=node_num)[0]
-        adj = adj[idx_sampled, :][:, idx_sampled]
-
-        return Data(x=data.x[idx_sampled], edge_index=dense_to_sparse(adj)[0])
+        idx_sub = torch.LongTensor(idx_sub).to(data.x.device)
+        mask_nondrop = torch.zeros_like(data.x[:,0]).scatter_(0, idx_sub, 1.0).bool()
+        edge_index, _ = subgraph(mask_nondrop, data.edge_index, relabel_nodes=True, num_nodes=node_num)
+        return Data(x=data.x[mask_nondrop], edge_index=edge_index)
 
     def views_fn(self, data):
         r"""Method to be called when :class:`RWSample` object is called.
