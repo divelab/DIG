@@ -39,13 +39,13 @@ def test_TUDatasetExt():
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].edge_index.size() == (2, 1980)
 
-#     # REDDIT-BINARY
-#     dataset = TUDatasetExt(root, name='REDDIT-BINARY', task='semisupervised')
-#     assert len(dataset) == 2000
-#     assert dataset.num_features == 0
+    # REDDIT-BINARY
+    dataset = TUDatasetExt(root, name='REDDIT-BINARY', task='semisupervised')
+    assert len(dataset) == 2000
+    assert dataset.num_features == 0
 
-#     assert dataset[0].y.size() == (1,)
-#     assert dataset[0].edge_index.size() == (2, 480)
+    assert dataset[0].y.size() == (1,)
+    assert dataset[0].edge_index.size() == (2, 480)
 
 #     # REDDIT-MULTI-5K
 #     dataset = TUDatasetExt(root, name='REDDIT-MULTI-5K', task='semisupervised')
@@ -56,12 +56,12 @@ def test_TUDatasetExt():
 #     assert dataset[0].edge_index.size() == (2, 3776)
 #     shutil.rmtree(root)
 
-#     ## unsupervised
-#     # NCI1
-#     root = './dataset/TUDataset'
-#     dataset = TUDatasetExt(root, name='NCI1', task='unsupervised')
-#     assert len(dataset) == 4110
-#     assert dataset.num_features == 37
+    ## unsupervised
+    # NCI1
+    root = './dataset/TUDataset'
+    dataset = TUDatasetExt(root, name='NCI1', task='unsupervised')
+    assert len(dataset) == 4110
+    assert dataset.num_features == 37
 
 #     assert dataset[0].x.size() == (21, 37)
 #     assert dataset[0].y.size() == (1,)
@@ -103,14 +103,14 @@ def test_TUDatasetExt():
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].edge_index.size() == (2, 2024)
 
-#     # REDDIT-BINARY
-#     dataset = TUDatasetExt(root, name='REDDIT-BINARY', task='unsupervised')
-#     assert len(dataset) == 2000
-#     assert dataset.num_features == 1
+    # REDDIT-BINARY
+    dataset = TUDatasetExt(root, name='REDDIT-BINARY', task='unsupervised')
+    assert len(dataset) == 2000
+    assert dataset.num_features == 1
 
-#     assert dataset[0].x.size() == (218, 1)
-#     assert dataset[0].y.size() == (1,)
-#     assert dataset[0].edge_index.size() == (2, 697)
+    assert dataset[0].x.size() == (218, 1)
+    assert dataset[0].y.size() == (1,)
+    assert dataset[0].edge_index.size() == (2, 697)
 
 #     # REDDIT-MULTI-5K
 #     dataset = TUDatasetExt(root, name='REDDIT-MULTI-5K', task='unsupervised')

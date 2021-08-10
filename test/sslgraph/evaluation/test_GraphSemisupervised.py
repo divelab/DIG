@@ -59,7 +59,37 @@ def test_GraphSemisupervised():
     embed_dim = 128
 
     encoder = Encoder(feat_dim, embed_dim, n_layers=3, gnn='resgcn')
-    graphcl = GraphCL(embed_dim, aug_1='subgraph', aug_2='subgraph')
+    graphcl = GraphCL(embed_dim, aug_1='dropN', aug_2='permE')
+
+    evaluator = GraphSemisupervised(dataset, dataset_pretrain, label_rate=0.01, p_epoch = 1, f_epoch = 1)
+
+    test_mean, test_std = evaluator.evaluate(learning_model=graphcl, encoder=encoder)
+
+    assert test_mean <= 1.0 and test_mean >= 0.0
+    assert test_std is not None
+
+    encoder = Encoder(feat_dim, embed_dim, n_layers=3, gnn='resgcn')
+    graphcl = GraphCL(embed_dim, aug_1='subgraph', aug_2='maskN')
+
+    evaluator = GraphSemisupervised(dataset, dataset_pretrain, label_rate=0.01, p_epoch = 1, f_epoch = 1)
+
+    test_mean, test_std = evaluator.evaluate(learning_model=graphcl, encoder=encoder)
+
+    assert test_mean <= 1.0 and test_mean >= 0.0
+    assert test_std is not None
+
+    encoder = Encoder(feat_dim, embed_dim, n_layers=3, gnn='resgcn')
+    graphcl = GraphCL(embed_dim, aug_1='random3', aug_2='random4')
+
+    evaluator = GraphSemisupervised(dataset, dataset_pretrain, label_rate=0.01, p_epoch = 1, f_epoch = 1)
+
+    test_mean, test_std = evaluator.evaluate(learning_model=graphcl, encoder=encoder)
+
+    assert test_mean <= 1.0 and test_mean >= 0.0
+    assert test_std is not None
+
+    encoder = Encoder(feat_dim, embed_dim, n_layers=3, gnn='resgcn')
+    graphcl = GraphCL(embed_dim, aug_1='random2', aug_2='random4')
 
     evaluator = GraphSemisupervised(dataset, dataset_pretrain, label_rate=0.01, p_epoch = 1, f_epoch = 1)
 

@@ -68,21 +68,21 @@ def test_get_dataset():
 #     assert dataset_pretrain[0].edge_index.size() == (2, 1980)
 #     shutil.rmtree(root)
 
-#     # REDDIT-BINARY
-#     root = './dataset/TUDataset'
-#     dataset, dataset_pretrain = get_dataset(name='REDDIT-BINARY', task='semisupervised', feat_str='deg+odeg100', root=root)
-#     assert len(dataset) == 2000
-#     assert len(dataset_pretrain) == 2000
-#     assert dataset.num_features == 13
-#     assert dataset_pretrain.num_features == 13
+    # REDDIT-BINARY
+    root = './dataset/TUDataset'
+    dataset, dataset_pretrain = get_dataset(name='REDDIT-BINARY', task='semisupervised', feat_str='deg+odeg100', root=root)
+    assert len(dataset) == 2000
+    assert len(dataset_pretrain) == 2000
+    assert dataset.num_features == 13
+    assert dataset_pretrain.num_features == 13
 
-#     assert dataset[0].x.size() == (218, 13)
-#     assert dataset_pretrain[0].x.size() == (218, 13)
-#     assert dataset[0].y.size() == (1,)
-#     assert dataset_pretrain[0].y.size() == (1,)
-#     assert dataset[0].edge_index.size() == (2, 480)
-#     assert dataset_pretrain[0].edge_index.size() == (2, 480)
-#     shutil.rmtree(root)
+    assert dataset[0].x.size() == (218, 13)
+    assert dataset_pretrain[0].x.size() == (218, 13)
+    assert dataset[0].y.size() == (1,)
+    assert dataset_pretrain[0].y.size() == (1,)
+    assert dataset[0].edge_index.size() == (2, 480)
+    assert dataset_pretrain[0].edge_index.size() == (2, 480)
+    shutil.rmtree(root)
 
 #     # REDDIT-MULTI-5K
 #     root = './dataset/TUDataset'
@@ -156,16 +156,16 @@ def test_get_dataset():
 #     assert dataset[0].edge_index.size() == (2, 2024)
 #     shutil.rmtree(root)
 
-#     # REDDIT-BINARY
-#     root = './dataset/TUDataset'
-#     dataset = get_dataset(name='REDDIT-BINARY', task='unsupervised', feat_str='deg+odeg100', root=root)
-#     assert len(dataset) == 2000
-#     assert dataset.num_features == 3065
+    # REDDIT-BINARY
+    root = './dataset/TUDataset'
+    dataset = get_dataset(name='REDDIT-BINARY', task='unsupervised', feat_str='deg+odeg100', root=root)
+    assert len(dataset) == 2000
+    assert dataset.num_features == 3065
 
-#     assert dataset[0].x.size() == (218, 3065)
-#     assert dataset[0].y.size() == (1,)
-#     assert dataset[0].edge_index.size() == (2, 697)
-#     shutil.rmtree(root)
+    assert dataset[0].x.size() == (218, 3065)
+    assert dataset[0].y.size() == (1,)
+    assert dataset[0].edge_index.size() == (2, 697)
+    shutil.rmtree(root)
 
 #     # REDDIT-MULTI-5K
 #     root = './dataset/TUDataset'

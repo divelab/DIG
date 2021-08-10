@@ -20,24 +20,16 @@ def test_NodeUnsupervised():
     test_mean = evaluator.evaluate(learning_model=grace, encoder=encoder)
 
     assert test_mean <= 1.0 and test_mean >= 0.0
-
-    encoder = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, 
-                    n_layers=2, gnn='gcn', node_level=True, graph_level=False)
-    graphcl = GraphCL(embed_dim, aug_1='random3', aug_2='random4')
+    
+    encoder_1 = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, 
+                        n_layers=2, gnn='gcn', node_level=True, graph_level=True)
+    encoder_2 = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, 
+                        n_layers=2, gnn='gcn', node_level=True, graph_level=True)
+    mvgrl = NodeMVGRL(z_dim=embed_dim*2, z_n_dim=embed_dim, diffusion_type='heat')
     
     evaluator = NodeUnsupervised(dataset, log_interval=1)
     evaluator.setup_train_config(p_lr=0.0005, p_epoch=1, p_weight_decay=1e-5, comp_embed_on='cpu')
-    test_mean = evaluator.evaluate(learning_model=graphcl, encoder=encoder)
-
-    assert test_mean <= 1.0 and test_mean >= 0.0
-    
-    encoder = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, 
-                    n_layers=2, gnn='gcn', node_level=True, graph_level=False)
-    mvgrl = NodeMVGRL(z_dim=embed_dim, z_n_dim=embed_dim, diffusion_type='heat')
-    
-    evaluator = NodeUnsupervised(dataset, log_interval=1)
-    evaluator.setup_train_config(p_lr=0.0005, p_epoch=1, p_weight_decay=1e-5, comp_embed_on='cpu')
-    test_mean = evaluator.evaluate(learning_model=graphcl, encoder=encoder)
+    test_mean = evaluator.evaluate(learning_model=graphcl, encoder=[encoder_1, encoder_2])
 
     assert test_mean <= 1.0 and test_mean >= 0.0
 

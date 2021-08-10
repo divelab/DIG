@@ -142,7 +142,7 @@ class NodeMVGRL(Contrastive):
                                         node_level=True,
                                         z_dim=z_dim,
                                         z_n_dim=z_n_dim,
-                                        proj=nn.Sigmoid(),
+                                        proj='MLP',
                                         proj_n='linear',
                                         neg_by_crpt=True,
                                         **kwargs)
