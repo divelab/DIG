@@ -20,11 +20,12 @@ class NodeAttrMask():
         mask_std (float, optional): Standard deviation of the distribution to generate masking values. 
             Must be non-negative. (default: :obj:`0.5`)
     '''
-    def __init__(self, mode='whole', mask_ratio=0.1, mask_mean=0.5, mask_std=0.5):
+    def __init__(self, mode='whole', mask_ratio=0.1, mask_mean=0.5, mask_std=0.5, return_mask=False):
         self.mode = mode
         self.mask_ratio = mask_ratio
         self.mask_mean = mask_mean
         self.mask_std = mask_std
+        self.return_mask = return_mask
     
     def __call__(self, data):
         return self.views_fn(data)
@@ -61,7 +62,10 @@ class NodeAttrMask():
         else:
             raise Exception("Masking mode option '{0:s}' is not available!".format(mode))
 
-        return Data(x=x, edge_index=data.edge_index, mask=mask)
+        if self.return_mask:
+            return Data(x=x, edge_index=data.edge_index, mask=mask)
+        else:
+            return Data(x=x, edge_index=data.edge_index)
 
     def views_fn(self, data):
         r"""Method to be called when :class:`NodeAttrMask` object is called.
