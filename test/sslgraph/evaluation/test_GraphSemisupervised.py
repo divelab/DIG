@@ -56,7 +56,7 @@ def test_GraphSemisupervised():
     root = './dataset'
     dataset, dataset_pretrain = get_dataset('NCI1', task='semisupervised', root=root)
     feat_dim = dataset[0].x.shape[1]
-    embed_dim = 128
+    embed_dim = 16
 
     encoder = Encoder(feat_dim, embed_dim, n_layers=3, gnn='resgcn')
     graphcl = GraphCL(embed_dim, aug_1='dropN', aug_2='permE')
