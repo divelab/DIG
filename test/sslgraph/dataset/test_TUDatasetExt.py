@@ -13,6 +13,8 @@ def test_TUDatasetExt():
     assert dataset[0].y.size() == (1,)
     assert dataset[0].edge_index.size() == (2, 42)
 
+    shutil.rmtree(root)
+
 #     # PROTEINS
 #     dataset = TUDatasetExt(root, name='PROTEINS', task='semisupervised')
 #     assert len(dataset) == 1113
@@ -47,6 +49,8 @@ def test_TUDatasetExt():
     assert dataset[0].y.size() == (1,)
     assert dataset[0].edge_index.size() == (2, 480)
 
+    shutil.rmtree(root)
+
 #     # REDDIT-MULTI-5K
 #     dataset = TUDatasetExt(root, name='REDDIT-MULTI-5K', task='semisupervised')
 #     assert len(dataset) == 4999
@@ -63,9 +67,11 @@ def test_TUDatasetExt():
     assert len(dataset) == 4110
     assert dataset.num_features == 37
 
-#     assert dataset[0].x.size() == (21, 37)
-#     assert dataset[0].y.size() == (1,)
-#     assert dataset[0].edge_index.size() == (2, 62)
+    assert dataset[0].x.size() == (21, 37)
+    assert dataset[0].y.size() == (1,)
+    assert dataset[0].edge_index.size() == (2, 62)
+
+    shutil.rmtree(root)
 
 #     # PROTEINS
 #     dataset = TUDatasetExt(root, name='PROTEINS', task='unsupervised')
@@ -112,6 +118,8 @@ def test_TUDatasetExt():
     assert dataset[0].y.size() == (1,)
     assert dataset[0].edge_index.size() == (2, 697)
 
+    shutil.rmtree(root)
+
 #     # REDDIT-MULTI-5K
 #     dataset = TUDatasetExt(root, name='REDDIT-MULTI-5K', task='unsupervised')
 #     assert len(dataset) == 4999
@@ -120,7 +128,7 @@ def test_TUDatasetExt():
 #     assert dataset[0].x.size() == (1593, 1)
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].edge_index.size() == (2, 5368)
-#     shutil.rmtree(root)
+    shutil.rmtree(root)
 
 if __name__ == '__main__':
     test_TUDatasetExt()
