@@ -8,7 +8,7 @@ from dig.sslgraph.method import GRACE, GraphCL, NodeMVGRL
 def test_NodeUnsupervised():
     root = './dataset'
     dataset = get_node_dataset('cora', root=root)
-    embed_dim = 128
+    embed_dim = 32
 
     encoder = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, 
                     n_layers=2, gnn='gcn', node_level=True, graph_level=False)
@@ -29,7 +29,7 @@ def test_NodeUnsupervised():
     
     evaluator = NodeUnsupervised(dataset, log_interval=1)
     evaluator.setup_train_config(p_lr=0.0005, p_epoch=1, p_weight_decay=1e-5, comp_embed_on='cpu')
-    test_mean = evaluator.evaluate(learning_model=graphcl, encoder=[encoder_1, encoder_2])
+    test_mean = evaluator.evaluate(learning_model=mvgrl, encoder=[encoder_1, encoder_2])
 
     assert test_mean <= 1.0 and test_mean >= 0.0
 
