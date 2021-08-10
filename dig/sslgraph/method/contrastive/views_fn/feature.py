@@ -62,7 +62,7 @@ class NodeAttrMask():
         else:
             raise Exception("Masking mode option '{0:s}' is not available!".format(mode))
 
-        if return_mask:
+        if self.return_mask:
             return Data(x=x, edge_index=data.edge_index, mask=mask)
         else:
             return Data(x=x, edge_index=data.edge_index)
