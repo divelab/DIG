@@ -4,7 +4,7 @@ os:
   - linux
 
 vm:
-  size: x-large
+  size: 2x-large
 
 branches:
   only:
