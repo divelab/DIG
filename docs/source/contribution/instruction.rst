@@ -3,13 +3,13 @@ Contributing to DIG
 
 Thank you very much for your interest in contributing to DIG: Dive into Graphs! Any forms of contributions are welcomed, including but not limited to the following.
 
-* `Reporting issues <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#id1>`_
-* `Fixing bugs <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
-* `Adding algorithms <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
-* `Adding datasets <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
-* `Adding metrics <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
-* `Adding utilities <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
-* `Improving documentations <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#id2>`_
+* `Reporting issues <#reporting-issues>`_
+* `Fixing bugs <#contributing-to-code>`_
+* `Adding algorithms <#contributing-to-code>`_
+* `Adding datasets <#contributing-to-code>`_
+* `Adding metrics <#contributing-to-code>`_
+* `Adding utilities <#contributing-to-code>`_
+* `Improving documentations <#improving-documentations>`_
 * `Staring DIG to encourage us <https://github.com/divelab/DIG>`_
 
     
