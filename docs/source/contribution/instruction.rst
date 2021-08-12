@@ -3,13 +3,13 @@ Contributing to DIG
 
 Thank you very much for your interest in contributing to DIG: Dive into Graphs! Any forms of contributions are welcomed, including but not limited to the following.
 
-* `Reporting issues <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#reporting-issues>`_
+* `Reporting issues <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#id1>`_
 * `Fixing bugs <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
 * `Adding algorithms <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
 * `Adding datasets <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
 * `Adding metrics <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
 * `Adding utilities <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#contributing-to-code>`_
-* `Improving documentations <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#improving-documentations>`_
+* `Improving documentations <https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html#id2>`_
 * `Staring DIG to encourage us <https://github.com/divelab/DIG>`_
 
     
@@ -22,9 +22,10 @@ Structurally, DIG is currently divided into four topics: Graph Generation, Self-
 
 Specifically, every directory under the :obj:`/dig` sources root contains a directory of algorithms (:obj:`method`), a directory of datasets (:obj:`dataset`), a directory of metrics (:obj:`evaluation`), and a directory of utilities (:obj:`utils`) if applicable.
 
+
 Reporting issues
 -------
-We use the GitHub `issues <https://github.com/divelab/DIG/issues>`_ tracker to manage any issues, questions, and reports. Please use the label feature to indicate what topic your issue concerns. 
+We use the GitHub `issues <https://github.com/divelab/DIG/issues>`_ tracker to manage any issues, questions, and reports. Please use the label feature to indicate what topic your issue concerns.
 
 
 Contributing to code
