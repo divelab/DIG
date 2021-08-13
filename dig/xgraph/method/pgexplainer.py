@@ -156,7 +156,6 @@ class PlotUtils(object):
 
         if figname is not None:
             plt.savefig(figname)
-        # plt.show()
         plt.close('all')
 
     def plot_subgraph_with_nodes(self, graph, nodelist, node_idx, colors='#FFA500', labels=None, edge_color='gray',
@@ -197,7 +196,10 @@ class PlotUtils(object):
         plt.axis('off')
         if title_sentence is not None:
             plt.title('\n'.join(wrap(title_sentence, width=60)))
-        plt.show()
+
+        if figname is not None:
+            plt.savefig(figname)
+        plt.close('all')
 
     def plot_ba2motifs(self, graph, nodelist, edgelist=None, figname=None):
         return self.plot_subgraph(graph, nodelist, edgelist=edgelist, figname=figname)
@@ -279,7 +281,7 @@ class PlotUtils(object):
 
     def plot_soft_edge_mask(self, graph, edge_mask, top_k, un_directed, figname, **kwargs):
         edge_index = torch.tensor(list(graph.edges())).T
-        edge_mask = torch.tensor(edge_mask)
+        edge_mask = torch.FloatTensor(edge_mask)
         if self.dataset_name.lower() in ['ba_2motifs', 'ba_lrp']:
             nodelist, edgelist = self.get_topk_edges_subgraph(edge_index, edge_mask, top_k, un_directed)
             self.plot_ba2motifs(graph, nodelist, edgelist, figname=figname)
@@ -639,26 +641,24 @@ class PGExplainer(nn.Module):
             kwargs(:obj:`Dict`):
               The additional parameters
                 - top_k (:obj:`int`): The number of edges in the final explanation results
-                - y (:obj:`torch.Tensor`): The ground-truth labels
 
         :rtype: (:obj:`None`, List[torch.Tensor], List[Dict])
         """
         # set default subgraph with 10 edges
         top_k = kwargs.get('top_k') if kwargs.get('top_k') is not None else 10
-        y = kwargs.get('y')
         x = x.to(self.device)
         edge_index = edge_index.to(self.device)
-        y = y.to(self.device)
 
         self.__clear_masks__()
         logits = self.model(x, edge_index)
         probs = F.softmax(logits, dim=-1)
+        pred_labels = probs.argmax(dim=-1)
         embed = self.model.get_emb(x, edge_index)
 
         if self.explain_graph:
             # original value
             probs = probs.squeeze()
-            label = y
+            label = pred_labels
             # masked value
             _, edge_mask = self.explain(x, edge_index, embed=embed, tmp=1.0, training=False)
             data = Data(x=x, edge_index=edge_index)
@@ -673,7 +673,7 @@ class PGExplainer(nn.Module):
             assert kwargs.get('node_idx') is not None, "please input the node_idx"
             # original value
             probs = probs.squeeze()[node_idx]
-            label = y[node_idx]
+            label = pred_labels[node_idx]
             # masked value
             x, edge_index, _, subset, _ = self.get_subgraph(node_idx, x, edge_index)
             new_node_idx = torch.where(subset == node_idx)[0]
@@ -684,8 +684,8 @@ class PGExplainer(nn.Module):
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
             maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
             value_func = GnnNetsNC2valueFunc(self.model,
-                                               node_idx=new_node_idx,
-                                               target_class=label)
+                                             node_idx=new_node_idx,
+                                             target_class=label)
             maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
                                     subgraph_building_method='zero_filling')
             sparsity_score = 1 - len(selected_nodes) / data.x.shape[0]

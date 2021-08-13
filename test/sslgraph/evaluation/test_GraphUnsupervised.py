@@ -8,7 +8,7 @@ from dig.sslgraph.method import GraphCL, InfoGraph, MVGRL
 def test_GraphUnsupervised():
     root = './dataset'
     dataset = get_dataset('MUTAG', task='unsupervised', root=root)
-    embed_dim = 32
+    embed_dim = 16
 
     encoder = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, n_layers=3, gnn='gin', bn=True)
     graphcl = GraphCL(embed_dim*3, aug_1=None, aug_2='random2', tau=0.2)

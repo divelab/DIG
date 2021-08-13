@@ -8,7 +8,8 @@ from dig.sslgraph.method import GRACE, GraphCL, NodeMVGRL
 def test_NodeUnsupervised():
     root = './dataset'
     dataset = get_node_dataset('cora', root=root)
-    embed_dim = 32
+
+    embed_dim = 16
 
     encoder = Encoder(feat_dim=dataset[0].x.shape[1], hidden_dim=embed_dim, 
                     n_layers=2, gnn='gcn', node_level=True, graph_level=False)
