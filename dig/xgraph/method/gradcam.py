@@ -41,7 +41,7 @@ class GradCAM(WalkBase):
     """
 
     def __init__(self, model: nn.Module, explain_graph: bool = False):
-        super().__init__(model, explain_graph)
+        super().__init__(model, explain_graph=explain_graph)
 
     def forward(self, x: Tensor, edge_index: Tensor, **kwargs)\
             -> Union[Tuple[None, List, List[Dict]], Tuple[Dict, List, List[Dict]]]:

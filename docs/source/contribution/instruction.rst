@@ -3,33 +3,37 @@ Contributing to DIG
 
 Thank you very much for your interest in contributing to DIG: Dive into Graphs! Any forms of contributions are welcomed, including but not limited to the following.
 
-* Reporting issues
-* Fixing bugs
-* Adding algorithms
-* Adding datasets
-* Adding metrics
-* Adding utilities
-* Improving documentations
+* `Reporting issues <#reporting-issues>`_
+* `Fixing bugs <#contributing-to-code>`_
+* `Adding algorithms <#contributing-to-code>`_
+* `Adding datasets <#contributing-to-code>`_
+* `Adding metrics <#contributing-to-code>`_
+* `Adding utilities <#contributing-to-code>`_
+* `Improving documentations <#improving-documentations>`_
+* `Staring DIG to encourage us <https://github.com/divelab/DIG>`_
 
-.. contents::
-    :local:
     
-Overview
+Overview of DIG
 -------
 
-Before contributing, it is helpful to have an understanding of the general structure of DIG. Namely, DIG is not one single graph deep learning model; instead, it is a collection of datasets, algorithms, and evaluation metrics across different topics. The objective of DIG is to enable researchers to benchmark their work and implement new ideas.
+Before contributing, it is helpful to have an understanding of the general structure of DIG. Namely, DIG is not one single graph deep learning model; instead, it is a collection of datasets, algorithms, and evaluation metrics across different topics. The objective of DIG is to provide a unified testbed for higher level, research-oriented graph deep learning tasks, which enables researchers to benchmark their work and implement new ideas.
 
-Structurally, DIG is divided into four topics: Graph Generation, Self-supervised Learning on Graphs, Explainability of Graph Neural Networks, and Deep Learning on 3D Graphs.
+Structurally, DIG is currently divided into four topics: Graph Generation, Self-supervised Learning on Graphs, Explainability of Graph Neural Networks, and Deep Learning on 3D Graphs.
 
 Specifically, every directory under the :obj:`/dig` sources root contains a directory of algorithms (:obj:`method`), a directory of datasets (:obj:`dataset`), a directory of metrics (:obj:`evaluation`), and a directory of utilities (:obj:`utils`) if applicable.
+
 
 Reporting issues
 -------
 We use the GitHub `issues <https://github.com/divelab/DIG/issues>`_ tracker to manage any issues, questions, and reports. Please use the label feature to indicate what topic your issue concerns.
 
 
-General process of contributing to code
+Contributing to code
 -------
+Before you plan to fix buges, add algorithms, add datasets, add metrics, and add utilities, please firstly open an `issue <https://github.com/divelab/DIG/issues>`_ to describe the features you plan to add. We can discuss it and achieve an agreement before you start coding, which can save lots of efforts.
+
+We explain the preferred GitHub workflow as follows.
+
 
 #. Fork the DIG repository by clicking "Fork" in the top right of the screen at `this URL <https://github.com/divelab/DIG>`_.
 

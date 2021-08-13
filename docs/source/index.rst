@@ -17,7 +17,7 @@ DIG: Dive into Graphs is a turnkey library for graph deep learning research.
 Why DIG?
 ^^^^^^^^
 
-The key difference with current graph deep learning libraries, such as PyTorch Geometric (PyG) and Deep Graph Library (DGL), is that, while PyG and DGL support basic graph deep learning operations, DIG provides a unified testbed for higher level, research-oriented graph deep learning tasks, such as graph generation, self-supervised learning, explainability, and 3D graphs.
+The key difference with current graph deep learning libraries, such as PyTorch Geometric (PyG) and Deep Graph Library (DGL), is that, while PyG and DGL support basic graph deep learning operations, **DIG provides a unified testbed for higher level, research-oriented graph deep learning tasks**, such as graph generation, self-supervised learning, explainability, and 3D graphs.
 
 If you are working or plan to work on research in graph deep learning, DIG enables you to develop your own methods within our extensible framework, and compare with current baseline methods using common datasets and evaluation metrics without extra efforts.
 
@@ -28,8 +28,9 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
    :maxdepth: 1
    :caption: Get Started
 
-   intro/installation
    intro/introduction
+   intro/installation
+   
 
 
 .. toctree::
