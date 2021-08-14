@@ -170,8 +170,9 @@ def compute_scores(score_func, children):
 
 
 class PlotUtils(object):
-    def __init__(self, dataset_name):
+    def __init__(self, dataset_name, is_show=True):
         self.dataset_name = dataset_name
+        self.is_show = is_show
 
     def plot(self, graph, nodelist, figname, **kwargs):
         """ plot function for different dataset """
@@ -191,8 +192,16 @@ class PlotUtils(object):
             raise NotImplementedError
 
     @staticmethod
-    def plot_subgraph(graph, nodelist, colors: Union[list, str] = '#FFA500', labels=None, edge_color='gray',
-                      edgelist=None, subgraph_edge_color='black', title_sentence=None, figname=None):
+    def plot_subgraph(self,
+                      graph,
+                      nodelist,
+                      colors: Union[None, str, List[str]] = '#FFA500',
+                      labels=None,
+                      edge_color='gray',
+                      edgelist=None,
+                      subgraph_edge_color='black',
+                      title_sentence=None,
+                      figname=None):
 
         if edgelist is None:
             edgelist = [(n_frm, n_to) for (n_frm, n_to) in graph.edges()
@@ -221,11 +230,19 @@ class PlotUtils(object):
         if title_sentence is not None:
             plt.title('\n'.join(wrap(title_sentence, width=60)))
         plt.show()
+        plt.close('all')
 
-    @staticmethod
-    def plot_subgraph_with_nodes(graph, nodelist, node_idx, colors: Union[str, list] = '#FFA500',
-                                 labels=None, edge_color='gray', edgelist=None,
-                                 subgraph_edge_color='black', title_sentence=None, figname=None):
+    def plot_subgraph_with_nodes(self,
+                                 graph,
+                                 nodelist,
+                                 node_idx,
+                                 colors='#FFA500',
+                                 labels=None,
+                                 edge_color='gray',
+                                 edgelist=None,
+                                 subgraph_edge_color='black',
+                                 title_sentence=None,
+                                 figname=None):
         node_idx = int(node_idx)
         if edgelist is None:
             edgelist = [(n_frm, n_to) for (n_frm, n_to) in graph.edges()
@@ -260,11 +277,13 @@ class PlotUtils(object):
             nx.draw_networkx_labels(graph, pos, labels)
 
         plt.axis('off')
-        if figname is not None:
-            plt.savefig(figname)
         if title_sentence is not None:
             plt.title('\n'.join(wrap(title_sentence, width=60)))
-        plt.show()
+
+        if figname is not None:
+            plt.savefig(figname)
+        if self.is_show:
+            plt.show()
 
     @staticmethod
     def plot_sentence(graph, nodelist, words, edgelist=None, figname=None):
@@ -289,14 +308,31 @@ class PlotUtils(object):
 
         plt.axis('off')
         plt.title('\n'.join(wrap(' '.join(words), width=50)))
+        if title_sentence is not None:
+            plt.title('\n'.join(wrap(title_sentence, width=60)))
         if figname is not None:
             plt.savefig(figname)
-        plt.close('all')
+        if self.is_show:
+            plt.show()
 
-    def plot_ba2motifs(self, graph, nodelist, edgelist=None, figname=None):
-        return self.plot_subgraph(graph, nodelist, edgelist=edgelist, figname=figname)
+    def plot_ba2motifs(self,
+                       graph,
+                       nodelist,
+                       edgelist=None,
+                       title_sentence=None,
+                       figname=None):
+        return self.plot_subgraph(graph, nodelist,
+                                  edgelist=edgelist,
+                                  title_sentence=title_sentence,
+                                  figname=figname)
 
-    def plot_molecule(self, graph, nodelist, x, edgelist=None, figname=None):
+    def plot_molecule(self,
+                      graph,
+                      nodelist,
+                      x,
+                      edgelist=None,
+                      title_sentence=None,
+                      figname=None):
         # collect the text information and node color
         if self.dataset_name == 'mutag':
             node_dict = {0: 'C', 1: 'N', 2: 'O', 3: 'F', 4: 'I', 5: 'Cl', 6: 'Br'}
@@ -315,25 +351,41 @@ class PlotUtils(object):
         else:
             raise NotImplementedError
 
-        self.plot_subgraph(graph, nodelist, colors=colors, labels=node_labels,
-                           edgelist=edgelist, edge_color='gray',
+        self.plot_subgraph(graph, nodelist,
+                           colors=colors,
+                           labels=node_labels,
+                           edgelist=edgelist,
+                           edge_color='gray',
                            subgraph_edge_color='black',
-                           title_sentence=None, figname=figname)
+                           title_sentence=title_sentence,
+                           figname=figname)
 
-    def plot_bashapes(self, graph, nodelist, y, node_idx, edgelist=None, figname=None):
+    def plot_bashapes(self,
+                      graph,
+                      nodelist,
+                      y,
+                      node_idx,
+                      edgelist=None,
+                      title_sentence=None,
+                      figname=None):
         node_idxs = {k: int(v) for k, v in enumerate(y.reshape(-1).tolist())}
         node_color = ['#FFA500', '#4970C6', '#FE0000', 'green']
         colors = [node_color[v % len(node_color)] for k, v in node_idxs.items()]
-        self.plot_subgraph_with_nodes(graph, nodelist, node_idx, colors,
-                                      edgelist=edgelist,
-                                      figname=figname,
-                                      subgraph_edge_color='black')
+        self.plot_subgraph_with_nodes(graph,
+                                     nodelist,
+                                     node_idx,
+                                     colors,
+                                     edgelist=edgelist,
+                                     title_sentence=title_sentence,
+                                     figname=figname,
+                                     subgraph_edge_color='black')
 
 
 class MCTSNode(object):
 
-    def __init__(self, coalition: list, data: Data, ori_graph: nx.Graph,
-                 c_puct: float = 10.0, W: float = 0, N: int = 0, P: float = 0):
+    def __init__(self,coalition: list = None, data: Data = None, ori_graph: nx.Graph = None,
+                 c_puct: float = 10.0, W: float = 0, N: int = 0, P: float = 0,
+                 load_dict: Optional[Dict] = None):
         self.data = data
         self.coalition = coalition
         self.ori_graph = ori_graph
@@ -342,12 +394,35 @@ class MCTSNode(object):
         self.W = W  # sum of node value
         self.N = N  # times of arrival
         self.P = P  # property score (reward)
+        if load_dict is not None:
+            self.load_info(load_dict)
 
     def Q(self):
         return self.W / self.N if self.N > 0 else 0
 
     def U(self, n):
         return self.c_puct * self.P * math.sqrt(n) / (1 + self.N)
+
+    @property
+    def info(self):
+        info_dict = {
+            'data': self.data,
+            'coalition': self.coalition,
+            'ori_graph': self.ori_graph,
+            'W': self.W,
+            'N': self.N,
+            'P': self.P
+        }
+        return info_dict
+
+    def load_info(self, info_dict):
+        self.W = info_dict['W']
+        self.N = info_dict['N']
+        self.P = info_dict['P']
+        self.coalition = info_dict['coalition']
+        self.ori_graph = info_dict['ori_graph']
+        self.data = info_dict['data']
+        self.children = []
 
 
 class MCTS(object):
@@ -673,14 +748,19 @@ class SubgraphX(object):
                 # l sharply score
                 data = Data(x=x, edge_index=edge_index)
                 tree_node_x = find_closest_node_result(results, max_nodes=max_nodes)
+                masked_node_list = [node for node in range(tree_node_x.data.x.shape[0])
+                                    if node in tree_node_x.coalition]
                 maskout_node_list = [node for node in range(tree_node_x.data.x.shape[0])
                                      if node not in tree_node_x.coalition]
+                masked_score = gnn_score(masked_node_list, data, value_func,
+                                         subgraph_building_method='zero_filling')
                 maskout_score = gnn_score(maskout_node_list, data, value_func,
                                           subgraph_building_method='zero_filling')
                 sparsity_score = 1 - len(tree_node_x.coalition) / tree_node_x.ori_graph.number_of_nodes()
 
                 explanation_results.append(results)
-                related_preds.append({'maskout': maskout_score,
+                related_preds.append({'masked': masked_score,
+                                      'maskout': maskout_score,
                                       'origin': probs[label],
                                       'sparsity': sparsity_score})
         else:
@@ -698,12 +778,18 @@ class SubgraphX(object):
 
                 tree_node_x = find_closest_node_result(results, max_nodes=max_nodes)
                 original_node_list = [node for node in tree_node_x.ori_graph.nodes]
+                masked_node_list = [node for node in range(tree_node_x.data.x.shape[0])
+                                    if node in tree_node_x.coalition]
                 maskout_node_list = [node for node in range(tree_node_x.data.x.shape[0])
                                      if node not in tree_node_x.coalition]
                 original_score = gnn_score(original_node_list,
                                            tree_node_x.data,
                                            value_func=value_func,
                                            subgraph_building_method='zero_filling')
+                masked_score = gnn_score(masked_node_list,
+                                         tree_node_x.data,
+                                         value_func=value_func,
+                                         subgraph_building_method='zero_filling')
                 maskout_score = gnn_score(maskout_node_list,
                                           tree_node_x.data,
                                           value_func=value_func,
@@ -711,7 +797,8 @@ class SubgraphX(object):
                 sparsity_score = 1 - len(tree_node_x.coalition) / tree_node_x.ori_graph.number_of_nodes()
 
                 explanation_results.append(results)
-                related_preds.append({'maskout': maskout_score,
+                related_preds.append({'masked': masked_score,
+                                      'maskout': maskout_score,
                                       'origin': original_score,
                                       'sparsity': sparsity_score})
 

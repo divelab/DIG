@@ -123,8 +123,9 @@ def calculate_selected_nodes(data, edge_mask, top_k):
 
 
 class PlotUtils(object):
-    def __init__(self, dataset_name):
+    def __init__(self, dataset_name, is_show=True):
         self.dataset_name = dataset_name
+        self.is_show = is_show
 
     def plot_subgraph(self, graph, nodelist, colors='#FFA500', labels=None, edge_color='gray',
                       edgelist=None, subgraph_edge_color='black', title_sentence=None, figname=None):
@@ -156,6 +157,9 @@ class PlotUtils(object):
 
         if figname is not None:
             plt.savefig(figname)
+
+        if self.is_show:
+            plt.show()
         plt.close('all')
 
     def plot_subgraph_with_nodes(self, graph, nodelist, node_idx, colors='#FFA500', labels=None, edge_color='gray',
@@ -199,12 +203,27 @@ class PlotUtils(object):
 
         if figname is not None:
             plt.savefig(figname)
-        plt.close('all')
+        if self.is_show:
+            plt.show()
 
-    def plot_ba2motifs(self, graph, nodelist, edgelist=None, figname=None):
-        return self.plot_subgraph(graph, nodelist, edgelist=edgelist, figname=figname)
+    def plot_ba2motifs(self,
+                       graph,
+                       nodelist,
+                       edgelist=None,
+                       title_sentence=None,
+                       figname=None):
+        return self.plot_subgraph(graph, nodelist,
+                                  edgelist=edgelist,
+                                  title_sentence=title_sentence,
+                                  figname=figname)
 
-    def plot_molecule(self, graph, nodelist, x, edgelist=None, figname=None):
+    def plot_molecule(self,
+                      graph,
+                      nodelist,
+                      x,
+                      edgelist=None,
+                      title_sentence=None,
+                      figname=None):
         # collect the text information and node color
         if self.dataset_name == 'mutag':
             node_dict = {0: 'C', 1: 'N', 2: 'O', 3: 'F', 4: 'I', 5: 'Cl', 6: 'Br'}
@@ -226,9 +245,16 @@ class PlotUtils(object):
         self.plot_subgraph(graph, nodelist, colors=colors, labels=node_labels,
                            edgelist=edgelist, edge_color='gray',
                            subgraph_edge_color='black',
-                           title_sentence=None, figname=figname)
+                           title_sentence=title_sentence,
+                           figname=figname)
 
-    def plot_sentence(self, graph, nodelist, words, edgelist=None, figname=None):
+    def plot_sentence(self,
+                      graph,
+                      nodelist,
+                      words,
+                      edgelist=None,
+                      title_sentence=None,
+                      figname=None):
         pos = nx.kamada_kawai_layout(graph)
         words_dict = {i: words[i] for i in graph.nodes}
         if nodelist is not None:
@@ -251,18 +277,35 @@ class PlotUtils(object):
 
         plt.axis('off')
         plt.title('\n'.join(wrap(' '.join(words), width=50)))
+        if title_sentence is not None:
+            plt.title('\n'.join(wrap(title_sentence, width=60)))
         if figname is not None:
             plt.savefig(figname)
-        plt.close('all')
+        if self.is_show:
+            plt.show()
 
-    def plot_bashapes(self, graph, nodelist, y, node_idx, edgelist=None, figname=None):
+    def plot_bashapes(self,
+                      graph,
+                      nodelist,
+                      y,
+                      node_idx,
+                      edgelist=None,
+                      title_sentence=None,
+                      figname=None):
         node_idxs = {k: int(v) for k, v in enumerate(y.reshape(-1).tolist())}
         node_color = ['#FFA500', '#4970C6', '#FE0000', 'green']
         colors = [node_color[v % len(node_color)] for k, v in node_idxs.items()]
-        self.plot_subgraph_with_nodes(graph, nodelist, node_idx, colors, edgelist=edgelist, figname=figname,
-                           subgraph_edge_color='black')
+        self.plot_subgraph_with_nodes(graph, nodelist, node_idx, colors,
+                                      edgelist=edgelist,
+                                      figname=figname,
+                                      title_sentence=title_sentence,
+                                      subgraph_edge_color='black')
 
-    def get_topk_edges_subgraph(self, edge_index, edge_mask, top_k, un_directed=False):
+    def get_topk_edges_subgraph(self,
+                                edge_index,
+                                edge_mask,
+                                top_k,
+                                un_directed=False):
         if un_directed:
             top_k = 2 * top_k
         edge_mask = edge_mask.reshape(-1)
@@ -279,28 +322,39 @@ class PlotUtils(object):
         nodelist = list(set(nodelist))
         return nodelist, edgelist
 
-    def plot_soft_edge_mask(self, graph, edge_mask, top_k, un_directed, figname, **kwargs):
+    def plot_soft_edge_mask(self,
+                            graph,
+                            edge_mask,
+                            top_k,
+                            un_directed,
+                            figname,
+                            title_sentence=None,
+                            **kwargs):
         edge_index = torch.tensor(list(graph.edges())).T
         edge_mask = torch.FloatTensor(edge_mask)
         if self.dataset_name.lower() in ['ba_2motifs', 'ba_lrp']:
             nodelist, edgelist = self.get_topk_edges_subgraph(edge_index, edge_mask, top_k, un_directed)
-            self.plot_ba2motifs(graph, nodelist, edgelist, figname=figname)
+            self.plot_ba2motifs(graph, nodelist, edgelist, title_sentence=title_sentence, figname=figname)
 
         elif self.dataset_name.lower() in ['mutag'] + list(MoleculeNet.names.keys()):
             x = kwargs.get('x')
             nodelist, edgelist = self.get_topk_edges_subgraph(edge_index, edge_mask, top_k, un_directed)
-            self.plot_molecule(graph, nodelist, x, edgelist, figname=figname)
+            self.plot_molecule(graph, nodelist, x, edgelist, title_sentence=title_sentence, figname=figname)
 
         elif self.dataset_name.lower() in ['ba_shapes', 'ba_shapes', 'tree_grid', 'tree_cycle']:
             y = kwargs.get('y')
             node_idx = kwargs.get('node_idx')
             nodelist, edgelist = self.get_topk_edges_subgraph(edge_index, edge_mask, top_k, un_directed)
-            self.plot_bashapes(graph, nodelist, y, node_idx, edgelist, figname=figname)
+            self.plot_bashapes(graph, nodelist, y, node_idx, edgelist, title_sentence=title_sentence, figname=figname)
 
         elif self.dataset_name.lower() in ['Graph_SST2'.lower()]:
             words = kwargs.get('words')
             nodelist, edgelist = self.get_topk_edges_subgraph(edge_index, edge_mask, top_k, un_directed)
-            self.plot_sentence(graph, nodelist, words=words, edgelist=edgelist, figname=figname)
+            self.plot_sentence(graph, nodelist,
+                               words=words,
+                               edgelist=edgelist,
+                               title_sentence=title_sentence,
+                               figname=figname)
 
         else:
             raise NotImplementedError
@@ -663,10 +717,13 @@ class PGExplainer(nn.Module):
             _, edge_mask = self.explain(x, edge_index, embed=embed, tmp=1.0, training=False)
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
+            masked_nodes_list = [node for node in range(data.x.shape[0]) if node in selected_nodes]
             maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
             value_func = GnnNetsGC2valueFunc(self.model, target_class=label)
-            maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
+            masked_pred = gnn_score(masked_nodes_list, data, value_func,
                                     subgraph_building_method='zero_filling')
+            maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
+                                     subgraph_building_method='zero_filling')
             sparsity_score = 1 - len(selected_nodes) / data.x.shape[0]
         else:
             node_idx = kwargs.get('node_idx')
@@ -682,20 +739,26 @@ class PGExplainer(nn.Module):
 
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
+            masked_nodes_list = [node for node in range(data.x.shape[0]) if node in selected_nodes]
             maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
             value_func = GnnNetsNC2valueFunc(self.model,
                                              node_idx=new_node_idx,
                                              target_class=label)
-            maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
+            masked_pred = gnn_score(masked_nodes_list, data,
+                                    value_func=value_func,
                                     subgraph_building_method='zero_filling')
+            maskout_pred = gnn_score(maskout_nodes_list, data,
+                                     value_func=value_func,
+                                     subgraph_building_method='zero_filling')
+
             sparsity_score = 1 - len(selected_nodes) / data.x.shape[0]
 
         # return variables
         pred_mask = [edge_mask]
-        related_preds = [{
-            'maskout': maskout_pred,
-            'origin': probs[label],
-            'sparsity': sparsity_score}]
+        related_preds = [{'masked': masked_pred,
+                          'maskout': maskout_pred,
+                          'origin': probs[label],
+                          'sparsity': sparsity_score}]
         return None, pred_mask, related_preds
 
     def visualization(self, data: Data, edge_mask: Tensor, top_k: int, plot_utils: PlotUtils,
