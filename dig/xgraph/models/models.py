@@ -100,9 +100,9 @@ class GCN_3l(GNNBasic):
 
     def get_emb(self, *args, **kwargs) -> torch.Tensor:
         x, edge_index, batch = self.arguments_read(*args, **kwargs)
-        post_conv = self.conv1(x, edge_index)
-        for conv in self.convs:
-            post_conv = conv(post_conv, edge_index)
+        post_conv = self.relu1(self.conv1(x, edge_index))
+        for conv, relu in zip(self.convs, self.relus):
+            post_conv = relu(conv(post_conv, edge_index))
         return post_conv
 
 
@@ -156,9 +156,11 @@ class GCN_2l(GNNBasic):
 
     def get_emb(self, *args, **kwargs) -> torch.Tensor:
         x, edge_index, batch = self.arguments_read(*args, **kwargs)
-        post_conv = self.conv1(x, edge_index)
-        for conv in self.convs:
-            post_conv = conv(post_conv, edge_index)
+        
+        post_conv = self.relu1(self.conv1(x, edge_index))
+        for conv, relu in zip(self.convs, self.relus):
+            post_conv = relu(conv(post_conv, edge_index))
+            
         return post_conv
 
 
