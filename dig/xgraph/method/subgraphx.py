@@ -191,7 +191,6 @@ class PlotUtils(object):
         else:
             raise NotImplementedError
 
-    @staticmethod
     def plot_subgraph(self,
                       graph,
                       nodelist,
@@ -229,8 +228,8 @@ class PlotUtils(object):
             plt.savefig(figname)
         if title_sentence is not None:
             plt.title('\n'.join(wrap(title_sentence, width=60)))
-        plt.show()
-        plt.close('all')
+        if self.is_show:
+            plt.show()
 
     def plot_subgraph_with_nodes(self,
                                  graph,
@@ -285,8 +284,7 @@ class PlotUtils(object):
         if self.is_show:
             plt.show()
 
-    @staticmethod
-    def plot_sentence(graph, nodelist, words, edgelist=None, figname=None):
+    def plot_sentence(self, graph, nodelist, words, edgelist=None, title_sentence=None, figname=None):
         pos = nx.kamada_kawai_layout(graph)
         words_dict = {i: words[i] for i in graph.nodes}
         if nodelist is not None:
