@@ -18,7 +18,7 @@
 [contributing-image]:https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
 [contributing-url]:https://diveintographs.readthedocs.io/en/latest/contribution/instruction.html
 
-![visitors](https://visitor-badge.glitch.me/badge?page_id=jwenjian.visitor-badge)
+
 [![PyPI Version][pypi-image]][pypi-url]
 [![Docs Status][docs-image]][docs-url]
 [![Build Status](https://travis-ci.com/divelab/DIG.svg?branch=dig)](https://travis-ci.com/divelab/DIG)
@@ -26,6 +26,7 @@
 ![Last Commit](https://img.shields.io/github/last-commit/divelab/DIG)
 [![Contributing][contributing-image]][contributing-url]
 [![License][license-image]][license-url]
+![visitors](https://visitor-badge.glitch.me/badge?page_id=jwenjian.visitor-badge)
 <!--- [![Contributors][contributor-image]][contributor-url] -->
 
 
