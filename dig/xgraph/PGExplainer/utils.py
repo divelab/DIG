@@ -248,8 +248,8 @@ class PlotUtils():
         return nodelist, edgelist
 
     def plot_soft_edge_mask(self, graph, edge_mask, top_k, un_directed, figname, **kwargs):
-        edge_index = torch.tensor(list(graph.edges())).T
-        edge_mask = torch.tensor(edge_mask)
+        edge_index = torch.FloatTensor(list(graph.edges())).T
+        edge_mask = torch.FloatTensor(edge_mask)
         if self.dataset_name.lower() == 'BA_2motifs'.lower():
             nodelist, edgelist = self.get_topk_edges_subgraph(edge_index, edge_mask, top_k, un_directed)
             self.plot_ba2motifs(graph, nodelist, edgelist, figname=figname)

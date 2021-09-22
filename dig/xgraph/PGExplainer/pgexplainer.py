@@ -198,8 +198,6 @@ class PGExplainer(nn.Module):
         duration = 0.0
         for epoch in range(self.epochs):
             loss = 0.0
-            pred_list = []
-            acc_list = []
             tmp = float(self.t0 * np.power(self.t1 / self.t0, epoch / self.epochs))
             self.elayers.train()
             optimizer.zero_grad()
@@ -210,15 +208,10 @@ class PGExplainer(nn.Module):
                 loss_tmp = self.__loss__(prob, ori_pred_dict[gid])
                 loss_tmp.backward()
                 loss += loss_tmp.item()
-                pred_label = prob.argmax(-1).item()
-                pred_list.append(pred_label)
-                acc_list.append(pred_label == data.y)
 
             optimizer.step()
             duration += time.perf_counter() - tic
-            accs = torch.stack(acc_list, dim=0)
-            acc = np.array(accs).mean()
-            print(f'Epoch: {epoch} | Loss: {loss} | Acc : {acc}')
+            print(f'Epoch: {epoch} | Loss: {loss}')
             torch.save(self.elayers.cpu().state_dict(), self.ckpt_path)
             self.elayers.to(self.device)
         print(f"training time is {duration:.5}s")
@@ -294,11 +287,8 @@ class PGExplainer(nn.Module):
                 emb_dict[gid] = emb.data.cpu()
 
         # train the explanation network
-        torch.autograd.set_detect_anomaly(True)
-
         for epoch in range(self.epochs):
             loss = 0.0
-            acc_list = []
             optimizer.zero_grad()
             tmp = float(self.t0 * np.power(self.t1 / self.t0, epoch / self.epochs))
             self.elayers.train()
@@ -308,12 +298,8 @@ class PGExplainer(nn.Module):
                 loss_tmp.backward()
                 loss += loss_tmp.item()
 
-                acc_list.append(pred[node_idx_dict[gid]].argmax().item() == data.y[gid])
-
             optimizer.step()
-            accs = torch.stack(acc_list, dim=0)
-            acc = np.array(accs).mean()
-            print(f'Epoch: {epoch} | Loss: {loss} | Acc : {acc}')
+            print(f'Epoch: {epoch} | Loss: {loss}')
             torch.save(self.elayers.cpu().state_dict(), self.ckpt_path)
             self.elayers.to(self.device)
 
@@ -325,14 +311,6 @@ class PGExplainer(nn.Module):
     def get_node_prediction(self, node_idx: int, x: torch.Tensor, edge_index: torch.Tensor, **kwargs):
         outputs = self.get_model_output(x, edge_index, edge_mask=None, **kwargs)
         return outputs[1][node_idx].argmax(dim=-1)
-
-    def explain_node(self, node_idx, x, edge_index, **kwargs):
-        data = Batch.from_data_list([Data(x=x, edge_index=edge_index)])
-        data = data.to(self.device)
-        with torch.no_grad():
-            _, prob, emb = self.get_model_output(data.x, data.edge_index)
-            _, edge_mask = self.forward((data.x, emb, data.edge_index, 1.0), training=False)
-        return edge_mask
 
     def __repr__(self):
         return f'{self.__class__.__name__}()'

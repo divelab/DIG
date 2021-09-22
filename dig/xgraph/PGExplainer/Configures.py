@@ -6,7 +6,7 @@ from typing import List
 
 class DataParser(Tap):
     dataset_name: str = 'bbbp'
-    dataset_dir: str = './datasets'
+    dataset_dir: str = '../datasets'
     random_split: bool = True
     data_split_ratio: List = [0.8, 0.1, 0.1]   # the ratio of training, validation and testing set for random split
     seed: int = 1

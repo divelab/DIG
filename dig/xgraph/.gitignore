@@ -1,3 +1,8 @@
 /datasets/*
 !/datasets/Readme.md
 !/datasets/load_datasets.py
+.gitignore
+.idea/
+checkpoint*
+dig/xgraph/SubgraphX/*.zip
+*.zip
