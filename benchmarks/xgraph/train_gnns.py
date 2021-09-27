@@ -5,9 +5,9 @@ import shutil
 import warnings
 from torch.optim import Adam
 from omegaconf import OmegaConf
-from benchmarks.utils import check_dir
-from benchmarks.gnnNets import get_gnnNets
-from benchmarks.dataset import get_dataset, get_dataloader
+from benchmarks.xgraph.utils import check_dir
+from benchmarks.xgraph.gnnNets import get_gnnNets
+from benchmarks.xgraph.dataset import get_dataset, get_dataloader
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import MultiStepLR
 

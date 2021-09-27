@@ -5,8 +5,8 @@ from omegaconf import OmegaConf
 from dig.xgraph.method import PGExplainer
 from dig.xgraph.evaluation import XCollector
 from dig.xgraph.method.base_explainer import ExplainerBase
-from benchmarks.gnnNets import get_gnnNets
-from benchmarks.dataset import get_dataset, get_dataloader
+from benchmarks.xgraph.gnnNets import get_gnnNets
+from benchmarks.xgraph.dataset import get_dataset, get_dataloader
 
 from torch import Tensor
 from typing import List, Dict, Tuple

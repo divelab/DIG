@@ -3,9 +3,9 @@ import torch
 import hydra
 from omegaconf import OmegaConf
 from dig.xgraph.evaluation import XCollector
-from benchmarks.gnnNets import get_gnnNets
-from benchmarks.dataset import get_dataset, get_dataloader
-from benchmarks.RandomSelection import RandomSelectorExplainer
+from benchmarks.xgraph.gnnNets import get_gnnNets
+from benchmarks.xgraph.dataset import get_dataset, get_dataloader
+from benchmarks.xgraph.RandomSelection import RandomSelectorExplainer
 
 
 @hydra.main(config_path="config", config_name="config")

@@ -3,11 +3,12 @@ import torch
 import hydra
 from tqdm import tqdm
 from omegaconf import OmegaConf
-from benchmarks.utils import check_dir
-from benchmarks.gnnNets import get_gnnNets
+from benchmarks.xgraph.utils import check_dir
+from benchmarks.xgraph.gnnNets import get_gnnNets
+from benchmarks.xgraph.dataset import get_dataset, get_dataloader
+
 from dig.xgraph.method import GNNExplainer
 from dig.xgraph.evaluation import XCollector
-from benchmarks.dataset import get_dataset, get_dataloader
 
 
 @hydra.main(config_path="config", config_name="config")

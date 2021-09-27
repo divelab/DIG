@@ -2,9 +2,9 @@ import os
 import torch
 import hydra
 from omegaconf import OmegaConf
-from benchmarks.utils import check_dir
-from benchmarks.gnnNets import get_gnnNets
-from benchmarks.dataset import get_dataset, get_dataloader
+from benchmarks.xgraph.utils import check_dir
+from benchmarks.xgraph.gnnNets import get_gnnNets
+from benchmarks.xgraph.dataset import get_dataset, get_dataloader
 from dig.xgraph.evaluation import XCollector
 from dig.xgraph.method import GNN_LRP
 
