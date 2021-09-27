@@ -116,5 +116,5 @@ def pipeline(config):
 
 if __name__ == '__main__':
     import sys
-    sys.argv.append('explainers=gn_lrp')
+    sys.argv.append('explainers=gnn_lrp')
     pipeline()
