@@ -1,0 +1,5 @@
+dataset_root: '/data/haiyang/xgraph_baseline/datasets'
+random_split_flag: True
+data_split_ratio: [0.8, 0.1, 0.1]
+dataset_name: 'bace'
+seed: 2

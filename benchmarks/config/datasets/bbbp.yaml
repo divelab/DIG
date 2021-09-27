@@ -1,0 +1,5 @@
+dataset_root: '/data/haiyang/dig_xgraph_baseline/datasets'
+dataset_name: 'bbbp'
+random_split_flag: True
+data_split_ratio: [0.8, 0.1, 0.1]
+seed: 2

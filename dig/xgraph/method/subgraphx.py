@@ -9,7 +9,6 @@ from torch import Tensor
 from textwrap import wrap
 from functools import partial
 from collections import Counter
-import torch.nn.functional as F
 from typing import List, Tuple, Dict
 from torch_geometric.data import Batch, Data
 from torch_geometric.utils import to_networkx
@@ -18,13 +17,13 @@ import matplotlib.pyplot as plt
 from torch_geometric.utils.num_nodes import maybe_num_nodes
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.datasets import MoleculeNet
+from torch_geometric.utils import remove_self_loops
 from .shapley import GnnNetsGC2valueFunc, GnnNetsNC2valueFunc, \
-    gnn_score, mc_shapley, l_shapley, mc_l_shapley, NC_mc_l_shapley
+    gnn_score, mc_shapley, l_shapley, mc_l_shapley, NC_mc_l_shapley, sparsity
 
 
 def find_closest_node_result(results, max_nodes):
     """ return the highest reward tree_node with its subgraph is smaller than max_nodes """
-
     results = sorted(results, key=lambda x: len(x.coalition))
 
     result_node = results[0]
@@ -174,20 +173,20 @@ class PlotUtils(object):
         self.dataset_name = dataset_name
         self.is_show = is_show
 
-    def plot(self, graph, nodelist, figname, **kwargs):
+    def plot(self, graph, nodelist, figname, title_sentence=None, **kwargs):
         """ plot function for different dataset """
         if self.dataset_name.lower() in ['ba_2motifs', 'ba_lrp']:
-            self.plot_ba2motifs(graph, nodelist, figname=figname)
+            self.plot_ba2motifs(graph, nodelist, title_sentence=title_sentence, figname=figname)
         elif self.dataset_name.lower() in ['mutag'] + list(MoleculeNet.names.keys()):
             x = kwargs.get('x')
-            self.plot_molecule(graph, nodelist, x, figname=figname)
-        elif self.dataset_name.lower() in ['ba_shapes', 'ba_shapes', 'tree_grid', 'tree_cycle']:
+            self.plot_molecule(graph, nodelist, x, title_sentence=title_sentence, figname=figname)
+        elif self.dataset_name.lower() in ['ba_shapes', 'ba_community', 'tree_grid', 'tree_cycle']:
             y = kwargs.get('y')
             node_idx = kwargs.get('node_idx')
-            self.plot_bashapes(graph, nodelist, y, node_idx, figname=figname)
-        elif self.dataset_name.lower() in ['Graph-SST2'.lower()]:
+            self.plot_bashapes(graph, nodelist, y, node_idx, title_sentence=title_sentence, figname=figname)
+        elif self.dataset_name.lower() in ['graph_sst2', 'graph_sst5', 'twitter']:
             words = kwargs.get('words')
-            self.plot_sentence(graph, nodelist, words=words, figname=figname)
+            self.plot_sentence(graph, nodelist, words=words, title_sentence=title_sentence, figname=figname)
         else:
             raise NotImplementedError
 
@@ -230,6 +229,8 @@ class PlotUtils(object):
             plt.title('\n'.join(wrap(title_sentence, width=60)))
         if self.is_show:
             plt.show()
+        if figname is not None:
+            plt.close()
 
     def plot_subgraph_with_nodes(self,
                                  graph,
@@ -283,6 +284,8 @@ class PlotUtils(object):
             plt.savefig(figname)
         if self.is_show:
             plt.show()
+        if figname is not None:
+            plt.close()
 
     def plot_sentence(self, graph, nodelist, words, edgelist=None, title_sentence=None, figname=None):
         pos = nx.kamada_kawai_layout(graph)
@@ -307,11 +310,15 @@ class PlotUtils(object):
         plt.axis('off')
         plt.title('\n'.join(wrap(' '.join(words), width=50)))
         if title_sentence is not None:
-            plt.title('\n'.join(wrap(title_sentence, width=60)))
+            string = '\n'.join(wrap(' '.join(words), width=50))
+            string += '\n'.join(wrap(title_sentence, width=60))
+            plt.title(string)
         if figname is not None:
             plt.savefig(figname)
         if self.is_show:
             plt.show()
+        if figname is not None:
+            plt.close()
 
     def plot_ba2motifs(self,
                        graph,
@@ -370,23 +377,23 @@ class PlotUtils(object):
         node_color = ['#FFA500', '#4970C6', '#FE0000', 'green']
         colors = [node_color[v % len(node_color)] for k, v in node_idxs.items()]
         self.plot_subgraph_with_nodes(graph,
-                                     nodelist,
-                                     node_idx,
-                                     colors,
-                                     edgelist=edgelist,
-                                     title_sentence=title_sentence,
-                                     figname=figname,
-                                     subgraph_edge_color='black')
+                                      nodelist,
+                                      node_idx,
+                                      colors,
+                                      edgelist=edgelist,
+                                      title_sentence=title_sentence,
+                                      figname=figname,
+                                      subgraph_edge_color='black')
 
 
 class MCTSNode(object):
-
-    def __init__(self,coalition: list = None, data: Data = None, ori_graph: nx.Graph = None,
+    def __init__(self, coalition: list = None, data: Data = None, ori_graph: nx.Graph = None,
                  c_puct: float = 10.0, W: float = 0, N: int = 0, P: float = 0,
-                 load_dict: Optional[Dict] = None):
+                 load_dict: Optional[Dict] = None, device='cpu'):
         self.data = data
         self.coalition = coalition
         self.ori_graph = ori_graph
+        self.device = device
         self.c_puct = c_puct
         self.children = []
         self.W = W  # sum of node value
@@ -404,7 +411,7 @@ class MCTSNode(object):
     @property
     def info(self):
         info_dict = {
-            'data': self.data,
+            'data': self.data.to('cpu'),
             'coalition': self.coalition,
             'ori_graph': self.ori_graph,
             'W': self.W,
@@ -419,14 +426,14 @@ class MCTSNode(object):
         self.P = info_dict['P']
         self.coalition = info_dict['coalition']
         self.ori_graph = info_dict['ori_graph']
-        self.data = info_dict['data']
+        self.data = info_dict['data'].to(self.device)
         self.children = []
+        return self
 
 
 class MCTS(object):
     r"""
     Monte Carlo Tree Search Method
-
     Args:
         X (:obj:`torch.Tensor`): Input node features
         edge_index (:obj:`torch.Tensor`): The edge indices.
@@ -438,18 +445,19 @@ class MCTS(object):
         high2low (:obj:`bool`): Whether to expand children tree node from high degree nodes to low degree nodes.
         node_idx (:obj:`int`): The target node index to extract the neighborhood.
         score_func (:obj:`Callable`): The reward function for tree node, such as mc_shapely and mc_l_shapely.
-
     """
     def __init__(self, X: torch.Tensor, edge_index: torch.Tensor, num_hops: int,
                  n_rollout: int = 10, min_atoms: int = 3, c_puct: float = 10.0,
                  expand_atoms: int = 14, high2low: bool = False,
-                 node_idx: int = None, score_func: Callable = None):
+                 node_idx: int = None, score_func: Callable = None, device='cpu'):
 
         self.X = X
         self.edge_index = edge_index
+        self.device = device
         self.num_hops = num_hops
         self.data = Data(x=self.X, edge_index=self.edge_index)
-        self.graph = to_networkx(self.data, to_undirected=True)
+        graph_data = Data(x=self.X, edge_index=remove_self_loops(self.edge_index)[0])
+        self.graph = to_networkx(graph_data, to_undirected=True)
         self.data = Batch.from_data_list([self.data])
         self.num_nodes = self.graph.number_of_nodes()
         self.score_func = score_func
@@ -458,6 +466,7 @@ class MCTS(object):
         self.c_puct = c_puct
         self.expand_atoms = expand_atoms
         self.high2low = high2low
+        self.new_node_idx = None
 
         # extract the sub-graph and change the node indices.
         if node_idx is not None:
@@ -469,12 +478,13 @@ class MCTS(object):
             self.graph = self.ori_graph.subgraph(subset.tolist())
             mapping = {int(v): k for k, v in enumerate(subset)}
             self.graph = nx.relabel_nodes(self.graph, mapping)
-            self.node_idx = torch.where(subset == self.ori_node_idx)[0]
+            self.new_node_idx = torch.where(subset == self.ori_node_idx)[0].item()
             self.num_nodes = self.graph.number_of_nodes()
             self.subset = subset
 
         self.root_coalition = sorted([node for node in range(self.num_nodes)])
-        self.MCTSNodeClass = partial(MCTSNode, data=self.data, ori_graph=self.graph, c_puct=self.c_puct)
+        self.MCTSNodeClass = partial(MCTSNode, data=self.data, ori_graph=self.graph,
+                                     c_puct=self.c_puct, device=self.device)
         self.root = self.MCTSNodeClass(self.root_coalition)
         self.state_map = {str(self.root.coalition): self.root}
 
@@ -508,10 +518,13 @@ class MCTS(object):
             node_degree_list = sorted(node_degree_list, key=lambda x: x[1], reverse=self.high2low)
             all_nodes = [x[0] for x in node_degree_list]
 
-            if len(all_nodes) < self.expand_atoms:
-                expand_nodes = all_nodes
+            if self.new_node_idx:
+                expand_nodes = [node for node in all_nodes if node != self.new_node_idx]
             else:
-                expand_nodes = all_nodes[:self.expand_atoms]
+                expand_nodes = all_nodes
+
+            if len(all_nodes) > self.expand_atoms:
+                expand_nodes = expand_nodes[:self.expand_atoms]
 
             for each_node in expand_nodes:
                 # for each node, pruning it and get the remaining sub-graph
@@ -520,10 +533,17 @@ class MCTS(object):
 
                 subgraphs = [self.graph.subgraph(c)
                              for c in nx.connected_components(self.graph.subgraph(subgraph_coalition))]
-                main_sub = subgraphs[0]
-                for sub in subgraphs:
-                    if sub.number_of_nodes() > main_sub.number_of_nodes():
-                        main_sub = sub
+
+                if self.new_node_idx:
+                    for sub in subgraphs:
+                        if self.new_node_idx in list(sub.nodes()):
+                            main_sub = sub
+                else:
+                    main_sub = subgraphs[0]
+
+                    for sub in subgraphs:
+                        if sub.number_of_nodes() > main_sub.number_of_nodes():
+                            main_sub = sub
 
                 new_graph_coalition = sorted(list(main_sub.nodes()))
 
@@ -574,7 +594,6 @@ class SubgraphX(object):
     r"""
     The implementation of paper
     `On Explainability of Graph Neural Networks via Subgraph Explorations <https://arxiv.org/abs/2102.05152>`_.
-
     Args:
         model (:obj:`torch.nn.Module`): The target model prepared to explain
         num_classes(:obj:`int`): Number of classes for the datasets
@@ -597,16 +616,14 @@ class SubgraphX(object):
         save_dir(:obj:`str`, :obj:`None`): Root directory to save the explanation results (default: :obj:`None`)
         filename(:obj:`str`): The filename of results
         vis(:obj:`bool`): Whether to show the visualization (default: :obj:`True`)
-
     Example:
         >>> # For graph classification task
         >>> subgraphx = SubgraphX(model=model, num_classes=2)
         >>> _, explanation_results, related_preds = subgraphx(x, edge_index)
-
     """
-    def __init__(self, model, num_classes: int, device, num_hops: Optional[int] = None, explain_graph: bool = True,
-                 rollout: int = 20, min_atoms: int = 5, c_puct: float = 10.0, expand_atoms=14,
-                 high2low=False, local_radius=4, sample_num=100, reward_method='mc_l_shapley',
+    def __init__(self, model, num_classes: int, device, num_hops: Optional[int] = None, verbose: bool = False,
+                 explain_graph: bool = True, rollout: int = 20, min_atoms: int = 5, c_puct: float = 10.0,
+                 expand_atoms=14, high2low=False, local_radius=4, sample_num=100, reward_method='mc_l_shapley',
                  subgraph_building_method='zero_filling', save_dir: Optional[str] = None,
                  filename: str = 'example', vis: bool = True):
 
@@ -617,6 +634,7 @@ class SubgraphX(object):
         self.num_classes = num_classes
         self.num_hops = self.update_num_hops(num_hops)
         self.explain_graph = explain_graph
+        self.verbose = verbose
 
         # mcts hyper-parameters
         self.rollout = rollout
@@ -666,6 +684,7 @@ class SubgraphX(object):
             assert node_idx is not None
         return MCTS(x, edge_index,
                     node_idx=node_idx,
+                    device=self.device,
                     score_func=score_func,
                     num_hops=self.num_hops,
                     n_rollout=self.rollout,
@@ -674,26 +693,28 @@ class SubgraphX(object):
                     expand_atoms=self.expand_atoms,
                     high2low=self.high2low)
 
-    def visualization(self, explanation_results: list, prediction: Union[int, Tensor],
+    def visualization(self, results: list,
                       max_nodes: int, plot_utils: PlotUtils, words: Optional[list] = None,
-                      y: Optional[Tensor] = None, vis_name: Optional[str] = None):
+                      y: Optional[Tensor] = None, title_sentence: Optional[str] = None,
+                      vis_name: Optional[str] = None):
         if self.save:
             if vis_name is None:
                 vis_name = f"{self.filename}.png"
         else:
             vis_name = None
-        results = explanation_results[prediction]
         tree_node_x = find_closest_node_result(results, max_nodes=max_nodes)
         if self.explain_graph:
             if words is not None:
                 plot_utils.plot(tree_node_x.ori_graph,
                                 tree_node_x.coalition,
                                 words=words,
+                                title_sentence=title_sentence,
                                 figname=vis_name)
             else:
                 plot_utils.plot(tree_node_x.ori_graph,
                                 tree_node_x.coalition,
                                 x=tree_node_x.data.x,
+                                title_sentence=title_sentence,
                                 figname=vis_name)
         else:
             subset = self.mcts_state_map.subset
@@ -702,14 +723,105 @@ class SubgraphX(object):
                                        for node in tree_node_x.ori_graph.nodes()])
             plot_utils.plot(tree_node_x.ori_graph,
                             tree_node_x.coalition,
-                            node_idx=self.mcts_state_map.node_idx,
+                            node_idx=self.mcts_state_map.new_node_idx,
+                            title_sentence=title_sentence,
                             y=subgraph_y,
                             figname=vis_name)
+
+    def read_from_MCTSInfo_list(self, MCTSInfo_list):
+        if isinstance(MCTSInfo_list[0], dict):
+            ret_list = [MCTSNode(device=self.device).load_info(node_info) for node_info in MCTSInfo_list]
+        elif isinstance(MCTSInfo_list[0][0], dict):
+            ret_list = []
+            for single_label_MCTSInfo_list in MCTSInfo_list:
+                single_label_ret_list = [MCTSNode(device=self.device).load_info(node_info) for node_info in single_label_MCTSInfo_list]
+                ret_list.append(single_label_ret_list)
+        return ret_list
+
+    def write_from_MCTSNode_list(self, MCTSNode_list):
+        if isinstance(MCTSNode_list[0], MCTSNode):
+            ret_list = [node.info for node in MCTSNode_list]
+        elif isinstance(MCTSNode_list[0][0], MCTSNode):
+            ret_list = []
+            for single_label_MCTSNode_list in MCTSNode_list:
+                single_label_ret_list = [node.info for node in single_label_MCTSNode_list]
+                ret_list.append(single_label_ret_list)
+        return ret_list
+
+    def explain(self, x: Tensor, edge_index: Tensor, label: int,
+                max_nodes: int = 5,
+                node_idx: Optional[int] = None,
+                saved_MCTSInfo_list: Optional[List[List]] = None):
+
+        probs = self.model(x, edge_index).squeeze().softmax(dim=-1)
+        if self.explain_graph:
+            if saved_MCTSInfo_list:
+                results = self.read_from_MCTSInfo_list(saved_MCTSInfo_list)
+
+            if not saved_MCTSInfo_list:
+                value_func = GnnNetsGC2valueFunc(self.model, target_class=label)
+                payoff_func = self.get_reward_func(value_func)
+                self.mcts_state_map = self.get_mcts_class(x, edge_index, score_func=payoff_func)
+                results = self.mcts_state_map.mcts(verbose=self.verbose)
+
+            # l sharply score
+            value_func = GnnNetsGC2valueFunc(self.model, target_class=label)
+            tree_node_x = find_closest_node_result(results, max_nodes=max_nodes)
+
+        else:
+            if saved_MCTSInfo_list:
+                results = self.read_from_MCTSInfo_list(saved_MCTSInfo_list)
+
+            self.mcts_state_map = self.get_mcts_class(x, edge_index, node_idx=node_idx)
+            self.new_node_idx = self.mcts_state_map.new_node_idx
+            # mcts will extract the subgraph and relabel the nodes
+            value_func = GnnNetsNC2valueFunc(self.model,
+                                             node_idx=self.mcts_state_map.new_node_idx,
+                                             target_class=label)
+
+            if not saved_MCTSInfo_list:
+                payoff_func = self.get_reward_func(value_func,
+                                                   node_idx=self.mcts_state_map.new_node_idx)
+                self.mcts_state_map.set_score_func(payoff_func)
+                results = self.mcts_state_map.mcts(verbose=self.verbose)
+
+            tree_node_x = find_closest_node_result(results, max_nodes=max_nodes)
+
+        # keep the important structure
+        masked_node_list = [node for node in range(tree_node_x.data.x.shape[0])
+                            if node in tree_node_x.coalition]
+
+        # remove the important structure, for node_classification,
+        # remain the node_idx when remove the important structure
+        maskout_node_list = [node for node in range(tree_node_x.data.x.shape[0])
+                             if node not in tree_node_x.coalition]
+        if not self.explain_graph:
+            maskout_node_list += [self.new_node_idx]
+
+        masked_score = gnn_score(masked_node_list,
+                                 tree_node_x.data,
+                                 value_func=value_func,
+                                 subgraph_building_method=self.subgraph_building_method)
+
+        maskout_score = gnn_score(maskout_node_list,
+                                  tree_node_x.data,
+                                  value_func=value_func,
+                                  subgraph_building_method=self.subgraph_building_method)
+
+        sparsity_score = sparsity(masked_node_list, tree_node_x.data,
+                                  subgraph_building_method=self.subgraph_building_method)
+
+        results = self.write_from_MCTSNode_list(results)
+        related_pred = {'masked': masked_score,
+                        'maskout': maskout_score,
+                        'origin': probs[node_idx, label].item(),
+                        'sparsity': sparsity_score}
+
+        return results, related_pred
 
     def __call__(self, x: Tensor, edge_index: Tensor, **kwargs)\
             -> Tuple[None, List, List[Dict]]:
         r""" explain the GNN behavior for the graph using SubgraphX method
-
         Args:
             x (:obj:`torch.Tensor`): Node feature matrix with shape
               :obj:`[num_nodes, dim_node_feature]`
@@ -719,89 +831,33 @@ class SubgraphX(object):
               The additional parameters
                 - node_idx (:obj:`int`, :obj:`None`): The target node index when explain node classification task
                 - max_nodes (:obj:`int`, :obj:`None`): The number of nodes in the final explanation results
-
         :rtype: (:obj:`None`, List[torch.Tensor], List[Dict])
         """
         node_idx = kwargs.get('node_idx')
-        max_nodes = kwargs.get('max_nodes')
-        max_nodes = 14 if max_nodes is None else max_nodes  # default max subgraph size
+        max_nodes = kwargs.get('max_nodes')   # default max subgraph size
 
         # collect all the class index
         labels = tuple(label for label in range(self.num_classes))
         ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
-        logits = self.model(x, edge_index)
-        probs = F.softmax(logits, dim=-1)
-        probs = probs.squeeze()
-        explanation_results = []
+
         related_preds = []
+        explanation_results = []
+        saved_results = None
+        if self.save:
+            if os.path.isfile(os.path.join(self.save_dir, f"{self.filename}.pt")):
+                saved_results = torch.load(os.path.join(self.save_dir, f"{self.filename}.pt"))
 
-        if self.explain_graph:
-            prediction = probs.argmax(-1)
-            for label in ex_labels:
-                value_func = GnnNetsGC2valueFunc(self.model, target_class=label)
-                payoff_func = self.get_reward_func(value_func)
-                self.mcts_state_map = self.get_mcts_class(x, edge_index, score_func=payoff_func)
-                results = self.mcts_state_map.mcts(verbose=False)
-
-                # l sharply score
-                data = Data(x=x, edge_index=edge_index)
-                tree_node_x = find_closest_node_result(results, max_nodes=max_nodes)
-                masked_node_list = [node for node in range(tree_node_x.data.x.shape[0])
-                                    if node in tree_node_x.coalition]
-                maskout_node_list = [node for node in range(tree_node_x.data.x.shape[0])
-                                     if node not in tree_node_x.coalition]
-                masked_score = gnn_score(masked_node_list, data, value_func,
-                                         subgraph_building_method='zero_filling')
-                maskout_score = gnn_score(maskout_node_list, data, value_func,
-                                          subgraph_building_method='zero_filling')
-                sparsity_score = 1 - len(tree_node_x.coalition) / tree_node_x.ori_graph.number_of_nodes()
-
-                explanation_results.append(results)
-                related_preds.append({'masked': masked_score,
-                                      'maskout': maskout_score,
-                                      'origin': probs[label],
-                                      'sparsity': sparsity_score})
-        else:
-            prediction = probs[node_idx].argmax(-1)
-            for label in ex_labels:
-                self.mcts_state_map = self.get_mcts_class(x, edge_index, node_idx=node_idx)
-                self.node_idx = self.mcts_state_map.node_idx
-                # mcts will extract the subgraph and relabel the nodes
-                value_func = GnnNetsNC2valueFunc(self.model,
-                                                 node_idx=self.mcts_state_map.node_idx,
-                                                 target_class=label)
-                payoff_func = self.get_reward_func(value_func, node_idx=self.mcts_state_map.node_idx)
-                self.mcts_state_map.set_score_func(payoff_func)
-                results = self.mcts_state_map.mcts(verbose=False)
-
-                tree_node_x = find_closest_node_result(results, max_nodes=max_nodes)
-                original_node_list = [node for node in tree_node_x.ori_graph.nodes]
-                masked_node_list = [node for node in range(tree_node_x.data.x.shape[0])
-                                    if node in tree_node_x.coalition]
-                maskout_node_list = [node for node in range(tree_node_x.data.x.shape[0])
-                                     if node not in tree_node_x.coalition]
-                original_score = gnn_score(original_node_list,
-                                           tree_node_x.data,
-                                           value_func=value_func,
-                                           subgraph_building_method='zero_filling')
-                masked_score = gnn_score(masked_node_list,
-                                         tree_node_x.data,
-                                         value_func=value_func,
-                                         subgraph_building_method='zero_filling')
-                maskout_score = gnn_score(maskout_node_list,
-                                          tree_node_x.data,
-                                          value_func=value_func,
-                                          subgraph_building_method='zero_filling')
-                sparsity_score = 1 - len(tree_node_x.coalition) / tree_node_x.ori_graph.number_of_nodes()
-
-                explanation_results.append(results)
-                related_preds.append({'masked': masked_score,
-                                      'maskout': maskout_score,
-                                      'origin': original_score,
-                                      'sparsity': sparsity_score})
+        for label_idx, label in enumerate(ex_labels):
+            results, related_pred = self.explain(x, edge_index,
+                                                 label=label,
+                                                 max_nodes=max_nodes,
+                                                 node_idx=node_idx,
+                                                 saved_MCTSInfo_list=saved_results)
+            related_preds.append(related_pred)
+            explanation_results.append(results)
 
         if self.save:
-            torch.save(explanation_results[prediction],
+            torch.save(explanation_results,
                        os.path.join(self.save_dir, f"{self.filename}.pt"))
 
         return None, explanation_results, related_preds

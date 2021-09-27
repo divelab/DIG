@@ -1,0 +1,24 @@
+explanation_result_dir: ''
+sparsity: 0.5
+
+param:
+  bbbp:
+    none: None
+  graph_sst2:
+    none: None
+  graph_sst5:
+    none: None
+  twitter:
+    none: None
+  ba_shapes:
+    none: None
+  ba_community:
+    none: None
+  tree_grid:
+    none: None
+  tree_cycle:
+    none: None
+  ba_2motifs:
+    none: None
+  bace:
+    none: None

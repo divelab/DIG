@@ -1,0 +1,2 @@
+dataset_root: '/data/haiyang/xgraph_baseline/datasets'
+dataset_name: 'tree_grid'

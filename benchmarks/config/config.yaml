@@ -1,0 +1,5 @@
+defaults:
+  - models: gcn
+  - datasets: bbbp
+  - explainers: gnn_gi
+device_id: 0

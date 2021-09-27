@@ -8,8 +8,10 @@ from .base_explainer import ExplainerBase
 from typing import Union
 EPS = 1e-15
 
+
 def cross_entropy_with_logit(y_pred: torch.Tensor, y_true: torch.Tensor, **kwargs):
     return cross_entropy(y_pred, y_true.long(), **kwargs)
+
 
 class GNNExplainer(ExplainerBase):
     r"""The GNN-Explainer model from the `"GNNExplainer: Generating
@@ -17,10 +19,8 @@ class GNNExplainer(ExplainerBase):
     <https://arxiv.org/abs/1903.03894>`_ paper for identifying compact subgraph
     structures and small subsets node features that play a crucial role in a
     GNN’s node-predictions.
-
     .. note:: For an example, see `benchmarks/xgraph
         <https://github.com/divelab/DIG/tree/dig/benchmarks/xgraph>`_.
-
     Args:
         model (torch.nn.Module): The GNN module to explain.
         epochs (int, optional): The number of epochs to train.
@@ -45,7 +45,7 @@ class GNNExplainer(ExplainerBase):
         if self.explain_graph:
             loss = cross_entropy_with_logit(raw_preds, x_label)
         else:
-            loss = cross_entropy_with_logit(raw_preds[self.node_idx].unsqueeze(0), x_label)
+            loss = cross_entropy_with_logit(raw_preds[self.node_idx].reshape(1, -1), x_label)
 
         m = self.edge_mask.sigmoid()
         loss = loss + self.coeffs['edge_size'] * m.sum()
@@ -66,7 +66,7 @@ class GNNExplainer(ExplainerBase):
                           ex_label: Tensor,
                           mask_features: bool = False,
                           **kwargs
-                          ) -> None:
+                          ) -> Tensor:
 
         # initialize a mask
         self.to(x.device)
@@ -96,7 +96,6 @@ class GNNExplainer(ExplainerBase):
     def forward(self, x, edge_index, mask_features=False, **kwargs):
         r"""
         Run the explainer for a specific graph instance.
-
         Args:
             x (torch.Tensor): The graph instance's input node features.
             edge_index (torch.Tensor): The graph instance's edge index.
@@ -108,15 +107,12 @@ class GNNExplainer(ExplainerBase):
                 :obj:`sparsity` (float): The Sparsity we need to control to transform a
                 soft mask to a hard mask. (Default: :obj:`0.7`)
                 :obj:`num_classes` (int): The number of task's classes.
-
         :rtype: (None, list, list)
-
         .. note::
             (None, edge_masks, related_predictions):
             edge_masks is a list of edge-level explanation for each class;
             related_predictions is a list of dictionary for each class
             where each dictionary includes 4 type predicted probabilities.
-
         """
         super().forward(x=x, edge_index=edge_index, **kwargs)
         self.model.eval()
@@ -127,35 +123,40 @@ class GNNExplainer(ExplainerBase):
         # Get subgraph and relabel the node, mapping is the relabeled given node_idx.
         if not self.explain_graph:
             node_idx = kwargs.get('node_idx')
+            if not node_idx.dim():
+                node_idx = node_idx.reshape(-1)
+            node_idx = node_idx.to(self.device)
             self.node_idx = node_idx
             assert node_idx is not None
             _, _, _, self.hard_edge_mask = subgraph(
                 node_idx, self.__num_hops__, self_loop_edge_index, relabel_nodes=True,
                 num_nodes=None, flow=self.__flow__())
 
-        # Assume the mask we will predict
-        labels = tuple(i for i in range(kwargs.get('num_classes')))
-        ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
-
-        # Calculate mask
-        edge_masks = []
-        for ex_label in ex_labels:
-            self.__clear_masks__()
+        if kwargs.get('edge_masks'):
+            edge_masks = kwargs.pop('edge_masks')
             self.__set_masks__(x, self_loop_edge_index)
-            edge_masks.append(self.control_sparsity(self.gnn_explainer_alg(x, edge_index, ex_label), sparsity=kwargs.get('sparsity')))
-            # edge_masks.append(self.gnn_explainer_alg(x, edge_index, ex_label))
 
+        else:
+            # Assume the mask we will predict
+            labels = tuple(i for i in range(kwargs.get('num_classes')))
+            ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
+
+            # Calculate mask
+            edge_masks = []
+            for ex_label in ex_labels:
+                self.__clear_masks__()
+                self.__set_masks__(x, self_loop_edge_index)
+                edge_masks.append(self.gnn_explainer_alg(x, edge_index, ex_label))
+
+        hard_edge_masks = [self.control_sparsity(mask, sparsity=kwargs.get('sparsity')).sigmoid()
+                           for mask in edge_masks]
 
         with torch.no_grad():
-            related_preds = self.eval_related_pred(x, edge_index, edge_masks, **kwargs)
-
+            related_preds = self.eval_related_pred(x, edge_index, hard_edge_masks, **kwargs)
 
         self.__clear_masks__()
 
-        return None, edge_masks, related_preds
-
-
-
+        return edge_masks, hard_edge_masks, related_preds
 
     def __repr__(self):
         return f'{self.__class__.__name__}()'

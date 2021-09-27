@@ -1,0 +1,5 @@
+dataset_root: '/data/haiyang/xgraph_baseline/datasets'
+dataset_name: 'twitter'
+random_split_flag: False
+data_split_ratio: None
+seed: 2

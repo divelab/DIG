@@ -12,7 +12,6 @@ import sys
 import os
 
 
-
 def load_model(name) -> torch.nn.Module:
     classes = [x for x in dir(models) if isclass(getattr(models, x))]
     try:

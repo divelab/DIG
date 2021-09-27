@@ -1,0 +1,94 @@
+explanation_result_dir: ''
+max_ex_size: 100
+
+param:
+  bbbp:
+    rollout: 20
+    high2low: False
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 12
+    reward_method: 'mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  ba_shapes:
+    rollout: 20
+    high2low: True
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 20
+    reward_method: 'Nc_mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  graph_sst2:
+    rollout: 20
+    high2low: False
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 12
+    reward_method: 'mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  graph_sst5:
+    rollout: 20
+    high2low: False
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 12
+    reward_method: 'mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  twitter:
+    rollout: 20
+    high2low: False
+    c_puct: 5.0
+    min_atoms: 5
+    expand_atoms: 20
+    reward_method: 'mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  ba_community:
+    rollout: 20
+    high2low: True
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 20
+    reward_method: 'Nc_mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  tree_grid:
+    rollout: 20
+    high2low: True
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 20
+    reward_method: 'Nc_mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  tree_cycle:
+    rollout: 20
+    high2low: True
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 20
+    reward_method: 'Nc_mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  ba_2motifs:
+    rollout: 20
+    high2low: True
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 20
+    reward_method: 'mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  bace:
+    rollout: 20
+    high2low: False
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 12
+    reward_method: 'mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True

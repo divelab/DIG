@@ -1,0 +1,33 @@
+explanation_result_dir: ''
+sparsity: 0.5
+param:
+  bbbp:
+    lr: 0.01
+    epochs: 1000
+  ba_shapes:
+    lr: 0.01
+    epochs: 1000
+  graph_sst2:
+    lr: 0.01
+    epochs: 1000
+  graph_sst5:
+    lr: 0.01
+    epochs: 1000
+  twitter:
+    lr: 0.01
+    epochs: 1000
+  ba_community:
+    lr: 0.01
+    epochs: 1000
+  tree_grid:
+    lr: 0.01
+    epochs: 1000
+  tree_cycle:
+    lr: 0.01
+    epochs: 1000
+  ba_2motifs:
+    lr: 0.01
+    epochs: 1000
+  bace:
+    lr: 0.01
+    epochs: 1000

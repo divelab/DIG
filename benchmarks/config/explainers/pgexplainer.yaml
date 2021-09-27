@@ -1,0 +1,86 @@
+explainer_saving_dir: ''
+explainer_saving_name: 'pgexplainer.pth'
+explanation_result_dir: ''
+sparsity: 0.5
+
+param:
+  bbbp:
+    ex_learing_rate: 0.05
+    ex_epochs: 20
+    coff_size: 0.01
+    coff_ent: 0.01
+    t0: 5.0
+    t1: 1.0
+    undirected: True
+  ba_shapes:
+    ex_learing_rate: 3e-3
+    ex_epochs: 20
+    coff_size: 0.01
+    coff_ent: 5e-4
+    t0: 5.0
+    t1: 1.0
+    undirected: True
+  graph_sst2:
+    ex_learing_rate: 3e-3
+    ex_epochs: 20
+    coff_size: 0.01
+    coff_ent: 5e-4
+    t0: 5.0
+    t1: 1.0
+    undirected: True
+  graph_sst5:
+    ex_learing_rate: 3e-3
+    ex_epochs: 20
+    coff_size: 0.01
+    coff_ent: 5e-4
+    t0: 5.0
+    t1: 1.0
+    undirected: True
+  twitter:
+    ex_learing_rate: 0.005
+    ex_epochs: 20
+    coff_size: 0.01
+    coff_ent: 5e-4
+    t0: 5.0
+    t1: 1.0
+    undirected: True
+  ba_community:
+    ex_learing_rate: 3e-3
+    ex_epochs: 20
+    coff_size: 0.01
+    coff_ent: 5e-4
+    t0: 5.0
+    t1: 1.0
+    undirected: True
+  tree_grid:
+    ex_learing_rate: 3e-3
+    ex_epochs: 20
+    coff_size: 0.01
+    coff_ent: 5e-4
+    t0: 5.0
+    t1: 1.0
+    undirected: True
+  tree_cycle:
+    ex_learing_rate: 3e-3
+    ex_epochs: 20
+    coff_size: 0.01
+    coff_ent: 5e-4
+    t0: 5.0
+    t1: 1.0
+    undirected: True
+  ba_2motifs:
+    ex_learing_rate: 3e-3
+    ex_epochs: 20
+    coff_size: 0.03
+    coff_ent: 5e-4
+    t0: 5.0
+    t1: 1.0
+    undirected: True
+  bace:
+    ex_learing_rate: 0.05
+    ex_epochs: 20
+    coff_size: 0.01
+    coff_ent: 0.01
+    t0: 5.0
+    t1: 1.0
+    undirected: True

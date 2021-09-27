@@ -20,7 +20,7 @@ from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.utils import to_networkx
 from torch_geometric.utils.num_nodes import maybe_num_nodes
 from typing import Tuple, List, Dict, Optional
-from .shapley import GnnNetsGC2valueFunc, GnnNetsNC2valueFunc, gnn_score
+from .shapley import gnn_score, GnnNetsNC2valueFunc, GnnNetsGC2valueFunc, sparsity
 from torch_geometric.datasets import MoleculeNet
 from rdkit import Chem
 
@@ -473,8 +473,9 @@ class PGExplainer(nn.Module):
         logit = prob[ori_pred]
         logit = logit + EPS
         pred_loss = - torch.log(logit)
+
         # size
-        edge_mask = self.mask_sigmoid
+        edge_mask = self.sparse_mask_values
         size_loss = self.coff_size * torch.sum(edge_mask)
 
         # entropy
@@ -586,16 +587,16 @@ class PGExplainer(nn.Module):
             h = elayer(h)
         values = h.reshape(-1)
         values = self.concrete_sample(values, beta=tmp, training=training)
+        self.sparse_mask_values = values
         mask_sparse = torch.sparse_coo_tensor(
             edge_index, values, (nodesize, nodesize)
         )
-        self.mask_sigmoid = mask_sparse.to_dense()
+        mask_sigmoid = mask_sparse.to_dense()
         # set the symmetric edge weights
-        sym_mask = (self.mask_sigmoid + self.mask_sigmoid.transpose(0, 1)) / 2
+        sym_mask = (mask_sigmoid + mask_sigmoid.transpose(0, 1)) / 2
         edge_mask = sym_mask[edge_index[0], edge_index[1]]
 
         # inverse the weights before sigmoid in MessagePassing Module
-        # edge_mask = inv_sigmoid(edge_mask)
         self.__clear_masks__()
         self.__set_masks__(x, edge_index, edge_mask)
 
@@ -634,7 +635,7 @@ class PGExplainer(nn.Module):
                 for gid in tqdm.tqdm(dataset_indices):
                     data = dataset[gid]
                     data.to(self.device)
-                    prob, _ = self.explain(data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
+                    prob, edge_mask = self.explain(data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
                     loss_tmp = self.__loss__(prob.squeeze(), ori_pred_dict[gid])
                     loss_tmp.backward()
                     loss += loss_tmp.item()
@@ -717,11 +718,8 @@ class PGExplainer(nn.Module):
             _, edge_mask = self.explain(x, edge_index, embed=embed, tmp=1.0, training=False)
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
-            masked_nodes_list = [node for node in range(data.x.shape[0]) if node in selected_nodes]
             maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
             value_func = GnnNetsGC2valueFunc(self.model, target_class=label)
-            masked_pred = gnn_score(masked_nodes_list, data, value_func,
-                                    subgraph_building_method='zero_filling')
             maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
                                      subgraph_building_method='zero_filling')
             sparsity_score = 1 - len(selected_nodes) / data.x.shape[0]
@@ -739,26 +737,29 @@ class PGExplainer(nn.Module):
 
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
-            masked_nodes_list = [node for node in range(data.x.shape[0]) if node in selected_nodes]
+            masked_node_list = [node for node in range(data.x.shape[0]) if node in selected_nodes]
             maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
             value_func = GnnNetsNC2valueFunc(self.model,
                                              node_idx=new_node_idx,
                                              target_class=label)
-            masked_pred = gnn_score(masked_nodes_list, data,
+
+            masked_pred = gnn_score(masked_node_list, data,
                                     value_func=value_func,
                                     subgraph_building_method='zero_filling')
             maskout_pred = gnn_score(maskout_nodes_list, data,
                                      value_func=value_func,
                                      subgraph_building_method='zero_filling')
 
-            sparsity_score = 1 - len(selected_nodes) / data.x.shape[0]
+            sparsity_score = sparsity(masked_node_list, data,
+                                      subgraph_building_method='zero_filling')
 
         # return variables
         pred_mask = [edge_mask]
-        related_preds = [{'masked': masked_pred,
-                          'maskout': maskout_pred,
-                          'origin': probs[label],
-                          'sparsity': sparsity_score}]
+        related_preds = [{
+            'masked': masked_pred,
+            'maskout': maskout_pred,
+            'origin': probs[label],
+            'sparsity': sparsity_score}]
         return None, pred_mask, related_preds
 
     def visualization(self, data: Data, edge_mask: Tensor, top_k: int, plot_utils: PlotUtils,

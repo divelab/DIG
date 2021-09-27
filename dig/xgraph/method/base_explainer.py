@@ -14,10 +14,9 @@ from torch_geometric.utils import to_networkx
 from ..models.utils import subgraph
 from rdkit import Chem
 from matplotlib.axes import Axes
-from matplotlib.patches import Path, PathPatch
 
 import numpy as np
-from ..models.models import GNNPool
+from ..models import GNNPool
 
 
 EPS = 1e-15
@@ -99,7 +98,6 @@ class ExplainerBase(nn.Module):
 
         return x, edge_index, mapping, edge_mask, kwargs
 
-
     def forward(self,
                 x: Tensor,
                 edge_index: Tensor,
@@ -108,7 +106,6 @@ class ExplainerBase(nn.Module):
         self.num_edges = edge_index.shape[1]
         self.num_nodes = x.shape[0]
         self.device = x.device
-
 
     def control_sparsity(self, mask: Tensor, sparsity=None, **kwargs):
         r"""
@@ -146,9 +143,8 @@ class ExplainerBase(nn.Module):
 
         return trans_mask
 
-
     def visualize_graph(self, node_idx: int, edge_index: Tensor, edge_mask: Tensor, y: Tensor = None,
-                           threshold: float = None, nolabel: bool = True, **kwargs) -> Tuple[Axes, nx.DiGraph]:
+                        threshold: float = None, nolabel: bool = True, **kwargs) -> Tuple[Axes, nx.DiGraph]:
         r"""Visualizes the subgraph around :attr:`node_idx` given an edge mask
         :attr:`edge_mask`.
 
@@ -260,31 +256,43 @@ class ExplainerBase(nn.Module):
         node_idx = 0 if node_idx is None else node_idx  # graph level: 0, node level: node_idx
         related_preds = []
 
+        # change the mask from -inf ~ +inf into 0 ~ 1
         for ex_label, edge_mask in enumerate(edge_masks):
+            if self.hard_edge_mask is not None:
+                sparsity = 1.0 - (edge_mask[self.hard_edge_mask] != 0).sum() / edge_mask[self.hard_edge_mask].size(0)
+            else:
+                sparsity = 1.0 - (edge_mask != 0).sum() / edge_mask.size(0)
 
-            self.edge_mask.data = float('inf') * torch.ones(edge_mask.size(), device=self.device)
+            self.edge_mask.data = torch.ones(edge_mask.size(), device=self.device)
             ori_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             self.edge_mask.data = edge_mask
             masked_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             # mask out important elements for fidelity calculation
-            self.edge_mask.data = - edge_mask  # keep Parameter's id
+            self.edge_mask.data = 1.0 - edge_mask  # keep Parameter's id
             maskout_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             # zero_mask
-            self.edge_mask.data = - float('inf') * torch.ones(edge_mask.size(), device=self.device)
+            self.edge_mask.data = torch.zeros(edge_mask.size(), device=self.device)
             zero_mask_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             related_preds.append({'zero': zero_mask_pred[node_idx],
                                   'masked': masked_pred[node_idx],
                                   'maskout': maskout_pred[node_idx],
-                                  'origin': ori_pred[node_idx]})
+                                  'origin': ori_pred[node_idx],
+                                  'sparsity': sparsity})
 
             # Adding proper activation function to the models' outputs.
-            related_preds[ex_label] = {key: pred.softmax(0)[ex_label].item()
-                                    for key, pred in related_preds[ex_label].items()}
+            tmp_result_dict = {}
+            for key, pred in related_preds[ex_label].items():
+                if key in ['sparsity']:
+                    tmp_result_dict[key] = pred.item()
+                else:
+                    tmp_result_dict[key] = pred.reshape(-1).softmax(0)[ex_label].item()
+            related_preds[ex_label] = tmp_result_dict
 
+        self.__clear_masks__()
         return related_preds
 
 
@@ -337,12 +345,10 @@ class WalkBase(ExplainerBase):
             step['module'].append(layer[0])
             step['output'] = layer[2]
 
-
         for walk_step in walk_steps:
             if hasattr(walk_step['module'][0], 'nn') and walk_step['module'][0].nn is not None:
                 # We don't allow any outside nn during message flow process in GINs
                 walk_step['module'] = [walk_step['module'][0]]
-
 
         if split_fc:
             if step['module']:
@@ -350,7 +356,6 @@ class WalkBase(ExplainerBase):
             return walk_steps, fc_steps
         else:
             fc_step = step
-
 
         return walk_steps, fc_step
 
@@ -383,42 +388,55 @@ class WalkBase(ExplainerBase):
     def eval_related_pred(self, x: Tensor, edge_index: Tensor, masks: List[Tensor], **kwargs):
 
         node_idx = kwargs.get('node_idx')
-        node_idx = 0 if node_idx is None else node_idx # graph level: 0, node level: node_idx
+        pred_label = kwargs.get('pred_label')
+        node_idx = 0 if node_idx is None else node_idx  # graph level: 0, node level: node_idx
 
         related_preds = []
 
-        for label, mask in enumerate(masks):
+        for label, edge_mask in enumerate(masks):
+            if self.hard_edge_mask is not None:
+                sparsity = 1.0 - (edge_mask[self.hard_edge_mask] != 0).sum() / edge_mask[self.hard_edge_mask].size(0)
+            else:
+                sparsity = 1.0 - (edge_mask != 0).sum() / edge_mask.size(0)
+
             # origin pred
-            for edge_mask in self.edge_mask:
-                edge_mask.data = float('inf') * torch.ones(mask.size(), device=self.device)
+            for mask in self.edge_mask:
+                mask.data = torch.ones(edge_mask.size(), device=self.device)
             ori_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
-            for edge_mask in self.edge_mask:
-                edge_mask.data = mask
+            for mask in self.edge_mask:
+                mask.data = edge_mask
             masked_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             # mask out important elements for fidelity calculation
-            for edge_mask in self.edge_mask:
-                edge_mask.data = - mask
+            for mask in self.edge_mask:
+                mask.data = 1.0 - edge_mask
             maskout_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             # zero_mask
-            for edge_mask in self.edge_mask:
-                edge_mask.data = - float('inf') * torch.ones(mask.size(), device=self.device)
+            for mask in self.edge_mask:
+                mask.data = torch.zeros(edge_mask.size(), device=self.device)
             zero_mask_pred = self.model(x=x, edge_index=edge_index, **kwargs)
 
             # Store related predictions for further evaluation.
             related_preds.append({'zero': zero_mask_pred[node_idx],
                                   'masked': masked_pred[node_idx],
                                   'maskout': maskout_pred[node_idx],
-                                  'origin': ori_pred[node_idx]})
+                                  'origin': ori_pred[node_idx],
+                                  'sparsity': sparsity})
 
             # Adding proper activation function to the models' outputs.
-            related_preds[label] = {key: pred.softmax(0)[label].item()
-                                    for key, pred in related_preds[label].items()}
+            if pred_label:
+                label = pred_label
+            tmp_result_dict = {}
+            for key, pred in related_preds[label].items():
+                if key in ['sparsity']:
+                    tmp_result_dict[key] = pred.item()
+                else:
+                    tmp_result_dict[key] = pred.reshape(-1).softmax(0)[label].item()
+            related_preds[label] = tmp_result_dict
 
         return related_preds
-
 
     def explain_edges_with_loop(self, x: Tensor, walks: Dict[Tensor, Tensor], ex_label):
 
