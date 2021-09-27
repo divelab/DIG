@@ -17,7 +17,7 @@ We provide a hands-on tutorial for each direction to help you to get started wit
 * `Tutorial for Deep Learning on 3D Graphs <https://diveintographs.readthedocs.io/en/latest/tutorials/threedgraph.html>`_
 
 
-You can also refer to `benchmark implementations <https://github.com/divelab/DIG/tree/dig/benchmarks>`_ as examples to use APIs provided in DIG.
+You can also refer to our provided `examples <https://github.com/divelab/DIG/tree/dig/examples>`_ about how to use APIs in DIG.
 
 .. image:: ../../imgs/DIG-overview.png
    :width: 100%

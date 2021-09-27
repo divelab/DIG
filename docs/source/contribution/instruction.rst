@@ -3,7 +3,7 @@ Contributing to DIG
 
 Thank you very much for your interest in contributing to DIG: Dive into Graphs! Any forms of contributions are welcomed, including but not limited to the following.
 
-* `Reporting issues <#reporting-issues>`_
+* `Reporting issues <#contributing-to-code>`_
 * `Fixing bugs <#contributing-to-code>`_
 * `Adding algorithms <#contributing-to-code>`_
 * `Adding datasets <#contributing-to-code>`_
@@ -21,6 +21,7 @@ Before contributing, it is helpful to have an understanding of the general struc
 Structurally, DIG is currently divided into four topics: Graph Generation, Self-supervised Learning on Graphs, Explainability of Graph Neural Networks, and Deep Learning on 3D Graphs.
 
 Specifically, every directory under the :obj:`/dig` sources root contains a directory of algorithms (:obj:`method`), a directory of datasets (:obj:`dataset`), a directory of metrics (:obj:`evaluation`), and a directory of utilities (:obj:`utils`) if applicable.
+
 
 
 Reporting issues
@@ -68,6 +69,8 @@ We explain the preferred GitHub workflow as follows.
 
 Improving documentations
 -------
+
+
 
 #. Install sphinx, sphinx_rtd_theme, and autodocsumm:
 
