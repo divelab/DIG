@@ -3,7 +3,7 @@ Contributing to DIG
 
 Thank you very much for your interest in contributing to DIG: Dive into Graphs! Any forms of contributions are welcomed, including but not limited to the following.
 
-* `Reporting issues <#contributing-to-code>`_
+* `Reporting issues <#reporting-issues>`_
 * `Fixing bugs <#contributing-to-code>`_
 * `Adding algorithms <#contributing-to-code>`_
 * `Adding datasets <#contributing-to-code>`_
