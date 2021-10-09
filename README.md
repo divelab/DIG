@@ -30,7 +30,7 @@
 <!--- [![Contributors][contributor-image]][contributor-url] -->
 
 
-**[Documentation](https://diveintographs.readthedocs.io)** | **[Paper](https://arxiv.org/abs/2103.12608)** | **[Tutorials](https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html#)** | **[Benchmarks](https://github.com/divelab/DIG/tree/dig/benchmarks)** |  **[Examples](https://github.com/divelab/DIG/tree/dig/examples)**
+**[Documentation](https://diveintographs.readthedocs.io)** | **[Paper [JMLR]](https://www.jmlr.org/papers/v22/21-0343.html)** | **[Tutorials](https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html#)** | **[Benchmarks](https://github.com/divelab/DIG/tree/dig/benchmarks)** |  **[Examples](https://github.com/divelab/DIG/tree/dig/examples)**
 
 *DIG: Dive into Graphs* is a turnkey library for graph deep learning research.
 
@@ -158,11 +158,15 @@ We welcome any forms of contributions, such as reporting bugs and adding new fea
 
 Please cite our [paper](https://arxiv.org/abs/2103.12608) if you find *DIG* useful in your work:
 ```
-@article{liu2021dig,
-      title={{DIG}: A Turnkey Library for Diving into Graph Deep Learning Research}, 
-      author={Meng Liu and Youzhi Luo and Limei Wang and Yaochen Xie and Hao Yuan and Shurui Gui and Haiyang Yu and Zhao Xu and Jingtun Zhang and Yi Liu and Keqiang Yan and Haoran Liu and Cong Fu and Bora Oztekin and Xuan Zhang and Shuiwang Ji},
-      journal={arXiv preprint arXiv:2103.12608},
-      year={2021},
+@article{JMLR:v22:21-0343,
+  author  = {Meng Liu and Youzhi Luo and Limei Wang and Yaochen Xie and Hao Yuan and Shurui Gui and Haiyang Yu and Zhao Xu and Jingtun Zhang and Yi Liu and Keqiang Yan and Haoran Liu and Cong Fu and Bora M Oztekin and Xuan Zhang and Shuiwang Ji},
+  title   = {DIG: A Turnkey Library for Diving into Graph Deep Learning Research},
+  journal = {Journal of Machine Learning Research},
+  year    = {2021},
+  volume  = {22},
+  number  = {240},
+  pages   = {1-9},
+  url     = {http://jmlr.org/papers/v22/21-0343.html}
 }
 ```
 
