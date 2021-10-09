@@ -156,7 +156,7 @@ We welcome any forms of contributions, such as reporting bugs and adding new fea
 
 ## Citing DIG
 
-Please cite our [paper](https://arxiv.org/abs/2103.12608) if you find *DIG* useful in your work:
+Please cite our [paper](https://jmlr.org/papers/v22/21-0343.html) if you find *DIG* useful in your work:
 ```
 @article{JMLR:v22:21-0343,
   author  = {Meng Liu and Youzhi Luo and Limei Wang and Yaochen Xie and Hao Yuan and Shurui Gui and Haiyang Yu and Zhao Xu and Jingtun Zhang and Yi Liu and Keqiang Yan and Haoran Liu and Cong Fu and Bora M Oztekin and Xuan Zhang and Shuiwang Ji},
