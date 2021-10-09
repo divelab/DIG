@@ -160,7 +160,7 @@ Please cite our [paper](https://jmlr.org/papers/v22/21-0343.html) if you find *D
 ```
 @article{JMLR:v22:21-0343,
   author  = {Meng Liu and Youzhi Luo and Limei Wang and Yaochen Xie and Hao Yuan and Shurui Gui and Haiyang Yu and Zhao Xu and Jingtun Zhang and Yi Liu and Keqiang Yan and Haoran Liu and Cong Fu and Bora M Oztekin and Xuan Zhang and Shuiwang Ji},
-  title   = {DIG: A Turnkey Library for Diving into Graph Deep Learning Research},
+  title   = {{DIG}: A Turnkey Library for Diving into Graph Deep Learning Research},
   journal = {Journal of Machine Learning Research},
   year    = {2021},
   volume  = {22},
