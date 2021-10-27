@@ -42,9 +42,18 @@ Next, we load the trained GNN model. The model is trained using the BA_shapes da
 
 .. code-block ::
 
+    def check_checkpoints(root='./'):
+        if osp.exists(osp.join(root, 'checkpoints')):
+            return
+        url = ('https://github.com/divelab/DIG_storage/raw/main/xgraph/checkpoints.zip')
+        path = download_url(url, root)
+        extract_zip(path, root)
+        os.unlink(path)
+        
     from dig.xgraph.models import GCN_2l
     model = GCN_2l(model_level='node', dim_node=dim_node, dim_hidden=300, num_classes=num_classes)
     model.to(device)
+    check_checkpoints()
     ckpt_path = osp.join('checkpoints', 'ba_shapes', 'GCN_2l', '0', 'GCN_2l_best.ckpt')
     model.load_state_dict(torch.load(ckpt_path)['state_dict'])
 
