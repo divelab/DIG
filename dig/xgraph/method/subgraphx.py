@@ -433,7 +433,8 @@ class MCTSNode(object):
 
 class MCTS(object):
     r"""
-    Monte Carlo Tree Search Method
+    Monte Carlo Tree Search Method.
+    
     Args:
         X (:obj:`torch.Tensor`): Input node features
         edge_index (:obj:`torch.Tensor`): The edge indices.
@@ -594,6 +595,7 @@ class SubgraphX(object):
     r"""
     The implementation of paper
     `On Explainability of Graph Neural Networks via Subgraph Explorations <https://arxiv.org/abs/2102.05152>`_.
+    
     Args:
         model (:obj:`torch.nn.Module`): The target model prepared to explain
         num_classes(:obj:`int`): Number of classes for the datasets
