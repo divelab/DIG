@@ -116,13 +116,16 @@ $ python -c "import torch; print(torch.__version__)"
 >>> 1.6.0
 ```
 
+
+
+
 2. Install [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html#) (>=1.6.0)
 
 ```shell script
 $ python -c "import torch_geometric; print(torch_geometric.__version__)"
 >>> 1.6.0
 ```
-
+**Note:** Our library has not been tested on PyTorch Geometric >= 2.0.0, which is largely different with PyTorch Geometric 1.x.x. Hence, we recommend to install PyTorch Geometric with a version from 1.6.0 to 1.7.2.
     
 3. Install DIG: Dive into Graphs.
 
