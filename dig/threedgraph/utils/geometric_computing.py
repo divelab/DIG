@@ -46,20 +46,22 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion = False):
     a = (pos_ji * pos_jk).sum(dim=-1) # cos_angle * |pos_ji| * |pos_jk|
     b = torch.cross(pos_ji, pos_jk).norm(dim=-1) # sin_angle * |pos_ji| * |pos_jk|
     angle = torch.atan2(b, a)
-            
-    idx_batch = torch.arange(len(idx_i),device=device)
-    idx_k_n = adj_t[idx_j].storage.col()
-    repeat = num_triplets
-    num_triplets_t = num_triplets.repeat_interleave(repeat)[mask]
-    idx_i_t = idx_i.repeat_interleave(num_triplets_t)
-    idx_j_t = idx_j.repeat_interleave(num_triplets_t)
-    idx_k_t = idx_k.repeat_interleave(num_triplets_t)
-    idx_batch_t = idx_batch.repeat_interleave(num_triplets_t)
-    mask = idx_i_t != idx_k_n       
-    idx_i_t, idx_j_t, idx_k_t, idx_k_n, idx_batch_t = idx_i_t[mask], idx_j_t[mask], idx_k_t[mask], idx_k_n[mask], idx_batch_t[mask]
 
-    # Calculate torsions.
+
     if use_torsion:
+        # Prepare torsion idxes.
+        idx_batch = torch.arange(len(idx_i),device=device)
+        idx_k_n = adj_t[idx_j].storage.col()
+        repeat = num_triplets - 1
+        num_triplets_t = num_triplets.repeat_interleave(repeat)
+        idx_i_t = idx_i.repeat_interleave(num_triplets_t)
+        idx_j_t = idx_j.repeat_interleave(num_triplets_t)
+        idx_k_t = idx_k.repeat_interleave(num_triplets_t)
+        idx_batch_t = idx_batch.repeat_interleave(num_triplets_t)
+        mask = (idx_i_t != idx_k_n) * (idx_k_t != idx_k_n)
+        idx_i_t, idx_j_t, idx_k_t, idx_k_n, idx_batch_t = idx_i_t[mask], idx_j_t[mask], idx_k_t[mask], idx_k_n[mask], idx_batch_t[mask]
+
+        # Calculate torsions.
         pos_j0 = pos[idx_k_t] - pos[idx_j_t]
         pos_ji = pos[idx_i_t] - pos[idx_j_t]
         pos_jk = pos[idx_k_n] - pos[idx_j_t]
@@ -70,6 +72,7 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion = False):
         b = (torch.cross(plane1, plane2) * pos_ji).sum(dim=-1) / dist_ji
         torsion1 = torch.atan2(b, a) # -pi to pi
         torsion1[torsion1<=0]+=2*PI # 0 to 2pi
+
         torsion = scatter(torsion1,idx_batch_t,reduce='min')
 
         return dist, angle, torsion, i, j, idx_kj, idx_ji
