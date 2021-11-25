@@ -58,7 +58,7 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion = False):
         idx_j_t = idx_j.repeat_interleave(num_triplets_t)
         idx_k_t = idx_k.repeat_interleave(num_triplets_t)
         idx_batch_t = idx_batch.repeat_interleave(num_triplets_t)
-        mask = (idx_i_t != idx_k_n) * (idx_k_t != idx_k_n)
+        mask = idx_i_t != idx_k_n
         idx_i_t, idx_j_t, idx_k_t, idx_k_n, idx_batch_t = idx_i_t[mask], idx_j_t[mask], idx_k_t[mask], idx_k_n[mask], idx_batch_t[mask]
 
         # Calculate torsions.
