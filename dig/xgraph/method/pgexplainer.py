@@ -718,11 +718,19 @@ class PGExplainer(nn.Module):
             _, edge_mask = self.explain(x, edge_index, embed=embed, tmp=1.0, training=False)
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
+            masked_node_list = [node for node in range(data.x.shape[0]) if node in selected_nodes]
             maskout_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]
             value_func = GnnNetsGC2valueFunc(self.model, target_class=label)
+
+            masked_pred = gnn_score(masked_node_list, data,
+                                    value_func=value_func,
+                                    subgraph_building_method='zero_filling')
+
             maskout_pred = gnn_score(maskout_nodes_list, data, value_func,
                                      subgraph_building_method='zero_filling')
+
             sparsity_score = 1 - len(selected_nodes) / data.x.shape[0]
+
         else:
             node_idx = kwargs.get('node_idx')
             assert kwargs.get('node_idx') is not None, "please input the node_idx"
@@ -746,6 +754,7 @@ class PGExplainer(nn.Module):
             masked_pred = gnn_score(masked_node_list, data,
                                     value_func=value_func,
                                     subgraph_building_method='zero_filling')
+
             maskout_pred = gnn_score(maskout_nodes_list, data,
                                      value_func=value_func,
                                      subgraph_building_method='zero_filling')
