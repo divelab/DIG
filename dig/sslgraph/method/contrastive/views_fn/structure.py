@@ -1,6 +1,5 @@
 import torch
-import numpy as np
-from torch_geometric.utils import to_dense_adj, dense_to_sparse
+from torch_geometric.utils import to_dense_adj, dense_to_sparse, dropout_adj
 from sklearn.preprocessing import MinMaxScaler
 from torch_geometric.data import Batch, Data
 
@@ -26,19 +25,16 @@ class EdgePerturbation():
         
     def do_trans(self, data):
         node_num, _ = data.x.size()
+        device = data.x.device
         _, edge_num = data.edge_index.size()
         perturb_num = int(edge_num * self.ratio)
-
-        edge_index = data.edge_index.detach().clone()
-        idx_remain = edge_index
-        idx_add = torch.tensor([]).reshape(2, -1).long()
+        idx_add = torch.tensor([], device=device).reshape(2, -1).long()
 
         if self.drop:
-            idx_remain = edge_index[:, np.random.choice(edge_num, edge_num-perturb_num, 
-                                                        replace=False)]
+            idx_remain = dropout_adj(data.edge_index, p=self.ratio)[0]
 
         if self.add:
-            idx_add = torch.randint(node_num, (2, perturb_num))
+            idx_add = torch.randint(node_num, (2, perturb_num), device=device)
 
         new_edge_index = torch.cat((idx_remain, idx_add), dim=1)
         new_edge_index = torch.unique(new_edge_index, dim=1)
@@ -87,7 +83,7 @@ class Diffusion():
     def do_trans(self, data):
         node_num, _ = data.x.size()
         if self.add_self_loop:
-            sl = torch.tensor([[n, n] for n in range(node_num)]).t()
+            sl = torch.tensor([[n, n] for n in range(node_num)], device=data.x.device).t()
             edge_index = torch.cat((data.edge_index, sl), dim=1)
         else:
             edge_index = data.edge_index.detach().clone()
@@ -168,7 +164,7 @@ class DiffusionWithSample():
         """
         node_num, _ = data.x.size()
         if self.add_self_loop:
-            sl = torch.tensor([[n, n] for n in range(node_num)]).t()
+            sl = torch.tensor([[n, n] for n in range(node_num)], device=data.x.device).t()
             edge_index = torch.cat((data.edge_index, sl), dim=1)
         else:
             edge_index = data.edge_index.detach().clone()
@@ -191,18 +187,18 @@ class DiffusionWithSample():
         if self.epsilon:
             epsilons = [1e-5, 1e-4, 1e-3, 1e-2]
             avg_degree = torch.sum(orig_adj) / orig_adj.shape[0]
-            ep = epsilons[np.argmin([abs(avg_degree - torch.sum(diff_adj >= e) / diff_adj.shape[0]) for e in epsilons])]
+            ep = epsilons[torch.argmin([abs(avg_degree - torch.sum(diff_adj >= e) / diff_adj.shape[0]) for e in epsilons])]
 
             diff_adj[diff_adj < ep] = 0.0
             scaler = MinMaxScaler()
             scaler.fit(diff_adj)
-            diff_adj = torch.tensor(scaler.transform(diff_adj))
+            diff_adj = torch.tensor(scaler.transform(diff_adj), device=data.x.device)
 
         dlist_orig_x = []
         dlist_diff_x = []
         drop_num = node_num - self.sample_size
         for b in range(self.batch_size):
-            idx_drop = np.random.choice(node_num, drop_num, replace=False)
+            idx_drop = torch.randperm(node_num, device=x.device)[:drop_num]
             idx_nondrop = [n for n in range(node_num) if not n in idx_drop]
 
             sample_orig_adj = orig_adj.clone()
@@ -222,4 +218,3 @@ class DiffusionWithSample():
                                      edge_attr=edge_attr))
 
         return Batch.from_data_list(dlist_orig_x), Batch.from_data_list(dlist_diff_x)
-

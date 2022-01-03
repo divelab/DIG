@@ -38,9 +38,13 @@ class NodeAttrMask():
         if self.mode == 'whole':
             mask = torch.zeros(node_num)
             mask_num = int(node_num * self.mask_ratio)
-            idx_mask = np.random.choice(node_num, mask_num, replace=False)
-            x[idx_mask] = torch.tensor(np.random.normal(loc=self.mask_mean, scale=self.mask_std, 
-                                                        size=(mask_num, feat_dim)), dtype=torch.float32)
+            idx_mask = torch.randperm(x.size(0), device=x.device)[:mask_num]
+            if self.mask_std > 0:
+                x[idx_mask] = torch.empty((mask_num, feat_dim), dtype=torch.float32, 
+                    device=x.device).normal_(mean=self.mask_mean,std=self.mask_std)
+            else:
+                x[idx_mask] = self.mask_mean
+
             mask[idx_mask] = 1
 
         elif self.mode == 'partial':
@@ -49,14 +53,15 @@ class NodeAttrMask():
                 for j in range(feat_dim):
                     if random.random() < self.mask_ratio:
                         x[i][j] = torch.tensor(np.random.normal(loc=self.mask_mean, 
-                                                                scale=self.mask_std), dtype=torch.float32)
+                            scale=self.mask_std), dtype=torch.float32, device=x.device)
                         mask[i][j] = 1
 
         elif self.mode == 'onehot':
             mask = torch.zeros(node_num)
             mask_num = int(node_num * self.mask_ratio)
-            idx_mask = np.random.choice(node_num, mask_num, replace=False)
-            x[idx_mask] = torch.tensor(np.eye(feat_dim)[np.random.randint(0, feat_dim, size=(mask_num))], dtype=torch.float32)
+            idx_mask = torch.randperm(x.size(0), device=x.device)[:mask_num]
+            x[idx_mask] = torch.eye(feat_dim, dtype=torch.float32, device=x.device
+                )[torch.randint(0, feat_dim, size=(mask_num), device=x.device)]
             mask[idx_mask] = 1
 
         else:
@@ -80,4 +85,3 @@ class NodeAttrMask():
             return Batch.from_data_list(dlist)
         elif isinstance(data, Data):
             return self.do_trans(data)
-
