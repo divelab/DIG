@@ -26,7 +26,7 @@ The information about the seven algorithms is summarized in the following table.
 | Grad-CAM | [Paper](https://openaccess.thecvf.com/content_CVPR_2019/papers/Pope_Explainability_Methods_for_Graph_Convolutional_Neural_Networks_CVPR_2019_paper.pdf) <br> [Code](https://github.com/divelab/DIG/tree/main/dig/xgraph/GradCAM) | Grad-CAM is a popular explanation models for image classifer. It is extended to graph models to measure the importance of different nodes. The key idea is to combine the hidden feature maps and the gradients to indicate node importance. |
 | XGNN | [Paper](https://arxiv.org/abs/2006.02587) <br> [Code](https://github.com/divelab/DIG/tree/main/dig/xgraph/XGNN) | XGNN is a model-level explanation method for Graph Neural Networks. Instead of explaining specific predictions, it studies the general behavior of GNNs, such as what input graph patterns will maximize the prediction of a certai class. It employs graph generation algorithm to generate graphs to maximize a target prediction score. |
 
-Except these, we also provide the RandomExplainer which gives random explanations for the input graphs.
+Besides, we also provide the RandomExplainer which gives random explanations for the input graphs.
 
 
 
