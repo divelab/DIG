@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import random_split, Subset
 from torch_geometric.data import DataLoader
 from dig.xgraph.dataset import MoleculeDataset, SynGraphDataset, SentiGraphDataset, BA_LRP
+from torch import default_generator
 
 
 def get_dataset(dataset_root, dataset_name):
@@ -46,11 +47,10 @@ def get_dataloader(dataset, batch_size, random_split_flag=True, data_split_ratio
 
         train, eval, test = random_split(dataset,
                                          lengths=[num_train, num_eval, num_test],
-                                         generator=torch.Generator().manual_seed(seed))
+                                         generator=default_generator)
 
     dataloader = dict()
     dataloader['train'] = DataLoader(train, batch_size=batch_size, shuffle=True)
     dataloader['eval'] = DataLoader(eval, batch_size=batch_size, shuffle=False)
     dataloader['test'] = DataLoader(test, batch_size=batch_size, shuffle=False)
     return dataloader
-

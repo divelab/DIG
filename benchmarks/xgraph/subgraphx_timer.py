@@ -1,4 +1,5 @@
 import os
+import time
 import torch
 import hydra
 from omegaconf import OmegaConf
@@ -18,11 +19,6 @@ random_seed = 123
 
 @hydra.main(config_path="config", config_name="config")
 def pipeline(config):
-    import json
-    recorder_path = f'/data/haiyang/{config.record_filename}'
-    with open(recorder_path, 'r') as f:
-        recorder = json.load(f)
-
     import random
     import numpy as np
     random.seed(random_seed)
@@ -57,7 +53,7 @@ def pipeline(config):
                              'data_split_ratio': config.datasets.data_split_ratio,
                              'seed': config.datasets.seed}
         loader = get_dataloader(dataset, **dataloader_params)
-        test_indices = loader['test'].dataset.indices[:100]
+        test_indices = loader['test'].dataset.indices[:20]
 
     if config.explainers.param.subgraph_building_method == 'split':
         config.models.param.add_self_loop = False
@@ -67,6 +63,7 @@ def pipeline(config):
                        dim_node=dataset.num_node_features,
                        dim_hidden=300,
                        num_classes=dataset.num_classes)
+
     elif config.model_name == 'GIN_3l':
         model = GIN_3l(model_level='graph',
                        dim_node=dataset.num_node_features,
@@ -119,48 +116,31 @@ def pipeline(config):
 
         index = 0
         x_collector = XCollector()
+        total_time = 0.0
+        time_duration = 0.0
         for i, data in enumerate(dataset[test_indices]):
             index += 1
             data.to(device)
             data.edge_index = add_self_loops(data.edge_index, num_nodes=data.num_nodes)[0]
-            saved_MCTSInfo_list = None
 
             from torch_geometric.data import Batch
             prediction = model(data=Batch.from_data_list([data])).argmax(-1).item()
 
-            if os.path.isfile(os.path.join(explanation_saving_dir, f'example_{test_indices[i]}.pt')) and not IS_FRESH:
-                saved_MCTSInfo_list = torch.load(os.path.join(explanation_saving_dir, f'example_{test_indices[i]}.pt'))
-                print(f"load example {test_indices[i]}.")
-
+            tic = time.time()
             explain_result, related_preds = \
                 subgraphx.explain(data.x, data.edge_index,
                                   max_nodes=config.explainers.max_ex_size,
                                   label=prediction,
-                                  saved_MCTSInfo_list=saved_MCTSInfo_list)
+                                  saved_MCTSInfo_list=None)
+            toc = time.time()
 
-            torch.save(explain_result, os.path.join(explanation_saving_dir, f'example_{test_indices[i]}.pt'))
-
-            title_sentence = f'fide: {(related_preds["origin"] - related_preds["maskout"]):.3f}, ' \
-                             f'fide_inv: {(related_preds["origin"] - related_preds["masked"]):.3f}, ' \
-                             f'spar: {related_preds["sparsity"]:.3f}'
-
-            explain_result = subgraphx.read_from_MCTSInfo_list(explain_result)
-            if hasattr(dataset, 'supplement'):
-                words = dataset.supplement['sentence_tokens'][str(test_indices[i])]
-            else:
-                words = None
-
-            subgraphx.visualization(explain_result,
-                                    max_nodes=config.explainers.max_ex_size,
-                                    plot_utils=plot_utils,
-                                    title_sentence=title_sentence,
-                                    vis_name=os.path.join(explanation_saving_dir,
-                                                          f'example_{test_indices[i]}.png'),
-                                    words=words)
+            time_duration += toc - tic
+            total_time += time_duration
 
             explain_result = [explain_result]
             related_preds = [related_preds]
             x_collector.collect_data(explain_result, related_preds, label=0)
+            print(f"The time duration is {time_duration}.")
 
     # for node level explanation
     else:
@@ -223,13 +203,7 @@ def pipeline(config):
           f'Fidelity_inv: {x_collector.fidelity_inv:.4f}\n'
           f'Sparsity: {x_collector.sparsity:.4f}')
 
-    recorder['subgraphx'][f'{config.explainers.max_ex_size}'] = {}
-    recorder['subgraphx'][f'{config.explainers.max_ex_size}']['fidelity'] = x_collector.fidelity
-    recorder['subgraphx'][f'{config.explainers.max_ex_size}']['fidelity_inv'] = x_collector.fidelity_inv
-    recorder['subgraphx'][f'{config.explainers.max_ex_size}']['sparsity'] = x_collector.sparsity
-
-    with open(recorder_path, 'w') as f:
-        json.dump(recorder, f, indent=2)
+    print(f"{total_time  / len(test_indices)}")
 
 
 if __name__ == '__main__':

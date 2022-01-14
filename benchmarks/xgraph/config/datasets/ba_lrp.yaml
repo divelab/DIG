@@ -1,5 +1,5 @@
 dataset_root: '/tmp/datasets'
 random_split_flag: True
 data_split_ratio: [0.8, 0.1, 0.1]
-dataset_name: 'bace'
+dataset_name: 'ba_lrp'
 seed: 2

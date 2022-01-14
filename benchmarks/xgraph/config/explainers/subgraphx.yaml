@@ -1,7 +1,34 @@
 explanation_result_dir: ''
-max_ex_size: 100
+max_ex_size: 10
 
 param:
+  clintox:
+    rollout: 20
+    high2low: False
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 12
+    reward_method: 'mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  tox21:
+    rollout: 20
+    high2low: False
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 12
+    reward_method: 'mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
+  ba_lrp:
+    rollout: 20
+    high2low: False
+    c_puct: 10.0
+    min_atoms: 5
+    expand_atoms: 12
+    reward_method: 'mc_l_shapley'
+    subgraph_building_method: 'split'
+    verbose: True
   bbbp:
     rollout: 20
     high2low: False

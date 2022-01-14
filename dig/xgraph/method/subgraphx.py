@@ -223,10 +223,10 @@ class PlotUtils(object):
             nx.draw_networkx_labels(graph, pos, labels)
 
         plt.axis('off')
-        if figname is not None:
-            plt.savefig(figname)
         if title_sentence is not None:
             plt.title('\n'.join(wrap(title_sentence, width=60)))
+        if figname is not None:
+            plt.savefig(figname)
         if self.is_show:
             plt.show()
         if figname is not None:

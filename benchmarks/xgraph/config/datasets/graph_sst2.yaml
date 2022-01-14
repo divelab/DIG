@@ -1,4 +1,4 @@
-dataset_root: '/data/haiyang/xgraph_baseline/datasets'
+dataset_root: '/tmp/datasets'
 dataset_name: 'graph_sst2'
 random_split_flag: False
 data_split_ratio: None

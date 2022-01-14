@@ -7,6 +7,7 @@ from benchmarks.xgraph.gnnNets import get_gnnNets
 from dig.xgraph.method import GNN_GI
 from dig.xgraph.evaluation import XCollector
 from benchmarks.xgraph.dataset import get_dataset, get_dataloader
+from dig.xgraph.models import GCN_3l
 
 
 @hydra.main(config_path="config", config_name="config")
@@ -33,22 +34,32 @@ def pipeline(config):
                              'data_split_ratio': config.datasets.data_split_ratio,
                              'seed': config.datasets.seed}
         loader = get_dataloader(dataset, **dataloader_params)
-        test_indices = loader['test'].dataset.indices
+        test_indices = loader['test'].dataset.indices[:100]
     else:
         node_indices_mask = (dataset.data.y != 0) * dataset.data.test_mask
         node_indices = torch.where(node_indices_mask)[0]
 
-    model = get_gnnNets(input_dim=dataset.num_node_features,
-                        output_dim=dataset.num_classes,
-                        model_config=config.models)
+    model = GCN_3l(model_level='graph',
+                   dim_node=dataset.num_node_features,
+                   dim_hidden=300,
+                   num_classes=dataset.num_classes)
+    # model = get_gnnNets(input_dim=dataset.num_node_features,
+    #                     output_dim=dataset.num_classes,
+    #                     model_config=config.models)
 
-    state_dict = torch.load(os.path.join(config.models.gnn_saving_dir,
-                                         config.datasets.dataset_name,
-                                         f"{config.models.gnn_name}_"
-                                         f"{len(config.models.param.gnn_latent_dim)}l_best.pth"))['net']
-    model.load_state_dict(state_dict)
+    # state_dict = torch.load(os.path.join(config.models.gnn_saving_dir,
+    #                                      config.datasets.dataset_name,
+    #                                      f"{config.models.gnn_name}_"
+    #                                      f"{len(config.models.param.gnn_latent_dim)}l_best.pth"))['net']
+    # model.load_state_dict(state_dict)
 
+    ckpt = torch.load(os.path.join(config.models.gnn_saving_dir,
+                                   config.datasets.dataset_name,
+                                   f"GCN_3l",
+                                   f"GCN_3l_best.ckpt"))
+    model.load_state_dict(ckpt['state_dict'])
     model.to(device)
+
     explanation_saving_dir = os.path.join(config.explainers.explanation_result_dir,
                                           config.datasets.dataset_name,
                                           config.models.gnn_name,
@@ -80,7 +91,8 @@ def pipeline(config):
                 walks = {k: v.to('cpu') for k, v in walks.items()}
                 torch.save(walks, os.path.join(explanation_saving_dir, f'example_{test_indices[i]}.pt'))
 
-            prediction = model(data).argmax(-1).item()
+            from torch_geometric.data import Batch
+            prediction = model(data=Batch.from_data_list([data])).argmax(-1).item()
             x_collector.collect_data(masks, related_preds, label=prediction)
     else:
         data = dataset.data

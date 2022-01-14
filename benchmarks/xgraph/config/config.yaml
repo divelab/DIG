@@ -3,3 +3,5 @@ defaults:
   - datasets: bbbp
   - explainers: gnn_gi
 device_id: 0
+model_name: GCN_3l
+record_filename: none
