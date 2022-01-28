@@ -24,7 +24,7 @@
     "save_interval": 1,
     "save_dir": "rand_gen_qm9",
     "num_min_node": 7,
-    "num_max_node": 25,
+    "num_max_node": 20,
     "temperature": [
         0.35,
         0.23
