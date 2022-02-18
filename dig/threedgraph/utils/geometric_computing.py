@@ -63,11 +63,11 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion = False):
         pos_j0 = pos[idx_k_t] - pos[idx_j_t]
         pos_ji = pos[idx_i_t] - pos[idx_j_t]
         pos_jk = pos[idx_k_n] - pos[idx_j_t]
-        dist_ji = pos_ji.pow(2).sum(dim=-1).sqrt()
+        # dist_ji = pos_ji.pow(2).sum(dim=-1).sqrt()
         plane1 = torch.cross(pos_ji, pos_j0)
         plane2 = torch.cross(pos_ji, pos_jk)
         a = (plane1 * plane2).sum(dim=-1) # cos_angle * |plane1| * |plane2|
-        b = (torch.cross(plane1, plane2) * pos_ji).sum(dim=-1) / dist_ji
+        b = torch.cross(plane1, plane2).norm(dim=-1) # sin_angle * |plane1| * |plane2|
         torsion1 = torch.atan2(b, a) # -pi to pi
         torsion1[torsion1<=0]+=2*PI # 0 to 2pi
         torsion = scatter(torsion1,idx_batch_t,reduce='min')
