@@ -27,6 +27,7 @@
 [![Contributing][contributing-image]][contributing-url]
 [![License][license-image]][license-url]
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=jwenjian.visitor-badge)
+[![Downloads](https://pepy.tech/badge/dive-into-graphs)](https://pepy.tech/project/dive-into-graphs)
 <!--- [![Contributors][contributor-image]][contributor-url] -->
 
 
