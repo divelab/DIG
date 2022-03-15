@@ -12,7 +12,7 @@ from Configures import data_args, train_args, model_args
 def train_MUTAG():
     # attention the multi-task here
     print('start loading data====================')
-    dataset = get_dataset(data_args)
+    dataset = get_dataset(data_args.dataset_dir， data_args.dataset_name)
     input_dim = dataset.num_node_features
     output_dim = int(dataset.num_classes)
     dataloader = get_dataloader(dataset, data_args, train_args)
@@ -87,7 +87,7 @@ def train_MUTAG():
 def train_GC():
     # attention the multi-task here
     print('start loading data====================')
-    dataset = get_dataset(data_args)
+    dataset = get_dataset(data_args.dataset_dir， data_args.dataset_name)
     input_dim = dataset.num_node_features
     output_dim = int(dataset.num_classes)
     dataloader = get_dataloader(dataset, data_args, train_args)
@@ -242,8 +242,7 @@ def predict_GC(test_dataloader, gnnNets):
 # train for node classification task
 def train_NC():
     print('start loading data====================')
-    import pdb; pdb.set_trace()
-    dataset = get_dataset(data_args)
+    dataset = get_dataset(data_args.dataset_dir， data_args.dataset_name)
     input_dim = dataset.num_node_features
     output_dim = int(dataset.num_classes)
 
