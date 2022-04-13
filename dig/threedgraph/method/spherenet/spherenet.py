@@ -10,11 +10,6 @@ from math import sqrt
 from ...utils import xyz_to_dat
 from .features import dist_emb, angle_emb, torsion_emb
 
-try:
-    import sympy as sym
-except ImportError:
-    sym = None
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class emb(torch.nn.Module):

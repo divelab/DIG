@@ -7,10 +7,7 @@ from scipy import special as sp
 import torch
 from math import pi as PI
 
-try:
-    import sympy as sym
-except ImportError:
-    sym = None
+import sympy as sym
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
