@@ -1,5 +1,38 @@
 # Explainability of Graph Neural Networks
 
+## Reproducibility
+This repository provides benchmark codes to compare the explainability methods under the same experimental settings. 
+
+* The checkpoints for the corresponding datasets are saved in the [link](https://drive.google.com/drive/u/0/folders/19krHmYpGDmR4abDB3bz0fVLYUeFmsmR7).
+Download the checkpoints, and save them in the directory `benchmarks/xgraph/checkpoints`.
+* The explanation results are saved in the [link](https://drive.google.com/drive/u/0/folders/1zNm9i1XvAMeZsmvzS1fyeIwpnaU8AkK7).
+When reproduce the results, please download the explanations and save them in the directory `benchmarks/xgraph/results`.
+
+### Results
+* Fidelity+ and Sparsity 
+<p align="center">
+<img src="imgs/fidelity.png" width="1000" class="center" alt="logo"/>
+    <br/>
+</p>
+
+* Fidelity- and Sparsity
+<p align="center">
+<img src="imgs/fidelity_inv.png" width="1000" class="center" alt="logo"/>
+    <br/>
+</p>
+
+* Accuracy and Stabability
+
+    These two metrics are only evaluated on the synthetic datasets BA-shapes and BA-Community, since they take the motifs as the ground-truth labels.
+
+Please run the following command in the `dig` directory.
+```bash
+DATASETS=graph_sst2
+EXPLAINERS=subgraphx 
+python -m benchmarks.xgraph.subgraphx datasets=$DATASETS explainers=$EXPLAINERS 
+```
+
+
 ## Overview
 
 Benchmark for xgraph provides a systematic schema to compare different instance-wise explanation algorithms for GNNs.

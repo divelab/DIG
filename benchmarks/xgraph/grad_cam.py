@@ -67,7 +67,7 @@ def pipeline(config):
     index = 0
     x_collector = XCollector()
     if config.models.param.graph_classification:
-        for i, data in enumerate(dataset[test_indices]):
+        for i, data in enumerate(dataset[test_indices[:10]]):
             index += 1
             data.edge_index = add_remaining_self_loops(data.edge_index, num_nodes=data.num_nodes)[0]
             data.to(device)

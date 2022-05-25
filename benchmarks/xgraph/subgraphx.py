@@ -126,7 +126,7 @@ def pipeline(config):
                                                           f'example_{test_indices[i]}_'
                                                           f'prediction_{prediction}_'
                                                           f'label_{data.y.item()}_'
-                                                          f'pred_{predict_true}_wdlen{len(words)}.png'),
+                                                          f'pred_{predict_true}.png'),
                                     words=words)
 
             explain_result = [explain_result]
