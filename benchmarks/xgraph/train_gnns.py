@@ -10,6 +10,7 @@ from benchmarks.xgraph.gnnNets import get_gnnNets
 from benchmarks.xgraph.dataset import get_dataset, get_dataloader
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import MultiStepLR
+from utils import fix_random_seed
 
 
 class TrainModel(object):
@@ -147,7 +148,8 @@ class TrainModel(object):
                 data = self.dataset.data.to(self.device)
                 train_loss = self._train_batch(data, data.y)
 
-            eval_loss, eval_acc = self.eval()
+            with torch.no_grad():
+                eval_loss, eval_acc = self.eval()
             print(f'Epoch:{epoch}, Training_loss:{train_loss:.4f}, Eval_loss:{eval_loss:.4f}, Eval_acc:{eval_acc:.4f}')
             if num_early_stop > 0:
                 if eval_loss <= best_eval_loss:
@@ -192,6 +194,7 @@ def main(config):
     config.models.gnn_saving_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'checkpoints')
     config.models.param = config.models.param[config.datasets.dataset_name]
     print(OmegaConf.to_yaml(config))
+    fix_random_seed(config.random_seed)
 
     if torch.cuda.is_available():
         device = torch.device('cuda', index=config.device_id)

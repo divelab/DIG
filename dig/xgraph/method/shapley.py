@@ -290,4 +290,4 @@ def sparsity(coalition: list, data: Data, subgraph_building_method='zero_filling
         node_mask = torch.zeros(data.x.shape[0])
         node_mask[coalition] = 1.0
         edge_mask = (node_mask[row] == 1) & (node_mask[col] == 1)
-        return 1.0 - edge_mask.sum() / edge_mask.shape[0]
+        return 1.0 - (edge_mask.sum() / edge_mask.shape[0]).item()

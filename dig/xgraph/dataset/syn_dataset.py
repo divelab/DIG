@@ -15,8 +15,9 @@ def read_ba2motif_data(folder: str, prefix):
 
     data_list = []
     for graph_idx in range(dense_edges.shape[0]):
+        edge_index = dense_to_sparse(torch.from_numpy(dense_edges[graph_idx]))[0]
         data_list.append(Data(x=torch.from_numpy(node_features[graph_idx]).float(),
-                              edge_index=dense_to_sparse(torch.from_numpy(dense_edges[graph_idx]))[0],
+                              edge_index=edge_index,
                               y=torch.from_numpy(np.where(graph_labels[graph_idx])[0])))
     return data_list
 
@@ -101,6 +102,30 @@ class SynGraphDataset(InMemoryDataset):
     def __repr__(self):
         return '{}({})'.format(self.names[self.name][0], len(self))
 
+    def gen_motif_edge_mask(self, data, node_idx=0, num_hops=3):
+        if self.name in ['ba_2motifs']:
+            return torch.logical_and(data.edge_index[0] >= 20, data.edge_index[1] >= 20)
+        elif self.name in ['ba_shapes', 'ba_community', 'tree_grid', 'tree_cycle']:
+            """ selection in a loop way to fetch all the nodes in the connected motifs """
+            if data.y[node_idx] == 0:
+                return torch.zeros_like(data.edge_index[0]).type(torch.bool)
+            connected_motif_nodes = set()
+            edge_label_matrix = data.edge_label_matrix + data.edge_label_matrix.T
+            edge_index = data.edge_index.to('cpu')
+            if isinstance(node_idx, torch.Tensor):
+                connected_motif_nodes.add(node_idx.item())
+            else:
+                connected_motif_nodes.add(node_idx)
+            for _ in range(num_hops):
+                append_node = set()
+                for node in connected_motif_nodes:
+                    append_node.update(tuple(torch.where(edge_label_matrix[node] != 0)[0].tolist()))
+                connected_motif_nodes.update(append_node)
+            connected_motif_nodes_tensor = torch.Tensor(list(connected_motif_nodes))
+            frm_mask = (edge_index[0].unsqueeze(1) - connected_motif_nodes_tensor.unsqueeze(0) == 0).any(dim=1)
+            to_mask = (edge_index[1].unsqueeze(1) - connected_motif_nodes_tensor.unsqueeze(0) == 0).any(dim=1)
+            return torch.logical_and(frm_mask, to_mask)
+
     def read_syn_data(self):
         with open(self.raw_paths[0], 'rb') as f:
             adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask, edge_label_matrix = pickle.load(f)
@@ -113,6 +138,7 @@ class SynGraphDataset(InMemoryDataset):
         data.train_mask = torch.from_numpy(train_mask)
         data.val_mask = torch.from_numpy(val_mask)
         data.test_mask = torch.from_numpy(test_mask)
+        data.edge_label_matrix = torch.from_numpy(edge_label_matrix)
         return data
 
 
@@ -248,4 +274,3 @@ class BA_LRP(InMemoryDataset):
 if __name__ == '__main__':
     # lrp_dataset = BA_LRP(root='.', num_per_class=10000)
     syn_dataset = SynGraphDataset(root='.', name='BA_Community')
-

@@ -45,9 +45,10 @@ def get_dataloader(dataset, batch_size, random_split_flag=True, data_split_ratio
         num_eval = int(data_split_ratio[1] * len(dataset))
         num_test = len(dataset) - num_train - num_eval
 
+        from functools import partial
         train, eval, test = random_split(dataset,
                                          lengths=[num_train, num_eval, num_test],
-                                         generator=default_generator)
+                                         generator=default_generator.manual_seed(seed))
 
     dataloader = dict()
     dataloader['train'] = DataLoader(train, batch_size=batch_size, shuffle=True)

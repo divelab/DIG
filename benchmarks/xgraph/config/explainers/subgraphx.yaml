@@ -1,5 +1,5 @@
 explanation_result_dir: ''
-max_ex_size: 10
+max_ex_size: 5
 
 param:
   clintox:

@@ -1,8 +1,9 @@
+import math
 import torch
 from torch import Tensor
 import torch.nn as nn
 import copy
-from torch_geometric.utils.loop import add_self_loops
+from torch_geometric.utils.loop import add_remaining_self_loops
 from ..models.utils import subgraph
 from ..models.models import GraphSequential
 from .base_explainer import WalkBase
@@ -57,17 +58,19 @@ class GNN_LRP(WalkBase):
 
         walk_steps, fc_steps = self.extract_step(x, edge_index, detach=False, split_fc=True)
 
-        edge_index_with_loop, _ = add_self_loops(edge_index, num_nodes=self.num_nodes)
+        edge_index_with_loop, _ = add_remaining_self_loops(edge_index, num_nodes=self.num_nodes)
 
         walk_indices_list = torch.tensor(
             self.walks_pick(edge_index_with_loop.cpu(), list(range(edge_index_with_loop.shape[1])),
                             num_layers=self.num_layers), device=self.device)
         if not self.explain_graph:
             node_idx = kwargs.get('node_idx')
+            node_idx = node_idx.reshape([1]).to(self.device)
             assert node_idx is not None
-            _, _, _, self.hard_edge_mask = subgraph(
+            self.subset, _, _, self.hard_edge_mask = subgraph(
                 node_idx, self.__num_hops__, edge_index_with_loop, relabel_nodes=True,
                 num_nodes=None, flow=self.__flow__())
+            self.new_node_idx = torch.where(self.subset == node_idx)[0]
 
             # walk indices list mask
             edge2node_idx = edge_index_with_loop[1] == node_idx
@@ -194,14 +197,17 @@ class GNN_LRP(WalkBase):
         with torch.no_grad():
             with self.connect_mask(self):
                 ex_labels = tuple(torch.tensor([label]).to(self.device) for label in labels)
-                masks = []
+                edge_masks = []
+                hard_edge_masks = []
                 for ex_label in ex_labels:
                     edge_attr = self.explain_edges_with_loop(x, walks, ex_label)
-                    mask = edge_attr
-                    mask = self.control_sparsity(mask, kwargs.get('sparsity'))
-                    mask = mask.sigmoid()
-                    masks.append(mask.detach())
+                    edge_mask = edge_attr.detach()
+                    valid_mask = (edge_mask != -math.inf)
+                    edge_mask[edge_mask == - math.inf] = edge_mask[valid_mask].min() - 1  # replace the negative inf
 
-                related_preds = self.eval_related_pred(x, edge_index, masks, **kwargs)
+                    edge_masks.append(edge_mask)
+                    hard_edge_masks.append(self.control_sparsity(edge_attr, kwargs.get('sparsity')).sigmoid())
 
-        return walks, masks, related_preds
+                related_preds = self.eval_related_pred(x, edge_index, hard_edge_masks, **kwargs)
+
+        return walks, edge_masks, related_preds

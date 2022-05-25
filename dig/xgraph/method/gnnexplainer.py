@@ -1,6 +1,6 @@
 import torch
 from torch import Tensor
-from torch_geometric.utils.loop import add_self_loops
+from torch_geometric.utils.loop import add_remaining_self_loops
 from dig.version import debug
 from ..models.utils import subgraph
 from torch.nn.functional import cross_entropy
@@ -30,16 +30,16 @@ class GNNExplainer(ExplainerBase):
         explain_graph (bool, optional): Whether to explain graph classification model
             (default: :obj:`False`)
     """
-
-    coeffs = {
-        'edge_size': 0.005,
-        'node_feat_size': 1.0,
-        'edge_ent': 1.0,
-        'node_feat_ent': 0.1,
-    }
-
-    def __init__(self, model: torch.nn.Module, epochs: int = 100, lr: float = 0.01, explain_graph: bool = False):
+    def __init__(self,
+                 model: torch.nn.Module,
+                 epochs: int = 100,
+                 lr: float = 0.01,
+                 coff_size: float = 0.001,
+                 coff_ent: float = 0.001,
+                 explain_graph: bool = False):
         super(GNNExplainer, self).__init__(model, epochs, lr, explain_graph)
+        self.coff_ent = coff_ent
+        self.coff_size = coff_size
 
     def __loss__(self, raw_preds: Tensor, x_label: Union[Tensor, int]):
         if self.explain_graph:
@@ -48,9 +48,9 @@ class GNNExplainer(ExplainerBase):
             loss = cross_entropy_with_logit(raw_preds[self.node_idx].reshape(1, -1), x_label)
 
         m = self.edge_mask.sigmoid()
-        loss = loss + self.coeffs['edge_size'] * m.sum()
+        loss = loss + self.coff_size * m.sum()
         ent = -m * torch.log(m + EPS) - (1 - m) * torch.log(1 - m + EPS)
-        loss = loss + self.coeffs['edge_ent'] * ent.mean()
+        loss = loss + self.coff_ent * ent.mean()
 
         if self.mask_features:
             m = self.node_feat_mask.sigmoid()
@@ -89,6 +89,7 @@ class GNNExplainer(ExplainerBase):
 
             optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_value_(self.model.parameters(), clip_value=2.0)
             optimizer.step()
 
         return self.edge_mask.data
@@ -117,7 +118,7 @@ class GNNExplainer(ExplainerBase):
         super().forward(x=x, edge_index=edge_index, **kwargs)
         self.model.eval()
 
-        self_loop_edge_index, _ = add_self_loops(edge_index, num_nodes=self.num_nodes)
+        self_loop_edge_index, _ = add_remaining_self_loops(edge_index, num_nodes=self.num_nodes)
 
         # Only operate on a k-hop subgraph around `node_idx`.
         # Get subgraph and relabel the node, mapping is the relabeled given node_idx.
@@ -126,11 +127,12 @@ class GNNExplainer(ExplainerBase):
             if not node_idx.dim():
                 node_idx = node_idx.reshape(-1)
             node_idx = node_idx.to(self.device)
-            self.node_idx = node_idx
             assert node_idx is not None
-            _, _, _, self.hard_edge_mask = subgraph(
+            self.subset, _, _, self.hard_edge_mask = subgraph(
                 node_idx, self.__num_hops__, self_loop_edge_index, relabel_nodes=True,
                 num_nodes=None, flow=self.__flow__())
+            self.node_idx = node_idx
+            self.new_node_idx = torch.where(self.subset == node_idx)[0]
 
         if kwargs.get('edge_masks'):
             edge_masks = kwargs.pop('edge_masks')

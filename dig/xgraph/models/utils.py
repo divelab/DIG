@@ -88,7 +88,6 @@ def subgraph(node_idx, num_hops, edge_index, relabel_nodes=False,
     else:
         node_idx = node_idx.to(row.device)
 
-
     inv = None
 
     if num_hops != -1:
@@ -113,8 +112,6 @@ def subgraph(node_idx, num_hops, edge_index, relabel_nodes=False,
             else:
                 subset = subsets
                 break
-
-
 
     node_mask.fill_(False)
     node_mask[subset] = True

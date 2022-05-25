@@ -1,7 +1,11 @@
 .gitignore
 .idea/
 benchmarks/xgraph/checkpoints/
-jsons
+benchmarks/xgraph/*.zip
+benchmarks/xgraph/*.sh
+benchmarks/xgraph/imgs/*.png
+benchmarks/xgraph/results/
+jsons/
 jsons.zip
 benchmarks/xgraph/subgraphx_timer.py
 experiment_curve.py

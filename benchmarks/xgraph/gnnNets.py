@@ -11,6 +11,7 @@ from torch import Tensor
 from torch_sparse import SparseTensor, fill_diag
 from torch_geometric.typing import Adj, OptTensor, Size
 from torch_geometric.utils import add_self_loops
+from dig.xgraph.models import GNNPool
 
 
 def get_gnnNets(input_dim, output_dim, model_config):
@@ -31,19 +32,27 @@ def identity(x: torch.Tensor, batch: torch.Tensor):
     return x
 
 
+def cat_max_sum(x, batch):
+    node_dim = x.shape[-1]
+    num_node = 25
+    x = x.reshape(-1, num_node, node_dim)
+    return torch.cat([x.max(dim=1)[0], x.sum(dim=1)], dim=-1)
+
+
 def get_readout_layers(readout):
     readout_func_dict = {
         "mean": global_mean_pool,
         "sum": global_add_pool,
         "max": global_max_pool,
         'identity': identity,
+        "cat_max_sum": cat_max_sum,
     }
     readout_func_dict = {k.lower(): v for k, v in readout_func_dict.items()}
     return readout_func_dict[readout.lower()]
 
 
 # GNN_LRP takes GNNPool class as pooling layer
-class GNNPool(nn.Module):
+class GNNPool(GNNPool):
     def __init__(self, readout):
         super().__init__()
         self.readout = get_readout_layers(readout)
@@ -216,11 +225,11 @@ class GCNConv(GCNConv):
         # --- add require_grad ---
         edge_weight.requires_grad_(True)
 
-        x = torch.matmul(x, self.weight)
-
         # propagate_type: (x: Tensor, edge_weight: OptTensor)
         out = self.propagate(edge_index, x=x, edge_weight=edge_weight,
                              size=None)
+
+        out = torch.matmul(out, self.weight)
 
         if self.bias is not None:
             out += self.bias
@@ -242,6 +251,7 @@ class GCNNet(GNNBase):
                  add_self_loop: bool = True,
                  gnn_nonlinear: str = 'relu',
                  readout: str = 'mean',
+                 concate: bool = False,
                  fc_latent_dim: Union[List[int]] = [],
                  fc_dropout: float = 0.0,
                  fc_nonlinear: str = 'relu',
@@ -258,6 +268,7 @@ class GCNNet(GNNBase):
         self.gnn_emb_normalization = gnn_emb_normalization
         self.gcn_adj_normalization = gcn_adj_normalization
         self.gnn_nonlinear = get_nonlinear(gnn_nonlinear)
+        self.concate = concate
         # readout
         self.readout_layer = GNNPool(readout)
         # FC part
@@ -266,7 +277,11 @@ class GCNNet(GNNBase):
         self.num_mlp_layers = len(self.fc_latent_dim) + 1
         self.fc_nonlinear = get_nonlinear(fc_nonlinear)
 
-        self.emb_dim = self.gnn_latent_dim[-1]
+        if self.concate:
+            self.emb_dim = sum(self.gnn_latent_dim)
+        else:
+            self.emb_dim = self.gnn_latent_dim[-1]
+
         # GNN layers
         self.convs = nn.ModuleList()
         self.convs.append(GCNConv(input_dim, self.gnn_latent_dim[0],
@@ -293,14 +308,19 @@ class GCNNet(GNNBase):
     def get_emb(self, *args, **kwargs):
         #  node embedding for GNN
         x, edge_index, _ = self._argsparse(*args, **kwargs)
+        xs = []
         for i in range(self.num_gnn_layers):
             x = self.convs[i](x, edge_index)
             if self.gnn_emb_normalization:
                 x = F.normalize(x, p=2, dim=-1)
             x = self.gnn_nonlinear(x)
             x = F.dropout(x, self.gnn_dropout)
+            xs.append(x)
 
-        return x
+        if self.concate:
+            return torch.cat(xs, dim=1)
+        else:
+            return x
 
     def forward(self, *args, **kwargs):
         _, _, batch = self._argsparse(*args, **kwargs)

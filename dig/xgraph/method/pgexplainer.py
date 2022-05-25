@@ -385,7 +385,7 @@ class PGExplainer(nn.Module):
     """
     def __init__(self, model, in_channels: int, device, explain_graph: bool = True, epochs: int = 20,
                  lr: float = 0.005, coff_size: float = 0.01, coff_ent: float = 5e-4,
-                 t0: float = 5.0, t1: float = 1.0, num_hops: Optional[int] = None):
+                 t0: float = 5.0, t1: float = 1.0, sample_bias: float = 0.0, num_hops: Optional[int] = None):
         super(PGExplainer, self).__init__()
         self.model = model
         self.device = device
@@ -400,6 +400,7 @@ class PGExplainer(nn.Module):
         self.coff_ent = coff_ent
         self.t0 = t0
         self.t1 = t1
+        self.sample_bias = sample_bias
 
         self.num_hops = self.update_num_hops(num_hops)
         self.init_bias = 0.0
@@ -534,7 +535,8 @@ class PGExplainer(nn.Module):
     def concrete_sample(self, log_alpha: Tensor, beta: float = 1.0, training: bool = True):
         r""" Sample from the instantiation of concrete distribution when training """
         if training:
-            random_noise = torch.rand(log_alpha.shape)
+            bias = self.sample_bias
+            random_noise = torch.rand(log_alpha.shape) * (1 - 2 * bias) + bias
             random_noise = torch.log(random_noise) - torch.log(1.0 - random_noise)
             gate_inputs = (random_noise.to(log_alpha.device) + log_alpha) / beta
             gate_inputs = gate_inputs.sigmoid()
@@ -568,7 +570,6 @@ class PGExplainer(nn.Module):
         """
         node_idx = kwargs.get('node_idx')
         nodesize = embed.shape[0]
-        feature_dim = embed.shape[1]
         if self.explain_graph:
             col, row = edge_index
             f1 = embed[col]
@@ -668,7 +669,7 @@ class PGExplainer(nn.Module):
                     with torch.no_grad():
                         x, edge_index, y, subset, _ = \
                             self.get_subgraph(node_idx=node_idx, x=data.x, edge_index=data.edge_index, y=data.y)
-                        emb = self.model.get_emb(data.x, data.edge_index)
+                        emb = self.model.get_emb(x, edge_index)
                         new_node_index = int(torch.where(subset == node_idx)[0])
                     pred, edge_mask = self.explain(x, edge_index, emb, tmp, training=True, node_idx=new_node_index)
                     loss_tmp = self.__loss__(pred[new_node_index], pred_dict[node_idx])

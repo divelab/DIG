@@ -48,12 +48,10 @@ class ExplainerBase(nn.Module):
     def __set_masks__(self, x: Tensor, edge_index: Tensor, init="normal"):
         (N, F), E = x.size(), edge_index.size(1)
 
-        std = 0.1
         self.node_feat_mask = torch.nn.Parameter(torch.randn(F, requires_grad=True, device=self.device) * 0.1)
 
         std = torch.nn.init.calculate_gain('relu') * sqrt(2.0 / (2 * N))
         self.edge_mask = torch.nn.Parameter(torch.randn(E, requires_grad=True, device=self.device) * std)
-        # self.edge_mask = torch.nn.Parameter(100 * torch.ones(E, requires_grad=True))
 
         for module in self.model.modules():
             if isinstance(module, MessagePassing):
@@ -386,7 +384,7 @@ class WalkBase(ExplainerBase):
         return walk_indices_list
 
     def eval_related_pred(self, x: Tensor, edge_index: Tensor, masks: List[Tensor], **kwargs):
-
+        # place to add accuracy
         node_idx = kwargs.get('node_idx')
         pred_label = kwargs.get('pred_label')
         node_idx = 0 if node_idx is None else node_idx  # graph level: 0, node level: node_idx
@@ -442,7 +440,10 @@ class WalkBase(ExplainerBase):
 
         walks_ids = walks['ids']
         walks_score = walks['score'][:walks_ids.shape[0], ex_label].reshape(-1)
-        idx_ensemble = torch.cat([(walks_ids == i).int().sum(dim=1).unsqueeze(0) for i in range(self.num_edges + self.num_nodes)], dim=0)
+        if walks_ids.max() <= self.num_edges - 1:  # num_edges includes the self-loop
+            idx_ensemble = torch.cat([(walks_ids == i).int().sum(dim=1).unsqueeze(0) for i in range(self.num_edges)], dim=0)
+        else:
+            idx_ensemble = torch.cat([(walks_ids == i).int().sum(dim=1).unsqueeze(0) for i in range(self.num_edges + self.num_nodes)], dim=0)
         hard_edge_attr_mask = (idx_ensemble.sum(1) > 0).long()
         hard_edge_attr_mask_value = torch.tensor([float('inf'), 0], dtype=torch.float, device=self.device)[hard_edge_attr_mask]
         edge_attr = (idx_ensemble * (walks_score.unsqueeze(0))).sum(1)

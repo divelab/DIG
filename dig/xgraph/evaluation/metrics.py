@@ -113,13 +113,21 @@ class XCollector:
     """
 
     def __init__(self, sparsity=None):
-        self.__related_preds, self.__targets = {'zero': [], 'masked': [], 'maskout': [], 'origin': [], 'sparsity': []}, []
+        self.__related_preds, self.__targets = \
+            {
+                'zero': [],
+                'masked': [],
+                'maskout': [],
+                'origin': [],
+                'sparsity': [],
+                'accuracy': [],
+                'stability': []
+             }, []
         self.masks: Union[List, List[List[Tensor]]] = []
 
         self.__sparsity = sparsity
-        self.__fidelity, self.__fidelity_inv = None, None
+        self.__fidelity, self.__fidelity_inv, self.__accuracy, self.__stability = None, None, None, None
         self.__score = None
-
 
     @property
     def targets(self) -> list:
@@ -129,10 +137,18 @@ class XCollector:
         r"""
         Clear class members.
         """
-        self.__related_preds, self.__targets = {'zero': [], 'masked': [], 'maskout': [], 'origin': []}, []
+        self.__related_preds, self.__targets = \
+            {
+                'zero': [],
+                'masked': [],
+                'maskout': [],
+                'origin': [],
+                'sparsity': [],
+                'accuracy': [],
+                'stability': []
+             }, []
         self.masks: Union[List, List[List[Tensor]]] = []
-
-        self.__fidelity, self.__fidelity_inv = None, None
+        self.__fidelity, self.__fidelity_inv, self.__accuracy, self.__stability = None, None, None, None
 
     def collect_data(self,
                      masks: List[Tensor],
@@ -147,11 +163,11 @@ class XCollector:
             related_preds (list): It is a list of dictionary for each class where each dictionary
             includes 4 type predicted probabilities and sparsity.
             label (int): The ground truth label. (default: 0)
-
         """
 
-        if self.__fidelity or self.__fidelity_inv:
-            self.__fidelity, self.__fidelity_inv = None, None
+        if self.__fidelity is not None or self.__fidelity_inv is not None \
+                or self.__accuracy is not None or self.__stability is not None:
+            self.__fidelity, self.__fidelity_inv, self.__accuracy, self.__stability = None, None, None, None
             print(f'#W#Called collect_data() after calculate explainable metrics.')
 
         if not np.isnan(label):
@@ -163,7 +179,6 @@ class XCollector:
             self.__targets.append(label)
             self.masks.append(masks)
 
-
     @property
     def fidelity(self):
         r"""
@@ -173,16 +188,17 @@ class XCollector:
             Please refer to `Explainability in Graph Neural Networks: A Taxonomic Survey
             <https://arxiv.org/abs/2012.15445>`_ for details.
         """
-        if self.__fidelity:
+        if self.__fidelity is not None:
             return self.__fidelity
-        elif None in self.__related_preds['maskout'] or None in self.__related_preds['origin']:
-            return None
         else:
-            mask_out_preds, one_mask_preds = \
-                torch.tensor(self.__related_preds['maskout']), torch.tensor(self.__related_preds['origin'])
+            if None in self.__related_preds['maskout'] or None in self.__related_preds['origin']:
+                return None
+            else:
+                mask_out_preds, one_mask_preds = \
+                    torch.tensor(self.__related_preds['maskout']), torch.tensor(self.__related_preds['origin'])
 
-            self.__fidelity = fidelity(one_mask_preds, mask_out_preds)
-            return self.__fidelity
+                self.__fidelity = fidelity(one_mask_preds, mask_out_preds)
+                return self.__fidelity
 
     @property
     def fidelity_inv(self):
@@ -193,28 +209,54 @@ class XCollector:
             Please refer to `Explainability in Graph Neural Networks: A Taxonomic Survey
             <https://arxiv.org/abs/2012.15445>`_ for details.
         """
-        if self.__fidelity_inv:
+        if self.__fidelity_inv is not None:
             return self.__fidelity_inv
-        elif None in self.__related_preds['masked'] or None in self.__related_preds['origin']:
-            return None
         else:
-            masked_preds, one_mask_preds = \
-                torch.tensor(self.__related_preds['masked']), torch.tensor(self.__related_preds['origin'])
+            if None in self.__related_preds['masked'] or None in self.__related_preds['origin']:
+                return None
+            else:
+                masked_preds, one_mask_preds = \
+                    torch.tensor(self.__related_preds['masked']), torch.tensor(self.__related_preds['origin'])
 
-            self.__fidelity_inv = fidelity_inv(one_mask_preds, masked_preds)
-            return self.__fidelity_inv
+                self.__fidelity_inv = fidelity_inv(one_mask_preds, masked_preds)
+                return self.__fidelity_inv
 
     @property
     def sparsity(self):
         r"""
         Return the Sparsity value.
         """
-        if self.__sparsity:
+        if self.__sparsity is not None:
             return self.__sparsity
-        elif None in self.__related_preds['sparsity']:
-            return None
         else:
-            return torch.tensor(self.__related_preds['sparsity']).mean().item()
+            if None in self.__related_preds['sparsity']:
+                return None
+            else:
+                return torch.tensor(self.__related_preds['sparsity']).mean().item()
+
+    @property
+    def accuracy(self):
+        r"""Return the accuracy for datasets with motif ground-truth"""
+        if self.__accuracy is not None:
+            return self.__accuracy
+        else:
+            if None in self.__related_preds['accuracy']:
+                return torch.tensor([acc for acc in self.__related_preds['accuracy']
+                                     if acc is not None]).mean().item()
+            else:
+                return torch.tensor(self.__related_preds['accuracy']).mean().item()
+
+    @property
+    def stability(self):
+        r"""Return the accuracy for datasets with motif ground-truth"""
+        if self.__stability is not None:
+            return self.__stability
+        else:
+            if None in self.__related_preds['stability']:
+                return torch.tensor([stability for stability in self.__related_preds['stability']
+                                     if stability is not None]).mean().item()
+            else:
+                return torch.tensor(self.__related_preds['stability']).mean().item()
 
 
 class ExplanationProcessor(nn.Module):
@@ -316,5 +358,3 @@ class ExplanationProcessor(nn.Module):
         x_collector.collect_data(masks,
                                  related_preds,
                                  data.y[y_idx].squeeze().long().item())
-
-

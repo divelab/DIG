@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 import torch.nn as nn
-from torch_geometric.utils.loop import add_self_loops
+from torch_geometric.utils.loop import add_remaining_self_loops
 from ..models.utils import subgraph
 from ..models.ext.deeplift.layer_deep_lift import DeepLift
 from .base_explainer import WalkBase
@@ -49,17 +49,18 @@ class DeepLIFT(WalkBase):
         # --- run the model once ---
         super().forward(x=x, edge_index=edge_index, **kwargs)
         self.model.eval()
-        self_loop_edge_index, _ = add_self_loops(edge_index, num_nodes=self.num_nodes)
+        self_loop_edge_index, _ = add_remaining_self_loops(edge_index, num_nodes=self.num_nodes)
 
         if not self.explain_graph:
             node_idx = kwargs.get('node_idx')
             if not node_idx.dim():
                 node_idx = node_idx.reshape(-1)
-            node_idx.to(self.device)
+            node_idx = node_idx.to(self.device)
             assert node_idx is not None
-            _, _, _, self.hard_edge_mask = subgraph(
+            self.subset, _, _, self.hard_edge_mask = subgraph(
                 node_idx, self.__num_hops__, self_loop_edge_index, relabel_nodes=True,
                 num_nodes=None, flow=self.__flow__())
+            self.new_node_idx = torch.where(self.subset == node_idx)[0]
 
         # --- add shap calculation hook ---
         shap = DeepLift(self.model)

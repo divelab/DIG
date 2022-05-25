@@ -300,7 +300,7 @@ class PlotUtils(object):
             if edgelist is None:
                 edgelist = [(n_frm, n_to) for (n_frm, n_to) in graph.edges()
                             if n_frm in nodelist and n_to in nodelist]
-                nx.draw_networkx_edges(graph, pos=pos_coalition, edgelist=edgelist, width=5, edge_color='yellow')
+                nx.draw_networkx_edges(graph, pos=pos_coalition, edgelist=edgelist, width=5, edge_color='yellow', arrows=True)
 
         nx.draw_networkx_nodes(graph, pos, nodelist=list(graph.nodes()), node_size=300)
 
@@ -754,7 +754,6 @@ class SubgraphX(object):
                 max_nodes: int = 5,
                 node_idx: Optional[int] = None,
                 saved_MCTSInfo_list: Optional[List[List]] = None):
-
         probs = self.model(x, edge_index).squeeze().softmax(dim=-1)
         if self.explain_graph:
             if saved_MCTSInfo_list:

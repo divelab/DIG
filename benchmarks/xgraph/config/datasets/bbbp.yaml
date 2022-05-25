@@ -2,4 +2,4 @@ dataset_root: '/tmp/datasets'
 dataset_name: 'bbbp'
 random_split_flag: True
 data_split_ratio: [0.8, 0.1, 0.1]
-seed: 123
+seed: 2

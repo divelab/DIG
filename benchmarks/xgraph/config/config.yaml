@@ -1,7 +1,7 @@
 defaults:
   - models: gcn
-  - datasets: bbbp
-  - explainers: gnn_gi
+  - datasets: graph_sst2
+  - explainers: subgraphx
+random_seed: 0
 device_id: 0
-model_name: GCN_3l
 record_filename: none
