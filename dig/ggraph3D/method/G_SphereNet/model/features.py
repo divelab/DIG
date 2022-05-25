@@ -5,9 +5,12 @@ import numpy as np
 from scipy.optimize import brentq
 from scipy import special as sp
 import torch
-from math import pi as PI
+from math import sqrt, pi as PI
 
-import sympy as sym
+try:
+    import sympy as sym
+except ImportError:
+    sym = None
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
