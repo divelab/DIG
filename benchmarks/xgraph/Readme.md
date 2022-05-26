@@ -61,18 +61,6 @@ The information about the seven algorithms is summarized in the following table.
 
 Besides, we also provide the RandomExplainer which gives random explanations for the input graphs.
 
-## Usage 
-
-* Download the checkpoints from [here](https://drive.google.com/drive/folders/19krHmYpGDmR4abDB3bz0fVLYUeFmsmR7?usp=sharing). In addition, you can train your own model with the `train_gnns.py` script.
-* Many required datasets can be automatically downloaded through the API in `DIG`. Specially, the Graph-SST2, Graph-SST5 and Graph-Twitter datasets should be downloaded manually through the [link](https://drive.google.com/drive/folders/1dt0aGMBvCEUYzaG00TYu1D03GPO7305z).
-
-
-## Results
-We also provide the experiment results for GCN model on six different datasets. 
-
-We provide the checkpoints
-and part of the results [here](https://drive.google.com/drive/folders/1zNm9i1XvAMeZsmvzS1fyeIwpnaU8AkK7?usp=sharing).
-
 
 ## Citations
 If you use our code and data, please cite our survey paper and DIG paper.
