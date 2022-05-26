@@ -23,7 +23,7 @@ When reproduce the results, please download the explanations and save them in th
 
 * Accuracy and Stabability
 
-    These two metrics are only evaluated on the synthetic datasets BA-shapes and BA-Community, since they take the motifs as the ground-truth labels.
+    These two metrics are only evaluated on the synthetic datasets BA-shapes and BA-Community, since these datasets take the motifs as the ground-truth labels.
 
 Please run the following command in the `dig` directory.
 ```bash
