@@ -25,12 +25,13 @@ When reproduce the results, please download the explanations and save them in th
 
     These two metrics are only evaluated on the synthetic datasets BA-shapes and BA-Community, since these datasets take the motifs as the ground-truth labels.
 
-Please run the following command in the `dig` directory.
+Please use the following command in the `dig` directory to run `SubgraphX`. Other algorithms can be executed with their corresponding codes.
+
 ```bash
 DATASETS=graph_sst2
-EXPLAINERS=subgraphx 
-python -m benchmarks.xgraph.subgraphx datasets=$DATASETS explainers=$EXPLAINERS 
+python -m benchmarks.xgraph.subgraphx datasets=$DATASETS explainers=subgraphx
 ```
+
 
 
 ## Overview
