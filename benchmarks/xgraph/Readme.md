@@ -1,7 +1,7 @@
 # Explainability of Graph Neural Networks
 
 ## Reproducibility
-This repository provides benchmark codes to compare the explainability methods under the same experimental settings. 
+This repository provides benchmark codes for our survey paper [Explainability in Graph Neural Networks: A Taxonomic Survey](https://arxiv.org/abs/2012.15445) to compare the explainability methods under the same experimental settings. 
 
 * The checkpoints for the corresponding datasets are saved in the [link](https://drive.google.com/drive/u/0/folders/19krHmYpGDmR4abDB3bz0fVLYUeFmsmR7).
 Download the checkpoints, and save them in the directory `benchmarks/xgraph/checkpoints`.
