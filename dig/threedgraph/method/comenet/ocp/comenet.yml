@@ -8,7 +8,6 @@ model:
   cutoff: 8.0
   num_radial: 3
   num_spherical: 2
-  use_angle_feature: True
   hetero: False
   num_output_layers: 3
   use_pbc: True
