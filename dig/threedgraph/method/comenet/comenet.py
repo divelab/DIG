@@ -3,8 +3,7 @@ from torch_geometric.nn import GraphConv, GraphNorm
 from torch_geometric.nn.acts import swish
 from torch_geometric.nn import inits
 
-from .radial_basis import RadialBasis
-from .features import AngleEmbedding, TorsionEmbedding
+from .features import AngleEmbedding, TorsionEmbedding, RadialBasis
 
 from torch_scatter import scatter, scatter_min
 

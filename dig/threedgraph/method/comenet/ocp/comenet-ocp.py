@@ -21,8 +21,7 @@ import torch.nn.functional as F
 import math
 from math import sqrt
 
-from ..features import AngleEmbedding, TorsionEmbedding
-from ..radial_basis import RadialBasis
+from ..features import AngleEmbedding, TorsionEmbedding, RadialBasis
 
 try:
     import sympy as sym
