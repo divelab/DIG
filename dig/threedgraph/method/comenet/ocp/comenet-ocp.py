@@ -21,7 +21,7 @@ import torch.nn.functional as F
 import math
 from math import sqrt
 
-from ..features import AngleEmbedding, TorsionEmbedding, RadialBasis
+from ..features import angle_emb, torsion_emb, RadialBasis
 
 try:
     import sympy as sym
@@ -305,10 +305,10 @@ class ComENet(nn.Module):
         self.act = act
 
         if use_angle_feature:
-            self.feature1 = TorsionEmbedding(num_radial=num_radial, num_spherical=num_spherical, cutoff=cutoff)
-            self.feature2 = AngleEmbedding(num_radial=num_radial, num_spherical=num_spherical, cutoff=cutoff)
+            self.feature1 = torsion_emb(num_radial=num_radial, num_spherical=num_spherical, cutoff=cutoff)
+            self.feature2 = angle_emb(num_radial=num_radial, num_spherical=num_spherical, cutoff=cutoff)
         else:
-            self.d_emb = RadialBasis(
+            self.dist_emb = RadialBasis(
                 num_radial=num_radial,
                 cutoff=cutoff,
                 rbf={"name": "bernstein"},
@@ -479,7 +479,7 @@ class ComENet(nn.Module):
             feature1 = self.feature1(dist, theta, phi)
             feature2 = self.feature2(dist, tau)
         else:
-            d_feature = self.d_emb(dist)
+            d_feature = self.dist_emb(dist)
             feature1 = d_feature
             feature2 = d_feature
 

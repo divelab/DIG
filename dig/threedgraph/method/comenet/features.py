@@ -254,9 +254,9 @@ def real_sph_harm(L, spherical_coordinates, zero_m_only=True):
     return Y_l_m
 
 
-class AngleEmbedding(torch.nn.Module):
+class angle_emb(torch.nn.Module):
     def __init__(self, num_radial, num_spherical, cutoff=8.0):
-        super(AngleEmbedding, self).__init__()
+        super(angle_emb, self).__init__()
         assert num_radial <= 64
         self.num_spherical = num_spherical
         self.num_radial = num_radial
@@ -295,9 +295,9 @@ class AngleEmbedding(torch.nn.Module):
         return out
 
 
-class TorsionEmbedding(torch.nn.Module):
+class torsion_emb(torch.nn.Module):
     def __init__(self, num_radial, num_spherical, cutoff=8.0):
-        super(TorsionEmbedding, self).__init__()
+        super(torsion_emb, self).__init__()
         assert num_radial <= 64
         self.num_radial = num_radial
         self.num_spherical = num_spherical
