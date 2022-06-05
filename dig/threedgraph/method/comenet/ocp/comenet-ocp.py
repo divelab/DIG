@@ -21,7 +21,7 @@ import torch.nn.functional as F
 import math
 from math import sqrt
 
-from ..features import angle_emb, torsion_emb
+from ocpmodels.models.comenet.utils import angle_emb, torsion_emb
 
 try:
     import sympy as sym
@@ -334,7 +334,7 @@ class ComENet(nn.Module):
         self.lin_out.reset_parameters()
 
     @conditional_grad(torch.enable_grad())
-    def _forward(self, data, pos):
+    def _forward(self, data):
         tags = data.tags
         batch = data.batch
         z = data.atomic_numbers.long()
@@ -342,7 +342,7 @@ class ComENet(nn.Module):
 
         if self.otf_graph:
             edge_index, cell_offsets, neighbors = radius_graph_pbc(
-                data, data.pos, self.cutoff, 50
+                data, self.cutoff, 50
             )
 
             data.edge_index = edge_index
@@ -351,7 +351,7 @@ class ComENet(nn.Module):
 
         if self.use_pbc:
             out = get_pbc_distances(
-                pos,
+                data.pos,
                 data.edge_index,
                 data.cell,
                 data.cell_offsets,
@@ -476,7 +476,7 @@ class ComENet(nn.Module):
         return energy
 
     def forward(self, data):
-        return self._forward(data, data.pos)
+        return self._forward(data)
 
     @property
     def num_params(self):
