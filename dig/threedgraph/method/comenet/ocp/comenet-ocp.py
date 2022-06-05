@@ -8,6 +8,7 @@ from torch_scatter import scatter, scatter_min
 try:
     from ocpmodels.common.registry import registry
     from ocpmodels.common.utils import conditional_grad, get_pbc_distances, radius_graph_pbc
+    from ocpmodels.models.comenet.utils import angle_emb, torsion_emb
 except:
     print("No OCP framework detected")
 
@@ -20,8 +21,6 @@ import torch.nn.functional as F
 
 import math
 from math import sqrt
-
-from ocpmodels.models.comenet.utils import angle_emb, torsion_emb
 
 try:
     import sympy as sym
