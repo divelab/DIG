@@ -175,7 +175,7 @@ class dist_emb(torch.nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
-        torch.arange(1, self.freq.numel() + 1, out=self.freq).mul_(PI)
+        self.freq.data = torch.arange(1, self.freq.numel() + 1).float().mul_(PI)
 
     def forward(self, dist):
         dist = dist.unsqueeze(-1) / self.cutoff
