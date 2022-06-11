@@ -7,7 +7,6 @@ dependencies:
   - rdkit==2021.03.1
   - pytorch==1.6.0
   - pip>=21.0
-  - protobuf==3.19.0
   - pip:
     - furo
     - numpy
