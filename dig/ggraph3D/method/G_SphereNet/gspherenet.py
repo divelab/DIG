@@ -1,6 +1,5 @@
 import os
 import torch
-import torch.nn as nn
 import numpy as np
 from .model import SphGen
 
@@ -15,7 +14,7 @@ class G_SphereNet():
     def get_model(self, model_conf_dict, checkpoint_path=None):
         if model_conf_dict['use_gpu'] and not torch.cuda.is_available():
             model_conf_dict['use_gpu'] = False
-        self.model = SphGen(model_conf_dict)
+        self.model = SphGen(**model_conf_dict)
         if checkpoint_path is not None:
             self.model.load_state_dict(torch.load(checkpoint_path))
     
@@ -28,6 +27,7 @@ class G_SphereNet():
         self.get_model(model_conf_dict, checkpoint_path)
         self.model.train()
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
+        ce_loss = torch.nn.BCELoss()
         if not os.path.isdir(save_dir):
             os.mkdir(save_dir)
         
@@ -47,7 +47,7 @@ class G_SphereNet():
                 ll_angle = torch.mean(1/2 * (angle_out[0] ** 2) - angle_out[1])
                 ll_torsion = torch.mean(1/2 * (torsion_out[0] ** 2) - torsion_out[1])
                 cannot_focus = data_batch['cannot_focus']
-                focus_ce = self.focus_ce(focus_score, cannot_focus)
+                focus_ce = ce_loss(focus_score, cannot_focus)
 
                 loss = ll_node + ll_dist + ll_angle + ll_torsion + focus_ce
                 loss.backward()

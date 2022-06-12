@@ -10,15 +10,15 @@ class RandGenEvaluator:
         pass
 
     @staticmethod
-    def eval_validity(mols_dict):
+    def eval_validity(mol_dicts):
         num_generated, num_valid = 0, 0
         results = {}
 
-        for num_atoms in mols_dict:
-            atomic_numbers, positions = mols_dict[num_atoms]['_atomic_numbers'], mols_dict[num_atoms]['_positions']
+        for num_atoms in mol_dicts:
+            atomic_numbers, positions = mol_dicts[num_atoms]['_atomic_numbers'], mol_dicts[num_atoms]['_positions']
             num_generated += len(atomic_numbers)
 
-            for atomic_number, position in zip(positions, atomic_numbers):
+            for atomic_number, position in zip(atomic_numbers, positions):
                 _, valid = xyz2mol(atomic_number, position)
                 num_valid += 1 if valid else 0
         
@@ -29,26 +29,27 @@ class RandGenEvaluator:
     
     @staticmethod
     def eval_bond_mmd(input_dict):
-        mols_dict, target_bond_dists = input_dict['mols_dict'], input_dict['target_bond_dists']
-        bond_types = [(1,8,1),(1,7,1),(6,7,1),(6,8,1),(6,6,1),(1,6,1)]
+        mol_dicts, target_bond_dists = input_dict['mol_dicts'], input_dict['target_bond_dists']
+        # bond_types = [(1,8,1),(1,7,1),(6,7,1),(6,8,1),(6,6,1),(1,6,1)]
+        bond_types = [(1,8,1),(1,7,1),(6,7,1)]
         atom_type_to_symbol = {1: 'H', 6: 'C', 7: 'N', 8: 'O'}
         results = {}
 
         valid_list, con_mat_list = [], []
-        for num_atoms in mols_dict:
-            atomic_numbers, positions = mols_dict[num_atoms]['_atomic_numbers'], mols_dict[num_atoms]['_positions']
-            for atomic_number, position in zip(positions, atomic_numbers):
+        for num_atoms in mol_dicts:
+            atomic_numbers, positions = mol_dicts[num_atoms]['_atomic_numbers'], mol_dicts[num_atoms]['_positions']
+            for atomic_number, position in zip(atomic_numbers, positions):
                 con_mat, valid = xyz2mol(atomic_number, position)
                 valid_list.append(valid)
                 con_mat_list.append(con_mat)
         
-        source_bond_dists = collect_bond_dists(mols_dict, valid_list, con_mat_list)
+        source_bond_dists = collect_bond_dists(mol_dicts, valid_list, con_mat_list)
 
         for bond_type in bond_types:
             if bond_type in source_bond_dists:
                 mmd = compute_mmd(torch.tensor(source_bond_dists[bond_type]), torch.tensor(target_bond_dists[bond_type]))
                 print("The MMD distance of {}-{} bond length distributions is {}".format(
-                    atom_type_to_symbol[bond_types[0]], atom_type_to_symbol[bond_types[1]], mmd))
+                    atom_type_to_symbol[bond_type[0]], atom_type_to_symbol[bond_type[1]], mmd))
                 results[bond_type] = mmd
         
         return results
@@ -60,13 +61,13 @@ class PropOptEvaluator:
         self.prop_name = prop_name
         self.good_threshold = good_threshold
     
-    def eval(self, mols_dict):
+    def eval(self, mol_dicts):
         results = {}
 
         prop_list = []
-        for num_atoms in mols_dict:
-            atomic_numbers, positions = mols_dict[num_atoms]['_atomic_numbers'], mols_dict[num_atoms]['_positions']
-            for atomic_number, position in zip(positions, atomic_numbers):
+        for num_atoms in mol_dicts:
+            atomic_numbers, positions = mol_dicts[num_atoms]['_atomic_numbers'], mol_dicts[num_atoms]['_positions']
+            for atomic_number, position in zip(atomic_numbers, positions):
                 _, valid = xyz2mol(atomic_number, position)
                 if not valid:
                     continue

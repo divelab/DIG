@@ -41,18 +41,22 @@ def collate_fn(data_batch_list):
 
 class QM93DGEN(InMemoryDataset):
     raw_url = "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/gdb9.tar.gz"
+    split_urls = [
+        "https://github.com/divelab/DIG_storage/raw/main/ggraph3D/data/split.npz",
+        "https://github.com/divelab/DIG_storage/raw/main/ggraph3D/data/alpha.npz",
+        "https://github.com/divelab/DIG_storage/raw/main/ggraph3D/data/gap.npz"
+    ]
     
-    def __init__(self, root, cutoff, subset_idxs, transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root, subset_idxs=None, transform=None, pre_transform=None, pre_filter=None):
         super(QM93DGEN, self).__init__(root, transform, pre_transform, pre_filter)
         self.root = root
-        self.cutoff = cutoff
-        self.subset_idxs = subset_idxs
         if not osp.exists(self.raw_paths[0]):
             self.download()
         if osp.exists(self.processed_paths[0]):
             self.atom_type_list, self.position_list, self.con_mat_list = torch.load(self.processed_paths[0])
         else:
             self.process()
+        self._indices = subset_idxs if subset_idxs is not None else range(len(self.atom_type_list))
     
     @property
     def raw_dir(self):
@@ -78,46 +82,69 @@ class QM93DGEN(InMemoryDataset):
         path = download_url(self.raw_url, self.raw_dir)
         extract_tar(path, self.raw_dir)
         os.unlink(path)
+        
+        for split_url in self.split_urls:
+            download_url(split_url, self.raw_dir)
     
 
     def process(self):
-        print("Processing...")
         mols = Chem.SDMolSupplier(self.raw_paths[0], removeHs=False, sanitize=False)
-        atom_type_list, position_list, con_mat_list = [], [], []
+        self.atom_type_list, self.position_list, self.con_mat_list = [], [], []
 
         for idx in range(len(mols)):
-            mol = self.mols[idx]
+            mol = mols[idx]
             num_atoms = mol.GetNumAtoms()
-            position = self.mols.GetItemText(idx).split('\n')[4:4+num_atoms]
+            position = mols.GetItemText(idx).split('\n')[4:4+num_atoms]
             position = np.array([[float(x) for x in line.split()[:3]] for line in position], dtype=np.float32)
             atom_type = np.array([atomic_num_to_type[atom.GetAtomicNum()] for atom in mol.GetAtoms()])
 
             con_mat = np.zeros([num_atoms, num_atoms], dtype=int)
             for bond in mol.GetBonds():
                 start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
-                bond_type = self.bond_to_type[bond.GetBondType()]
+                bond_type = bond_to_type[bond.GetBondType()]
                 con_mat[start, end] = bond_type
                 con_mat[end, start] = bond_type
             
             if atom_type[0] != 1:
-                first_carbon = np.nonzero(atom_type == 1)[0][0]
+                carbon_idxs = np.nonzero(atom_type == 1)
                 perm = np.arange(len(atom_type))
-                perm[0] = first_carbon
-                perm[first_carbon] = 0
+                if len(carbon_idxs[0]) > 0:
+                    first_carbon = carbon_idxs[0][0]
+                    perm[0] = first_carbon
+                    perm[first_carbon] = 0
                 atom_type, position = atom_type[perm], position[perm]
                 con_mat = con_mat[perm][:, perm]
             
-            atom_type_list.append(torch.tensor(atom_type))
-            position_list.append(torch.tensor(position))
-            con_mat_list.append(torch.tensor(con_mat))
+            self.atom_type_list.append(torch.tensor(atom_type))
+            self.position_list.append(torch.tensor(position))
+            self.con_mat_list.append(torch.tensor(con_mat))
         
-        torch.save((atom_type_list, position_list, con_mat_list), self.processed_paths[0])
-        print("Done!")
+        torch.save((self.atom_type_list, self.position_list, self.con_mat_list), self.processed_paths[0])
+    
+    
+    def len(self):
+        return len(self._indices)
     
 
+    def get_idx_split(self, task):
+        assert task in ['rand_gen', 'gap_opt', 'alpha_opt']
+        if task == 'rand_gen':
+            split_idxs = np.load(osp.join(self.raw_dir, 'split.npz'))
+        elif task == 'gap_opt':
+            split_idxs = np.load(osp.join(self.raw_dir, 'gap.npz'))
+        elif task == 'alpha_opt':
+            split_idxs = np.load(osp.join(self.raw_dir, 'alpha.npz'))
+        else:
+            print("Not supported task! The task must be rand_gen, gap_opt, or alpha_opt!")
+            exit()
+        split_dict = {
+            'train': split_idxs['train_idx'].tolist(), 
+            'valid': split_idxs['val_idx'].tolist()
+        }
+        return split_dict
+
+
     def get(self, idx):
-        if self.subset_idxs is not None:
-            idx = int(self.subset_idxs[idx])
         atom_type, position, con_mat = self.atom_type_list[idx], self.position_list[idx], self.con_mat_list[idx]
         atom_valency = torch.sum(con_mat, dim=1)
 
