@@ -30,8 +30,7 @@ class RandGenEvaluator:
     @staticmethod
     def eval_bond_mmd(input_dict):
         mol_dicts, target_bond_dists = input_dict['mol_dicts'], input_dict['target_bond_dists']
-        # bond_types = [(1,8,1),(1,7,1),(6,7,1),(6,8,1),(6,6,1),(1,6,1)]
-        bond_types = [(1,8,1),(1,7,1),(6,7,1)]
+        bond_types = [(1,8,1),(1,7,1),(6,7,1),(6,8,1),(6,6,1),(1,6,1)]
         atom_type_to_symbol = {1: 'H', 6: 'C', 7: 'N', 8: 'O'}
         results = {}
 
