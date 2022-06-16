@@ -1,0 +1,32 @@
+{
+    "model": {
+        "cutoff": 5.0,
+        "num_node_types": 5,
+        "num_layers": 4,
+        "hidden_channels": 128,
+        "int_emb_size": 64,
+        "basis_emb_size": 8,
+        "out_emb_channels": 256,
+        "num_spherical": 7,
+        "num_radial": 6,
+        "num_flow_layers": 6,
+        "deq_coeff": 0.9,
+        "use_gpu": true,
+        "n_att_heads": 4
+    },
+    "lr": 0.0001,
+    "weight_decay": 0.0,
+    "save_interval": 1,
+    "batch_size": 64,
+    "max_epochs": 100,
+    "chunk_size": 1000,
+    "num_min_node": 2,
+    "num_max_node": 35,
+    "temperature": [
+        0.5,
+        0.3,
+        0.4,
+        1.0
+    ],
+    "focus_th": 0.5
+}
