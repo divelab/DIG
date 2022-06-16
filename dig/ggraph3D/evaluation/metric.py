@@ -80,6 +80,8 @@ class PropOptEvaluator:
             best = np.max(prop_list)
             good_per = np.sum(np.array(prop_list) >= self.good_threshold) / len(prop_list)
         
+        print("Mean: {}, median: {}, best: {}, good percentage: {:.2f}".format(mean, median, best, good_per * 100))
+        
         results['mean'] = mean
         results['median'] = median
         results['best'] = best

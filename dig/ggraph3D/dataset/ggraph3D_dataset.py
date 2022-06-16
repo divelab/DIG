@@ -47,7 +47,7 @@ class QM93DGEN(InMemoryDataset):
         "https://github.com/divelab/DIG_storage/raw/main/ggraph3D/data/gap.npz"
     ]
     
-    def __init__(self, root, subset_idxs=None, transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root='./qm9_3Dgen', subset_idxs=None, transform=None, pre_transform=None, pre_filter=None):
         super(QM93DGEN, self).__init__(root, transform, pre_transform, pre_filter)
         self.root = root
         if not osp.exists(self.raw_paths[0]):
