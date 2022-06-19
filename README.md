@@ -35,6 +35,7 @@
 
 *DIG: Dive into Graphs* is a turnkey library for graph deep learning research.
 
+:fire:**Note: This branch is under developing. We are working on updating our DIG based on PyG 2.0.0. We will release a stable DIG version soon.**
 
 ## Why DIG?
 
