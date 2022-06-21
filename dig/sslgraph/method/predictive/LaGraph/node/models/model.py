@@ -9,15 +9,19 @@ from torch_geometric.nn import GATConv, GCNConv, GINConv
 
 
 class Encoder(torch.nn.Module):
-    def __init__(self, dim_in=32, dim_out=32, num_gc_layers=5, activation='prelu'):
+    def __init__(self, dim_in=32, dim_out=32, num_gc_layers=5, activation='prelu', conv='gcn'):
         super(Encoder, self).__init__()
 
         self.num_gc_layers = num_gc_layers
         self.convs = torch.nn.ModuleList()
         self.bns = torch.nn.ModuleList()
+        self.conv_name = conv
         for i in range(num_gc_layers):
             start_dim = dim_out if i else dim_in
-            conv = GCN(start_dim, dim_out, activation)
+            if self.conv_name == 'pyg_gcn':
+                conv = GCNConv(start_dim, dim_out)
+            else:
+                conv = GCN(start_dim, dim_out, activation)
             bn = torch.nn.BatchNorm1d(dim_out)
             self.convs.append(conv)
             self.bns.append(bn)
@@ -25,7 +29,11 @@ class Encoder(torch.nn.Module):
     def forward(self, x, adj, sparse):
         xs = []
         for i in range(self.num_gc_layers):
-            x = self.convs[i](x, adj, sparse)
+            if self.conv_name == 'pyg_gcn':
+                x = self.convs[i](x[0], adj)
+                x = F.relu(x)
+            else:
+                x = self.convs[i](x, adj, sparse)
             x = self.bns[i](torch.squeeze(x))
             x = torch.unsqueeze(x, 0)
             xs.append(x)
@@ -84,12 +92,12 @@ class MLP(torch.nn.Module):
 
 
 class LaGraphNetNode(torch.nn.Module):
-    def __init__(self, dim_ft=32, dim_hid=32, dim_eb=32, num_en_layers=5, num_de_layers=5, decoder='gnn'):
+    def __init__(self, dim_ft=32, dim_hid=32, dim_eb=32, num_en_layers=5, num_de_layers=5, decoder='gnn', conv='gcn'):
         super(LaGraphNetNode, self).__init__()
 
         self.embedding_layer = Sequential(Linear(dim_ft, dim_eb), ReLU())
         self.bn = torch.nn.BatchNorm1d(dim_eb, affine=False)
-        self.encoder = Encoder(dim_in=dim_ft, dim_out=dim_hid, num_gc_layers=num_en_layers)
+        self.encoder = Encoder(dim_in=dim_ft, dim_out=dim_hid, num_gc_layers=num_en_layers, conv=conv)
         if decoder == 'gnn':
             self.decoder = Decoder(dim_in=dim_hid, dim_out=dim_ft, num_gc_layers=num_de_layers)
         elif decoder == 'mlp':
