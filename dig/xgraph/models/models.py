@@ -322,7 +322,7 @@ class GCNConv(gnn.GCNConv):
         # --- add require_grad ---
         edge_weight.requires_grad_(True)
 
-        x = torch.matmul(x, self.weight)
+        x = self.lin(x)
 
         # propagate_type: (x: Tensor, edge_weight: OptTensor)
         out = self.propagate(edge_index, x=x, edge_weight=edge_weight,
@@ -341,7 +341,7 @@ class GCNConv(gnn.GCNConv):
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
-                and not self.__explain__):
+                and not self._explain):
             coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
                                          size, kwargs)
 
@@ -363,7 +363,7 @@ class GCNConv(gnn.GCNConv):
             # For `GNNExplainer`, we require a separate message and aggregate
             # procedure since this allows us to inject the `edge_mask` into the
             # message passing computation scheme.
-            if self.__explain__:
+            if self._explain:
                 edge_mask = self.__edge_mask__
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
@@ -466,7 +466,7 @@ class GINConv(gnn.GINConv):
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
-                and not self.__explain__):
+                and not self._explain):
             coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
                                          size, kwargs)
 
@@ -488,7 +488,7 @@ class GINConv(gnn.GINConv):
             # For `GNNExplainer`, we require a separate message and aggregate
             # procedure since this allows us to inject the `edge_mask` into the
             # message passing computation scheme.
-            if self.__explain__:
+            if self._explain:
                 edge_mask = self.__edge_mask__
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
@@ -697,7 +697,7 @@ class GCNConv_mask(gnn.GCNConv):
         # --- add require_grad ---
         edge_weight.requires_grad_(True)
 
-        x = torch.matmul(x, self.weight)
+        x = self.lin(x)
 
         # propagate_type: (x: Tensor, edge_weight: OptTensor)
         out = self.propagate(edge_index, x=x, edge_weight=edge_weight,
@@ -716,7 +716,7 @@ class GCNConv_mask(gnn.GCNConv):
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
-                and not self.__explain__):
+                and not self._explain):
             coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
                                          size, kwargs)
 
@@ -738,7 +738,7 @@ class GCNConv_mask(gnn.GCNConv):
             # For `GNNExplainer`, we require a separate message and aggregate
             # procedure since this allows us to inject the `edge_mask` into the
             # message passing computation scheme.
-            if self.__explain__:
+            if self._explain:
                 edge_mask = self.__edge_mask__
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
@@ -841,7 +841,7 @@ class GINConv_mask(gnn.GINConv):
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
-                and not self.__explain__):
+                and not self._explain):
             coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
                                          size, kwargs)
 
@@ -863,7 +863,7 @@ class GINConv_mask(gnn.GINConv):
             # For `GNNExplainer`, we require a separate message and aggregate
             # procedure since this allows us to inject the `edge_mask` into the
             # message passing computation scheme.
-            if self.__explain__:
+            if self._explain:
                 edge_mask = self.__edge_mask__
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).

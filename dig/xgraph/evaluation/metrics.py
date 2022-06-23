@@ -291,12 +291,12 @@ class ExplanationProcessor(nn.Module):
                              range(self.cls.num_layers)]
 
             for idx, module in enumerate(self.cls.mp_layers):
-                module.__explain__ = True
+                module._explain = True
                 module.__edge_mask__ = self.cls.edge_mask[idx]
 
         def __exit__(self, *args):
             for idx, module in enumerate(self.cls.mp_layers):
-                module.__explain__ = False
+                module._explain = False
 
     def eval_related_pred(self, x: torch.Tensor, edge_index: torch.Tensor, masks: List[torch.Tensor], **kwargs):
 

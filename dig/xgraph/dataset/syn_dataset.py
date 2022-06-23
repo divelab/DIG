@@ -3,6 +3,8 @@ import torch
 import pickle
 import numpy as np
 import os.path as osp
+
+import tqdm
 from torch_geometric.utils import dense_to_sparse
 from torch_geometric.data import Data, InMemoryDataset, download_url, extract_zip
 from torch_geometric.data.dataset import files_exist
@@ -263,7 +265,7 @@ class BA_LRP(InMemoryDataset):
             return
 
         data_list = []
-        for i in range(self.num_per_class):
+        for i in tqdm.tqdm(range(self.num_per_class)):
             data_list.append(self.gen_class1())
             data_list.append(self.gen_class2())
 

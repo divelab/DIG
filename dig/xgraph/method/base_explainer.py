@@ -55,13 +55,13 @@ class ExplainerBase(nn.Module):
 
         for module in self.model.modules():
             if isinstance(module, MessagePassing):
-                module.__explain__ = True
+                module._explain = True
                 module.__edge_mask__ = self.edge_mask
 
     def __clear_masks__(self):
         for module in self.model.modules():
             if isinstance(module, MessagePassing):
-                module.__explain__ = False
+                module._explain = False
                 module.__edge_mask__ = None
         self.node_feat_masks = None
         self.edge_mask = None
@@ -466,9 +466,9 @@ class WalkBase(ExplainerBase):
                              range(self.cls.num_layers)]
 
             for idx, module in enumerate(self.cls.mp_layers):
-                module.__explain__ = True
+                module._explain = True
                 module.__edge_mask__ = self.cls.edge_mask[idx]
 
         def __exit__(self, *args):
             for idx, module in enumerate(self.cls.mp_layers):
-                module.__explain__ = False
+                module._explain = False
