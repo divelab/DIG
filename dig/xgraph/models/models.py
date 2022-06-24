@@ -291,6 +291,7 @@ class GCNConv(gnn.GCNConv):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.edge_weight = None
+        self.weight = nn.Parameter(self.lin.weight.data.T.clone().detach())
 
     def forward(self, x: Tensor, edge_index: Adj,
                 edge_weight: OptTensor = None) -> Tensor:
@@ -322,7 +323,7 @@ class GCNConv(gnn.GCNConv):
         # --- add require_grad ---
         edge_weight.requires_grad_(True)
 
-        x = self.lin(x)
+        x = torch.matmul(x, self.weight)
 
         # propagate_type: (x: Tensor, edge_weight: OptTensor)
         out = self.propagate(edge_index, x=x, edge_weight=edge_weight,
@@ -388,6 +389,7 @@ class GINConv(gnn.GINConv):
         self.edge_weight = None
         self.fc_steps = None
         self.reweight = None
+
 
     def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
                 edge_weight: OptTensor = None, task='explain', **kwargs) -> Tensor:
@@ -666,6 +668,7 @@ class GCNConv_mask(gnn.GCNConv):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.edge_weight = None
+        self.weight = nn.Parameter(self.lin.weight.data.T.clone().detach())
 
     def forward(self, x: Tensor, edge_index: Adj,
                 edge_weight: OptTensor = None) -> Tensor:
@@ -697,7 +700,7 @@ class GCNConv_mask(gnn.GCNConv):
         # --- add require_grad ---
         edge_weight.requires_grad_(True)
 
-        x = self.lin(x)
+        x = torch.matmul(x, self.weight)
 
         # propagate_type: (x: Tensor, edge_weight: OptTensor)
         out = self.propagate(edge_index, x=x, edge_weight=edge_weight,
@@ -763,6 +766,7 @@ class GINConv_mask(gnn.GINConv):
         self.edge_weight = None
         self.fc_steps = None
         self.reweight = None
+
 
     def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
                 edge_weight: OptTensor = None, task='explain', **kwargs) -> Tensor:

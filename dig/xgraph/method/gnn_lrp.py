@@ -105,8 +105,8 @@ class GNN_LRP(WalkBase):
                                 ori_fc_weight = fc_modules[0].weight.data
                                 fc_modules[0].weight.data = ori_fc_weight + gamma_ * ori_fc_weight
                     else:
-                        ori_gnn_weights.append(modules[0].lin.weight.data)
-                        gamma_module.lin.weight.data = ori_gnn_weights[i] + gamma_ * ori_gnn_weights[i].relu()
+                        ori_gnn_weights.append(modules[0].weight.data)
+                        gamma_module.weight.data = ori_gnn_weights[i] + gamma_ * ori_gnn_weights[i].relu()
                     gnn_gamma_modules.append(gamma_module)
 
                 # --- record original weights of fc layer ---

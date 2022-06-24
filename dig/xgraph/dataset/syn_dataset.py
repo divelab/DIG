@@ -214,7 +214,13 @@ class BA_LRP(InMemoryDataset):
     def download(self):
         url = self.url
         path = download_url(url, self.raw_dir)
-        shutil.move(path, path.replace('ba_lrp.pt', 'raw.pt'))
+        # shutil.move(path, path.replace('ba_lrp_old.pt', 'raw.pt'))
+        data_list = torch.load(path)
+        pyg_data_list = []
+        for data in data_list:
+            pyg_data_list.append(Data(x=data['x'], edge_index=data['edge_index'], y=data['y']))
+        data, slices = self.collate(pyg_data_list)
+        torch.save((data, slices), self.raw_paths[0])
 
     @staticmethod
     def gen_class1():
