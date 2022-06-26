@@ -291,6 +291,7 @@ class GCNConv(gnn.GCNConv):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.edge_weight = None
+        self.weight = nn.Parameter(self.lin.weight.data.T.clone().detach())
 
     def forward(self, x: Tensor, edge_index: Adj,
                 edge_weight: OptTensor = None) -> Tensor:
@@ -341,7 +342,7 @@ class GCNConv(gnn.GCNConv):
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
-                and not self.__explain__):
+                and not self._explain):
             coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
                                          size, kwargs)
 
@@ -363,7 +364,7 @@ class GCNConv(gnn.GCNConv):
             # For `GNNExplainer`, we require a separate message and aggregate
             # procedure since this allows us to inject the `edge_mask` into the
             # message passing computation scheme.
-            if self.__explain__:
+            if self._explain:
                 edge_mask = self.__edge_mask__
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
@@ -388,6 +389,7 @@ class GINConv(gnn.GINConv):
         self.edge_weight = None
         self.fc_steps = None
         self.reweight = None
+
 
     def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
                 edge_weight: OptTensor = None, task='explain', **kwargs) -> Tensor:
@@ -466,7 +468,7 @@ class GINConv(gnn.GINConv):
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
-                and not self.__explain__):
+                and not self._explain):
             coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
                                          size, kwargs)
 
@@ -488,7 +490,7 @@ class GINConv(gnn.GINConv):
             # For `GNNExplainer`, we require a separate message and aggregate
             # procedure since this allows us to inject the `edge_mask` into the
             # message passing computation scheme.
-            if self.__explain__:
+            if self._explain:
                 edge_mask = self.__edge_mask__
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
@@ -666,6 +668,7 @@ class GCNConv_mask(gnn.GCNConv):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.edge_weight = None
+        self.weight = nn.Parameter(self.lin.weight.data.T.clone().detach())
 
     def forward(self, x: Tensor, edge_index: Adj,
                 edge_weight: OptTensor = None) -> Tensor:
@@ -716,7 +719,7 @@ class GCNConv_mask(gnn.GCNConv):
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
-                and not self.__explain__):
+                and not self._explain):
             coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
                                          size, kwargs)
 
@@ -738,7 +741,7 @@ class GCNConv_mask(gnn.GCNConv):
             # For `GNNExplainer`, we require a separate message and aggregate
             # procedure since this allows us to inject the `edge_mask` into the
             # message passing computation scheme.
-            if self.__explain__:
+            if self._explain:
                 edge_mask = self.__edge_mask__
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
@@ -763,6 +766,7 @@ class GINConv_mask(gnn.GINConv):
         self.edge_weight = None
         self.fc_steps = None
         self.reweight = None
+
 
     def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
                 edge_weight: OptTensor = None, task='explain', **kwargs) -> Tensor:
@@ -841,7 +845,7 @@ class GINConv_mask(gnn.GINConv):
 
         # Run "fused" message and aggregation (if applicable).
         if (isinstance(edge_index, SparseTensor) and self.fuse
-                and not self.__explain__):
+                and not self._explain):
             coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
                                          size, kwargs)
 
@@ -863,7 +867,7 @@ class GINConv_mask(gnn.GINConv):
             # For `GNNExplainer`, we require a separate message and aggregate
             # procedure since this allows us to inject the `edge_mask` into the
             # message passing computation scheme.
-            if self.__explain__:
+            if self._explain:
                 edge_mask = self.__edge_mask__
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).

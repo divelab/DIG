@@ -443,14 +443,14 @@ class PGExplainer(nn.Module):
         self.edge_mask.to(self.device)
         for module in self.model.modules():
             if isinstance(module, MessagePassing):
-                module.__explain__ = True
+                module._explain = True
                 module.__edge_mask__ = self.edge_mask
 
     def __clear_masks__(self):
         """ clear the edge weights to None, and set the explain flag to :obj:`False` """
         for module in self.model.modules():
             if isinstance(module, MessagePassing):
-                module.__explain__ = False
+                module._explain = False
                 module.__edge_mask__ = None
         self.edge_mask = None
 
