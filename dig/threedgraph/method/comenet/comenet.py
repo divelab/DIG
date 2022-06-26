@@ -215,20 +215,32 @@ class SimpleInteractionBlock(torch.nn.Module):
 
 
 class ComENet(nn.Module):
+    r"""
+         The ComENet from the `"ComENet: Towards Complete and Efficient Message Passing for 3D Molecular Graphs" <https://arxiv.org/abs/2206.08515>`_ paper.
+        
+        Args:
+            cutoff (float, optional): Cutoff distance for interatomic interactions. (default: :obj:`8.0`)
+            num_layers (int, optional): Number of building blocks. (default: :obj:`4`)
+            hidden_channels (int, optional): Hidden embedding size. (default: :obj:`256`)
+            out_channels (int, optional): Size of each output sample. (default: :obj:`1`)
+            num_radial (int, optional): Number of radial basis functions. (default: :obj:`3`)
+            num_spherical (int, optional): Number of spherical harmonics. (default: :obj:`2`)
+            num_output_layers (int, optional): Number of linear layers for the output blocks. (default: :obj:`3`)
+    """
     def __init__(
             self,
-            num_targets=1,
+            cutoff=8.0,
+            num_layers=4,
             hidden_channels=256,
-            num_blocks=4,
+            out_channels=1,
             num_radial=3,
             num_spherical=2,
-            cutoff=8.0,
             num_output_layers=3,
     ):
         super(ComENet, self).__init__()
-        self.num_targets = num_targets
+        self.out_channels = out_channels
         self.cutoff = cutoff
-        self.num_blocks = num_blocks
+        self.num_layers = num_layers
 
         if sym is None:
             raise ImportError("Package `sympy` could not be found.")
@@ -251,14 +263,14 @@ class ComENet(nn.Module):
                     hidden_channels,
                     act,
                 )
-                for _ in range(num_blocks)
+                for _ in range(num_layers)
             ]
         )
 
         self.lins = torch.nn.ModuleList()
         for _ in range(num_output_layers):
             self.lins.append(Linear(hidden_channels, hidden_channels))
-        self.lin_out = Linear(hidden_channels, num_targets, weight_initializer='zeros')
+        self.lin_out = Linear(hidden_channels, out_channels, weight_initializer='zeros')
         self.reset_parameters()
 
     def reset_parameters(self):

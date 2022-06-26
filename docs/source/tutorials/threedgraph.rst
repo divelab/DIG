@@ -91,12 +91,12 @@ Output:
 
 
 
-.. [1] Liu, M., Luo, Y., Wang, L., Xie, Y., Yuan, H., Gui, S., Yu, H., Xu, Z., Zhang, J., Liu, Y. and Yan, K., 2021. DIG: A Turnkey Library for Diving into Graph Deep Learning Research. arXiv preprint arXiv:2103.12608.
-.. [2] Liu, Y., Wang, L., Liu, M., Zhang, X., Oztekin, B. and Ji, S., 2021. Spherical message passing for 3D graph networks. arXiv preprint arXiv:2102.05013.
+.. [1] Liu, M., Luo, Y., Wang, L., Xie, Y., Yuan, H., Gui, S., Yu, H., Xu, Z., Zhang, J., Liu, Y. and Yan, K., 2021. DIG: A Turnkey Library for Diving into Graph Deep Learning Research. Journal of Machine Learning Research, 22(240), pp.1-9.
+.. [2] Liu, Y., Wang, L., Liu, M., Zhang, X., Oztekin, B. and Ji, S., 2021. Spherical message passing for 3D molecular graphs. In International Conference on Learning Representations.
 .. [3] Gilmer, J., Schoenholz, S.S., Riley, P.F., Vinyals, O. and Dahl, G.E., 2017, July. Neural message passing for quantum chemistry. In International conference on machine learning (pp. 1263-1272). PMLR.
 .. [4] Wu, Z., Ramsundar, B., Feinberg, E.N., Gomes, J., Geniesse, C., Pappu, A.S., Leswing, K. and Pande, V., 2018. MoleculeNet: a benchmark for molecular machine learning. Chemical science, 9(2), pp.513-530.
-.. [5] Wang, Z., Liu, M., Luo, Y., Xu, Z., Xie, Y., Wang, L., Cai, L. and Ji, S., 2020. Advanced graph and sequence neural networks for molecular property prediction and drug discovery. arXiv preprint arXiv:2012.01981.
+.. [5] Wang, Z., Liu, M., Luo, Y., Xu, Z., Xie, Y., Wang, L., Cai, L., Qi, Q., Yuan, Z., Yang, T. and Ji, S., 2022. Advanced graph and sequence neural networks for molecular property prediction and drug discovery. Bioinformatics, 38(9), pp.2579-2586.
 .. [6] Schütt, K.T., Sauceda, H.E., Kindermans, P.J., Tkatchenko, A. and Müller, K.R., 2018. Schnet–a deep learning architecture for molecules and materials. The Journal of Chemical Physics, 148(24), p.241722.
-.. [7] Klicpera, J., Groß, J. and Günnemann, S., 2020. Directional message passing for molecular graphs. In International Conference on Learning Representations (ICLR), 2020.
+.. [7] Gasteiger, J., Groß, J. and Günnemann, S., 2019, September. Directional message passing for molecular graphs. In International Conference on Learning Representations.
 .. [8] Ramakrishnan, R., Dral, P.O., Rupp, M. and Von Lilienfeld, O.A., 2014. Quantum chemistry structures and properties of 134 kilo molecules. Scientific data, 1(1), pp.1-7.
 
