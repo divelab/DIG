@@ -17,6 +17,7 @@ from evaluate_embedding import evaluate_embedding
 
 from arguments import arg_parse_graph
 import random
+from tqdm import tqdm
 
 
 def setup_seed(seed):
@@ -75,7 +76,7 @@ if __name__ == '__main__':
         accuracy = []
         val_accuracy = []
 
-        for epoch in range(1, args.epoch+1):
+        for epoch in tqdm(range(1, args.epoch+1), total=args.epoch, desc="Seed: {}; Epoch".format(seed), position=0, leave=True):
             loss_all, loss_rec_all, loss_inv_all = 0, 0, 0
             num_nodes_all = 0
             model.train()
@@ -95,19 +96,12 @@ if __name__ == '__main__':
 
                 loss.backward()
                 optimizer.step()
-                
-                
-#                 if txtfile is not None:
-#                     file_obj = open(txtfile, 'a')
-#                 file_obj.write('loss_rec: {}, loss_inv: {}\n'.format(loss_rec, loss_inv))
-#                 file_obj.close()
 
-#             if txtfile is not None:
-#                 file_obj = open(txtfile, 'a')
-#                 file_obj.write('Epoch {}, Loss {}, Loss_rec {}, Loss_inv {}\n'
-#                                .format(epoch, loss_all / num_nodes_all, loss_rec_all / num_nodes_all, loss_inv_all / num_nodes_all))
-#                 file_obj.close()
-
+            if txtfile is not None:
+                file_obj = open(txtfile, 'a')
+                file_obj.write('Epoch {}, Loss {}, Loss_rec {}, Loss_inv {}\n'
+                               .format(epoch, loss_all / num_nodes_all, loss_rec_all / num_nodes_all, loss_inv_all / num_nodes_all))
+                file_obj.close()
 
             if epoch % args.interval == 0:
                 if args.save_model:
@@ -137,12 +131,17 @@ if __name__ == '__main__':
             file_obj.write('Epoch {0:d}, test_accs {1:.2f}, {2:.2f}, {3:.2f}, {4:.2f}, {5:.2f}, test_acc_avg {6:.2f}, test_acc_std {7:.2f}\n'
                                .format((i+1)*args.interval, accuracies[0][i], accuracies[1][i], accuracies[2][i], accuracies[3][i], accuracies[4][i],
                                        avg_accuracies[i], std_accuracies[i]))
+#             print('Epoch {0:d}, test_accs {1:.2f}, {2:.2f}, {3:.2f}, {4:.2f}, {5:.2f}, test_acc_avg {6:.2f}, test_acc_std {7:.2f}'
+#                         .format((i+1)*args.interval, accuracies[0][i], accuracies[1][i], accuracies[2][i], accuracies[3][i], accuracies[4][i],
+#                                 avg_accuracies[i], std_accuracies[i]))
 
     file_obj.write('==========\n')
     best_epoch = np.argmax(avg_accuracies) + 1
     file_obj.write('Best epoch: {0:d}, avg_acc: {1:.2f}, acc_std: {2:.2f}\n'.format(best_epoch, avg_accuracies[best_epoch-1], std_accuracies[best_epoch-1]))
     file_obj.close()
-
+    print('==========')
+    print('Best epoch: {0:d}, avg_acc: {1:.2f}, acc_std: {2:.2f}\n'.format(best_epoch, avg_accuracies[best_epoch-1], std_accuracies[best_epoch-1]))
+    
 
 
 
