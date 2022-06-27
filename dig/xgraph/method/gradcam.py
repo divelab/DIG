@@ -1,15 +1,9 @@
 from typing import Any, Callable, List, Tuple, Union, Dict
+
+import captum.attr as ca
 import torch
-from torch import Tensor
-from torch.nn import Module
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.utils.loop import add_remaining_self_loops
-import captum.attr as ca
-from ..models.utils import subgraph, normalize
-from captum.attr._utils.typing import (
-    TargetType,
-)
 from captum.attr._utils.common import (
     _format_additional_forward_args,
     _format_attributions,
@@ -20,7 +14,16 @@ from captum.attr._utils.gradient import (
     compute_layer_gradients_and_eval,
     undo_gradient_requirements,
 )
+from captum.attr._utils.typing import (
+    TargetType,
+)
+from torch import Tensor
+from torch.nn import Module
+from torch_geometric.utils.loop import add_remaining_self_loops
+
 from .base_explainer import WalkBase
+from ..models.utils import subgraph, normalize
+
 EPS = 1e-15
 
 
@@ -44,7 +47,7 @@ class GradCAM(WalkBase):
     def __init__(self, model: nn.Module, explain_graph: bool = False):
         super().__init__(model, explain_graph=explain_graph)
 
-    def forward(self, x: Tensor, edge_index: Tensor, **kwargs)\
+    def forward(self, x: Tensor, edge_index: Tensor, **kwargs) \
             -> Union[Tuple[None, List, List[Dict]], Tuple[List, List, List[Dict]]]:
         r"""
         Run the explainer for a specific graph instance.
@@ -97,8 +100,10 @@ class GradCAM(WalkBase):
                     super().__init__()
                     self.cls = cls
                     self.convs = cls.model.convs
+
                 def forward(self, *args, **kwargs):
                     return self.cls.model(*args, **kwargs)[node_idx]
+
             if self.explain_graph:
                 model = self.model
             else:
@@ -137,12 +142,12 @@ class GraphLayerGradCam(ca.LayerGradCam):
         super().__init__(forward_func, layer, device_ids)
 
     def attribute(
-        self,
-        inputs: Union[Tensor, Tuple[Tensor, ...]],
-        target: TargetType = None,
-        additional_forward_args: Any = None,
-        attribute_to_layer_input: bool = False,
-        relu_attributions: bool = False,
+            self,
+            inputs: Union[Tensor, Tuple[Tensor, ...]],
+            target: TargetType = None,
+            additional_forward_args: Any = None,
+            attribute_to_layer_input: bool = False,
+            relu_attributions: bool = False,
     ) -> Union[Tensor, Tuple[Tensor, ...]]:
         r"""
         Args:

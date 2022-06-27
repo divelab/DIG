@@ -35,6 +35,7 @@
 
 *DIG: Dive into Graphs* is a turnkey library for graph deep learning research.
 
+:fire:**Note: This branch is under developing. We are working on updating our DIG based on PyG 2.0.0. We will release a stable DIG version soon.**
 
 ## Why DIG?
 
@@ -61,7 +62,7 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 
 ## Usage
 
-Example: a few lines of code to run [SphereNet](https://arxiv.org/abs/2102.05013) on [QM9](https://www.nature.com/articles/sdata201422) to incorporate 3D information of molecules.
+Example: a few lines of code to run [SphereNet](https://openreview.net/forum?id=givsRXsOt9r) on [QM9](https://www.nature.com/articles/sdata201422) to incorporate 3D information of molecules.
 
 
 ```python

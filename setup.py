@@ -33,7 +33,7 @@ setuptools.setup(
     ],
     install_requires=['scipy',
                       'cilog',
-                      'typed-argument-parser==1.5.4',
+                      'typed-argument-parser==1.7.2',
                       'captum==0.2.0',
                       'shap',
                       'IPython',
@@ -41,7 +41,7 @@ setuptools.setup(
                       'rdkit-pypi',
                       'pandas',
                       'sympy',
-                      'pyscf==1.7.6.post1'
+                      'pyscf==1.7.6.post1',
                       'hydra-core'],
     python_requires='>=3.6',
     setup_requires=setup_requires,

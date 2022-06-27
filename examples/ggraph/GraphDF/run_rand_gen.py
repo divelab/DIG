@@ -1,7 +1,7 @@
 import json
 import argparse
 from rdkit import RDLogger
-from torch_geometric.data import DenseDataLoader
+from torch_geometric.loader import DenseDataLoader
 from dig.ggraph.dataset import QM9, ZINC250k, MOSES
 from dig.ggraph.method import GraphDF
 from dig.ggraph.evaluation import RandGenEvaluator
