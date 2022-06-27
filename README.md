@@ -35,7 +35,7 @@
 
 *DIG: Dive into Graphs* is a turnkey library for graph deep learning research.
 
-:fire:**Note: This branch is under developing. We are working on updating our DIG based on PyG 2.0.0. We will release a stable DIG version soon.**
+:fire:**Note: This branch is under developing. We are working on updating our DIG based on PyG 2.0.0. We will release a stable DIG version (dive-into-graphs 1.0.0) soon.**
 
 ## Why DIG?
 
@@ -109,25 +109,24 @@ run3d.run(device, train_dataset, valid_dataset, test_dataset, model, loss_func, 
 ## Installation
 
 ### Install from pip
-The key dependencies of DIG: Dive into Graphs are PyTorch (>=1.6.0), PyTorch Geometric (>=1.6.0), and RDKit.
+The key dependencies of DIG: Dive into Graphs are PyTorch (>=1.10.0), PyTorch Geometric (>=2.0.0), and RDKit.
 
-1. Install [PyTorch](https://pytorch.org/get-started/locally/) (>=1.6.0)
+1. Install [PyTorch](https://pytorch.org/get-started/locally/) (>=1.10.0)
 
 ```shell script
 $ python -c "import torch; print(torch.__version__)"
->>> 1.6.0
+>>> 1.10.0
 ```
 
 
 
 
-2. Install [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html#) (>=1.6.0)
+2. Install [PyG](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html#) (>=2.0.0)
 
 ```shell script
 $ python -c "import torch_geometric; print(torch_geometric.__version__)"
->>> 1.6.0
+>>> 2.0.0
 ```
-**Note:** Our library has not been tested on PyTorch Geometric >= 2.0.0, which is largely different with PyTorch Geometric 1.x.x. Hence, we recommend to install PyTorch Geometric with a version from 1.6.0 to 1.7.2.
     
 3. Install DIG: Dive into Graphs.
 
