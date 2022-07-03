@@ -8,6 +8,8 @@ from torch_geometric.utils import add_remaining_self_loops
 from dig.xgraph.method import GradCAM
 from dig.xgraph.evaluation import XCollector
 from dig.xgraph.dataset import SynGraphDataset
+from dig.xgraph.utils.compatibility import compatible_state_dict
+
 from benchmarks.xgraph.gnnNets import get_gnnNets
 from benchmarks.xgraph.dataset import get_dataset, get_dataloader
 from benchmarks.xgraph.utils import check_dir, fix_random_seed, Recorder, perturb_input
@@ -49,10 +51,13 @@ def pipeline(config):
                         output_dim=dataset.num_classes,
                         model_config=config.models)
 
-    state_dict = torch.load(os.path.join(config.models.gnn_saving_dir,
-                                         config.datasets.dataset_name,
-                                         f"{config.models.gnn_name}_"
-                                         f"{len(config.models.param.gnn_latent_dim)}l_best.pth"))['net']
+    state_dict = compatible_state_dict(torch.load(os.path.join(
+        config.models.gnn_saving_dir,
+        config.datasets.dataset_name,
+        f"{config.models.gnn_name}_"
+        f"{len(config.models.param.gnn_latent_dim)}l_best.pth"
+    ))['net'])
+
     model.load_state_dict(state_dict)
     model.to(device)
 

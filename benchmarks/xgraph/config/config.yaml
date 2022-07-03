@@ -1,6 +1,6 @@
 defaults:
   - models: gcn
-  - datasets: graph_sst2
+  - datasets: bbbp
   - explainers: subgraphx
 random_seed: 0
 device_id: 0

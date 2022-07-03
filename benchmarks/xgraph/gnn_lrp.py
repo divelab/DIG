@@ -11,6 +11,7 @@ from benchmarks.xgraph.utils import check_dir, fix_random_seed, Recorder, pertur
 from dig.xgraph.evaluation import XCollector
 from dig.xgraph.method import GNN_LRP
 from dig.xgraph.dataset import SynGraphDataset
+from dig.xgraph.utils.compatibility import compatible_state_dict
 
 
 @hydra.main(config_path="config", config_name="config")
@@ -50,10 +51,13 @@ def pipeline(config):
                         output_dim=dataset.num_classes,
                         model_config=config.models)
 
-    state_dict = torch.load(os.path.join(config.models.gnn_saving_dir,
-                                         config.datasets.dataset_name,
-                                         f"{config.models.gnn_name}_"
-                                         f"{len(config.models.param.gnn_latent_dim)}l_best.pth"))['net']
+    state_dict = compatible_state_dict(torch.load(os.path.join(
+        config.models.gnn_saving_dir,
+        config.datasets.dataset_name,
+        f"{config.models.gnn_name}_"
+        f"{len(config.models.param.gnn_latent_dim)}l_best.pth"
+    ))['net'])
+
     model.load_state_dict(state_dict)
 
     model.to(device)
