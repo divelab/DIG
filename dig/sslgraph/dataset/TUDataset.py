@@ -52,7 +52,6 @@ class TUDatasetExt(InMemoryDataset):
             (default: obj: `data.pt`)
     """
     url = 'https://ls11-www.cs.tu-dortmund.de/people/morris/graphkerneldatasets'
-#     url = 'https://www.chrsmrrs.com/graphkerneldatasets'
     cleaned_url = ('https://raw.githubusercontent.com/nd7141/graph_datasets/master/datasets')
 
     def __init__(self,
@@ -188,9 +187,6 @@ class TUDatasetExt(InMemoryDataset):
     def get_num_feature(self):
         data = self.data.__class__()
 
-        if hasattr(self.data, '__num_nodes__'):
-            data.num_nodes = self.data.__num_nodes__[0]
-
         for key in self.data.keys:
             item, slices = self.data[key], self.slices[key]
             if torch.is_tensor(item):
@@ -206,10 +202,9 @@ class TUDatasetExt(InMemoryDataset):
     def get(self, idx):
         data = self.data.__class__()
 
-        if hasattr(self.data, '__num_nodes__'):
-            data.num_nodes = self.data.__num_nodes__[idx]
-
         for key in self.data.keys:
+            if key == 'num_nodes':
+                continue
             item, slices = self.data[key], self.slices[key]
             if torch.is_tensor(item):
                 s = list(repeat(slice(None), item.dim()))

@@ -4,7 +4,7 @@ import numpy as np
 import torch.nn as nn
 from tqdm import trange
 from sklearn.model_selection import StratifiedKFold
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 from sklearn.svm import SVC
 from sklearn import preprocessing

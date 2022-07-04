@@ -2,7 +2,7 @@ import copy
 import torch
 import numpy as np
 import torch.nn as nn
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 from sklearn import preprocessing
 
 

@@ -57,15 +57,13 @@ class Encoder(torch.nn.Module):
     (tensor([...]), tensor([...])) 
     """
     def __init__(self, feat_dim, hidden_dim, n_layers=5, pool='sum', 
-                 gnn='gin', bn=True, act='relu', bias=True, xavier=True, 
-                 node_level=False, graph_level=True, edge_weight=False):
+                 gnn='gin', node_level=False, graph_level=True, **kwargs):
         super(Encoder, self).__init__()
 
         if gnn == 'gin':
-            self.encoder = GIN(feat_dim, hidden_dim, n_layers, pool, bn, act)
+            self.encoder = GIN(feat_dim, hidden_dim, n_layers, pool, **kwargs)
         elif gnn == 'gcn':
-            self.encoder = GCN(feat_dim, hidden_dim, n_layers, pool, bn, 
-                               act, bias, xavier, edge_weight)
+            self.encoder = GCN(feat_dim, hidden_dim, n_layers, pool, **kwargs)
         elif gnn == 'resgcn':
             self.encoder = ResGCN(feat_dim, hidden_dim, num_conv_layers=n_layers, 
                                   global_pool=pool)
@@ -164,7 +162,7 @@ class GCN(torch.nn.Module):
                            add_self_loops=self.add_self_loops,
                            normalize=self.normalize)
             if xavier:
-                self.weights_init(conv)
+                self.weights_init(conv.lin)
             self.convs.append(conv)
             self.acts.append(a)
             if bn:
