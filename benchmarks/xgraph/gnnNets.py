@@ -12,6 +12,7 @@ from torch_sparse import SparseTensor, fill_diag
 from torch_geometric.typing import Adj, OptTensor, Size
 from torch_geometric.utils import add_self_loops
 from dig.xgraph.models import GNNPool
+from collections import OrderedDict
 
 
 def get_gnnNets(input_dim, output_dim, model_config):
@@ -118,55 +119,22 @@ class GNNBase(nn.Module):
                     batch = torch.zeros(x.shape[0], dtype=torch.int64, device=x.device)
         return x, edge_index, batch
 
+    def load_state_dict(self, state_dict: 'OrderedDict[str, Tensor]',
+                        strict: bool = True):
+        new_state_dict = OrderedDict()
+        for key in state_dict.keys():
+            if key in self.state_dict().keys():
+                new_state_dict[key] = state_dict[key]
+
+        super(GNNBase, self).load_state_dict(new_state_dict)
+
 
 # GCNConv
 class GCNConv(GCNConv):
     def __init__(self, *args, **kwargs):
         super(GCNConv, self).__init__(*args, **kwargs)
-
-    # remove the sigmoid operation for edge_mask in the propagation method
-    def propagate(self, edge_index: Adj, size: Size = None, **kwargs):
-        size = self.__check_input__(edge_index, size)
-
-        # Run "fused" message and aggregation (if applicable).
-        if (isinstance(edge_index, SparseTensor) and self.fuse
-                and not self.__explain__):
-            coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
-                                         size, kwargs)
-
-            msg_aggr_kwargs = self.inspector.distribute(
-                'message_and_aggregate', coll_dict)
-            out = self.message_and_aggregate(edge_index, **msg_aggr_kwargs)
-
-            update_kwargs = self.inspector.distribute('update', coll_dict)
-            return self.update(out, **update_kwargs)
-
-        # Otherwise, run both functions in separation.
-        elif isinstance(edge_index, Tensor) or not self.fuse:
-            coll_dict = self.__collect__(self.__user_args__, edge_index, size,
-                                         kwargs)
-
-            msg_kwargs = self.inspector.distribute('message', coll_dict)
-            out = self.message(**msg_kwargs)
-
-            # For `GNNExplainer`, we require a separate message and aggregate
-            # procedure since this allows us to inject the `edge_mask` into the
-            # message passing computation scheme.
-            if self.__explain__:
-                edge_mask = self.__edge_mask__
-                # Some ops add self-loops to `edge_index`. We need to do the
-                # same for `edge_mask` (but do not train those).
-                if out.size(self.node_dim) != edge_mask.size(0):
-                    loop = edge_mask.new_ones(size[0])
-                    edge_mask = torch.cat([edge_mask, loop], dim=0)
-                assert out.size(self.node_dim) == edge_mask.size(0)
-                out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
-
-            aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
-            out = self.aggregate(out, **aggr_kwargs)
-
-            update_kwargs = self.inspector.distribute('update', coll_dict)
-            return self.update(out, **update_kwargs)
+        self.edge_weight = None
+        self.weight = nn.Parameter(self.lin.weight.data.T.clone().detach())
 
     # add edge_weight for normalize=False
     def forward(self, x: Tensor, edge_index: Adj,
@@ -210,6 +178,7 @@ class GCNConv(GCNConv):
                         self._cached_edge_index = (edge_index, edge_weight)
                 else:
                     edge_index, edge_weight = cache[0], cache[1]
+
             elif isinstance(edge_index, SparseTensor):
                 cache = self._cached_adj_t
                 if cache is None:
@@ -238,6 +207,49 @@ class GCNConv(GCNConv):
         self.edge_weight = edge_weight
 
         return out
+
+    def propagate(self, edge_index: Adj, size: Size = None, **kwargs):
+        size = self.__check_input__(edge_index, size)
+
+        # Run "fused" message and aggregation (if applicable).
+        if (isinstance(edge_index, SparseTensor) and self.fuse
+                and not self._explain):
+            coll_dict = self.__collect__(self.__fused_user_args__, edge_index,
+                                         size, kwargs)
+
+            msg_aggr_kwargs = self.inspector.distribute(
+                'message_and_aggregate', coll_dict)
+            out = self.message_and_aggregate(edge_index, **msg_aggr_kwargs)
+
+            update_kwargs = self.inspector.distribute('update', coll_dict)
+            return self.update(out, **update_kwargs)
+
+        # Otherwise, run both functions in separation.
+        elif isinstance(edge_index, Tensor) or not self.fuse:
+            coll_dict = self.__collect__(self.__user_args__, edge_index, size,
+                                         kwargs)
+
+            msg_kwargs = self.inspector.distribute('message', coll_dict)
+            out = self.message(**msg_kwargs)
+
+            # For `GNNExplainer`, we require a separate message and aggregate
+            # procedure since this allows us to inject the `edge_mask` into the
+            # message passing computation scheme.
+            if self._explain:
+                edge_mask = self.__edge_mask__
+                # Some ops add self-loops to `edge_index`. We need to do the
+                # same for `edge_mask` (but do not train those).
+                if out.size(self.node_dim) != edge_mask.size(0):
+                    loop = edge_mask.new_ones(size[0])
+                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                assert out.size(self.node_dim) == edge_mask.size(0)
+                out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
+
+            aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
+            out = self.aggregate(out, **aggr_kwargs)
+
+            update_kwargs = self.inspector.distribute('update', coll_dict)
+            return self.update(out, **update_kwargs)
 
 
 class GCNNet(GNNBase):

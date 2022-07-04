@@ -13,6 +13,7 @@ from dig.xgraph.dataset import SynGraphDataset
 from dig.xgraph.method.subgraphx import PlotUtils
 from dig.xgraph.evaluation import XCollector
 from dig.xgraph.method.subgraphx import find_closest_node_result
+from dig.xgraph.utils.compatibility import compatible_state_dict
 IS_FRESH = False
 
 
@@ -48,10 +49,13 @@ def pipeline(config):
                         output_dim=dataset.num_classes,
                         model_config=config.models)
 
-    state_dict = torch.load(os.path.join(config.models.gnn_saving_dir,
-                                         config.datasets.dataset_name,
-                                         f"{config.models.gnn_name}_"
-                                         f"{len(config.models.param.gnn_latent_dim)}l_best.pth"))['net']
+    state_dict = compatible_state_dict(torch.load(os.path.join(
+        config.models.gnn_saving_dir,
+        config.datasets.dataset_name,
+        f"{config.models.gnn_name}_"
+        f"{len(config.models.param.gnn_latent_dim)}l_best.pth"
+    ))['net'])
+
     model.load_state_dict(state_dict)
 
     explanation_saving_dir = os.path.join(config.explainers.explanation_result_dir,

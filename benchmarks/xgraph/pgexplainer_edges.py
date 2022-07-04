@@ -7,6 +7,7 @@ from sklearn.metrics import roc_auc_score
 from dig.xgraph.method import PGExplainer
 from dig.xgraph.evaluation import XCollector
 from dig.xgraph.method.base_explainer import ExplainerBase
+from dig.xgraph.utils.compatibility import compatible_state_dict
 
 from benchmarks.xgraph.gnnNets import get_gnnNets
 from benchmarks.xgraph.dataset import get_dataset, get_dataloader, SynGraphDataset
