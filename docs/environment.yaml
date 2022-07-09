@@ -4,9 +4,9 @@ channels:
   - defaults
 dependencies:
   - python==3.8
-  - rdkit==2021.03.1
   - pip>=21.0
   - pip:
+    - rdkit-pypi
     - https://download.pytorch.org/whl/cpu/torch-1.10.0%2Bcpu-cp38-cp38-linux_x86_64.whl
     - furo
     - numpy
