@@ -45,7 +45,7 @@ class GNNExplainer(ExplainerBase):
         if self.explain_graph:
             loss = cross_entropy_with_logit(raw_preds, x_label)
         else:
-            loss = cross_entropy_with_logit(raw_preds[self.node_idx].reshape(1, -1), x_label)
+            loss = cross_entropy_with_logit(raw_preds[self.new_node_idx].reshape(1, -1), x_label)
 
         m = self.edge_mask.sigmoid()
         loss = loss + self.coff_size * m.sum()
@@ -128,11 +128,16 @@ class GNNExplainer(ExplainerBase):
                 node_idx = node_idx.reshape(-1)
             node_idx = node_idx.to(self.device)
             assert node_idx is not None
-            self.subset, _, _, self.hard_edge_mask = subgraph(
+            self.subset, self_loop_edge_index, _, self.hard_edge_mask = subgraph(
                 node_idx, self.__num_hops__, self_loop_edge_index, relabel_nodes=True,
                 num_nodes=None, flow=self.__flow__())
+            x_exp = x[self.subset]
+
             self.node_idx = node_idx
             self.new_node_idx = torch.where(self.subset == node_idx)[0]
+        else:
+            self.hard_edge_mask = torch.ones_like(self_loop_edge_index[0]).bool()
+            x_exp = x
 
         if kwargs.get('edge_masks'):
             edge_masks = kwargs.pop('edge_masks')
@@ -148,7 +153,10 @@ class GNNExplainer(ExplainerBase):
             for ex_label in ex_labels:
                 self.__clear_masks__()
                 self.__set_masks__(x, self_loop_edge_index)
-                edge_masks.append(self.gnn_explainer_alg(x, edge_index, ex_label, mask_features))
+                edge_mask = self.gnn_explainer_alg(x_exp, self_loop_edge_index, ex_label, mask_features)
+                new_edge_mask = torch.full_like(self.hard_edge_mask.float(), fill_value=-torch.inf)
+                new_edge_mask[self.hard_edge_mask] = edge_mask
+                edge_masks.append(new_edge_mask)
 
         hard_edge_masks = [self.control_sparsity(mask, sparsity=kwargs.get('sparsity')).sigmoid()
                            for mask in edge_masks]
