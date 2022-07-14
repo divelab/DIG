@@ -39,7 +39,7 @@
 
 ## Why DIG?
 
-The key difference with current graph deep learning libraries, such as PyTorch Geometric (PyG) and Deep Graph Library (DGL), is that, while PyG and DGL support basic graph deep learning operations, DIG provides a unified testbed for higher level, research-oriented graph deep learning tasks, such as graph generation, self-supervised learning, explainability, and 3D graphs.
+The key difference with current graph deep learning libraries, such as PyTorch Geometric (PyG) and Deep Graph Library (DGL), is that, while PyG and DGL support basic graph deep learning operations, DIG provides a unified testbed for higher level, research-oriented graph deep learning tasks, such as graph generation, self-supervised learning, explainability, 3D graphs, and graph out-of-distribution.
 
 If you are working or plan to work on research in graph deep learning, DIG enables you to develop your own methods within our extensible framework, and compare with current baseline methods using common datasets and evaluation metrics without extra efforts.
 
@@ -51,7 +51,7 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 * **Self-supervised Learning on Graphs**: `dig.sslgraph`
 * **Explainability of Graph Neural Networks**: `dig.xgraph`
 * **Deep Learning on 3D Graphs**: `dig.threedgraph`
-
+* **Graph OOD**: `dig.oodgraph`
 
 
 <p align="center">
@@ -96,14 +96,14 @@ run3d.run(device, train_dataset, valid_dataset, test_dataset, model, loss_func, 
 
 
 1. For details of all included APIs, please refer to the [documentation](https://diveintographs.readthedocs.io/). 
-2. We provide a hands-on tutorial for each direction to help you to get started with *DIG*: [Graph Generation](https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html), [Self-supervised Learning on Graphs](https://diveintographs.readthedocs.io/en/latest/tutorials/sslgraph.html), [Explainability of Graph Neural Networks](https://diveintographs.readthedocs.io/en/latest/tutorials/subgraphx.html), and [Deep Learning on 3D Graphs](https://diveintographs.readthedocs.io/en/latest/tutorials/threedgraph.html).
+2. We provide a hands-on tutorial for each direction to help you to get started with *DIG*: [Graph Generation](https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html), [Self-supervised Learning on Graphs](https://diveintographs.readthedocs.io/en/latest/tutorials/sslgraph.html), [Explainability of Graph Neural Networks](https://diveintographs.readthedocs.io/en/latest/tutorials/subgraphx.html), [Deep Learning on 3D Graphs](https://diveintographs.readthedocs.io/en/latest/tutorials/threedgraph.html), [Graph OOD (GOOD) datasets](https://diveintographs.readthedocs.io/en/latest/tutorials/oodgraph.html).
 3. We also provide [examples](https://github.com/divelab/DIG/tree/dig-stable/examples) to use APIs provided in *DIG*. You can get started with your interested directions by clicking the following links.
 
 * [Graph Generation](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph): [`JT-VAE`](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/JTVAE), [`GraphAF`](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/GraphAF), [`GraphDF`](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/GraphDF), [`GraphEBM`](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/GraphEBM).
 * [Self-supervised Learning on Graphs](https://github.com/divelab/DIG/tree/dig-stable/examples/sslgraph): [`InfoGraph`](https://github.com/divelab/DIG/blob/dig-stable/examples/sslgraph/example_infograph.ipynb), [`GRACE`](https://github.com/divelab/DIG/blob/dig-stable/examples/sslgraph/example_grace.ipynb), [`MVGRL`](https://github.com/divelab/DIG/blob/dig-stable/examples/sslgraph/example_mvgrl.ipynb), [`GraphCL`](https://github.com/divelab/DIG/blob/dig-stable/examples/sslgraph/example_graphcl.ipynb).
 * [Explainability of Graph Neural Networks](https://github.com/divelab/DIG/tree/dig-stable/examples/xgraph): [`DeepLIFT`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/deeplift.ipynb), [`GNN-LRP`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/gnn_lrp.ipynb), [`GNNExplainer`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/gnnexplainer.ipynb), [`GradCAM`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/gradcam.ipynb), [`PGExplainer`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/pgexplainer.ipynb), [`SubgraphX`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/subgraphx.ipynb).
 * [Deep Learning on 3D Graphs](https://github.com/divelab/DIG/tree/dig-stable/examples/threedgraph): [`SchNet`](https://github.com/divelab/DIG/blob/dig-stable/examples/threedgraph/threedgraph.ipynb), [`DimeNet++`](https://github.com/divelab/DIG/blob/dig-stable/examples/threedgraph/threedgraph.ipynb), [`SphereNet`](https://github.com/divelab/DIG/blob/dig-stable/examples/threedgraph/threedgraph.ipynb).
-
+* [Graph OOD (GOOD) datasets](https://github.com/divelab/DIG/tree/dig-stable/examples/oodgraph): `GOODHIV`, `GOODPCBA`, `GOODZINC`, `GOODCMNIST`, `GOODMotif`, `GOODCora`, `GOODArxiv`, `GOODCBAS`.
 
 
 ## Installation

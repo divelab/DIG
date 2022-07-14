@@ -19,6 +19,8 @@ dependencies:
     - torch-geometric==2.0.0
     - git+https://github.com/Chilipp/autodocsumm.git
     - captum==0.2.0
+    - munch
+    - gdown
     - cilog
     - typed-argument-parser==1.5.4 
     - tensorboard

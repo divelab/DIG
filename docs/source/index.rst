@@ -42,6 +42,7 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
    tutorials/sslgraph
    tutorials/subgraphx
    tutorials/threedgraph
+   tutorials/oodgraph
 
 
 .. toctree::
@@ -86,6 +87,13 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
    3dgraph/method
    3dgraph/evaluation
    3dgraph/utils
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+   :caption: Graph OOD (GOOD) datasets
+
+   oodgraph/good
 
 
 .. toctree::
