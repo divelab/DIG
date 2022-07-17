@@ -377,6 +377,7 @@ class PGExplainer(nn.Module):
         t1(:obj:`float`): The temperature at the final epoch
         num_hops (:obj:`int`, :obj:`None`): The number of hops to extract neighborhood of target node
         (default: :obj:`None`)
+        k (:obj:`int`): number of the monte carlo steps for reparameterization trick
 
     .. note: For node classification model, the :attr:`explain_graph` flag is False.
       If :attr:`num_hops` is set to :obj:`None`, it will be automatically calculated by calculating the
@@ -385,7 +386,7 @@ class PGExplainer(nn.Module):
     """
     def __init__(self, model, in_channels: int, device, explain_graph: bool = True, epochs: int = 20,
                  lr: float = 0.005, coff_size: float = 0.01, coff_ent: float = 5e-4,
-                 t0: float = 5.0, t1: float = 1.0, sample_bias: float = 0.0, num_hops: Optional[int] = None):
+                 t0: float = 5.0, t1: float = 1.0, sample_bias: float = 0.0, num_hops: Optional[int] = None, k: int = 1):
         super(PGExplainer, self).__init__()
         self.model = model
         self.device = device
@@ -403,6 +404,7 @@ class PGExplainer(nn.Module):
         self.sample_bias = sample_bias
 
         self.num_hops = self.update_num_hops(num_hops)
+        self.k_MC = k
         self.init_bias = 0.0
 
         # Explanation model in PGExplainer
@@ -470,8 +472,9 @@ class PGExplainer(nn.Module):
                 return module.flow
         return 'source_to_target'
 
-    def __loss__(self, prob: Tensor, ori_pred: int):
-        logit = prob[ori_pred]
+    def __loss__(self, prob: Tensor, ori_pred: Tensor):
+        ind = torch.arange(prob.size(0))
+        logit = prob[ind, ori_pred]
         logit = logit + EPS
         pred_loss = - torch.log(logit)
 
@@ -545,12 +548,40 @@ class PGExplainer(nn.Module):
 
         return gate_inputs
 
+    def reparam_trick(self, 
+            edges_w: Tensor,
+            x: Tensor, 
+            edge_index: Tensor, 
+            embed: Tensor, 
+            tmp: float = 1.0,
+            training: bool = False):
+
+        nodesize = embed.size(0)
+        edges_w = self.concrete_sample(edges_w, beta=tmp, training=training)
+        self.sparse_mask_values = edges_w
+        mask_sparse = torch.sparse_coo_tensor(
+            edge_index, edges_w, (nodesize, nodesize)
+        )
+        mask_sigmoid = mask_sparse.to_dense()
+        # set the symmetric edge weights
+        sym_mask = (mask_sigmoid + mask_sigmoid.transpose(0, 1)) / 2
+        edge_mask = sym_mask[edge_index[0], edge_index[1]]
+
+        # inverse the weights before sigmoid in MessagePassing Module
+        self.__clear_masks__()
+        self.__set_masks__(x, edge_index, edge_mask)
+
+        # the model prediction with edge mask
+        logits = self.model(x, edge_index)
+        probs = F.softmax(logits, dim=-1)
+
+        self.__clear_masks__()
+
+        return probs, edge_mask
+
     def explain(self,
-                x: Tensor,
-                edge_index: Tensor,
                 embed: Tensor,
-                tmp: float = 1.0,
-                training: bool = False,
+                edge_index: Tensor,
                 **kwargs)\
             -> Tuple[float, Tensor]:
         r""" explain the GNN behavior for graph with explanation network
@@ -569,7 +600,6 @@ class PGExplainer(nn.Module):
             edge_mask (:obj:`torch.Tensor`): The probability mask for graph edges
         """
         node_idx = kwargs.get('node_idx')
-        nodesize = embed.shape[0]
         if self.explain_graph:
             col, row = edge_index
             f1 = embed[col]
@@ -587,39 +617,29 @@ class PGExplainer(nn.Module):
         for elayer in self.elayers:
             h = elayer(h)
         values = h.reshape(-1)
-        values = self.concrete_sample(values, beta=tmp, training=training)
-        self.sparse_mask_values = values
-        mask_sparse = torch.sparse_coo_tensor(
-            edge_index, values, (nodesize, nodesize)
-        )
-        mask_sigmoid = mask_sparse.to_dense()
-        # set the symmetric edge weights
-        sym_mask = (mask_sigmoid + mask_sigmoid.transpose(0, 1)) / 2
-        edge_mask = sym_mask[edge_index[0], edge_index[1]]
-
-        # inverse the weights before sigmoid in MessagePassing Module
-        self.__clear_masks__()
-        self.__set_masks__(x, edge_index, edge_mask)
-
-        # the model prediction with edge mask
-        logits = self.model(x, edge_index)
-        probs = F.softmax(logits, dim=-1)
-
-        self.__clear_masks__()
-        return probs, edge_mask
+        
+        return values
 
     def train_explanation_network(self, dataset):
         r""" training the explanation network by gradient descent(GD) using Adam optimizer """
         optimizer = Adam(self.elayers.parameters(), lr=self.lr)
+        
+        num_classes = None
+
         if self.explain_graph:
             with torch.no_grad():
                 dataset_indices = list(range(len(dataset)))
                 self.model.eval()
                 emb_dict = {}
                 ori_pred_dict = {}
+                
                 for gid in tqdm.tqdm(dataset_indices):
                     data = dataset[gid].to(self.device)
                     logits = self.model(data.x, data.edge_index)
+                    
+                    if num_classes is None:
+                        num_classes = logits.size(1)
+                    
                     emb = self.model.get_emb(data.x, data.edge_index)
                     emb_dict[gid] = emb.data.cpu()
                     ori_pred_dict[gid] = logits.argmax(-1).data.cpu()
@@ -627,23 +647,35 @@ class PGExplainer(nn.Module):
             # train the mask generator
             duration = 0.0
             for epoch in range(self.epochs):
+                probs = torch.zeros((len(dataset_indices), self.k_MC, num_classes), requires_grad=False)
                 loss = 0.0
-                pred_list = []
                 tmp = float(self.t0 * np.power(self.t1 / self.t0, epoch / self.epochs))
                 self.elayers.train()
                 optimizer.zero_grad()
                 tic = time.perf_counter()
-                for gid in tqdm.tqdm(dataset_indices):
+                
+                for i, gid in tqdm.tqdm(enumerate(dataset_indices)):
                     data = dataset[gid]
                     data.to(self.device)
-                    prob, edge_mask = self.explain(data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
-                    loss_tmp = self.__loss__(prob.squeeze(), ori_pred_dict[gid])
-                    loss_tmp.backward()
-                    loss += loss_tmp.item()
-                    pred_label = prob.argmax(-1).item()
-                    pred_list.append(pred_label)
-
+                    edges_w = self.explain(data.edge_index, embed=emb_dict[gid])
+                    
+                    # Monte carlo step to apply reparameterization trick
+                    for k in range(self.k_MC):
+                        p, _ = self.reparam_trick(edges_w, data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
+                        probs[i, k] = probs[i, k] + p
+                
+                ori_preds = (torch.tensor(ori_pred_dict.values())   # B*K
+                    .squeeze(1)
+                    .repeat_interleave(k, dim=1)
+                    .flatten())
+                probs = probs.flatten(end_dim=1)        # B*K C
+                
+                loss_tmp = self.__loss__(probs, ori_preds)
+                loss_tmp.backward()
                 optimizer.step()
+
+                loss += loss_tmp.item()
+
                 duration += time.perf_counter() - tic
                 print(f'Epoch: {epoch} | Loss: {loss}')
         else:
@@ -652,31 +684,51 @@ class PGExplainer(nn.Module):
                 data.to(self.device)
                 self.model.eval()
                 explain_node_index_list = torch.where(data.train_mask)[0].tolist()
-                pred_dict = {}
+                ori_pred_dict = {}
                 logits = self.model(data.x, data.edge_index)
+                
+                if num_classes is None:
+                    num_classes = logits.size(1)
+
                 for node_idx in tqdm.tqdm(explain_node_index_list):
-                    pred_dict[node_idx] = logits[node_idx].argmax(-1).item()
+                    ori_pred_dict[node_idx] = logits[node_idx].argmax(-1).item()
 
             # train the mask generator
             duration = 0.0
             for epoch in range(self.epochs):
                 loss = 0.0
+                probs = torch.zeros((len(explain_node_index_list), self.k_MC, num_classes), requires_grad=False)
                 optimizer.zero_grad()
                 tmp = float(self.t0 * np.power(self.t1 / self.t0, epoch / self.epochs))
                 self.elayers.train()
                 tic = time.perf_counter()
-                for iter_idx, node_idx in tqdm.tqdm(enumerate(explain_node_index_list)):
+                
+                for i, node_idx in tqdm.tqdm(enumerate(explain_node_index_list)):
                     with torch.no_grad():
                         x, edge_index, y, subset, _ = \
                             self.get_subgraph(node_idx=node_idx, x=data.x, edge_index=data.edge_index, y=data.y)
                         emb = self.model.get_emb(x, edge_index)
                         new_node_index = int(torch.where(subset == node_idx)[0])
-                    pred, edge_mask = self.explain(x, edge_index, emb, tmp, training=True, node_idx=new_node_index)
-                    loss_tmp = self.__loss__(pred[new_node_index], pred_dict[node_idx])
-                    loss_tmp.backward()
-                    loss += loss_tmp.item()
 
+                    edges_w = self.explain(emb, edge_index, node_idx=new_node_index)
+                    
+                    # Monte carlo step to apply reparameterization trick
+                    for k in range(self.k_MC):
+                        p, _ = self.reparam_trick(edges_w, x, edge_index, emb, tmp=tmp, training=True)
+                        probs[i, k] = probs[i, k] + p
+
+                ori_preds = (torch.tensor(ori_pred_dict.values())   # B*K
+                    .squeeze(1)
+                    .repeat_interleave(k, dim=1)
+                    .flatten())
+                probs = probs.flatten(end_dim=1)        # B*K C
+
+                loss_tmp = self.__loss__(probs, ori_preds)
+                loss_tmp.backward()
                 optimizer.step()
+
+                loss += loss_tmp.item()
+
                 duration += time.perf_counter() - tic
                 print(f'Epoch: {epoch} | Loss: {loss/len(explain_node_index_list)}')
             print(f"training time is {duration:.5}s")
@@ -716,7 +768,8 @@ class PGExplainer(nn.Module):
             probs = probs.squeeze()
             label = pred_labels
             # masked value
-            _, edge_mask = self.explain(x, edge_index, embed=embed, tmp=1.0, training=False)
+            edges_w = self.explain(x, edge_index, embed=embed)
+            _, edge_mask = self.reparam_trick(edges_w, x, edge_index, embed, tmp=1.0, training=False)
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
             masked_node_list = [node for node in range(data.x.shape[0]) if node in selected_nodes]
@@ -742,7 +795,8 @@ class PGExplainer(nn.Module):
             x, edge_index, _, subset, _ = self.get_subgraph(node_idx, x, edge_index)
             new_node_idx = torch.where(subset == node_idx)[0]
             embed = self.model.get_emb(x, edge_index)
-            _, edge_mask = self.explain(x, edge_index, embed, tmp=1.0, training=False, node_idx=new_node_idx)
+            edges_w = self.explain(embed, edge_index, node_idx=new_node_idx)
+            _, edge_mask = self.reparam_trick(edges_w, x, edge_index, embed, tmp=1.0, training=False)
 
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
