@@ -20,7 +20,7 @@ To generate molecular graphs, we first need to decide what is generated to form 
 After the molecular graph formation method is determined, we can use any deep generative model (e.g. VAE [7]_, GAN [8]_, and flow [9]_) to construct a graph generator, in which latent variables are mapped to the generation targets by the model. 
 
 Next, we will show how to use GraphDF to construct a graph generator with sequential method and flow model. Specifically, we will show code examples
-of random generation and property optimization. Before running the example codes, please download the `configuration files <https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphDF/config>`_ and the `trained model files <https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphDF/saved_ckpts>`_.
+of random generation and property optimization. Before running the example codes, please download the `configuration files <https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/GraphDF/config>`_ and the `trained model files <https://github.com/divelab/DIG_storage/tree/main/ggraph/GraphDF/saved_ckpts>`_.
 
 
 Random Generation Example
