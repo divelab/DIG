@@ -763,6 +763,8 @@ class PGExplainer(nn.Module):
         pred_labels = probs.argmax(dim=-1)
         embed = self.model.get_emb(x, edge_index)
 
+        self.elayers.eval()
+        
         if self.explain_graph:
             # original value
             probs = probs.squeeze()
