@@ -649,7 +649,8 @@ class PGExplainer(nn.Module):
             # train the mask generator
             duration = 0.0
             for epoch in range(self.epochs):
-                probs = torch.zeros((len(dataset_indices), self.k_MC, num_classes), requires_grad=False)
+                probs = torch.zeros((len(dataset_indices), self.k_MC, num_classes), 
+                        requires_grad=False).to(self.device)
                 loss = 0.0
                 tmp = float(self.t0 * np.power(self.t1 / self.t0, epoch / self.epochs))
                 self.elayers.train()
@@ -700,7 +701,8 @@ class PGExplainer(nn.Module):
             duration = 0.0
             for epoch in range(self.epochs):
                 loss = 0.0
-                probs = torch.zeros((len(explain_node_index_list), self.k_MC, num_classes), requires_grad=False)
+                probs = torch.zeros((len(explain_node_index_list), self.k_MC, num_classes),
+                         requires_grad=False).to(self.device)
                 optimizer.zero_grad()
                 tmp = float(self.t0 * np.power(self.t1 / self.t0, epoch / self.epochs))
                 self.elayers.train()
