@@ -551,14 +551,14 @@ class PGExplainer(nn.Module):
 
         return gate_inputs
 
-    def concrete_sampling_and_model_forwarding(self, 
+    def explain(self, 
             edges_w: Tensor,
             x: Tensor, 
             edge_index: Tensor, 
             embed: Tensor, 
             tmp: float = 1.0,
             training: bool = False):
-
+        """ explain the GNN behaviour using graph input and its latent variable """
         nodesize = embed.size(0)
         edges_w = self.concrete_sample(edges_w, beta=tmp, training=training)
         self.sparse_mask_values = edges_w
@@ -582,12 +582,12 @@ class PGExplainer(nn.Module):
 
         return probs, edge_mask
 
-    def explain(self,
+    def get_latent_variables(self,
                 embed: Tensor,
                 edge_index: Tensor,
                 **kwargs)\
             -> Tuple[float, Tensor]:
-        r""" explain the GNN behavior for graph with explanation network
+        r""" returns latent variables of the explainer network
 
         Args:
             x (:obj:`torch.Tensor`): Node feature matrix with shape
@@ -599,8 +599,7 @@ class PGExplainer(nn.Module):
             training (:obj:`bool`): Whether in training procedure or not
 
         Returns:
-            probs (:obj:`torch.Tensor`): The classification probability for graph with edge mask
-            edge_mask (:obj:`torch.Tensor`): The probability mask for graph edges
+            values (:obj:`torch.Tensor`): latent variables
         """
         node_idx = kwargs.get('node_idx')
         if self.explain_graph:
@@ -660,11 +659,11 @@ class PGExplainer(nn.Module):
                 for i, gid in tqdm.tqdm(enumerate(dataset_indices)):
                     data = dataset[gid]
                     data.to(self.device)
-                    edges_w = self.explain(emb_dict[gid], data.edge_index)
+                    edges_w = self.get_latent_variables(emb_dict[gid], data.edge_index)
                     
                     # Monte carlo step to apply reparameterization trick
                     for k in range(self.k_MC):
-                        p, _ = self.concrete_sampling_and_model_forwarding(edges_w, data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
+                        p, _ = self.explain(edges_w, data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
                         probs[i, k] = probs[i, k] + p
 
                 ori_preds = (torch.Tensor(list(ori_pred_dict.values()))   # B*K
@@ -714,11 +713,11 @@ class PGExplainer(nn.Module):
                         emb = self.model.get_emb(x, edge_index)
                         new_node_index = int(torch.where(subset == node_idx)[0])
                     
-                    edges_w = self.explain(emb, edge_index, node_idx=new_node_index)
+                    edges_w = self.get_latent_variables(emb, edge_index, node_idx=new_node_index)
                     
                     # Monte carlo step to apply reparameterization trick
                     for k in range(self.k_MC):
-                        p, _ = self.concrete_sampling_and_model_forwarding(edges_w, x, edge_index, emb, tmp=tmp, training=True)
+                        p, _ = self.explain(edges_w, x, edge_index, emb, tmp=tmp, training=True)
                         probs[i, k] = probs[i, k] + p[new_node_index]
 
                 ori_preds = (torch.Tensor(list(ori_pred_dict.values()))   # B*K
@@ -774,8 +773,8 @@ class PGExplainer(nn.Module):
             probs = probs.squeeze()
             label = pred_labels
             # masked value
-            edges_w = self.explain(embed, edge_index)
-            _, edge_mask = self.concrete_sampling_and_model_forwarding(edges_w, x, edge_index, embed, tmp=1.0, training=False)
+            edges_w = self.get_latent_variables(embed, edge_index)
+            _, edge_mask = self.explain(edges_w, x, edge_index, embed, tmp=1.0, training=False)
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
             masked_node_list = [node for node in range(data.x.shape[0]) if node in selected_nodes]
@@ -801,8 +800,8 @@ class PGExplainer(nn.Module):
             x, edge_index, _, subset, _ = self.get_subgraph(node_idx, x, edge_index)
             new_node_idx = torch.where(subset == node_idx)[0]
             embed = self.model.get_emb(x, edge_index)
-            edges_w = self.explain(embed, edge_index, node_idx=new_node_idx)
-            _, edge_mask = self.concrete_sampling_and_model_forwarding(edges_w, x, edge_index, embed, tmp=1.0, training=False)
+            edges_w = self.get_latent_variables(embed, edge_index, node_idx=new_node_idx)
+            _, edge_mask = self.explain(edges_w, x, edge_index, embed, tmp=1.0, training=False)
 
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
