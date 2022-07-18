@@ -473,10 +473,11 @@ class PGExplainer(nn.Module):
         return 'source_to_target'
 
     def __loss__(self, prob: Tensor, ori_pred: Tensor):
-        ind = torch.arange(prob.size(0))
+        ind = torch.arange(prob.size(0)).long()
         logit = prob[ind, ori_pred]
         logit = logit + EPS
         pred_loss = - torch.log(logit)
+        pred_loss = torch.mean(pred_loss)
 
         # size
         edge_mask = self.sparse_mask_values
@@ -548,7 +549,7 @@ class PGExplainer(nn.Module):
 
         return gate_inputs
 
-    def reparam_trick(self, 
+    def concrete_sampling_and_model_forwarding(self, 
             edges_w: Tensor,
             x: Tensor, 
             edge_index: Tensor, 
@@ -661,13 +662,14 @@ class PGExplainer(nn.Module):
                     
                     # Monte carlo step to apply reparameterization trick
                     for k in range(self.k_MC):
-                        p, _ = self.reparam_trick(edges_w, data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
+                        p, _ = self.concrete_sampling_and_model_forwarding(edges_w, data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
                         probs[i, k] = probs[i, k] + p
-                
+
                 ori_preds = (torch.tensor(ori_pred_dict.values())   # B*K
-                    .squeeze(1)
-                    .repeat_interleave(k, dim=1)
-                    .flatten())
+                    .unsqueeze(1)
+                    .repeat_interleave(self.k_MC, dim=1)
+                    .flatten()
+                    .long())
                 probs = probs.flatten(end_dim=1)        # B*K C
                 
                 loss_tmp = self.__loss__(probs, ori_preds)
@@ -709,20 +711,21 @@ class PGExplainer(nn.Module):
                             self.get_subgraph(node_idx=node_idx, x=data.x, edge_index=data.edge_index, y=data.y)
                         emb = self.model.get_emb(x, edge_index)
                         new_node_index = int(torch.where(subset == node_idx)[0])
-
+                    
                     edges_w = self.explain(emb, edge_index, node_idx=new_node_index)
                     
                     # Monte carlo step to apply reparameterization trick
                     for k in range(self.k_MC):
-                        p, _ = self.reparam_trick(edges_w, x, edge_index, emb, tmp=tmp, training=True)
-                        probs[i, k] = probs[i, k] + p
+                        p, _ = self.concrete_sampling_and_model_forwarding(edges_w, x, edge_index, emb, tmp=tmp, training=True)
+                        probs[i, k] = probs[i, k] + p[new_node_index]
 
-                ori_preds = (torch.tensor(ori_pred_dict.values())   # B*K
-                    .squeeze(1)
-                    .repeat_interleave(k, dim=1)
-                    .flatten())
+                ori_preds = (torch.Tensor(list(ori_pred_dict.values()))   # B*K
+                    .unsqueeze(1)
+                    .repeat_interleave(self.k_MC, dim=1)
+                    .flatten()
+                    .long())
+                    
                 probs = probs.flatten(end_dim=1)        # B*K C
-
                 loss_tmp = self.__loss__(probs, ori_preds)
                 loss_tmp.backward()
                 optimizer.step()
@@ -771,7 +774,7 @@ class PGExplainer(nn.Module):
             label = pred_labels
             # masked value
             edges_w = self.explain(x, edge_index, embed=embed)
-            _, edge_mask = self.reparam_trick(edges_w, x, edge_index, embed, tmp=1.0, training=False)
+            _, edge_mask = self.concrete_sampling_and_model_forwarding(edges_w, x, edge_index, embed, tmp=1.0, training=False)
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
             masked_node_list = [node for node in range(data.x.shape[0]) if node in selected_nodes]
@@ -798,7 +801,7 @@ class PGExplainer(nn.Module):
             new_node_idx = torch.where(subset == node_idx)[0]
             embed = self.model.get_emb(x, edge_index)
             edges_w = self.explain(embed, edge_index, node_idx=new_node_idx)
-            _, edge_mask = self.reparam_trick(edges_w, x, edge_index, embed, tmp=1.0, training=False)
+            _, edge_mask = self.concrete_sampling_and_model_forwarding(edges_w, x, edge_index, embed, tmp=1.0, training=False)
 
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
