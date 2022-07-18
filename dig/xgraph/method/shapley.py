@@ -119,8 +119,7 @@ def l_shapley(coalition: list, data: Data, local_radius: int,
     for subset_len in range(0, num_nodes_around + 1):
         node_exclude_subsets = combinations(nodes_around, subset_len)
         for node_exclude_subset in node_exclude_subsets:
-            set_exclude_mask = np.ones(num_nodes)
-            set_exclude_mask[local_region] = 0.0
+            set_exclude_mask = np.zeros(num_nodes)
             if node_exclude_subset:
                 set_exclude_mask[list(node_exclude_subset)] = 1.0
             set_include_mask = set_exclude_mask.copy()
@@ -203,8 +202,7 @@ def mc_l_shapley(coalition: list, data: Data, local_radius: int,
         random_nodes_permutation = np.random.permutation(random_nodes_permutation)
         split_idx = np.where(random_nodes_permutation == coalition_placeholder)[0][0]
         selected_nodes = random_nodes_permutation[:split_idx]
-        set_exclude_mask = np.ones(num_nodes)
-        set_exclude_mask[local_region] = 0.0
+        set_exclude_mask = np.zeros(num_nodes)
         set_exclude_mask[selected_nodes] = 1.0
         set_include_mask = set_exclude_mask.copy()
         set_include_mask[coalition] = 1.0
@@ -261,8 +259,7 @@ def NC_mc_l_shapley(coalition: list, data: Data, local_radius: int,
         random_nodes_permutation = np.random.permutation(random_nodes_permutation)
         split_idx = np.where(random_nodes_permutation == coalition_placeholder)[0][0]
         selected_nodes = random_nodes_permutation[:split_idx]
-        set_exclude_mask = np.ones(num_nodes)
-        set_exclude_mask[local_region] = 0.0
+        set_exclude_mask = np.zeros(num_nodes)
         set_exclude_mask[selected_nodes] = 1.0
         if node_idx != -1:
             set_exclude_mask[node_idx] = 1.0
