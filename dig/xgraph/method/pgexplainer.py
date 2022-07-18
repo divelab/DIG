@@ -658,14 +658,14 @@ class PGExplainer(nn.Module):
                 for i, gid in tqdm.tqdm(enumerate(dataset_indices)):
                     data = dataset[gid]
                     data.to(self.device)
-                    edges_w = self.explain(data.edge_index, embed=emb_dict[gid])
+                    edges_w = self.explain(emb_dict[gid], data.edge_index)
                     
                     # Monte carlo step to apply reparameterization trick
                     for k in range(self.k_MC):
                         p, _ = self.concrete_sampling_and_model_forwarding(edges_w, data.x, data.edge_index, embed=emb_dict[gid], tmp=tmp, training=True)
                         probs[i, k] = probs[i, k] + p
 
-                ori_preds = (torch.tensor(ori_pred_dict.values())   # B*K
+                ori_preds = (torch.Tensor(list(ori_pred_dict.values()))   # B*K
                     .unsqueeze(1)
                     .repeat_interleave(self.k_MC, dim=1)
                     .flatten()
@@ -724,7 +724,6 @@ class PGExplainer(nn.Module):
                     .repeat_interleave(self.k_MC, dim=1)
                     .flatten()
                     .long())
-                    
                 probs = probs.flatten(end_dim=1)        # B*K C
                 loss_tmp = self.__loss__(probs, ori_preds)
                 loss_tmp.backward()
@@ -773,7 +772,7 @@ class PGExplainer(nn.Module):
             probs = probs.squeeze()
             label = pred_labels
             # masked value
-            edges_w = self.explain(x, edge_index, embed=embed)
+            edges_w = self.explain(embed, edge_index)
             _, edge_mask = self.concrete_sampling_and_model_forwarding(edges_w, x, edge_index, embed, tmp=1.0, training=False)
             data = Data(x=x, edge_index=edge_index)
             selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
