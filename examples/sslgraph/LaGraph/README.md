@@ -1,6 +1,6 @@
 # Self-Supervised Representation Learning via Latent Graph Prediction
 
-PyTorch implementation for [Self-Supervised Representation Learning via Latent Graph Prediction](https://arxiv.org/abs/2202.08333)
+PyTorch implementation for [Self-Supervised Representation Learning via Latent Graph Prediction](https://proceedings.mlr.press/v162/xie22e.html)
 
 Yaochen Xie<sup>\*</sup>, Zhao Xu<sup>\*</sup>, Shuiwang Ji
 
