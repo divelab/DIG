@@ -343,7 +343,9 @@ class PlotUtils(object):
 
         elif self.dataset_name.lower() in ['ba_shapes', 'ba_shapes', 'tree_grid', 'tree_cycle']:
             y = kwargs.get('y')
-            node_idx = kwargs.get('node_idx')
+
+            # TODO: handle when `node_idx` is None
+            node_idx = kwargs.get('node_idx', 0)
             nodelist, edgelist = self.get_topk_edges_subgraph(edge_index, edge_mask, top_k, un_directed)
             self.plot_bashapes(graph, nodelist, y, node_idx, edgelist, title_sentence=title_sentence, figname=figname)
 
@@ -845,6 +847,7 @@ class PGExplainer(nn.Module):
                                                top_k=top_k,
                                                un_directed=True,
                                                words=words,
+                                               y=data.y,
                                                figname=vis_name)
             else:
                 plot_utils.plot_soft_edge_mask(graph,
@@ -852,6 +855,7 @@ class PGExplainer(nn.Module):
                                                top_k=top_k,
                                                un_directed=True,
                                                x=x,
+                                               y=data.y,
                                                figname=vis_name)
         else:
             assert node_idx is not None, "visualization method doesn't get the target node index"
