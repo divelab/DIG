@@ -22,6 +22,9 @@ Our experimental results demonstrate the superiority of *LaGraph* in performance
 ![](./ablation.png)
 
 
+## Environment Setup
+You can follow the same environment setup of [DIG-v1](https://github.com/divelab/DIG/tree/dig). Specifically, we use PyG >=1.6.0 and <=1.7.2, PyTorch 1.6.0. For DIG-v2, we are integrating the code of LaGraph in the library for easier usage. However, current version of LaGraph are made runable without installing DIG for easy reproduction.
+
 ## Experiments
 
 To reproduce experimental results of graph-level tasks, please refer to ```graph/example.ipynb```.
@@ -32,10 +35,13 @@ To reproduce experimental results of node-level tasks, please refer to ```node/e
 If you use this code for you research, please cite our paper.
 
 ```
-@article{xie2022self,
-  title={Self-Supervised Representation Learning via Latent Graph Prediction},
-  author={Xie, Yaochen and Xu, Zhao and Ji, Shuiwang},
-  journal={arXiv preprint arXiv:2202.08333},
-  year={2022}
+@inproceedings{xie2022lagraph,
+ author = {Xie, Yaochen and Xu, Zhao and Ji, Shuiwang},
+ booktitle = {Proceedings of the 39th International Conference on Machine Learning},
+ pages = {24460-24477},
+ title = {Self-Supervised Representation Learning via Latent Graph Prediction},
+ publisher = {PMLR},
+ volume = {162},
+ year = {2022}
 }
 ```
