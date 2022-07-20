@@ -42,6 +42,8 @@ Next, we load the trained GNN model. The model is trained using the BA_shapes da
 
 .. code-block ::
 
+    from dig.xgraph.utils.compatibility import compatible_state_dict
+
     def check_checkpoints(root='./'):
         if osp.exists(osp.join(root, 'checkpoints')):
             return
@@ -55,7 +57,8 @@ Next, we load the trained GNN model. The model is trained using the BA_shapes da
     model.to(device)
     check_checkpoints()
     ckpt_path = osp.join('checkpoints', 'ba_shapes', 'GCN_2l', '0', 'GCN_2l_best.ckpt')
-    model.load_state_dict(torch.load(ckpt_path)['state_dict'])
+    state_dict = compatible_state_dict(torch.load(ckpt_path, map_location='cpu')['state_dict'])
+    model.load_state_dict(state_dict)
 
 
 Then given an input graph, we feed it to the GNN model and obtain the prediction for a target node.
