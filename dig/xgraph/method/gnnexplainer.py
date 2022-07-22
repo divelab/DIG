@@ -94,7 +94,7 @@ class GNNExplainer(ExplainerBase):
 
         return self.edge_mask.data
 
-    def forward(self, x, edge_index, mask_features=False, **kwargs):
+    def forward(self, x, edge_index, mask_features=False, target_label=None, **kwargs):
         r"""
         Run the explainer for a specific graph instance.
         Args:
@@ -102,6 +102,7 @@ class GNNExplainer(ExplainerBase):
             edge_index (torch.Tensor): The graph instance's edge index.
             mask_features (bool, optional): Whether to use feature mask. Not recommended.
                 (Default: :obj:`False`)
+            target_label (torch.Tensor, optional): if given then apply optimization only on this label
             **kwargs (dict):
                 :obj:`node_idx` （int): The index of node that is pending to be explained.
                 (for node classification)
@@ -146,9 +147,10 @@ class GNNExplainer(ExplainerBase):
             # Calculate mask
             edge_masks = []
             for ex_label in ex_labels:
-                self.__clear_masks__()
-                self.__set_masks__(x, self_loop_edge_index)
-                edge_masks.append(self.gnn_explainer_alg(x, edge_index, ex_label))
+                if target_label is None or ex_label.item() == target_label.item():
+                    self.__clear_masks__()
+                    self.__set_masks__(x, self_loop_edge_index)
+                    edge_masks.append(self.gnn_explainer_alg(x, edge_index, ex_label))
 
         hard_edge_masks = [self.control_sparsity(mask, sparsity=kwargs.get('sparsity')).sigmoid()
                            for mask in edge_masks]
