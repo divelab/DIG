@@ -104,7 +104,7 @@ class GNNExplainer(ExplainerBase):
                 (Default: :obj:`False`)
             target_label (torch.Tensor, optional): if given then apply optimization only on this label
             **kwargs (dict):
-                :obj:`node_idx` （int): The index of node that is pending to be explained.
+                :obj:`node_idx` （int, list, tuple, torch.Tensor): The index of node that is pending to be explained.
                 (for node classification)
                 :obj:`sparsity` (float): The Sparsity we need to control to transform a
                 soft mask to a hard mask. (Default: :obj:`0.7`)
@@ -124,15 +124,18 @@ class GNNExplainer(ExplainerBase):
         # Only operate on a k-hop subgraph around `node_idx`.
         # Get subgraph and relabel the node, mapping is the relabeled given node_idx.
         if not self.explain_graph:
-            node_idx = kwargs.get('node_idx')
-            if not node_idx.dim():
-                node_idx = node_idx.reshape(-1)
-            node_idx = node_idx.to(self.device)
-            assert node_idx is not None
+            self.node_idx = node_idx = kwargs.get('node_idx')
+            assert node_idx is not None, 'An node explanation needs kwarg node_idx, but got None.'
+            if isinstance(node_idx, torch.Tensor) and not node_idx.dim():
+                node_idx = node_idx.to(self.device).flatten()
+            elif isinstance(node_idx, (int, list, tuple)):
+                node_idx = torch.tensor([node_idx], device=self.device, dtype=torch.int64).flatten()
+            else:
+                raise TypeError(f'node_idx should be in types of int, list, tuple, '
+                                f'or torch.Tensor, but got {type(node_idx)}')
             self.subset, _, _, self.hard_edge_mask = subgraph(
                 node_idx, self.__num_hops__, self_loop_edge_index, relabel_nodes=True,
                 num_nodes=None, flow=self.__flow__())
-            self.node_idx = node_idx
             self.new_node_idx = torch.where(self.subset == node_idx)[0]
 
         if kwargs.get('edge_masks'):
