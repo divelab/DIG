@@ -34,12 +34,16 @@ class GNNExplainer(ExplainerBase):
                  model: torch.nn.Module,
                  epochs: int = 100,
                  lr: float = 0.01,
-                 coff_size: float = 0.001,
-                 coff_ent: float = 0.001,
+                 coff_edge_size: float = 0.001,
+                 coff_edge_ent: float = 0.001,
+                 coff_node_feat_size: float = 1.0,
+                 coff_node_feat_ent: float = 0.1,
                  explain_graph: bool = False):
         super(GNNExplainer, self).__init__(model, epochs, lr, explain_graph)
-        self.coff_ent = coff_ent
-        self.coff_size = coff_size
+        self.coff_node_feat_size = coff_node_feat_size
+        self.coff_node_feat_ent = coff_node_feat_ent
+        self.coff_edge_size = coff_edge_size
+        self.coff_edge_ent = coff_edge_ent
 
     def __loss__(self, raw_preds: Tensor, x_label: Union[Tensor, int]):
         if self.explain_graph:
@@ -48,15 +52,15 @@ class GNNExplainer(ExplainerBase):
             loss = cross_entropy_with_logit(raw_preds[self.node_idx].reshape(1, -1), x_label)
 
         m = self.edge_mask.sigmoid()
-        loss = loss + self.coff_size * m.sum()
+        loss = loss + self.coff_edge_size * m.sum()
         ent = -m * torch.log(m + EPS) - (1 - m) * torch.log(1 - m + EPS)
-        loss = loss + self.coff_ent * ent.mean()
+        loss = loss + self.coff_edge_ent * ent.mean()
 
         if self.mask_features:
             m = self.node_feat_mask.sigmoid()
-            loss = loss + self.coeffs['node_feat_size'] * m.sum()
+            loss = loss + self.coff_node_feat_size * m.sum()
             ent = -m * torch.log(m + EPS) - (1 - m) * torch.log(1 - m + EPS)
-            loss = loss + self.coeffs['node_feat_ent'] * ent.mean()
+            loss = loss + self.coff_node_feat_ent * ent.mean()
 
         return loss
 
