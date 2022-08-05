@@ -64,6 +64,7 @@ class PGExplainer_edges(ExplainerBase):
 
         else:
             node_idx = kwargs.get('node_idx')
+            sparsity = kwargs.get('sparsity')
             assert kwargs.get('node_idx') is not None, "please input the node_idx"
             select_edge_index = torch.arange(0, edge_index.shape[1])
             subgraph_x, subgraph_edge_index, _, subset, kwargs = \
@@ -92,14 +93,15 @@ class PGExplainer_edges(ExplainerBase):
             # edge_masks
             edge_masks = [subgraph_edge_mask for _ in range(num_classes)]
             # Calculate mask
-            hard_edge_masks = [self.control_sparsity(subgraph_edge_mask, sparsity=kwargs.get('sparsity')).sigmoid()
-                               for _ in range(num_classes)]
+            hard_edge_masks = [
+                self.control_sparsity(subgraph_edge_mask, sparsity=sparsity).sigmoid()
+                for _ in range(num_classes)]
 
             self.__clear_masks__()
             self.__set_masks__(subgraph_x, subgraph_edge_index)
             with torch.no_grad():
-                related_preds = self.eval_related_pred(subgraph_x, subgraph_edge_index, hard_edge_masks,
-                                                       node_idx=self.new_node_idx)
+                related_preds = self.eval_related_pred(
+                    subgraph_x, subgraph_edge_index, hard_edge_masks, node_idx=self.new_node_idx)
 
             self.__clear_masks__()
 
@@ -149,6 +151,8 @@ def pipeline(config):
                                          config.datasets.dataset_name,
                                          f"{config.models.gnn_name}_"
                                          f"{len(config.models.param.gnn_latent_dim)}l_best.pth"))['net']
+
+    state_dict = compatible_state_dict(state_dict)
     model.load_state_dict(state_dict)
     eval_model.load_state_dict(state_dict)
 
@@ -185,6 +189,7 @@ def pipeline(config):
     if os.path.isfile(pgexplainer_saving_path):
         print("Load saved PGExplainer model...")
         state_dict = torch.load(pgexplainer_saving_path)
+        state_dict = compatible_state_dict(state_dict)
         pgexplainer.load_state_dict(state_dict)
     else:
         if config.models.param.graph_classification:
@@ -193,6 +198,7 @@ def pipeline(config):
             pgexplainer.train_explanation_network(dataset)
         torch.save(pgexplainer.state_dict(), pgexplainer_saving_path)
         state_dict = torch.load(pgexplainer_saving_path)
+        state_dict = compatible_state_dict(state_dict)
         pgexplainer.load_state_dict(state_dict)
 
     index = 0

@@ -12,6 +12,7 @@ param:
     t0: 5.0
     t1: 1.0
     undirected: True
+    sample_bias: 0
   ba_shapes:
     ex_learning_rate: 0.001
     ex_epochs: 10
@@ -20,6 +21,7 @@ param:
     t0: 5.0
     t1: 0.1
     undirected: True
+    sample_bias: 0
   graph_sst2:
     ex_learning_rate: 3e-3
     ex_epochs: 20
@@ -28,6 +30,7 @@ param:
     t0: 5.0
     t1: 1.0
     undirected: True
+    sample_bias: 0
   graph_sst5:
     ex_learning_rate: 3e-3
     ex_epochs: 20
@@ -36,6 +39,7 @@ param:
     t0: 5.0
     t1: 1.0
     undirected: True
+    sample_bias: 0
   twitter:
     ex_learning_rate: 0.005
     ex_epochs: 20
@@ -44,31 +48,7 @@ param:
     t0: 5.0
     t1: 1.0
     undirected: True
-  ba_community:
-    ex_learning_rate: 0.005
-    ex_epochs: 30
-    coff_size: 1e-4
-    coff_ent: 0.01
-    t0: 5.0
-    t1: 0.1
-    sample_bias: 0.0
-    undirected: True
-  tree_grid:
-    ex_learning_rate: 3e-3
-    ex_epochs: 20
-    coff_size: 0.01
-    coff_ent: 5e-4
-    t0: 5.0
-    t1: 1.0
-    undirected: True
-  tree_cycle:
-    ex_learning_rate: 3e-3
-    ex_epochs: 20
-    coff_size: 0.01
-    coff_ent: 5e-4
-    t0: 5.0
-    t1: 1.0
-    undirected: True
+    sample_bias: 0
   ba_2motifs:
     ex_learning_rate: 3e-3
     ex_epochs: 20
@@ -77,11 +57,4 @@ param:
     t0: 5.0
     t1: 1.0
     undirected: True
-  bace:
-    ex_learning_rate: 0.05
-    ex_epochs: 20
-    coff_size: 0.01
-    coff_ent: 0.01
-    t0: 5.0
-    t1: 1.0
-    undirected: True
+    sample_bias: 0
