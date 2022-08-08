@@ -10,7 +10,7 @@ from .train_utils import adjust_learning_rate, DataIterator
 class GraphDF(Generator):
     r"""
         The method class for GraphDF algorithm proposed in the paper `GraphDF: A Discrete Flow Model for Molecular Graph Generation <https://arxiv.org/abs/2102.01189>`_. This class provides interfaces for running random generation, property
-        optimization, and constrained optimization with GraphDF algorithm. Please refer to the `benchmark codes <https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphDF>`_ for usage examples.
+        optimization, and constrained optimization with GraphDF algorithm. Please refer to the `example codes <https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/GraphDF>`_ for usage examples.
     """
 
     def __init__(self):
