@@ -6,6 +6,11 @@ from .model import SphGen
 
 
 class G_SphereNet():
+    r"""
+        The method class for G-SphereNet algorithm proposed in the paper `An Autoregressive Flow Model for 3D Molecular Geometry Generation from Scratch <https://openreview.net/forum?id=C03Ajc-NS5W>`_. 
+        This class provides interfaces for running training and generation with G-SphereNet algorithm. 
+        Please refer to the `example codes <https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph3D/G_SphereNet>`_ for usage examples.
+    """
     def __init__(self):
         super(G_SphereNet, self).__init__()
         self.model = None
@@ -24,6 +29,20 @@ class G_SphereNet():
     
 
     def train(self, loader, lr, wd, max_epochs, model_conf_dict, checkpoint_path, save_interval, save_dir):
+        r"""
+            Running training for random generation task.
+
+            Args:
+                loader: The data loader for loading training samples. It is supposed to use dig.ggraph3D.dataset.QM93DGEN
+                    as the dataset class, and apply torch.utils.data.DataLoader to it to form the data loader.
+                lr (float): The learning rate for training.
+                wd (float): The weight decay factor for training.
+                max_epochs (int): The maximum number of training epochs.
+                model_conf_dict (dict): The python dict for configuring the model hyperparameters.
+                save_interval (int): Indicate the frequency to save the model parameters to .pth files,
+                    *e.g.*, if save_interval=2, the model parameters will be saved for every 2 training epochs.
+                save_dir (str): The directory to save the model parameters.
+        """
         self.get_model(model_conf_dict, checkpoint_path)
         self.model.train()
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=lr, weight_decay=wd)
@@ -64,6 +83,24 @@ class G_SphereNet():
 
 
     def generate(self, model_conf_dict, checkpoint_path, n_mols=1000, chunk_size=100, num_min_node=7, num_max_node=25, temperature=[1.0, 1.0, 1.0, 1.0], focus_th=0.5):
+        r"""
+            Running graph generation for random generation task.
+
+            Args:
+                model_conf_dict (dict): The python dict for configuring the model hyperparameters.
+                checkpoint_path (str): The path to the saved model checkpoint file.
+                n_mols (int, optional): The number of molecular geometries to generate. (default: :obj:`1000`)
+                chunk_size (int, optional): The maximum number of molecular geometries that are allowed to be generated in parallel. (default: :obj:`100`)
+                num_min_node (int, optional): The minimum number of nodes in the generated molecular geometries. (default: :obj:`7`)
+                num_max_node (int, optional): the maximum number of nodes in the generated molecular geometries. (default: :obj:`25`)
+                temperature (list, optional): a list of four float numbers, the temperature parameter of prior distribution. (default: :obj:`[1.0, 1.0, 1.0, 1.0]`)
+                focus_th (float, optional): The threshold for focus node classification. (default: :obj:`0.5`)
+            
+            :rtype:
+                mol_dicts,
+                A python dict where the key is the number of atoms, and the value indexed by that key is another python dict storing the atomic
+                number matrix (indexed by the key '_atomic_numbers') and the coordinate tensor (indexed by the key '_positions') of all generated molecular geometries with that atom number. 
+        """
         self.get_model(model_conf_dict, checkpoint_path)
         self.model.eval()
 

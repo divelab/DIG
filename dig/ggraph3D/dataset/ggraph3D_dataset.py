@@ -16,6 +16,13 @@ bond_to_type = {BondType.SINGLE: 1, BondType.DOUBLE: 2, BondType.TRIPLE: 3}
 
 
 def collate_fn(data_batch_list):
+    r"""
+        The collate function used to form a mini-batch of data when creating data loaders with the dataset class dig.ggraph3D.dataset.QM93DGEN.
+
+        Args:
+            data_batch_list: a list of python dict returned from the get function of dig.ggraph3D.dataset.QM93DGEN.
+        :rtype: :class:`dict` a python dict with the same keys as every python dict in data_batch_list.
+    """
     data_batch = {}
 
     for key in ['atom_type', 'position', 'new_atom_type', 'new_dist', 'new_angle', 'new_torsion', 'cannot_focus']:
@@ -40,6 +47,30 @@ def collate_fn(data_batch_list):
 
 
 class QM93DGEN(InMemoryDataset):
+    r"""
+        A `Pytorch Geometric <https://pytorch-geometric.readthedocs.io/en/latest/index.html>`_ data interface for datasets used in molecule generation.
+        
+        .. note::
+            When creating data loaders of this dataset class, only dig.ggraph3D.dataset.collate_fn can be used as the collate function.
+        
+        Args:
+            root (string, optional): Root directory where the dataset should be saved. (default: :obj:`./`)
+            subset_idxs (list, optional): if it is not None, only the data located 
+                at the indexs in subset_idxs of the dataset will be sampled.
+                (default: :obj:`None`)
+            transform (callable, optional): A function/transform that takes in an
+                :obj:`torch_geometric.data.Data` object and returns a transformed
+                version. The data object will be transformed before every access.
+                (default: :obj:`None`)
+            pre_transform (callable, optional): A function/transform that takes in
+                an :obj:`torch_geometric.data.Data` object and returns a
+                transformed version. The data object will be transformed before
+                being saved to disk. (default: :obj:`None`)
+            pre_filter (callable, optional): A function that takes in an
+                :obj:`torch_geometric.data.Data` object and returns a boolean
+                value, indicating whether the data object should be included in the
+                final dataset. (default: :obj:`None`)
+    """
     raw_url = "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/gdb9.tar.gz"
     split_urls = [
         "https://github.com/divelab/DIG_storage/raw/main/ggraph3D/data/split.npz",
@@ -88,6 +119,9 @@ class QM93DGEN(InMemoryDataset):
     
 
     def process(self):
+        r"""
+            Processes the dataset from raw data file to the :obj:`self.processed_dir` folder.
+        """
         mols = Chem.SDMolSupplier(self.raw_paths[0], removeHs=False, sanitize=False)
         self.atom_type_list, self.position_list, self.con_mat_list = [], [], []
 
@@ -123,10 +157,21 @@ class QM93DGEN(InMemoryDataset):
     
     
     def len(self):
+        r"""
+            Gets the number of molecular geometries that can be sampled in total.
+        """
         return len(self._indices)
     
 
     def get_idx_split(self, task):
+        r"""Gets the train-valid set split indices of the dataset for different tasks.
+        
+        Args:
+            task: The name of the task that the dataset will be used in, including 'rand_gen' for random molecular geometry generation, 
+                'gap_opt' for discovering molecular geometries with low HOMO-LUMO gaps, and 'alpha_opt' for discovering molecular geometries 
+                with high isotropic polarizabilities.
+        :rtype: A dictionary for training-validation split with key :obj:`train` and :obj:`valid`.
+        """
         assert task in ['rand_gen', 'gap_opt', 'alpha_opt']
         if task == 'rand_gen':
             split_idxs = np.load(osp.join(self.raw_dir, 'split.npz'))
@@ -145,6 +190,23 @@ class QM93DGEN(InMemoryDataset):
 
 
     def get(self, idx):
+        r"""Gets the data object at index :idx:.
+        
+        Args:
+            idx: The index of the data that you want to reach.
+        :rtype: :class:`dict` a python dict with the following items:
+                    "atom_type" --- the atom types of previously generated geometries at each generation step;
+                    "position" --- the atom coordinates of previously generated geometries at each generation step;
+                    "batch" --- the identity indexes used to discriminate different generation step;
+                    "focus" --- the index of focus atom at each generation step;
+                    "c1_focus" --- the index of c1 and focus atom at each generation step;
+                    "c2_c1_focus" --- the index of c2, c1, and focus atom at each generation step;
+                    "new_atom_type" --- the atom types to be generated at each generation step;
+                    "new_dist" --- the distances to be generated at each generation step;
+                    "new_angle" --- the angles to be generated at each generation step;
+                    "new_torsion" --- the torsion angles to be generated at each generation step;
+                    "cannot_focus" --- the labels denoting whether each atom can serve as the focus atom or not in the previously generated geometries at each generation step.
+        """
         atom_type, position, con_mat = self.atom_type_list[idx], self.position_list[idx], self.con_mat_list[idx]
         atom_valency = torch.sum(con_mat, dim=1)
 

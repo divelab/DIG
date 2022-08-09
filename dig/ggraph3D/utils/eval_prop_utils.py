@@ -40,6 +40,17 @@ def geom2alpha(geom):
 
 
 def compute_prop(atomic_number, position, prop_name):
+    """
+    Calculate the quantum property score of the given molecular geometry with `PySCF <https://pyscf.org/index.html>`_.
+
+    Args:
+        atomic_number (numpy array): the numpy array indicating the atomic number of atoms in the molecular geometry.
+        position (numpy array): the numpy array indicating the coordinates of atoms in the molecular geometry.
+        prop_name (string): the name of quantum property, 'gap' for HOMO-LUMO gap, 'alpha' for isotropic polarizability.
+    
+    :rtype:
+        :class:`float`
+    """
     ptb = Chem.GetPeriodicTable()
     geom = [[ptb.GetElementSymbol(int(z)), position[i]] for i, z in enumerate(atomic_number)]
 
