@@ -157,7 +157,7 @@ class GNNExplainer(ExplainerBase):
                 if target_label is None or ex_label.item() == target_label.item():
                     self.__clear_masks__()
                     self.__set_masks__(x, self_loop_edge_index)
-                    edge_masks.append(self.gnn_explainer_alg(x, edge_index, ex_label))
+                    edge_masks.append(self.gnn_explainer_alg(x, edge_index, ex_label, mask_features))
 
         hard_edge_masks = [self.control_sparsity(mask, sparsity=kwargs.get('sparsity')).sigmoid()
                            for mask in edge_masks]
