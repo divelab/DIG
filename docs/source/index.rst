@@ -54,8 +54,19 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
    ggraph/method
    ggraph/evaluation
    ggraph/utils
-   
-   
+
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+   :caption: 3D Graph Generation
+
+   ggraph3d/dataset
+   ggraph3d/method
+   ggraph3d/evaluation
+   ggraph3d/utils
+
+
 .. toctree::
    :glob:
    :maxdepth: 1
