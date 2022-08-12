@@ -1,0 +1,109 @@
+name: GCN
+norm: true
+loop: true
+params:
+# 0.9511
+  reddit:
+    architecture:
+      num_layers: 2
+      hidden_channels: 256
+      dropout: 0.5
+      drop_input: false
+      batch_norm: false
+      residual: false
+    num_parts: 200
+    batch_size: 100
+    max_steps: 2
+    pool_size: 2
+    num_workers: 0
+    lr: 0.05
+    reg_weight_decay: 0.0
+    nonreg_weight_decay: 0.0
+    grad_norm: none
+    epochs: 400
+    gamma: 0.5
+
+# 0.5449
+  flickr:
+    architecture:
+      num_layers: 2
+      hidden_channels: 512
+      dropout: 0.5
+      drop_input: true
+      batch_norm: true
+      residual: false
+    num_parts: 24
+    batch_size: 12
+    max_steps: 2
+    pool_size: 2
+    num_workers: 0
+    lr: 0.01
+    reg_weight_decay: 0
+    nonreg_weight_decay: 0
+    grad_norm: 2.0
+    epochs: 1000
+    gamma: 0.1
+
+# ...
+  yelp:
+    architecture:
+      num_layers: 2
+      hidden_channels: 512
+      dropout: 0.0
+      drop_input: false
+      batch_norm: false
+      residual: true
+      linear: false
+    num_parts: 40
+    batch_size: 5
+    max_steps: 4
+    pool_size: 2
+    num_workers: 0
+    lr: 0.01
+    reg_weight_decay: 0
+    nonreg_weight_decay: 0
+    grad_norm: null
+    epochs: 500
+    gamma: 0.3
+
+# 0.7171
+  arxiv:
+    architecture:
+      num_layers: 3
+      hidden_channels: 256
+      dropout: 0.5
+      drop_input: false
+      batch_norm: true
+      residual: false
+    num_parts: 80
+    batch_size: 40
+    max_steps: 2
+    pool_size: 2
+    num_workers: 0
+    lr: 0.01
+    reg_weight_decay: 0
+    nonreg_weight_decay: 0
+    grad_norm: none
+    epochs: 400
+    gamma: 0.1
+
+#
+  products:
+    architecture:
+      num_layers: 3
+      hidden_channels: 256
+      dropout: 0.3
+      drop_input: false
+      batch_norm: false
+      residual: false
+    num_parts: 7
+    batch_size: 1
+    max_steps: 4
+    pool_size: 1
+    num_workers: 0
+    lr: 0.005
+    reg_weight_decay: 0
+    nonreg_weight_decay: 0
+    grad_norm: 2.0
+    epochs: 300
+    gamma: 0.5

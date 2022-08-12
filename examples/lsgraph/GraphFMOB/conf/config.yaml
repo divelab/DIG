@@ -1,0 +1,6 @@
+defaults:
+  - model: pna
+  - dataset: yelp
+device: 7
+root: '/data/haiyang/datasets'
+log_every: 1
