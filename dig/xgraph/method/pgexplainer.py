@@ -793,7 +793,7 @@ class PGExplainer(nn.Module):
                                                edge_mask,
                                                top_k=top_k,
                                                un_directed=True,
-                                               x=x,
+                                               x=data.x,
                                                figname=vis_name)
         else:
             assert node_idx is not None, "visualization method doesn't get the target node index"
