@@ -1,7 +1,7 @@
 Frontiers of Graph Neural Networks with DIG: KDD 2022 Hand-on Tutorial
 --------
 
-[[Slides]](https://github.com/divelab/DIG/blob/dig-stable/tutorials/KDD2022/DIG-Tutorial-KDD22.pdf)[[Hands-on demos]](https://github.com/divelab/DIG/tree/dig-stable/tutorials/KDD2022)
+[[Slides]](https://drive.google.com/file/d/1yk8Y1SkwpuxGbBVx5cKgI2J7KJ0ZMqAd/view?usp=sharing)[[Hands-on demos]](https://github.com/divelab/DIG/tree/dig-stable/tutorials/KDD2022)
 
 This tutorial covers several fontiers, including **graph generation**, **self-supervised learning of GNNs**, **explainability of GNNs** and **3D GNNs**. We firstly introduce graph neural networks briefly. Then, for each of the mentioned directions, we provide a unified and comprehensive review of the key approaches. In addition, we have hands-on code demonstrations based on our library [DIG](https://github.com/divelab/DIG) to help the audience to implement and benchmark methods in these frontiers without extra effort. 
 
