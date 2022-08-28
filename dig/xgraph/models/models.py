@@ -103,6 +103,25 @@ class GCN_3l(GNNBasic):
             post_conv = relu(conv(post_conv, edge_index))
         return post_conv
 
+class GCN_3l_BN(GCN_3l):
+    def __init__(self, model_level, dim_node, dim_hidden, num_classes):
+        super().__init__(model_level, dim_node, dim_hidden, num_classes)
+        num_layer = 3
+
+        self.relu1 = nn.Sequential(
+            nn.BatchNorm1d(dim_hidden),
+            nn.ReLU()
+        )
+
+        self.relus = nn.ModuleList(
+            [
+                nn.Sequential(
+                    nn.BatchNorm1d(dim_hidden),
+                    nn.ReLU(),
+                )
+                for _ in range(num_layer - 1)
+            ]
+        )
 
 class GCN_2l(GNNBasic):
 
