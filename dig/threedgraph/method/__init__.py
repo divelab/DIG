@@ -3,6 +3,7 @@ from .schnet import SchNet
 from .dimenetpp import DimeNetPP
 from .spherenet import SphereNet
 from .comenet import ComENet
+from .pronet import ProNet
 
 
 __all__ = [
@@ -10,5 +11,6 @@ __all__ = [
     'SchNet',
     'DimeNetPP',
     'SphereNet',
-    'ComENet'
+    'ComENet',
+    'ProNet'
 ]
