@@ -3,7 +3,7 @@ This is an implementation of ProNet model
 
 """
 
-from torch_geometric.nn.acts import swish
+from torch_geometric.nn.resolver import swish
 from torch_geometric.nn import inits, MessagePassing
 from torch_geometric.nn import radius_graph
 
