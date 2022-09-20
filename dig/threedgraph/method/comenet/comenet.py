@@ -1,6 +1,5 @@
 from torch_cluster import radius_graph
 from torch_geometric.nn import GraphConv, GraphNorm
-from torch_geometric.nn.acts import swish
 from torch_geometric.nn import inits
 
 from .features import angle_emb, torsion_emb
@@ -24,6 +23,8 @@ except ImportError:
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+def swish(x):
+    return x * torch.sigmoid(x)
 
 class Linear(torch.nn.Module):
 

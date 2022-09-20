@@ -3,7 +3,6 @@ This is an implementation of ProNet model
 
 """
 
-from torch_geometric.nn.acts import swish
 from torch_geometric.nn import inits, MessagePassing
 from torch_geometric.nn import radius_graph
 
@@ -23,6 +22,9 @@ import numpy as np
 num_aa_type = 26
 num_side_chain_embs = 8
 num_bb_embs = 6
+
+def swish(x):
+    return x * torch.sigmoid(x)
 
 
 class Linear(torch.nn.Module):
