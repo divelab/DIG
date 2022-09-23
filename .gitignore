@@ -11,3 +11,8 @@ experiment_curve.py
 /dig/xgraph/dataset/ba_lrp/
 /docs/build/
 /fix_bug.py
+.eggs/
+**/__pycache__/
+build/
+**/*.egg-info/
+**/*.egg

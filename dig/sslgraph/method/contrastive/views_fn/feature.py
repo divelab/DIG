@@ -2,6 +2,9 @@ import random
 import torch
 import numpy as np
 from torch_geometric.data import Batch, Data
+from typing import Dict
+from torch_geometric.utils import to_undirected, degree
+from dig.sslgraph.utils.pgrace import eigenvector_centrality, feature_drop_weights_dense, feature_drop_weights, compute_pr, drop_feature_weighted_2
 
 
 class NodeAttrMask():
@@ -72,6 +75,65 @@ class NodeAttrMask():
         else:
             return Data(x=x, edge_index=data.edge_index)
 
+    def views_fn(self, data):
+        r"""Method to be called when :class:`NodeAttrMask` object is called.
+        
+        Args:
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
+        if isinstance(data, Batch):
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
+            return Batch.from_data_list(dlist)
+        elif isinstance(data, Data):
+            return self.do_trans(data)
+
+class GCANodeAttrMask():
+    def __init__(self, centrality_measure: str, prob: float = 0.1, threshold: float = 0.7, dense: bool = False, return_mask: bool = False):
+        self.centrality_measure = centrality_measure
+        self.dense = dense
+        self.return_mask = return_mask
+        self.prob = prob
+        self.threshold = threshold
+    
+    def __call__(self, data):
+        return self.views_fn(data)
+
+    
+    def _get_node_centrality(self, data : Data):
+        if self.centrality_measure == 'degree':
+            edge_index_ = to_undirected(data.edge_index)
+            node_deg = degree(edge_index_[1])
+            node_c = node_deg
+        elif self.centrality_measure == 'pr':
+            node_pr = compute_pr(data.edge_index)
+            node_c = node_pr
+        elif self.centrality_measure == 'evc':
+            node_evc = eigenvector_centrality(data)
+            node_c = node_evc
+        else:
+            # Don't allow masking if centrality measure is not specified
+            # GCA official implementation uses a full-one mask, but we mandate the user to remove NodePerturbation from the view_fn
+            raise Exception("Centrality measure option '{}' is not available!".format(self.centrality_measure))
+        return node_c
+
+    def do_trans(self, data : Data):
+        # TODO: determine if to(device) call is needed
+        x = data.x.detach().clone()
+        node_c = self._get_node_centrality(data).to(x.device)
+        if self.dense:
+            feature_weights = feature_drop_weights_dense(data.x, node_c).to(x.device)
+        else:
+            feature_weights = feature_drop_weights(data.x, node_c).to(x.device)
+        x = drop_feature_weighted_2(x, feature_weights, p = self.prob, threshold = self.threshold).to(x.device)
+        if self.return_mask:
+            return Data(x=x, edge_index=data.edge_index, mask=feature_weights).to(x.device)
+        else:
+            return Data(x=x, edge_index=data.edge_index).to(x.device)
+    
+    
+    
     def views_fn(self, data):
         r"""Method to be called when :class:`NodeAttrMask` object is called.
         

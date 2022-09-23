@@ -2,7 +2,7 @@ import torch
 from torch_geometric.utils import to_dense_adj, dense_to_sparse, dropout_adj
 from sklearn.preprocessing import MinMaxScaler
 from torch_geometric.data import Batch, Data
-
+from dig.sslgraph.utils.pgrace import degree_drop_weights, pr_drop_weights, evc_drop_weights, drop_edge_weighted
 
 class EdgePerturbation():
     '''Edge perturbation on the given graph or batched graphs. Class objects callable via 
@@ -55,7 +55,42 @@ class EdgePerturbation():
         elif isinstance(data, Data):
             return self.do_trans(data)
 
-
+class GCAEdgePerturbation():
+    def __init__(self, drop_scheme : str, prob : float, threshold : float = 0.7):
+        self.drop_scheme = drop_scheme
+        self.prob = prob
+        self.threshold = threshold
+    def __call__(self, data):
+        return self.views_fn(data)
+    def do_trans(self, data):
+        if self.drop_scheme not in ['degree', 'pr', 'evc']:
+            raise ValueError("Invalid drop scheme {}".format(self.drop_scheme))
+        drop_weights = self._get_edge_weights(data)
+        new_edge_index = drop_edge_weighted(data.edge_index, drop_weights, p=self.prob, threshold=self.threshold)
+        return Data(x=data.x, edge_index=new_edge_index)
+        
+    def _get_edge_weights(self, data):
+        device = data.x.device
+        if self.drop_scheme == 'degree':
+            drop_weights = degree_drop_weights(data.edge_index).to(device)
+        elif self.drop_scheme == 'pr':
+            drop_weights = pr_drop_weights(data.edge_index, aggr='sink', k=200).to(device)
+        elif self.drop_scheme == 'evc':
+            drop_weights = evc_drop_weights(data).to(device)
+        return drop_weights
+    def views_fn(self, data):
+        r"""Method to be called when :class:`EdgePerturbation` object is called.
+        
+        Args:
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
+        if isinstance(data, Batch):
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
+            return Batch.from_data_list(dlist)
+        elif isinstance(data, Data):
+            return self.do_trans(data)
 
 class Diffusion():
     '''Diffusion on the given graph or batched graphs, used in 
