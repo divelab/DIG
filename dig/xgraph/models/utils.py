@@ -37,7 +37,7 @@ class ReadOut(torch.nn.Module):
 
 
 def normalize(x: torch.Tensor):
-    x -= x.min()
+    x -= x.min()  # This operation -= may lead to mem leak without detach() before this assignment. (x = x - x.min() won't lead to such a problem.)
     if x.max() == 0:
         return torch.zeros(x.size(), device=x.device)
     x /= x.max()
