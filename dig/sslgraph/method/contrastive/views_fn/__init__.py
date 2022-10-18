@@ -1,5 +1,5 @@
-from .feature import NodeAttrMask, GCANodeAttrMask
-from .structure import EdgePerturbation, Diffusion, DiffusionWithSample, GCAEdgePerturbation
+from .feature import NodeAttrMask, AdaNodeAttrMask
+from .structure import EdgePerturbation, Diffusion, DiffusionWithSample, AdaEdgePerturbation
 from .sample import UniformSample, RWSample
 from .combination import RandomView, Sequential
 
@@ -12,6 +12,6 @@ __all__ = [
     "DiffusionWithSample",
     "UniformSample",
     "RWSample",
-    "GCANodeAttrMask",
-    "GCAEdgePerturbation"
+    "AdaNodeAttrMask",
+    "AdaEdgePerturbation"
 ]

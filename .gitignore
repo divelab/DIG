@@ -1,5 +1,6 @@
 .gitignore
 .idea/
+.vscode/
 benchmarks/xgraph/checkpoints/
 benchmarks/xgraph/*.zip
 benchmarks/xgraph/*.sh
