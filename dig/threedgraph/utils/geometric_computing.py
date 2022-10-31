@@ -52,8 +52,8 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion = False):
         # Prepare torsion idxes.
         idx_batch = torch.arange(len(idx_i),device=device)
         idx_k_n = adj_t[idx_j].storage.col()
-        repeat = num_triplets - 1
-        num_triplets_t = num_triplets.repeat_interleave(repeat)
+        repeat = num_triplets
+        num_triplets_t = num_triplets.repeat_interleave(repeat)[mask]
         idx_i_t = idx_i.repeat_interleave(num_triplets_t)
         idx_j_t = idx_j.repeat_interleave(num_triplets_t)
         idx_k_t = idx_k.repeat_interleave(num_triplets_t)
