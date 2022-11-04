@@ -12,7 +12,7 @@ def test_MD17():
     assert dataset[0].pos.size() == (21, 3)
     assert dataset[0].y.size() == (1,)
     assert dataset[0].force.size() == (21, 3)
-    split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+    split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
     assert split_idx['train'][0] == 118875
     assert split_idx['valid'][0] == 5044
     assert split_idx['test'][0] == 44424
@@ -25,7 +25,7 @@ def test_MD17():
 #     assert dataset[0].pos.size() == (12, 3)
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].force.size() == (12, 3)
-#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
 #     assert split_idx['train'][0] == 401788
 #     assert split_idx['valid'][0] == 32285
 #     assert split_idx['test'][0] == 145596
@@ -38,7 +38,7 @@ def test_MD17():
 #     assert dataset[0].pos.size() == (9, 3)
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].force.size() == (9, 3)
-#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
 #     assert split_idx['train'][0] == 198217
 #     assert split_idx['valid'][0] == 34712
 #     assert split_idx['test'][0] == 144219
@@ -51,7 +51,7 @@ def test_MD17():
 #     assert dataset[0].pos.size() == (9, 3)
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].force.size() == (9, 3)
-#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
 #     assert split_idx['train'][0] == 501619
 #     assert split_idx['valid'][0] == 755114
 #     assert split_idx['test'][0] == 866595
@@ -64,7 +64,7 @@ def test_MD17():
 #     assert dataset[0].pos.size() == (18, 3)
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].force.size() == (18, 3)
-#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
 #     assert split_idx['train'][0] == 104200
 #     assert split_idx['valid'][0] == 119477
 #     assert split_idx['test'][0] == 158389
@@ -77,7 +77,7 @@ def test_MD17():
 #     assert dataset[0].pos.size() == (16, 3)
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].force.size() == (16, 3)
-#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
 #     assert split_idx['train'][0] == 210643
 #     assert split_idx['valid'][0] == 217058
 #     assert split_idx['test'][0] == 73884
@@ -90,7 +90,7 @@ def test_MD17():
 #     assert dataset[0].pos.size() == (15, 3)
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].force.size() == (15, 3)
-#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
 #     assert split_idx['train'][0] == 84247
 #     assert split_idx['valid'][0] == 303283
 #     assert split_idx['test'][0] == 148214
@@ -103,7 +103,7 @@ def test_MD17():
 #     assert dataset[0].pos.size() == (12, 3)
 #     assert dataset[0].y.size() == (1,)
 #     assert dataset[0].force.size() == (12, 3)
-#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+#     split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
 #     assert split_idx['train'][0] == 37527
 #     assert split_idx['valid'][0] == 54674
 #     assert split_idx['test'][0] == 40298

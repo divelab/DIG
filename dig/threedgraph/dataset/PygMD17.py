@@ -35,7 +35,7 @@ class MD17(InMemoryDataset):
         --------
 
         >>> dataset = MD17(name='aspirin')
-        >>> split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+        >>> split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
         >>> train_dataset, valid_dataset, test_dataset = dataset[split_idx['train']], dataset[split_idx['valid']], dataset[split_idx['test']]
         >>> train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
         >>> data = next(iter(train_loader))
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     print(dataset.data.pos.shape)
     print(dataset.data.y.shape)
     print(dataset.data.force.shape)
-    split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=10000, seed=42)
+    split_idx = dataset.get_idx_split(len(dataset.data.y), train_size=1000, valid_size=1000, seed=42)
     print(split_idx)
     print(dataset[split_idx['train']])
     train_dataset, valid_dataset, test_dataset = dataset[split_idx['train']], dataset[split_idx['valid']], dataset[split_idx['test']]
