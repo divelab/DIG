@@ -408,6 +408,7 @@ class GINConv(gnn.GINConv):
         self.fc_steps = None
         self.reweight = None
 
+
     def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
                 edge_weight: OptTensor = None, task='explain', **kwargs) -> Tensor:
         """"""
@@ -685,7 +686,8 @@ class GCNConv_mask(gnn.GCNConv):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.edge_weight = None
-
+        self.weight = nn.Parameter(self.lin.weight.data.T.clone().detach())
+    
     def forward(self, x: Tensor, edge_index: Adj,
                 edge_weight: OptTensor = None) -> Tensor:
         """"""
@@ -782,6 +784,7 @@ class GINConv_mask(gnn.GINConv):
         self.edge_weight = None
         self.fc_steps = None
         self.reweight = None
+
 
     def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
                 edge_weight: OptTensor = None, task='explain', **kwargs) -> Tensor:
