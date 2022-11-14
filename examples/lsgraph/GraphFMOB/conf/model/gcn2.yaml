@@ -1,0 +1,125 @@
+name: GCN2
+norm: true
+loop: true
+params:
+
+# 0.9678
+  reddit:
+    architecture:
+      num_layers: 4
+      hidden_channels: 256
+      dropout: 0.5
+      drop_input: true
+      batch_norm: true
+      residual: false
+      shared_weights: false
+      alpha: 0.1
+      theta: 0.5
+    num_parts: 200
+    batch_size: 100
+    max_steps: 2
+    pool_size: 2
+    num_workers: 0
+    lr: 0.01
+    reg_weight_decay: 0.0
+    nonreg_weight_decay: 0.0
+    grad_norm: null
+    epochs: 400
+    gamma: 0.1
+
+# 0.7320
+  arxiv:
+    architecture:
+      num_layers: 4
+      hidden_channels: 256
+      dropout: 0.3
+      drop_input: false
+      batch_norm: true
+      residual: false
+      shared_weights: true
+      alpha: 0.2
+      theta: 0.5
+    num_parts: 40
+    batch_size: 20
+    max_steps: 2
+    pool_size: 2
+    num_workers: 0
+    lr: 0.01
+    reg_weight_decay: 0.0
+    nonreg_weight_decay: 0.0
+    grad_norm: null
+    epochs: 500
+    gamma: 0.2
+
+# 0.5651
+  flickr:
+    architecture:
+      num_layers: 8
+      hidden_channels: 256
+      dropout: 0.5
+      drop_input: true
+      batch_norm: true
+      residual: false
+      shared_weights: false
+      alpha: 0.1
+      theta: 0.5
+    num_parts: 24
+    batch_size: 12
+    max_steps: 2
+    pool_size: 2
+    num_workers: 0
+    lr: 0.01
+    reg_weight_decay: 0
+    nonreg_weight_decay: 0
+    grad_norm: null
+    epochs: 1000
+    gamma: 0.2
+
+# 0.6539
+  yelp:
+    architecture:
+      num_layers: 2
+      hidden_channels: 512
+      dropout: 0.0
+      drop_input: false
+      batch_norm: false
+      residual: false
+      shared_weights: false
+      alpha: 0.2
+      theta: 0.5
+    num_parts: 40
+    batch_size: 5
+    max_steps: 4
+    pool_size: 2
+    num_workers: 0
+    lr: 0.01
+    reg_weight_decay: 0
+    nonreg_weight_decay: 0
+    grad_norm: null
+    epochs: 500
+    gamma: 0.95
+
+#
+  products:
+    architecture:
+      num_layers: 5
+      hidden_channels: 128
+      dropout: 0.1
+      drop_input: false
+      batch_norm: false
+      residual: false
+      shared_weights: false
+      alpha: 0.1
+      theta: 0.5
+    edge_dropout: 0.8
+    num_parts: 150
+    batch_size: 1
+    max_steps: 151
+    pool_size: 1
+    num_workers: 0
+    lr: 0.005
+    reg_weight_decay: 0
+    nonreg_weight_decay: 0
+    grad_norm: null
+    epochs: 300
+    gamma: 0.1

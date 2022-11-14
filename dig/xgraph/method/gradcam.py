@@ -81,6 +81,8 @@ class GradCAM(WalkBase):
 
         if not self.explain_graph:
             node_idx = kwargs.get('node_idx')
+            if isinstance(node_idx, int):
+                node_idx = torch.tensor([node_idx], device=self.device, dtype=torch.long)
             if not node_idx.dim():
                 node_idx = node_idx.reshape(-1)
             node_idx = node_idx.to(self.device)
@@ -114,7 +116,7 @@ class GradCAM(WalkBase):
             edge_masks = []
             hard_edge_masks = []
             for ex_label in ex_labels:
-                attr_wo_relu = self.explain_method.attribute(x, ex_label, additional_forward_args=edge_index)
+                attr_wo_relu = self.explain_method.attribute(x, ex_label, additional_forward_args=edge_index).detach()
                 mask = normalize(attr_wo_relu.relu())
                 mask = mask.squeeze()
                 mask = (mask[self_loop_edge_index[0]] + mask[self_loop_edge_index[1]]) / 2

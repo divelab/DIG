@@ -471,6 +471,9 @@ class MCTS(object):
 
         # extract the sub-graph and change the node indices.
         if node_idx is not None:
+            if isinstance(node_idx, Tensor):
+                node_idx = node_idx.item()
+
             self.ori_node_idx = node_idx
             self.ori_graph = copy.copy(self.graph)
             x, edge_index, subset, edge_mask, kwargs = \

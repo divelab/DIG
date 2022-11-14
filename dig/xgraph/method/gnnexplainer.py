@@ -38,13 +38,17 @@ class GNNExplainer(ExplainerBase):
                  model: torch.nn.Module,
                  epochs: int = 100,
                  lr: float = 0.01,
-                 coff_size: float = 0.001,
-                 coff_ent: float = 0.001,
+                 coff_edge_size: float = 0.001,
+                 coff_edge_ent: float = 0.001,
+                 coff_node_feat_size: float = 1.0,
+                 coff_node_feat_ent: float = 0.1,
                  explain_graph: bool = False,
                  indirect_graph_symmetric_weights: bool = False):
         super(GNNExplainer, self).__init__(model, epochs, lr, explain_graph)
-        self.coff_ent = coff_ent
-        self.coff_size = coff_size
+        self.coff_node_feat_size = coff_node_feat_size
+        self.coff_node_feat_ent = coff_node_feat_ent
+        self.coff_edge_size = coff_edge_size
+        self.coff_edge_ent = coff_edge_ent
         self._symmetric_edge_mask_indirect_graph: bool = indirect_graph_symmetric_weights
 
     def __loss__(self, raw_preds: Tensor, x_label: Union[Tensor, int]):
@@ -54,15 +58,15 @@ class GNNExplainer(ExplainerBase):
             loss = cross_entropy_with_logit(raw_preds[self.node_idx].reshape(1, -1), x_label)
 
         m = self.edge_mask.sigmoid()
-        loss = loss + self.coff_size * m.sum()
+        loss = loss + self.coff_edge_size * m.sum()
         ent = -m * torch.log(m + EPS) - (1 - m) * torch.log(1 - m + EPS)
-        loss = loss + self.coff_ent * ent.mean()
+        loss = loss + self.coff_edge_ent * ent.mean()
 
         if self.mask_features:
             m = self.node_feat_mask.sigmoid()
-            loss = loss + self.coeffs['node_feat_size'] * m.sum()
+            loss = loss + self.coff_node_feat_size * m.sum()
             ent = -m * torch.log(m + EPS) - (1 - m) * torch.log(1 - m + EPS)
-            loss = loss + self.coeffs['node_feat_ent'] * ent.mean()
+            loss = loss + self.coff_node_feat_ent * ent.mean()
 
         return loss
 
@@ -110,7 +114,7 @@ class GNNExplainer(ExplainerBase):
                 (Default: :obj:`False`)
             target_label (torch.Tensor, optional): if given then apply optimization only on this label
             **kwargs (dict):
-                :obj:`node_idx` （int): The index of node that is pending to be explained.
+                :obj:`node_idx` （int, list, tuple, torch.Tensor): The index of node that is pending to be explained.
                 (for node classification)
                 :obj:`sparsity` (float): The Sparsity we need to control to transform a
                 soft mask to a hard mask. (Default: :obj:`0.7`)
@@ -130,15 +134,18 @@ class GNNExplainer(ExplainerBase):
         # Only operate on a k-hop subgraph around `node_idx`.
         # Get subgraph and relabel the node, mapping is the relabeled given node_idx.
         if not self.explain_graph:
-            node_idx = kwargs.get('node_idx')
-            if not node_idx.dim():
-                node_idx = node_idx.reshape(-1)
-            node_idx = node_idx.to(self.device)
-            assert node_idx is not None
+            self.node_idx = node_idx = kwargs.get('node_idx')
+            assert node_idx is not None, 'An node explanation needs kwarg node_idx, but got None.'
+            if isinstance(node_idx, torch.Tensor) and not node_idx.dim():
+                node_idx = node_idx.to(self.device).flatten()
+            elif isinstance(node_idx, (int, list, tuple)):
+                node_idx = torch.tensor([node_idx], device=self.device, dtype=torch.int64).flatten()
+            else:
+                raise TypeError(f'node_idx should be in types of int, list, tuple, '
+                                f'or torch.Tensor, but got {type(node_idx)}')
             self.subset, _, _, self.hard_edge_mask = subgraph(
                 node_idx, self.__num_hops__, self_loop_edge_index, relabel_nodes=True,
                 num_nodes=None, flow=self.__flow__())
-            self.node_idx = node_idx
             self.new_node_idx = torch.where(self.subset == node_idx)[0]
 
         if kwargs.get('edge_masks'):

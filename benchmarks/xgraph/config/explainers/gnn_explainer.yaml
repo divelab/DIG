@@ -26,28 +26,8 @@ param:
     epochs: 1000
     coff_size: 0.001
     coff_ent: 1e-5
-  ba_community:
-    lr: 0.01
-    epochs: 1000
-    coff_size: 0.1
-    coff_ent: 0.1
-  tree_grid:
-    lr: 0.01
-    epochs: 1000
-    coff_size: 0.001
-    coff_ent: 0.1
-  tree_cycle:
-    lr: 0.01
-    epochs: 1000
-    coff_size: 0.1
-    coff_ent: 0.1
   ba_2motifs:
     lr: 0.02
     epochs: 100
     coff_size: 0.001
     coff_ent: 1e-5
-  bace:
-    lr: 0.01
-    epochs: 1000
-    coff_size: 0.001
-    coff_ent: 0.001

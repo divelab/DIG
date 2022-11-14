@@ -28,6 +28,10 @@ import dig.ggraph.dataset
 import dig.ggraph.method
 import dig.ggraph.utils
 import dig.ggraph.evaluation
+import dig.ggraph3D.dataset
+import dig.ggraph3D.method
+import dig.ggraph3D.utils
+import dig.ggraph3D.evaluation
 import dig.xgraph.dataset
 import dig.xgraph.method
 import dig.xgraph.evaluation

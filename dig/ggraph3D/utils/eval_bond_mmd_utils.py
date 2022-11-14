@@ -3,6 +3,18 @@ import numpy as np
 
 
 def collect_bond_dists(mols_dict, valid_list, con_mat_list):
+    """
+    Collect the lengths for each type of chemical bond in given valid molecular geometries.
+
+    Args:
+        mol_dicts (dict): A python dict where the key is the number of atoms, and the value indexed by that key is another python dict storing the atomic
+            number matrix (indexed by the key '_atomic_numbers') and the coordinate tensor (indexed by the key '_positions') of all generated molecular geometries with that atom number.
+        valid_list (list): the list of bool values indicating whether each molecular geometry is chemically valid. Note that only the bond lengths of 
+            valid molecular geometries will be collected.
+        con_mat_list (list): the list of bond order matrices.
+    
+    :rtype: :class:`dict` a python dict where the key is the bond type, and the value indexed by that key is the list of all bond lengths of that bond.
+    """
     bond_dist = {}
     id = 0
 
@@ -30,6 +42,17 @@ def collect_bond_dists(mols_dict, valid_list, con_mat_list):
 
 
 def compute_mmd(source, target, batch_size=1000, kernel_mul=2.0, kernel_num=5, fix_sigma=None):
+    """
+    Calculate the `maximum mean discrepancy distance <https://jmlr.csail.mit.edu/papers/v13/gretton12a.html>`_ between two sample set.
+    This implementation is based on `this open source code <https://github.com/ZongxianLee/MMD_Loss.Pytorch>`_.
+
+    Args:
+        source (pytorch tensor): the pytorch tensor containing data samples of the source distribution.
+        target (pytorch tensor): the pytorch tensor containing data samples of the target distribution.
+
+    :rtype:
+        :class:`float`
+    """
     n_source = int(source.size()[0])
     n_target = int(target.size()[0])
     n_samples = n_source + n_target

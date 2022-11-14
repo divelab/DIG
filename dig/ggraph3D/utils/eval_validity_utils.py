@@ -381,21 +381,17 @@ def check_valency(mol):
 
 def xyz2mol(atoms, coordinates, use_graph=True):
     """
-    Generate a rdkit molobj from atoms, coordinates and a total_charge.
+    Convert the given molecular geometry to a 2D molecular graph and check if it is chemically valid through valency check with the algorithm 
+    in `this paper <https://onlinelibrary.wiley.com/doi/abs/10.1002/bkcs.10334>`_.
 
-    args:
-        atoms - list of atom types (int)
-        coordinates - 3xN Cartesian coordinates
-        charge - total charge of the system (default: 0)
-
-    optional:
-        allow_charged_fragments - alternatively radicals are made
-        use_graph - use graph (networkx)
-        use_huckel - Use Huckel method for atom connectivity prediction
-        embed_chiral - embed chiral information to the molecule
-
-    returns:
-        mols - list of rdkit molobjects
+    Args:
+        atoms (numpy array): the numpy array indicating the atomic number of atoms in the molecular geometry.
+        coordinates (numpy array): the numpy array indicating the coordinates of atoms in the molecular geometry.
+        use_graph (bool): whether use networkx to compute the maximum-weighted matching of the graph or not. (default: :obj:`True`)
+    
+    :rtype:
+        BO: bond order matrix.
+        valid: a bool value denoting whether the molecular geometry is valid or not.
 
     """
 

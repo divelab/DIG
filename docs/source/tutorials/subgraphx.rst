@@ -86,9 +86,11 @@ Since the graph model is a two-layer GNN model, the information only aggregates 
     subgraph_x, subgraph_edge_index, subset, edge_mask, kwargs = \
         MCTS.__subgraph__(node_idx, data.x, data.edge_index, num_hops=2)
     subgraph_y = data.y[subset].to('cpu')
+    new_node_idx = torch.argwhere(subset == node_idx)[0]
+    
     vis_graph = to_networkx(Data(x=subgraph_x, edge_index=subgraph_edge_index))
     plotutils = PlotUtils(dataset_name='ba_shapes')
-    plotutils.plot(vis_graph, nodelist=[], figname=None, y=subgraph_y, node_idx=node_indice)
+    plotutils.plot(vis_graph, nodelist=[], figname=None, y=subgraph_y, node_idx=new_node_idx)
 
 .. image:: imgs/subgraphx_ori_graph.png
     :width: 80%

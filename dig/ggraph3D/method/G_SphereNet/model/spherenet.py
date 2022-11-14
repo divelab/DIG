@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 from torch.nn import Linear, Embedding
-from torch_geometric.nn.acts import swish
 from torch_geometric.nn.inits import glorot_orthogonal
 from torch_geometric.nn import radius_graph
 from torch_scatter import scatter
@@ -17,6 +16,9 @@ except ImportError:
     sym = None
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+def swish(x):
+    return x * torch.sigmoid(x)
 
 class emb(torch.nn.Module):
     def __init__(self, num_spherical, num_radial, cutoff, envelope_exponent):

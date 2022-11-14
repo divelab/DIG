@@ -31,7 +31,7 @@
 <!--- [![Contributors][contributor-image]][contributor-url] -->
 
 
-**[Documentation](https://diveintographs.readthedocs.io)** | **[Paper [JMLR]](https://www.jmlr.org/papers/v22/21-0343.html)** | **[Tutorials](https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html#)** | **[Benchmarks](https://github.com/divelab/DIG/tree/dig-stable/benchmarks)** |  **[Examples](https://github.com/divelab/DIG/tree/dig-stable/examples)**
+**[Documentation](https://diveintographs.readthedocs.io)** | **[Paper [JMLR]](https://www.jmlr.org/papers/v22/21-0343.html)** | **[Tutorials](https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html#)** | **[Benchmarks](https://github.com/divelab/DIG/tree/dig-stable/benchmarks)** |  **[Examples](https://github.com/divelab/DIG/tree/dig-stable/examples)** | **[Join the DIG slack community now!:fire:](https://join.slack.com/t/dive-into-graphs/shared_invite/zt-1i9kn731c-RhLA1zcEGHXbIToxdVqo0g)**
 
 *DIG: Dive into Graphs* is a turnkey library for graph deep learning research.
 
@@ -180,7 +180,7 @@ Please cite our [paper](https://jmlr.org/papers/v22/21-0343.html) if you find *D
 
 ## Contact
 
-If you have any technical questions, please submit new issues.
+If you have any technical questions, please submit new issues or raise it in our [DIG slack community:fire:](https://join.slack.com/t/dive-into-graphs/shared_invite/zt-1i9kn731c-RhLA1zcEGHXbIToxdVqo0g).
 
 If you have any other questions, please contact us: Meng Liu [mengliu@tamu.edu] and Shuiwang Ji [sji@tamu.edu].
 

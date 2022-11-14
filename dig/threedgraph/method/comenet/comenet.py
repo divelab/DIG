@@ -1,6 +1,5 @@
 from torch_cluster import radius_graph
 from torch_geometric.nn import GraphConv, GraphNorm
-from torch_geometric.nn.acts import swish
 from torch_geometric.nn import inits
 
 from .features import angle_emb, torsion_emb
@@ -24,6 +23,8 @@ except ImportError:
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+def swish(x):
+    return x * torch.sigmoid(x)
 
 class Linear(torch.nn.Module):
 
@@ -136,12 +137,12 @@ class SimpleInteractionBlock(torch.nn.Module):
     def __init__(
             self,
             hidden_channels,
+            middle_channels,
             num_radial,
             num_spherical,
             num_layers,
             output_channels,
-            act=swish,
-            inits='glorot',
+            act=swish
     ):
         super(SimpleInteractionBlock, self).__init__()
         self.act = act
@@ -159,15 +160,15 @@ class SimpleInteractionBlock(torch.nn.Module):
         self.norm = GraphNorm(hidden_channels)
 
         # Transformations of Bessel and spherical basis representations.
-        self.lin_feature1 = TwoLayerLinear(num_radial * num_spherical ** 2, hidden_channels, hidden_channels)
-        self.lin_feature2 = TwoLayerLinear(num_radial * num_spherical, hidden_channels, hidden_channels)
+        self.lin_feature1 = TwoLayerLinear(num_radial * num_spherical ** 2, middle_channels, hidden_channels)
+        self.lin_feature2 = TwoLayerLinear(num_radial * num_spherical, middle_channels, hidden_channels)
 
         # Dense transformations of input messages.
         self.lin = Linear(hidden_channels, hidden_channels)
         self.lins = torch.nn.ModuleList()
         for _ in range(num_layers):
             self.lins.append(Linear(hidden_channels, hidden_channels))
-        self.final = Linear(hidden_channels, output_channels, weight_initializer=inits)
+        self.final = Linear(hidden_channels, output_channels)
 
         self.reset_parameters()
 
@@ -222,6 +223,7 @@ class ComENet(nn.Module):
             cutoff (float, optional): Cutoff distance for interatomic interactions. (default: :obj:`8.0`)
             num_layers (int, optional): Number of building blocks. (default: :obj:`4`)
             hidden_channels (int, optional): Hidden embedding size. (default: :obj:`256`)
+            middle_channels (int, optional): Middle embedding size for the two layer linear block. (default: :obj:`256`)
             out_channels (int, optional): Size of each output sample. (default: :obj:`1`)
             num_radial (int, optional): Number of radial basis functions. (default: :obj:`3`)
             num_spherical (int, optional): Number of spherical harmonics. (default: :obj:`2`)
@@ -232,6 +234,7 @@ class ComENet(nn.Module):
             cutoff=8.0,
             num_layers=4,
             hidden_channels=256,
+            middle_channels=64,
             out_channels=1,
             num_radial=3,
             num_spherical=2,
@@ -257,6 +260,7 @@ class ComENet(nn.Module):
             [
                 SimpleInteractionBlock(
                     hidden_channels,
+                    middle_channels,
                     num_radial,
                     num_spherical,
                     num_output_layers,
@@ -270,7 +274,7 @@ class ComENet(nn.Module):
         self.lins = torch.nn.ModuleList()
         for _ in range(num_output_layers):
             self.lins.append(Linear(hidden_channels, hidden_channels))
-        self.lin_out = Linear(hidden_channels, out_channels, weight_initializer='zeros')
+        self.lin_out = Linear(hidden_channels, out_channels)
         self.reset_parameters()
 
     def reset_parameters(self):

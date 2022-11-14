@@ -11,13 +11,5 @@ param:
     none: None
   ba_shapes:
     none: None
-  ba_community:
-    none: None
-  tree_grid:
-    none: None
-  tree_cycle:
-    none: None
   ba_2motifs:
-    none: None
-  bace:
     none: None

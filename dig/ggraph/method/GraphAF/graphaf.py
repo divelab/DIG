@@ -10,7 +10,7 @@ from .train_utils import adjust_learning_rate, DataIterator
 class GraphAF(Generator):
     r"""
         The method class for GraphAF algorithm proposed in the paper `GraphAF: a Flow-based Autoregressive Model for Molecular Graph Generation <https://arxiv.org/abs/2001.09382>`_. This class provides interfaces for running random generation, property
-        optimization, and constrained optimization with GraphAF. Please refer to the `benchmark codes <https://github.com/divelab/DIG/tree/dig/benchmarks/ggraph/GraphAF>`_ for usage examples.
+        optimization, and constrained optimization with GraphAF. Please refer to the `example codes <https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/GraphAF>`_ for usage examples.
     """
     def __init__(self):
         super(GraphAF, self).__init__()

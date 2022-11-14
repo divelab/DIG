@@ -5,7 +5,8 @@ from scipy.special import comb
 from itertools import combinations
 import torch.nn.functional as F
 from torch_geometric.utils import to_networkx
-from torch_geometric.data import Data, Batch, Dataset, DataLoader
+from torch_geometric.data import Data, Batch, Dataset
+from torch_geometric.loader import DataLoader
 
 
 def GnnNetsGC2valueFunc(gnnNets, target_class):
