@@ -688,7 +688,7 @@ class GCNConv_mask(gnn.GCNConv):
         super().__init__(*args, **kwargs)
         self.edge_weight = None
         self.weight = nn.Parameter(self.lin.weight.data.T.clone().detach())
- 
+
     def forward(self, x: Tensor, edge_index: Adj,
                 edge_weight: OptTensor = None) -> Tensor:
         """"""
