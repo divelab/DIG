@@ -3,6 +3,7 @@ from torch import Tensor
 from torch_geometric.utils.loop import add_remaining_self_loops
 from dig.version import debug
 from ..models.utils import subgraph
+from .utils import symmetric_edge_mask_indirect_graph
 from torch.nn.functional import cross_entropy
 from .base_explainer import ExplainerBase
 from typing import Union
@@ -29,6 +30,9 @@ class GNNExplainer(ExplainerBase):
             (default: :obj:`0.01`)
         explain_graph (bool, optional): Whether to explain graph classification model
             (default: :obj:`False`)
+        indirect_graph_symmetric_weights (bool, optional): If `True`, then the explainer
+            will first realize whether this graph input has indirect edges, 
+            then makes its edge weights symmetric. (default: :obj:`False`)
     """
     def __init__(self,
                  model: torch.nn.Module,
@@ -36,10 +40,12 @@ class GNNExplainer(ExplainerBase):
                  lr: float = 0.01,
                  coff_size: float = 0.001,
                  coff_ent: float = 0.001,
-                 explain_graph: bool = False):
+                 explain_graph: bool = False,
+                 indirect_graph_symmetric_weights: bool = False):
         super(GNNExplainer, self).__init__(model, epochs, lr, explain_graph)
         self.coff_ent = coff_ent
         self.coff_size = coff_size
+        self._symmetric_edge_mask_indirect_graph: bool = indirect_graph_symmetric_weights
 
     def __loss__(self, raw_preds: Tensor, x_label: Union[Tensor, int]):
         if self.explain_graph:
@@ -150,9 +156,14 @@ class GNNExplainer(ExplainerBase):
                 if target_label is None or ex_label.item() == target_label.item():
                     self.__clear_masks__()
                     self.__set_masks__(x, self_loop_edge_index)
-                    edge_masks.append(self.gnn_explainer_alg(x, edge_index, ex_label))
+                    edge_mask = self.gnn_explainer_alg(x, edge_index, ex_label).sigmoid()
+                    
+                    if self._symmetric_edge_mask_indirect_graph:
+                        edge_mask = symmetric_edge_mask_indirect_graph(self_loop_edge_index, edge_mask)
 
-        hard_edge_masks = [self.control_sparsity(mask, sparsity=kwargs.get('sparsity')).sigmoid()
+                    edge_masks.append(edge_mask)
+
+        hard_edge_masks = [self.control_sparsity(mask, sparsity=kwargs.get('sparsity'))
                            for mask in edge_masks]
 
         with torch.no_grad():
