@@ -3,5 +3,5 @@ from .jse import JSE_loss
 
 __all__ = [
     "NCE_loss",
-    "JSE_loss"
+    "JSE_loss",
 ]

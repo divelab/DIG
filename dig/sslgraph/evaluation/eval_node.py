@@ -22,7 +22,7 @@ class LogReg(nn.Module):
                 m.bias.data.fill_(0.0)
 
     def forward(self, seq):
-        ret = torch.log_softmax(self.fc(seq), dim=-1)
+        ret = self.fc(seq)
         return ret
 
 

@@ -1,8 +1,8 @@
 import torch
-from torch_geometric.utils import to_dense_adj, dense_to_sparse, dropout_adj
+from torch_geometric.utils import to_dense_adj, dense_to_sparse, dropout_adj, degree, add_remaining_self_loops
 from sklearn.preprocessing import MinMaxScaler
 from torch_geometric.data import Batch, Data
-
+from dig.sslgraph.utils.adaptive import degree_drop_weights, pr_drop_weights, evc_drop_weights, drop_edge_weighted
 
 class EdgePerturbation():
     '''Edge perturbation on the given graph or batched graphs. Class objects callable via 
@@ -55,7 +55,57 @@ class EdgePerturbation():
         elif isinstance(data, Data):
             return self.do_trans(data)
 
-
+class AdaEdgePerturbation():
+    '''Proabilistic edge perturbation on the given graph or batched graphs. Perturbations are adaptive i.e. critical edges have lower probability of being removed.
+    Adaptations based on the paper `Graph Contrastive Learning with Adaptive Augmentation <https://arxiv.org/abs/2010.14945>`
+    Refer to `source implementation <https://github.com/CRIPAC-DIG/GCA>` for more details.
+    Class objects callable via method :meth:`views_fn`.
+    
+    Args:
+        centrality_measure (str): Method for computing edge centrality. Set `degree` for degree centrality,
+        `pr` for PageRank centrality and `evc` for eigen-vector centrality
+        prob (float): Probability factor used for calculating edge-drop probability
+        threshold (float): Upper-bound probability for dropping any edge, defaults to 0.7
+    '''
+    def __init__(self, centrality_measure : str, prob : float, threshold : float):
+        self.centrality_measure = centrality_measure
+        self.prob = prob
+        self.threshold = threshold
+    def __call__(self, data):
+        return self.views_fn(data)
+    def do_trans(self, data):
+        if self.centrality_measure not in ['degree', 'pr', 'evc']:
+            raise ValueError("Invalid drop scheme {}".format(self.centrality_measure))
+        drop_weights = self._get_edge_weights(data)
+        new_edge_index = drop_edge_weighted(data.edge_index, drop_weights, p=self.prob, threshold=self.threshold)
+        return Data(x=data.x, edge_index=new_edge_index)
+        
+    def _get_edge_weights(self, data):
+        # Add self loops if the degree returns for only a subset of nodes
+        if degree(data.edge_index[1]).size(0) != data.x.size(0):
+            edge_index_ = add_remaining_self_loops(data.edge_index, num_nodes=data.x.size(0))[0]
+        else:
+            edge_index_ = data.edge_index
+        if self.centrality_measure == 'degree':
+            drop_weights = degree_drop_weights(edge_index_)
+        elif self.centrality_measure == 'pr':
+            drop_weights = pr_drop_weights(edge_index_, aggr='sink', k=200)
+        elif self.centrality_measure == 'evc':
+            drop_weights = evc_drop_weights(data)
+        return drop_weights
+    def views_fn(self, data):
+        r"""Method to be called when :class:`AdaEdgePerturbation` object is called.
+        
+        Args:
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
+        if isinstance(data, Batch):
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
+            return Batch.from_data_list(dlist)
+        elif isinstance(data, Data):
+            return self.do_trans(data)
 
 class Diffusion():
     '''Diffusion on the given graph or batched graphs, used in 

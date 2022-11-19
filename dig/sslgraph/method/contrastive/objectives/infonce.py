@@ -29,13 +29,15 @@ def NCE_loss(zs=None, zs_n=None, batch=None, sigma=None, **kwargs):
         norm = kwargs['norm']
     else:
         norm = True
+    
+    mean = kwargs['mean'] if 'mean' in kwargs else True
         
     if zs_n is not None:
         if zs is None:
             # InfoNCE in GRACE
             assert len(zs_n)==2
-            return (infoNCE_local_intra_node(zs_n[0], zs_n[1], tau, norm)+
-                    infoNCE_local_intra_node(zs_n[1], zs_n[0], tau, norm))*0.5
+            return (infoNCE_local_intra_node(zs_n[0], zs_n[1], tau, norm, batch)+
+                    infoNCE_local_intra_node(zs_n[1], zs_n[0], tau, norm, batch))*0.5
         else:
             assert len(zs_n)==len(zs)
             assert batch is not None
@@ -65,20 +67,39 @@ def NCE_loss(zs=None, zs_n=None, batch=None, sigma=None, **kwargs):
         return loss
 
     
-def infoNCE_local_intra_node(z1_n, z2_n, tau=0.5, norm=True):
+def infoNCE_local_intra_node(z1_n, z2_n, tau=0.5, norm=True, batch=None):
     '''
     Args:
         z1_n: Tensor of shape [n_nodes, z_dim].
         z2_n: Tensor of shape [n_nodes, z_dim].
         tau: Float. Usually in (0,1].
         norm: Boolean. Whether to apply normlization.
+        batch: Tensor of shape [batch_size]
     '''
-    if norm:
-        z1_n = F.normalize(z1_n)
-        z2_n = F.normalize(z2_n)
+    def sim(z1:torch.Tensor, z2:torch.Tensor):
+            if norm:
+                z1 = F.normalize(z1)
+                z2 = F.normalize(z2)
+            return torch.mm(z1, z2.t())
+    
     exp = lambda x: torch.exp(x / tau)
-    refl_sim = exp(torch.mm(z1_n, z1_n.t()))
-    between_sim = exp(torch.mm(z1_n, z2_n.t()))
+    if batch is not None:
+        batch_size = batch.size(0)
+        num_nodes = z1_n.size(0)
+        indices = torch.arange(0, num_nodes).to(z1_n.device)
+        losses = []
+        for i in range(0, num_nodes, batch_size):
+            mask = indices[i:i+batch_size]
+            refl_sim = exp(sim(z1_n[mask], z1_n))
+            between_sim = exp(sim(z1_n[mask], z2_n))
+            losses.append(-torch.log(between_sim[:, i:i+batch_size].diag()
+                            / (refl_sim.sum(1) + between_sim.sum(1)
+                            - refl_sim[:, i:i+batch_size].diag())))
+        losses = torch.cat(losses)
+        return losses.mean()
+
+    refl_sim = exp(sim(z1_n, z1_n))
+    between_sim = exp(sim(z1_n, z2_n))
     
     pos_sim = between_sim.diag()
     intra_sim = refl_sim.sum(1) - refl_sim.diag()

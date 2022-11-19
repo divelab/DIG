@@ -1,5 +1,5 @@
-from .feature import NodeAttrMask
-from .structure import EdgePerturbation, Diffusion, DiffusionWithSample
+from .feature import NodeAttrMask, AdaNodeAttrMask
+from .structure import EdgePerturbation, Diffusion, DiffusionWithSample, AdaEdgePerturbation
 from .sample import UniformSample, RWSample
 from .combination import RandomView, Sequential
 
@@ -11,5 +11,7 @@ __all__ = [
     "Diffusion",
     "DiffusionWithSample",
     "UniformSample",
-    "RWSample"
+    "RWSample",
+    "AdaNodeAttrMask",
+    "AdaEdgePerturbation"
 ]

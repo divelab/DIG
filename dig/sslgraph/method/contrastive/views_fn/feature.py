@@ -2,6 +2,8 @@ import random
 import torch
 import numpy as np
 from torch_geometric.data import Batch, Data
+from torch_geometric.utils import to_undirected, degree, add_remaining_self_loops
+from dig.sslgraph.utils.adaptive import eigenvector_centrality, feature_drop_weights_dense, feature_drop_weights, compute_pr, drop_feature_weighted
 
 
 class NodeAttrMask():
@@ -74,6 +76,81 @@ class NodeAttrMask():
 
     def views_fn(self, data):
         r"""Method to be called when :class:`NodeAttrMask` object is called.
+        
+        Args:
+            data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
+            
+        :rtype: :class:`torch_geometric.data.Data`.  
+        """
+        if isinstance(data, Batch):
+            dlist = [self.do_trans(d) for d in data.to_data_list()]
+            return Batch.from_data_list(dlist)
+        elif isinstance(data, Data):
+            return self.do_trans(data)
+
+class AdaNodeAttrMask():
+    '''Proabilistic node attribute perturbation on the given graph or batched graphs. Perturbations are adaptive i.e. critical nodes have lower probability of being perturbed.
+    Adaptations based on the paper `Graph Contrastive Learning with Adaptive Augmentation <https://arxiv.org/abs/2010.14945>`
+    Refer to `source implementation <https://github.com/CRIPAC-DIG/GCA>` for more details.
+    Class objects callable via method :meth:`views_fn`.
+    
+    Args:
+        centrality_measure (str): Method for computing node centrality. Set `degree` for degree centrality,
+        `pr` for PageRank centrality and `evc` for eigen-vector centrality
+        prob (float): Probability factor used for calculating attribute-masking probability
+        threshold (float, optional): Upper-bound probability for masking any attribute, defaults to 0.7
+        dense (bool, optional): Indicates prescence of dense continuous features. Defaults to `false`
+    '''
+    def __init__(self, centrality_measure: str, prob: float, threshold: float, dense: bool, return_mask: bool = False):
+        self.centrality_measure = centrality_measure
+        self.dense = dense
+        self.return_mask = return_mask
+        self.prob = prob
+        self.threshold = threshold
+    
+    def __call__(self, data):
+        return self.views_fn(data)
+
+    
+    def _get_node_centrality(self, data : Data):
+        # Add self loops if the degree returns for only a subset of nodes
+        if degree(data.edge_index[1]).size(0) != data.x.size(0):
+            edge_index_ = add_remaining_self_loops(data.edge_index, num_nodes=data.x.size(0))[0]
+        else:
+            edge_index_ = data.edge_index
+        if self.centrality_measure == 'degree':
+            edge_index_ = to_undirected(edge_index_)
+            node_deg = degree(edge_index_[1])
+            node_c = node_deg
+        elif self.centrality_measure == 'pr':
+            node_pr = compute_pr(edge_index_)
+            node_c = node_pr
+        elif self.centrality_measure == 'evc':
+            node_evc = eigenvector_centrality(data)
+            node_c = node_evc
+        else:
+            # Don't allow masking if centrality measure is not specified
+            # GCA official implementation uses a full-one mask, but we mandate the user to remove AdaNodePerturbation from the view_fn
+            raise Exception("Centrality measure option '{}' is not available!".format(self.centrality_measure))
+        return node_c
+
+    def do_trans(self, data : Data):
+        x = data.x.detach().clone()
+        node_c = self._get_node_centrality(data)
+        if self.dense:
+            feature_weights = feature_drop_weights_dense(data.x, node_c)
+        else:
+            feature_weights = feature_drop_weights(data.x, node_c)
+        x = drop_feature_weighted(x, feature_weights, p = self.prob, threshold = self.threshold)
+        if self.return_mask:
+            return Data(x=x, edge_index=data.edge_index, mask=feature_weights).to(x.device)
+        else:
+            return Data(x=x, edge_index=data.edge_index).to(x.device)
+    
+    
+    
+    def views_fn(self, data):
+        r"""Method to be called when :class:`AdaNodeAttrMask` object is called.
         
         Args:
             data (:class:`torch_geometric.data.Data`): The input graph or batched graphs.
