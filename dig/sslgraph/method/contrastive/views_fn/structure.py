@@ -248,7 +248,7 @@ class DiffusionWithSample():
         dlist_diff_x = []
         drop_num = node_num - self.sample_size
         for b in range(self.batch_size):
-            idx_drop = torch.randperm(node_num, device=x.device)[:drop_num]
+            idx_drop = torch.randperm(node_num, device=data.x.device)[:drop_num]
             idx_nondrop = [n for n in range(node_num) if not n in idx_drop]
 
             sample_orig_adj = orig_adj.clone()
