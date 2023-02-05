@@ -1,1 +1,1 @@
-from .discriminator.runner_discriminator import DiscriminatorRunner
+from .runner_discriminator import RunnerDiscriminator

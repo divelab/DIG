@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch_scatter import scatter
 from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool, GINConv
 
-
 class GEMBConv(torch.nn.Module):
     def __init__(self, node_feat_dim, message_net_hiddens, update_net_hiddens, node_update_type='residual', layer_norm=False):
         super(GEMBConv, self).__init__()

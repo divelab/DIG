@@ -1,3 +1,6 @@
+# Author: Youzhi Luo (yzluo@tamu.edu)
+# Updated by: Anmol Anand(aanand@tamu.edu)
+
 import os
 import torch
 import torch.nn.functional as F
@@ -7,7 +10,7 @@ from .model import DiscriminatorModel
 from .utils import DegreeTrans, TripleSet
 
 
-class DiscriminatorRunner(object):
+class RunnerDiscriminator(object):
     def __init__(self, data_root_path, data_name,
                  max_num_epochs=320, batch_size=32, start_lr=1e-4,
                  model_type='gmnet', num_layers=6, hidden=256, pool_type='sum', fuse_type='abs_diff'):
@@ -78,18 +81,18 @@ class DiscriminatorRunner(object):
         return num_correct / (2 * len(loader.dataset)), num_pos_correct / len(loader.dataset), num_neg_correct / len(loader.dataset)
 
 
-    def train_test(self, out_root_path, num_save=30, model_dir_name=None, file_name='record.txt'):
+    def train_test(self, out_root_path, num_save=30, file_name='record.txt'):
         self.model = self.model.to(self.device)
 
         out_path = os.path.join(out_root_path, self.data_name)
         if not os.path.isdir(out_path):
             print(out_path)
             os.makedirs(out_path)
-        
-        if model_dir_name is not None:
-            model_dir = os.path.join(out_path, model_dir_name)
-            if not os.path.isdir(model_dir):
-                os.mkdir(model_dir)
+
+        model_dir_name = self.conf['dis_param']['model_type']
+        model_dir = os.path.join(out_path, model_dir_name)
+        if not os.path.isdir(model_dir):
+            os.mkdir(model_dir)
 
         f = open(os.path.join(out_path, file_name), 'a')
         f.write('Discrimator classification results for dataset {} with model parameters {}\n'.format(self.data_name, 
