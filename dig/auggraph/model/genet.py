@@ -1,3 +1,5 @@
+# Author: Youzhi Luo (yzluo@tamu.edu)
+
 import torch
 import torch.nn as nn
 from torch_scatter import scatter

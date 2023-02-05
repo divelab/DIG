@@ -1,3 +1,5 @@
+# Author: Youzhi Luo (yzluo@tamu.edu)
+
 import random
 import torch
 import numpy as np
