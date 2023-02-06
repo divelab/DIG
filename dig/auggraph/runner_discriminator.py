@@ -13,7 +13,7 @@ from .constants import *
 
 
 class RunnerDiscriminator(object):
-    def __init__(self, data_root_path, dataset_name):
+    def __init__(self, dataset_name, data_root_path='tudataset/'):
         self.conf = dis_conf[dataset_name]
         self._get_dataset(data_root_path, dataset_name)
         self.model = self._get_model()
@@ -77,7 +77,7 @@ class RunnerDiscriminator(object):
         return num_correct / (2 * len(loader.dataset)), num_pos_correct / len(loader.dataset), num_neg_correct / len(loader.dataset)
 
 
-    def train_test(self, out_root_path, num_save=30, file_name='record.txt'):
+    def train_test(self, out_root_path='results/dis_results', num_save=30, file_name='record.txt'):
         self.model = self.model.to(self.device)
 
         out_path = os.path.join(out_root_path, self.data_name)

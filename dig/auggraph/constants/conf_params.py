@@ -11,6 +11,6 @@ PATIENCE = 'patience'
 MIN_LR = 'min_lr'
 MAX_NUM_EPOCHS = 'max_num_epochs'
 PRE_TRAIN_PATH = 'pre_train_path'
-IN_DIMENSION = 'in_dimension'
+IN_DIMENSION = 'in_dim'
 
 DISCRIMINATOR_PARAMS = 'discriminator_params'

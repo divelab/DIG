@@ -71,7 +71,7 @@ class GEMBConv(torch.nn.Module):
 
 
 class Readout(nn.Module):
-    def __init__(self, node_feat_dim, node_hiddens, graph_hiddens, use_gate=True, pool_type=SU):
+    def __init__(self, node_feat_dim, node_hiddens, graph_hiddens, use_gate=True, pool_type=SUM):
         super(Readout, self).__init__()
         self.graph_feat_dim = node_hiddens[-1]
         self.use_gate = use_gate
