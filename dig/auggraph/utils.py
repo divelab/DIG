@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset
 from torch_geometric.utils import degree
 
+
 class DegreeTrans(object):
     def __init__(self, dataset, in_degree=False):
         self.max_degree = None

@@ -11,6 +11,7 @@ from .utils import DegreeTrans, TripleSet
 from .conf import dis_conf
 from .constants import *
 
+
 class RunnerDiscriminator(object):
     def __init__(self, data_root_path, dataset_name):
         self.conf = dis_conf[dataset_name]

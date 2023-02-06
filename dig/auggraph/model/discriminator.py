@@ -6,6 +6,7 @@ from .genet import GENet
 from .gmnet import GMNet
 from ..constants import *
 
+
 class DiscriminatorModel(torch.nn.Module):
     def __init__(self, in_dim, num_layers, hidden, pool_type=SUM, model_type=GMNET, fuse_type=ABS_DIFF, **kwargs):
         super(DiscriminatorModel, self).__init__()

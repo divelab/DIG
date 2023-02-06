@@ -7,6 +7,7 @@ from torch_scatter import scatter
 from .genet import Readout
 from ..constants import *
 
+
 class GMNConv(nn.Module):
     def __init__(self, node_feat_dim, message_net_hiddens, update_net_hiddens, node_update_type='residual', layer_norm=False):
         super(GMNConv, self).__init__()
