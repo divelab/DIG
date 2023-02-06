@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_scatter import scatter
 from .genet import Readout
+from ..constants import *
 
 class GMNConv(nn.Module):
     def __init__(self, node_feat_dim, message_net_hiddens, update_net_hiddens, node_update_type='residual', layer_norm=False):
@@ -104,7 +105,7 @@ class GMNConv(nn.Module):
 
 
 class GMNet(nn.Module):
-    def __init__(self, in_dim, num_layers, hidden, pool_type='sum', use_gate=True, node_update_type='residual', layer_norm=False):
+    def __init__(self, in_dim, num_layers, hidden, pool_type=SUM, use_gate=True, node_update_type='residual', layer_norm=False):
         super(GMNet, self).__init__()
 
         self.embedding = nn.Sequential(

@@ -1,0 +1,1 @@
+from .discriminator_conf import dis_conf

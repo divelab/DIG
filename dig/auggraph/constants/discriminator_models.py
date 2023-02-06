@@ -1,0 +1,2 @@
+GMNET = 'gmnet'
+GENET = 'genet'

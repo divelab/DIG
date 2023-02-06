@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from torch_scatter import scatter
 from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool, GINConv
+from ..constants import *
 
 class GEMBConv(torch.nn.Module):
     def __init__(self, node_feat_dim, message_net_hiddens, update_net_hiddens, node_update_type='residual', layer_norm=False):
@@ -69,18 +70,18 @@ class GEMBConv(torch.nn.Module):
 
 
 class Readout(nn.Module):
-    def __init__(self, node_feat_dim, node_hiddens, graph_hiddens, use_gate=True, pool_type='add'):
+    def __init__(self, node_feat_dim, node_hiddens, graph_hiddens, use_gate=True, pool_type=SU):
         super(Readout, self).__init__()
         self.graph_feat_dim = node_hiddens[-1]
         self.use_gate = use_gate
         self._get_node_net(node_feat_dim, node_hiddens, use_gate)
         self._get_graph_net(self.graph_feat_dim, graph_hiddens)
 
-        if pool_type == 'mean':
+        if pool_type == MEAN:
             self.pool = global_mean_pool
-        elif pool_type == 'sum':
+        elif pool_type == SUM:
             self.pool = global_add_pool
-        elif pool_type == 'max':
+        elif pool_type == MAX:
             self.pool = global_max_pool
 
     def _get_node_net(self, node_feat_dim, node_hiddens, use_gate):
@@ -116,7 +117,7 @@ class Readout(nn.Module):
 
 
 class GENet(nn.Module):
-    def __init__(self, in_dim, num_layers, hidden, conv_type='gemb', pool_type='sum', use_gate=True, node_update_type='residual', layer_norm=False):
+    def __init__(self, in_dim, num_layers, hidden, conv_type='gemb', pool_type=SUM, use_gate=True, node_update_type='residual', layer_norm=False):
         super(GENet, self).__init__()
 
         self.embedding = nn.Sequential(nn.Linear(in_dim, hidden))
