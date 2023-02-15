@@ -4,16 +4,16 @@ import torch
 import torch.nn as nn
 from .genet import GENet
 from .gmnet import GMNet
-from ..constants import *
+from dig.auggraph.method.GraphAug.constants import *
 
 
-class DiscriminatorModel(torch.nn.Module):
+class RewardGenModel(torch.nn.Module):
     def __init__(self, in_dim, num_layers, hidden, pool_type=SUM, model_type=GMNET, fuse_type=ABS_DIFF, **kwargs):
-        super(DiscriminatorModel, self).__init__()
+        super(RewardGenModel, self).__init__()
         if model_type == GMNET:
-            self.dis_encoder = GMNet(in_dim, num_layers, hidden, pool_type=pool_type, **kwargs)
+            self.reward_gen_encoder = GMNet(in_dim, num_layers, hidden, pool_type=pool_type, **kwargs)
         elif model_type == GENET:
-            self.dis_encoder = GENet(in_dim, num_layers, hidden, pool_type=pool_type, **kwargs)
+            self.reward_gen_encoder = GENet(in_dim, num_layers, hidden, pool_type=pool_type, **kwargs)
         
         self.fuse_type = fuse_type
         if fuse_type == CONCAT:
@@ -40,7 +40,7 @@ class DiscriminatorModel(torch.nn.Module):
             )
 
     def forward(self, data1, data2):
-        embed1, embed2 = self.dis_encoder(data1, data2)
+        embed1, embed2 = self.reward_gen_encoder(data1, data2)
 
         if self.fuse_type == ADD:
             pair_embed = embed1 + embed2

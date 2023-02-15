@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch_scatter import scatter
 from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool, GINConv
-from ..constants import *
+from dig.auggraph.method.GraphAug.constants import *
 
 
 class GEMBConv(torch.nn.Module):

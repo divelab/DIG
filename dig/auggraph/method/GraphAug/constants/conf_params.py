@@ -13,4 +13,4 @@ MAX_NUM_EPOCHS = 'max_num_epochs'
 PRE_TRAIN_PATH = 'pre_train_path'
 IN_DIMENSION = 'in_dim'
 
-DISCRIMINATOR_PARAMS = 'discriminator_params'
+REWARD_GEN_PARAMS = 'reward_gen_params'

@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_scatter import scatter
 from .genet import Readout
-from ..constants import *
+from dig.auggraph.method.GraphAug.constants import *
 
 
 class GMNConv(nn.Module):

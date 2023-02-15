@@ -1,20 +1,19 @@
 # Author: Youzhi Luo (yzluo@tamu.edu)
-# Updated by: Anmol Anand(aanand@tamu.edu)
+# Updated by: Anmol Anand (aanand@tamu.edu)
 
 import os
 import torch
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import TUDataset
-from .model import DiscriminatorModel
+from .model import RewardGenModel
 from .utils import DegreeTrans, TripleSet
-from .conf import dis_conf
-from .constants import *
+from dig.auggraph.method.GraphAug.constants import *
 
 
-class RunnerDiscriminator(object):
-    def __init__(self, dataset_name, data_root_path='tudataset/'):
-        self.conf = dis_conf[dataset_name]
+class RunnerRewardGen(object):
+    def __init__(self, dataset_name, conf, data_root_path='dig/auggraph/datasets'):
+        self.conf = conf
         self._get_dataset(data_root_path, dataset_name)
         self.model = self._get_model()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -29,11 +28,11 @@ class RunnerDiscriminator(object):
         elif data_name in [COLLAB, IMDB_BINARY]:
             self.train_set = TripleSet(dataset, transform=DegreeTrans(dataset))
             self.val_set = TripleSet(dataset, transform=DegreeTrans(dataset))
-        self.conf[DISCRIMINATOR_PARAMS][IN_DIMENSION] = self.train_set[0][0].x.shape[1]
+        self.conf[REWARD_GEN_PARAMS][IN_DIMENSION] = self.train_set[0][0].x.shape[1]
     
 
     def _get_model(self):
-        return DiscriminatorModel(**self.conf[DISCRIMINATOR_PARAMS])
+        return RewardGenModel(**self.conf[REWARD_GEN_PARAMS])
 
 
     def _train_epoch(self, loader, optimizer):
@@ -77,7 +76,7 @@ class RunnerDiscriminator(object):
         return num_correct / (2 * len(loader.dataset)), num_pos_correct / len(loader.dataset), num_neg_correct / len(loader.dataset)
 
 
-    def train_test(self, out_root_path='results/dis_results', num_save=30, file_name='record.txt'):
+    def train_test(self, out_root_path='dig/auggraph/method/GraphAug/results/reward_gen_results', num_save=30, file_name='record.txt'):
         self.model = self.model.to(self.device)
 
         out_path = os.path.join(out_root_path, self.data_name)
@@ -85,14 +84,14 @@ class RunnerDiscriminator(object):
             print(out_path)
             os.makedirs(out_path)
 
-        model_dir_name = self.conf[DISCRIMINATOR_PARAMS][MODEL_TYPE]
+        model_dir_name = self.conf[REWARD_GEN_PARAMS][MODEL_TYPE]
         model_dir = os.path.join(out_path, model_dir_name)
         if not os.path.isdir(model_dir):
             os.mkdir(model_dir)
 
         f = open(os.path.join(out_path, file_name), 'a')
-        f.write('Discrimator classification results for dataset {} with model parameters {}\n'.format(self.data_name, 
-            self.conf[DISCRIMINATOR_PARAMS]))
+        f.write('Reward generator classification results for dataset {} with model parameters {}\n'.format(self.data_name,
+                                                                                                      self.conf[REWARD_GEN_PARAMS]))
         f.close()
 
         train_loader = DataLoader(self.train_set, batch_size=self.conf[BATCH_SIZE], shuffle=True, num_workers=16)
