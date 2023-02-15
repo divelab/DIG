@@ -1,2 +1,0 @@
-Reward generator classification results for dataset IMDB-BINARY with model parameters {'num_layers': 6, 'hidden': 256, 'model_type': 'gmnet', 'pool_type': 'sum', 'fuse_type': 'abs_diff', 'in_dim': 136}
-Reward generator classification results for dataset IMDB-BINARY with model parameters {'num_layers': 6, 'hidden': 256, 'model_type': 'gmnet', 'pool_type': 'sum', 'fuse_type': 'abs_diff', 'in_dim': 136}
