@@ -2,7 +2,7 @@
 
 ## ECdataset and FOLDdataset
 
-For ECdataset and FOLDdatset, please download datasets from [here](https://github.com/phermosilla/IEConv_proteins#download-the-preprocessed-datasets) to a path. The set the parameter `root='path'` to load and process the data.
+For ECdataset and FOLDdatset, please download datasets from [here](https://github.com/phermosilla/IEConv_proteins#download-the-preprocessed-datasets) (Protein function and Scope 1.75) to a path. The set the parameter `root='path'` to load and process the data.
 
 Usage example:
 ```python
