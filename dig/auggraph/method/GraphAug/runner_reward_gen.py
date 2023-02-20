@@ -8,24 +8,24 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import TUDataset
 from .model import RewardGenModel
 from .utils import DegreeTrans, TripleSet
-from dig.auggraph.method.GraphAug.constants import *
+from dig.auggraph.method.GraphAug.paths import *
 
 
 class RunnerRewardGen(object):
-    def __init__(self, dataset_name, conf, data_root_path='dig/auggraph/datasets'):
+    def __init__(self, dataset_name, conf):
         self.conf = conf
-        self._get_dataset(data_root_path, dataset_name)
+        self._get_dataset(DATA_ROOT_PATH, dataset_name)
         self.model = self._get_model()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.data_name = dataset_name
+        self.dataset_name = dataset_name
 
 
-    def _get_dataset(self, data_root_path, data_name):
-        dataset = TUDataset(data_root_path, name=data_name)
-        if data_name in [NCI1, MUTAG, PROTEINS, NCI109]:
+    def _get_dataset(self, data_root_path, dataset_name):
+        dataset = TUDataset(data_root_path, name=dataset_name)
+        if dataset_name in [DatasetName.NCI1, DatasetName.MUTAG, DatasetName.PROTEINS, DatasetName.NCI109]:
             self.train_set = TripleSet(dataset)
             self.val_set = TripleSet(dataset)
-        elif data_name in [COLLAB, IMDB_BINARY]:
+        elif dataset_name in [DatasetName.COLLAB, DatasetName.IMDB_BINARY]:
             self.train_set = TripleSet(dataset, transform=DegreeTrans(dataset))
             self.val_set = TripleSet(dataset, transform=DegreeTrans(dataset))
         self.conf[REWARD_GEN_PARAMS][IN_DIMENSION] = self.train_set[0][0].x.shape[1]
@@ -76,10 +76,10 @@ class RunnerRewardGen(object):
         return num_correct / (2 * len(loader.dataset)), num_pos_correct / len(loader.dataset), num_neg_correct / len(loader.dataset)
 
 
-    def train_test(self, out_root_path='dig/auggraph/method/GraphAug/results/reward_gen_results', num_save=30, file_name='record.txt'):
+    def train_test(self, num_save=30, file_name='record.txt'):
         self.model = self.model.to(self.device)
 
-        out_path = os.path.join(out_root_path, self.data_name)
+        out_path = os.path.join(REWARD_GEN_RESULTS_PATH, self.dataset_name)
         if not os.path.isdir(out_path):
             print(out_path)
             os.makedirs(out_path)
@@ -90,8 +90,8 @@ class RunnerRewardGen(object):
             os.mkdir(model_dir)
 
         f = open(os.path.join(out_path, file_name), 'a')
-        f.write('Reward generator classification results for dataset {} with model parameters {}\n'.format(self.data_name,
-                                                                                                      self.conf[REWARD_GEN_PARAMS]))
+        f.write('Reward generator classification results for dataset {} with model parameters {}\n'.format(
+            self.dataset_name, self.conf[REWARD_GEN_PARAMS]))
         f.close()
 
         train_loader = DataLoader(self.train_set, batch_size=self.conf[BATCH_SIZE], shuffle=True, num_workers=16)

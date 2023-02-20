@@ -8,22 +8,23 @@ from dig.auggraph.method.GraphAug.constants import *
 
 
 class RewardGenModel(torch.nn.Module):
-    def __init__(self, in_dim, num_layers, hidden, pool_type=SUM, model_type=GMNET, fuse_type=ABS_DIFF, **kwargs):
+    def __init__(self, in_dim, num_layers, hidden, pool_type=PoolType.SUM, model_type=RewardGenModel.GMNET,
+                 fuse_type=FuseType.ABS_DIFF, **kwargs):
         super(RewardGenModel, self).__init__()
-        if model_type == GMNET:
+        if model_type == RewardGenModel.GMNET:
             self.reward_gen_encoder = GMNet(in_dim, num_layers, hidden, pool_type=pool_type, **kwargs)
-        elif model_type == GENET:
+        elif model_type == RewardGenModel.GENET:
             self.reward_gen_encoder = GENet(in_dim, num_layers, hidden, pool_type=pool_type, **kwargs)
         
         self.fuse_type = fuse_type
-        if fuse_type == CONCAT:
+        if fuse_type == FuseType.CONCAT:
             self.pred_head = nn.Sequential(
                 nn.Linear(2 * hidden, 2 * hidden),
                 nn.ReLU(),
                 nn.Linear(2 * hidden, 1),
                 nn.Sigmoid(),
             )
-        elif fuse_type == COSINE:
+        elif fuse_type == FuseType.COSINE:
             self.pred_head = nn.Sequential(
                 nn.Linear(hidden, 2 * hidden),
                 nn.ReLU(),
@@ -42,15 +43,15 @@ class RewardGenModel(torch.nn.Module):
     def forward(self, data1, data2):
         embed1, embed2 = self.reward_gen_encoder(data1, data2)
 
-        if self.fuse_type == ADD:
+        if self.fuse_type == FuseType.ADD:
             pair_embed = embed1 + embed2
-        elif self.fuse_type == MULTIPLY:
+        elif self.fuse_type == FuseType.MULTIPLY:
             pair_embed = embed1 * embed2
-        elif self.fuse_type == CONCAT:
+        elif self.fuse_type == FuseType.CONCAT:
             pair_embed = torch.cat((embed1, embed2), dim=1)
-        elif self.fuse_type == ABS_DIFF:
+        elif self.fuse_type == FuseType.ABS_DIFF:
             pair_embed = torch.abs(embed1 - embed2)
-        elif self.fuse_type == COSINE:
+        elif self.fuse_type == FuseType.COSINE:
             embed1, embed2 = self.pred_head(embed1), self.pred_head(embed2)
             prob = (1.0 + self.cos(embed1, embed2)) / 2.0
             return prob

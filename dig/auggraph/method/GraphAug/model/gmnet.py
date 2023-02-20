@@ -9,9 +9,9 @@ from dig.auggraph.method.GraphAug.constants import *
 
 
 class GMNConv(nn.Module):
-    def __init__(self, node_feat_dim, message_net_hiddens, update_net_hiddens, node_update_type='residual', layer_norm=False):
+    def __init__(self, node_feat_dim, message_net_hiddens, update_net_hiddens, node_update_type=NodeUpdateType.RESIDUAL, layer_norm=False):
         super(GMNConv, self).__init__()
-        assert node_update_type in ['mlp', 'residual', 'gru']
+        assert node_update_type in [NodeUpdateType.MLP, NodeUpdateType.RESIDUAL, NodeUpdateType.GRU]
         self.node_update_type = node_update_type
         self._get_message_net(node_feat_dim, message_net_hiddens)
         self._get_update_net(node_feat_dim, update_net_hiddens, node_update_type)
@@ -28,7 +28,7 @@ class GMNConv(nn.Module):
         self.message_net = nn.Sequential(*layer)
     
     def _get_update_net(self, node_feat_dim, update_net_hiddens, node_update_type):
-        if node_update_type == 'gru':
+        if node_update_type == NodeUpdateType.GRU:
             self.update_net = nn.GRU(node_feat_dim * 3, node_feat_dim)
         else:
             layer = []
@@ -44,14 +44,14 @@ class GMNConv(nn.Module):
         target_idx, source_idx = edge_index
         message_inputs = torch.cat((x.index_select(0, source_idx), x.index_select(0, target_idx)), dim=-1)
         messages = self.message_net(message_inputs)
-        aggregation = scatter(messages, target_idx, dim=0, dim_size=x.shape[0], reduce='add')
+        aggregation = scatter(messages, target_idx, dim=0, dim_size=x.shape[0], reduce=ReduceType.ADD)
 
         if hasattr(self, 'message_norm'):
             aggregation = self.message_norm(aggregation)
         return aggregation
     
     def node_update(self, x, messages, attentions):
-        if self.node_update_type == 'gru':
+        if self.node_update_type == NodeUpdateType.GRU:
             update_inputs = torch.cat((messages, attentions), dim=-1)
             _, new_x = self.update_net(update_inputs.unsqueeze(0), x.unsqueeze(0))
             new_x = torch.squeeze(new_x)
@@ -62,7 +62,7 @@ class GMNConv(nn.Module):
         if hasattr(self, 'update_norm'):
             new_x = self.update_norm(new_x)
         
-        if self.node_update_type == 'residual':
+        if self.node_update_type == NodeUpdateType.RESIDUAL:
             return x + new_x
         return new_x
     
@@ -106,7 +106,7 @@ class GMNConv(nn.Module):
 
 
 class GMNet(nn.Module):
-    def __init__(self, in_dim, num_layers, hidden, pool_type=SUM, use_gate=True, node_update_type='residual', layer_norm=False):
+    def __init__(self, in_dim, num_layers, hidden, pool_type=PoolType.SUM, use_gate=True, node_update_type=NodeUpdateType.RESIDUAL, layer_norm=False):
         super(GMNet, self).__init__()
 
         self.embedding = nn.Sequential(

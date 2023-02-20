@@ -8,9 +8,9 @@ from dig.auggraph.method.GraphAug.constants import *
 
 
 class GEMBConv(torch.nn.Module):
-    def __init__(self, node_feat_dim, message_net_hiddens, update_net_hiddens, node_update_type='residual', layer_norm=False):
+    def __init__(self, node_feat_dim, message_net_hiddens, update_net_hiddens, node_update_type=NodeUpdateType.RESIDUAL, layer_norm=False):
         super(GEMBConv, self).__init__()
-        assert node_update_type in ['mlp', 'residual', 'gru']
+        assert node_update_type in [NodeUpdateType.MLP, NodeUpdateType.RESIDUAL, NodeUpdateType.GRU]
         self.node_update_type = node_update_type
         self._get_message_net(node_feat_dim, message_net_hiddens)
         self._get_update_net(node_feat_dim, update_net_hiddens, node_update_type)
@@ -27,7 +27,7 @@ class GEMBConv(torch.nn.Module):
         self.message_net = torch.nn.Sequential(*layer)
 
     def _get_update_net(self, node_feat_dim, update_net_hiddens, node_update_type):
-        if node_update_type == 'gru':
+        if node_update_type == NodeUpdateType.GRU:
             self.update_net = torch.nn.GRU(node_feat_dim * 2, node_feat_dim)
         else:
             layer = []
@@ -43,14 +43,14 @@ class GEMBConv(torch.nn.Module):
         target_idx, source_idx = edge_index
         message_inputs = torch.cat((x.index_select(0, source_idx), x.index_select(0, target_idx)), dim=-1)
         messages = self.message_net(message_inputs)
-        aggregation = scatter(messages, target_idx, dim=0, dim_size=x.shape[0], reduce='add')
+        aggregation = scatter(messages, target_idx, dim=0, dim_size=x.shape[0], reduce=ReduceType.ADD)
 
         if hasattr(self, 'message_norm'):
             aggregation = self.message_norm(aggregation)
         return aggregation
 
     def node_update(self, x, messages):
-        if self.node_update_type == 'gru':
+        if self.node_update_type == NodeUpdateType.GRU:
             _, new_x = self.update_net(messages.unsqueeze(0), x.unsqueeze(0))
             new_x = torch.squeeze(new_x)
         else:
@@ -60,7 +60,7 @@ class GEMBConv(torch.nn.Module):
         if hasattr(self, 'update_norm'):
             new_x = self.update_norm(new_x)
 
-        if self.node_update_type == 'residual':
+        if self.node_update_type == NodeUpdateType.RESIDUAL:
             return x + new_x
         return new_x
 
@@ -71,18 +71,18 @@ class GEMBConv(torch.nn.Module):
 
 
 class Readout(nn.Module):
-    def __init__(self, node_feat_dim, node_hiddens, graph_hiddens, use_gate=True, pool_type=SUM):
+    def __init__(self, node_feat_dim, node_hiddens, graph_hiddens, use_gate=True, pool_type=PoolType.SUM):
         super(Readout, self).__init__()
         self.graph_feat_dim = node_hiddens[-1]
         self.use_gate = use_gate
         self._get_node_net(node_feat_dim, node_hiddens, use_gate)
         self._get_graph_net(self.graph_feat_dim, graph_hiddens)
 
-        if pool_type == MEAN:
+        if pool_type == PoolType.MEAN:
             self.pool = global_mean_pool
-        elif pool_type == SUM:
+        elif pool_type == PoolType.SUM:
             self.pool = global_add_pool
-        elif pool_type == MAX:
+        elif pool_type == PoolType.MAX:
             self.pool = global_max_pool
 
     def _get_node_net(self, node_feat_dim, node_hiddens, use_gate):
@@ -118,16 +118,17 @@ class Readout(nn.Module):
 
 
 class GENet(nn.Module):
-    def __init__(self, in_dim, num_layers, hidden, conv_type='gemb', pool_type=SUM, use_gate=True, node_update_type='residual', layer_norm=False):
+    def __init__(self, in_dim, num_layers, hidden, conv_type=ConvType.GEMB, pool_type=PoolType.SUM, use_gate=True,
+                 node_update_type=NodeUpdateType.RESIDUAL, layer_norm=False):
         super(GENet, self).__init__()
 
         self.embedding = nn.Sequential(nn.Linear(in_dim, hidden))
 
         self.convs = torch.nn.ModuleList()
         for _ in range(num_layers):
-            if conv_type == 'gemb':
+            if conv_type == ConvType.GEMB:
                 self.convs.append(GEMBConv(hidden, [hidden * 2, hidden * 2], [hidden * 2], node_update_type, layer_norm))
-            elif conv_type == 'gin':
+            elif conv_type == ConvType.GIN:
                 self.convs.append(
                     GINConv(nn.Sequential(
                         nn.Linear(hidden, hidden),
@@ -135,8 +136,7 @@ class GENet(nn.Module):
                         nn.Linear(hidden, hidden),
                         nn.ReLU(),
                         nn.BN(hidden),
-                    ),
-                        train_eps=True))
+                    ), train_eps=True))
 
         self.readout = Readout(hidden, [hidden], [hidden], use_gate, pool_type)
 

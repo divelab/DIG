@@ -1,2 +1,0 @@
-GMNET = 'gmnet'
-GENET = 'genet'

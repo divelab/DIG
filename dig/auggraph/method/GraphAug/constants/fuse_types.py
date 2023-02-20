@@ -1,5 +1,0 @@
-ABS_DIFF = 'abs_diff'
-CONCAT = 'concat'
-COSINE = 'cosine'
-ADD = 'add'
-MULTIPLY = 'multiply'
