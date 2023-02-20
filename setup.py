@@ -44,7 +44,7 @@ setuptools.setup(
                       'rdkit-pypi',
                       'pandas',
                       'sympy',
-                      'pyscf==1.7.6',
+                      'pyscf>=1.7.6',
                       'hydra-core'],
     python_requires='>=3.6',
     setup_requires=setup_requires,

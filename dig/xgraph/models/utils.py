@@ -125,3 +125,20 @@ def subgraph(node_idx, num_hops, edge_index, relabel_nodes=False,
         edge_index = node_idx[edge_index]
 
     return subset, edge_index, inv, edge_mask
+
+
+def gumbel_softmax(log_alpha: torch.Tensor, beta: float = 1.0, training: bool = True):
+    r""" Sample from the instantiation of concrete distribution when training
+    Args:
+        log_alpha: input probabilities
+        beta: temperature for softmax
+    """
+    if training:
+        random_noise = torch.rand(log_alpha.shape)
+        random_noise = torch.log(random_noise) - torch.log(1.0 - random_noise)
+        gate_inputs = (random_noise.to(log_alpha.device) + log_alpha) / beta
+        gate_inputs = gate_inputs.sigmoid()
+    else:
+        gate_inputs = log_alpha.sigmoid()
+
+    return gate_inputs
