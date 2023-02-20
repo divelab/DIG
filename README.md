@@ -55,7 +55,7 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 
 
 <p align="center">
-<img src="https://github.com/divelab/DIG/blob/dig-stable/imgs/DIG-overview.png" width="700" class="center" alt="logo"/>
+<img src="https://github.com/divelab/DIG/blob/dig-stable/docs/imgs/DIG-overview.png" width="700" class="center" alt="logo"/>
     <br/>
 </p>
 
