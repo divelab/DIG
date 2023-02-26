@@ -44,7 +44,7 @@ class GMNConv(nn.Module):
         target_idx, source_idx = edge_index
         message_inputs = torch.cat((x.index_select(0, source_idx), x.index_select(0, target_idx)), dim=-1)
         messages = self.message_net(message_inputs)
-        aggregation = scatter(messages, target_idx, dim=0, dim_size=x.shape[0], reduce=ReduceType.ADD)
+        aggregation = scatter(messages, target_idx, dim=0, dim_size=x.shape[0], reduce=ReduceType.ADD.value)
 
         if hasattr(self, 'message_norm'):
             aggregation = self.message_norm(aggregation)

@@ -12,7 +12,7 @@ base_reward_gen_conf = {
     REWARD_GEN_PARAMS: {
         NUM_LAYERS: 5,
         HIDDEN_UNITS: 256,
-        MODEL_TYPE: RewardGenModel.GMNET,
+        MODEL_TYPE: RewardGenModelType.GMNET,
         POOL_TYPE: PoolType.SUM,
         FUSE_TYPE: FuseType.ABS_DIFF
     }

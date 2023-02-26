@@ -8,12 +8,11 @@ from dig.auggraph.method.GraphAug.constants import *
 
 
 class RewardGenModel(torch.nn.Module):
-    def __init__(self, in_dim, num_layers, hidden, pool_type=PoolType.SUM, model_type=RewardGenModel.GMNET,
-                 fuse_type=FuseType.ABS_DIFF, **kwargs):
+    def __init__(self, in_dim, num_layers, hidden, pool_type=PoolType.SUM, model_type=RewardGenModelType.GMNET, fuse_type=FuseType.ABS_DIFF, **kwargs):
         super(RewardGenModel, self).__init__()
-        if model_type == RewardGenModel.GMNET:
+        if model_type == RewardGenModelType.GMNET:
             self.reward_gen_encoder = GMNet(in_dim, num_layers, hidden, pool_type=pool_type, **kwargs)
-        elif model_type == RewardGenModel.GENET:
+        elif model_type == RewardGenModelType.GENET:
             self.reward_gen_encoder = GENet(in_dim, num_layers, hidden, pool_type=pool_type, **kwargs)
         
         self.fuse_type = fuse_type

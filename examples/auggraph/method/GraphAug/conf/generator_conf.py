@@ -19,13 +19,13 @@ base_generator_conf = {
         UNIFORM: False,
         RNN_INPUT: RnnInputType.VIRTUAL,
         AUG_TYPE_PARAMS: {
-            AugType.NODE_FM: {
+            AugType.NODE_FM.value: {
                 HID_DIM: 64, TEMPERATURE: 1.0, TRAINING: True, MAGNITUDE: 0.05
             },
-            AugType.NODE_DROP: {
+            AugType.NODE_DROP.value: {
                 HID_DIM: 64, TEMPERATURE: 1.0, TRAINING: True, MAGNITUDE: 0.05
             },
-            AugType.EDGE_Per: {
+            AugType.EDGE_Per.value: {
                 HID_DIM: 64, TEMPERATURE: 1.0, TRAINING: True, MAGNITUDE: 0.05
             }
         }

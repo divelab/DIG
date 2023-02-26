@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import TUDataset
 from .model import RewardGenModel
-from .utils import DegreeTrans, TripleSet
+from dig.auggraph.datasets.aug_dataset import DegreeTrans, TripleSet
 from dig.auggraph.method.GraphAug.paths import *
 
 
@@ -21,7 +21,7 @@ class RunnerRewardGen(object):
 
 
     def _get_dataset(self, data_root_path, dataset_name):
-        dataset = TUDataset(data_root_path, name=dataset_name)
+        dataset = TUDataset(data_root_path, name=dataset_name.value)
         if dataset_name in [DatasetName.NCI1, DatasetName.MUTAG, DatasetName.PROTEINS, DatasetName.NCI109]:
             self.train_set = TripleSet(dataset)
             self.val_set = TripleSet(dataset)
@@ -79,13 +79,13 @@ class RunnerRewardGen(object):
     def train_test(self, num_save=30, file_name='record.txt'):
         self.model = self.model.to(self.device)
 
-        out_path = os.path.join(REWARD_GEN_RESULTS_PATH, self.dataset_name)
+        out_path = os.path.join(REWARD_GEN_RESULTS_PATH, self.dataset_name.value)
         if not os.path.isdir(out_path):
             print(out_path)
             os.makedirs(out_path)
 
         model_dir_name = self.conf[REWARD_GEN_PARAMS][MODEL_TYPE]
-        model_dir = os.path.join(out_path, model_dir_name)
+        model_dir = os.path.join(out_path, model_dir_name.value)
         if not os.path.isdir(model_dir):
             os.mkdir(model_dir)
 

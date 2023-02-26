@@ -4,23 +4,23 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.data import Batch
 from torch_geometric.datasets import TUDataset
 from .model import RewardGenModel
-from .utils import Subset, DegreeTrans
+from dig.auggraph.datasets.aug_dataset import Subset, DegreeTrans
 from .aug import Augmenter
 from dig.auggraph.method.GraphAug.paths import *
 
 
 class RunnerGenerator(object):
-    def __init__(self, data_name, conf):
+    def __init__(self, dataset_name, conf):
         self.conf = conf
-        self._get_dataset(DATA_ROOT_PATH, data_name)
+        self._get_dataset(dataset_name)
         self._get_model()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.data_name = data_name
+        self.dataset_name = dataset_name
         if conf[BASELINE] == BaselineType.EXP:
             self.moving_mean = None
 
-    def _get_dataset(self, data_root_path, dataset_name):
-        dataset = TUDataset(data_root_path, name=dataset_name)
+    def _get_dataset(self, dataset_name):
+        dataset = TUDataset(DATA_ROOT_PATH, name=dataset_name.value)
         if dataset_name in [DatasetName.NCI1, DatasetName.MUTAG, DatasetName.AIDS, DatasetName.NCI109, DatasetName.PROTEINS]:
             self.train_set = Subset(dataset)
             self.val_set = Subset(dataset)
@@ -28,12 +28,11 @@ class RunnerGenerator(object):
             self.train_set = Subset(dataset, transform=DegreeTrans(dataset))
             self.val_set = Subset(dataset, transform=DegreeTrans(dataset))
             self.post_trans = DegreeTrans(dataset)
-
         in_dim = self.val_set[0].x.shape[1]
         self.conf[REWARD_GEN_PARAMS][IN_DIMENSION] = in_dim
         self.conf[GENERATOR_PARAMS][IN_DIMENSION] = in_dim
-        if AugType.NODE_FM in self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS]:
-            self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS][AugType.NODE_FM][NODE_FEAT_DIM] = in_dim
+        if AugType.NODE_FM.value in self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS]:
+            self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS][AugType.NODE_FM.value][NODE_FEAT_DIM] = in_dim
 
     def _get_model(self):
         self.discriminator = RewardGenModel(**self.conf[REWARD_GEN_PARAMS])
@@ -108,7 +107,7 @@ class RunnerGenerator(object):
     def train(self, file_name='val_record.txt'):
         self.discriminator, self.generator = self.discriminator.to(self.device), self.generator.to(self.device)
 
-        out_path = os.path.join(GENERATOR_RESULTS_PATH, self.data_name)
+        out_path = os.path.join(GENERATOR_RESULTS_PATH, self.dataset_name.value)
         if not os.path.isdir(out_path):
             os.makedirs(out_path)
 
@@ -119,7 +118,7 @@ class RunnerGenerator(object):
         self.out_path = out_path
 
         f = open(os.path.join(model_path, file_name), 'a')
-        f.write('Generator results for dataset {} using augmentation below\n'.format(self.data_name))
+        f.write('Generator results for datasets {} using augmentation below\n'.format(self.dataset_name))
         for aug_type in self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS]:
             f.write('{}: {}\n'.format(aug_type, self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS][aug_type]))
         f.close()

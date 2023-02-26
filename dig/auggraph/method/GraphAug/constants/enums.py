@@ -30,7 +30,7 @@ class PoolType(Enum):
     MEAN = 'mean'
     MAX = 'max'
 
-class RewardGenModel(Enum):
+class RewardGenModelType(Enum):
     GMNET = 'gmnet'
     GENET = 'genet'
 

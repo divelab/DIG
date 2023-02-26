@@ -11,7 +11,7 @@ def coalesce(
     edge_index: Tensor,
     edge_attr: Optional[Union[Tensor, List[Tensor]]] = None,
     num_nodes: Optional[int] = None,
-    reduce: str = ReduceType.ADD,
+    reduce: str = ReduceType.ADD.value,
     is_sorted: bool = False,
     sort_by_row: bool = True,
 ) -> Union[Tensor, Tuple[Tensor, Tensor], Tuple[Tensor, List[Tensor]]]:
