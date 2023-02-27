@@ -24,12 +24,12 @@ from .shapley import GnnNetsGC2valueFunc, GnnNetsNC2valueFunc, \
 
 def find_closest_node_result(results, max_nodes):
     """ return the highest reward tree_node with its subgraph is smaller than max_nodes """
-    results = sorted(results, key=lambda x: len(x.coalition))
+    results = sorted(results, key=lambda x: len(x["coalition"]))
 
     result_node = results[0]
     for result_idx in range(len(results)):
         x = results[result_idx]
-        if len(x.coalition) <= max_nodes and x.P > result_node.P:
+        if len(x["coalition"]) <= max_nodes and x["P"] > result_node["P"]:
             result_node = x
     return result_node
 
