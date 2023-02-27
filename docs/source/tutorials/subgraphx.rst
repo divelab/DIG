@@ -131,8 +131,7 @@ After MCTS searching and Shapley value computation, the subgraph with the highes
     result = find_closest_node_result(explanation_results[prediction], max_nodes=max_nodes)
 
     plotutils = PlotUtils(dataset_name='ba_shapes')
-    explainer.visualization(explanation_results,
-                            prediction,
+    explainer.visualization(explanation_results[prediction],
                             max_nodes=max_nodes,
                             plot_utils=plotutils,
                             y=data.y)
