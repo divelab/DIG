@@ -15,7 +15,7 @@ def xyz_to_dat(pos, edge_index, num_nodes, use_torsion = False):
 
     Args:
         pos: Geometric information for every node in the graph.
-        edgee_index: Edge index of the graph.
+        edge_index: Edge index of the graph.
         number_nodes: Number of nodes in the graph.
         use_torsion: If set to :obj:`True`, will return distance, angle and torsion, otherwise only return distance and angle (also retrun some useful index). (default: :obj:`False`)
     """
