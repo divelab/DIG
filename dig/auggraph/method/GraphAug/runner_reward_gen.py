@@ -8,13 +8,13 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import TUDataset
 from .model import RewardGenModel
 from dig.auggraph.datasets.aug_dataset import DegreeTrans, TripleSet
-from dig.auggraph.method.GraphAug.paths import *
+from dig.auggraph.method.GraphAug.constants import *
 
 
 class RunnerRewardGen(object):
-    def __init__(self, dataset_name, conf):
+    def __init__(self, data_root_path, dataset_name, conf):
         self.conf = conf
-        self._get_dataset(DATA_ROOT_PATH, dataset_name)
+        self._get_dataset(data_root_path, dataset_name)
         self.model = self._get_model()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.dataset_name = dataset_name
@@ -76,10 +76,10 @@ class RunnerRewardGen(object):
         return num_correct / (2 * len(loader.dataset)), num_pos_correct / len(loader.dataset), num_neg_correct / len(loader.dataset)
 
 
-    def train_test(self, num_save=30, file_name='record.txt'):
+    def train_test(self, results_path, num_save=30, file_name='record.txt'):
         self.model = self.model.to(self.device)
 
-        out_path = os.path.join(REWARD_GEN_RESULTS_PATH, self.dataset_name.value)
+        out_path = os.path.join(results_path, self.dataset_name.value)
         if not os.path.isdir(out_path):
             print(out_path)
             os.makedirs(out_path)

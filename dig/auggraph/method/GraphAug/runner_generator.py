@@ -6,21 +6,21 @@ from torch_geometric.datasets import TUDataset
 from .model import RewardGenModel
 from dig.auggraph.datasets.aug_dataset import Subset, DegreeTrans
 from .aug import Augmenter
-from dig.auggraph.method.GraphAug.paths import *
+from dig.auggraph.method.GraphAug.constants import *
 
 
 class RunnerGenerator(object):
-    def __init__(self, dataset_name, conf):
+    def __init__(self, data_root_path, dataset_name, conf):
         self.conf = conf
-        self._get_dataset(dataset_name)
+        self._get_dataset(data_root_path, dataset_name)
         self._get_model()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.dataset_name = dataset_name
         if conf[BASELINE] == BaselineType.EXP:
             self.moving_mean = None
 
-    def _get_dataset(self, dataset_name):
-        dataset = TUDataset(DATA_ROOT_PATH, name=dataset_name.value)
+    def _get_dataset(self, data_root_path, dataset_name):
+        dataset = TUDataset(data_root_path, name=dataset_name.value)
         if dataset_name in [DatasetName.NCI1, DatasetName.MUTAG, DatasetName.AIDS, DatasetName.NCI109, DatasetName.PROTEINS]:
             self.train_set = Subset(dataset)
             self.val_set = Subset(dataset)
@@ -104,10 +104,10 @@ class RunnerGenerator(object):
 
         return num_correct / len(self.val_set), total_rewards / len(self.val_set)
 
-    def train(self, file_name='val_record.txt'):
+    def train(self, results_path, file_name='val_record.txt'):
         self.discriminator, self.generator = self.discriminator.to(self.device), self.generator.to(self.device)
 
-        out_path = os.path.join(GENERATOR_RESULTS_PATH, self.dataset_name.value)
+        out_path = os.path.join(results_path, self.dataset_name.value)
         if not os.path.isdir(out_path):
             os.makedirs(out_path)
 
