@@ -16,7 +16,7 @@ parser.add_argument('--generator_results_path', type=str,
                     default='./dig/auggraph/method/GraphAug/results/generator_results',
                     help='The directory where generator states will be stored after each epoch.')
 parser.add_argument('--reward_gen_state_path', type=str,
-                    default='./dig/auggraph/method/GraphAug/results/reward_gen_results' + '/{}/{}/{}.pt'.format(dataset_name.value, model_type.value, str(last_checkpoint).zfill(4)),
+                    default='./dig/auggraph/method/GraphAug/results/reward_gen_results/{}/{}/{}.pt'.format(dataset_name.value, model_type.value, str(last_checkpoint).zfill(4)),
                     help='File path for final training state of reward generation model')
 args = parser.parse_args()
 

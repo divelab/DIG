@@ -81,7 +81,6 @@ class RunnerRewardGen(object):
 
         out_path = os.path.join(results_path, self.dataset_name.value)
         if not os.path.isdir(out_path):
-            print(out_path)
             os.makedirs(out_path)
 
         model_dir_name = self.conf[REWARD_GEN_PARAMS][MODEL_TYPE]

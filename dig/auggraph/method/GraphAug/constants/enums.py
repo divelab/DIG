@@ -53,3 +53,8 @@ class ConvType(Enum):
 class MaskType(Enum):
     ZERO = 'zero'
     GAUSSIAN = 'gaussian'
+
+class CLSModelType(Enum):
+    GIN = 'gin'
+    GINE = 'gine'
+    GCN = 'gcn'
