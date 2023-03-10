@@ -5,7 +5,7 @@ import numpy as np
 from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import TUDataset
 from sklearn.model_selection import KFold, train_test_split
-from dig.auggraph.method.GraphAug.model import GIN, GINE, GCN
+from dig.auggraph.method.GraphAug.model import GIN, GCN
 from dig.auggraph.datasets.aug_dataset import DegreeTrans, Subset, AUG_trans
 from dig.auggraph.method.GraphAug.aug import Augmenter
 from dig.auggraph.method.GraphAug.constants import *
@@ -55,8 +55,6 @@ class RunnerAugCls(object):
         if self.conf[MODEL_NAME] == CLSModelType.GIN:
             return GIN(self.conf[IN_DIMENSION], self.conf[NUM_CLASSES], self.conf[NUM_LAYERS],
                        self.conf[HIDDEN_UNITS], self.conf[DROPOUT])
-        elif self.conf[MODEL_NAME] == CLSModelType.GINE:
-            return GINE(self.dataset, self.conf[NUM_LAYERS], self.conf[HIDDEN_UNITS], self.conf[DROPOUT])
         elif self.conf[MODEL_NAME] == CLSModelType.GCN:
             return GCN(self.conf[IN_DIMENSION], self.conf[NUM_CLASSES], self.conf[NUM_LAYERS], self.conf[HIDDEN_UNITS],
                        self.conf[DROPOUT])

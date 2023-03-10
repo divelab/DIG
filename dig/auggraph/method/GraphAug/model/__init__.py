@@ -1,2 +1,2 @@
 from .reward_generator import RewardGenModel
-from .classifier import GIN, GCN, GINE
+from .classifier import GIN, GCN

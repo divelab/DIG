@@ -56,5 +56,4 @@ class MaskType(Enum):
 
 class CLSModelType(Enum):
     GIN = 'gin'
-    GINE = 'gine'
     GCN = 'gcn'
