@@ -364,6 +364,7 @@ class ComENet(nn.Module):
             dist = out["distances"]
             vecs = out["distance_vec"]
         else:
+            pos = data.pos
             edge_index = radius_graph(pos, r=self.cutoff, batch=batch, max_num_neighbors=1000)
             j, i = edge_index
             vecs = pos[j] - pos[i]

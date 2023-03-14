@@ -2,7 +2,7 @@ includes:
 - configs/is2re/all/base.yml
 
 model:
-  name: comenet
+  name: ocpmodels.models.comenet.comenet.ComENet
   hidden_channels: 256
   num_blocks: 4
   cutoff: 6.0
@@ -14,16 +14,16 @@ model:
   otf_graph: False
 
 optim:
-  batch_size: 128
-  eval_batch_size: 128
+  batch_size: 32
+  eval_batch_size: 32
   num_workers: 4
-  lr_initial: 0.0005
-  lr_gamma: 0.5
-  lr_milestones:
-    - 14375 # epochs 4, 14375 batch_size 128, 115082 batch_size 16
-    - 25156 # epochs 7, 25156 batch_size 128, 201394 batch_size 16
-    - 35938 # epochs 10, 35938 batch_size 128, 287705 batch_size 16
-  warmup_steps: 7188 # epochs 2, 7188 batch_size 128, 57541 batch_size 16
-  warmup_factor: 0.2
-  max_epochs: 20
+  scheduler: CyclicLR
+  lr_initial: 0.001
+  base_lr: 0.000005
+  max_lr: 0.001
+  step_size_up: 57500
+  mode: triangular2
+  cycle_momentum: False
+  amsgrad: True
+  max_epochs: 50
   loss_energy: mae
