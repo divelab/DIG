@@ -4,7 +4,7 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.data import Batch
 from torch_geometric.datasets import TUDataset
 from .model import RewardGenModel
-from dig.auggraph.datasets.aug_dataset import Subset, DegreeTrans
+from dig.auggraph.dataset.aug_dataset import Subset, DegreeTrans
 from .aug import Augmenter
 from dig.auggraph.method.GraphAug.constants import *
 
@@ -118,7 +118,7 @@ class RunnerGenerator(object):
         self.out_path = out_path
 
         f = open(os.path.join(model_path, file_name), 'a')
-        f.write('Generator results for datasets {} using augmentation below\n'.format(self.dataset_name))
+        f.write('Generator results for dataset {} using augmentation below\n'.format(self.dataset_name))
         for aug_type in self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS]:
             f.write('{}: {}\n'.format(aug_type, self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS][aug_type]))
         f.close()

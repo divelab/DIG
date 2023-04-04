@@ -6,7 +6,7 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import TUDataset
 from sklearn.model_selection import KFold, train_test_split
 from dig.auggraph.method.GraphAug.model import GIN, GCN
-from dig.auggraph.datasets.aug_dataset import DegreeTrans, Subset, AUG_trans
+from dig.auggraph.dataset.aug_dataset import DegreeTrans, Subset, AUG_trans
 from dig.auggraph.method.GraphAug.aug import Augmenter
 from dig.auggraph.method.GraphAug.constants import *
 

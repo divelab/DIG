@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import TUDataset
 from .model import RewardGenModel
-from dig.auggraph.datasets.aug_dataset import DegreeTrans, TripleSet
+from dig.auggraph.dataset.aug_dataset import DegreeTrans, TripleSet
 from dig.auggraph.method.GraphAug.constants import *
 
 

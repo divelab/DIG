@@ -10,7 +10,7 @@ conf[REWARD_GEN_PARAMS] = reward_gen_conf[dataset_name][REWARD_GEN_PARAMS]
 model_type = conf[REWARD_GEN_PARAMS][MODEL_TYPE]
 last_checkpoint = reward_gen_conf[dataset_name][MAX_NUM_EPOCHS] - 1
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_root_path', type=str, default='../../../dig/auggraph/datasets/tudatasets',
+parser.add_argument('--data_root_path', type=str, default='../../../dig/auggraph/dataset/tudatasets',
                     help='The directory with all graph datasets')
 parser.add_argument('--generator_results_path', type=str,
                     default='./results/generator_results',

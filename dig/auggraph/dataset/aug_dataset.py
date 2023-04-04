@@ -9,6 +9,12 @@ from torch_geometric.utils import degree
 
 
 class DegreeTrans(object):
+    r"""A temporary test documentation.
+
+    Args:
+        dataset(string, optional): looks good?
+        in_degree: iykyk
+    """
     def __init__(self, dataset, in_degree=False):
         self.max_degree = None
         self.mean = None
