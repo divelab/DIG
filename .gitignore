@@ -18,4 +18,4 @@ build/
 **/*.egg-info/
 **/*.egg
 dig/auggraph/dataset/tudataset/*
-dig/auggraph/method/GraphAug/results
+examples/auggraph/GraphAug/results

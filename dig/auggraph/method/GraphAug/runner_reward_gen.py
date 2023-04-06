@@ -12,6 +12,19 @@ from dig.auggraph.method.GraphAug.constants import *
 
 
 class RunnerRewardGen(object):
+    r"""
+    Runs the reward generation model which will be able to distinguish
+    between graphs with different labels. Check
+    :obj:`dig.examples.auggraph.GraphAug.run_reward_gen` for examples on how
+    to run the reward generation model.
+
+    Args:
+        data_root_path (string): Directory where datasets should be saved.
+        dataset_name (:class:`dig.auggraph.method.GraphAug.constants.enums.DatasetName`):
+            Graph dataset name
+        conf: Hyperparameters for the model.
+    """
+
     def __init__(self, data_root_path, dataset_name, conf):
         self.conf = conf
         self._get_dataset(data_root_path, dataset_name)
@@ -22,7 +35,8 @@ class RunnerRewardGen(object):
 
     def _get_dataset(self, data_root_path, dataset_name):
         dataset = TUDataset(data_root_path, name=dataset_name.value)
-        if dataset_name in [DatasetName.NCI1, DatasetName.MUTAG, DatasetName.PROTEINS, DatasetName.NCI109]:
+        if dataset_name in [DatasetName.NCI1, DatasetName.MUTAG,
+                            DatasetName.PROTEINS, DatasetName.NCI109]:
             self.train_set = TripleSet(dataset)
             self.val_set = TripleSet(dataset)
         elif dataset_name in [DatasetName.COLLAB, DatasetName.IMDB_BINARY]:
@@ -76,7 +90,17 @@ class RunnerRewardGen(object):
         return num_correct / (2 * len(loader.dataset)), num_pos_correct / len(loader.dataset), num_neg_correct / len(loader.dataset)
 
 
-    def train_test(self, results_path, num_save=30, file_name='record.txt'):
+    def train_test(self, results_path, num_save=30):
+        r"""
+        This method is used to run the training epochs for the reward generation
+        model and validate the epoch parameters.
+
+        Args:
+            results_path (string): Directory where the resulting optimal
+                parameters of the reward generation model will be saved.
+            num_save (integer): Number of final epochs for which model
+                parameters will be saved.
+        """
         self.model = self.model.to(self.device)
 
         out_path = os.path.join(results_path, self.dataset_name.value)
@@ -88,7 +112,8 @@ class RunnerRewardGen(object):
         if not os.path.isdir(model_dir):
             os.mkdir(model_dir)
 
-        f = open(os.path.join(out_path, file_name), 'a')
+        log_file = 'record.txt'
+        f = open(os.path.join(out_path, log_file), 'a')
         f.write('Reward generator classification results for dataset {} with model parameters {}\n'.format(
             self.dataset_name, self.conf[REWARD_GEN_PARAMS]))
         f.close()
@@ -105,6 +130,6 @@ class RunnerRewardGen(object):
             val_acc, val_pos_acc, val_neg_acc = self.test(val_loader)
             print('Epoch {}, validation accuracy {}, accuracy of positive samples {}, accuracy of negative samples {}'.format(epoch, val_acc, val_pos_acc, val_neg_acc))
 
-            f = open(os.path.join(out_path, file_name), 'a')
+            f = open(os.path.join(out_path, log_file), 'a')
             f.write('Epoch {}, validation accuracy {}, accuracy of positive samples {}, accuracy of negative samples {}\n'.format(epoch, val_acc, val_pos_acc, val_neg_acc))
             f.close()

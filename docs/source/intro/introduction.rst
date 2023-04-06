@@ -3,6 +3,7 @@ Introduction
 
 DIG includes unified implementations of **data interfaces**, **common algorithms**, and **evaluation metrics** for several advanced tasks. Our goal is to enable researchers to easily implement and benchmark algorithms. Currently, we consider the following research directions.
 
+* **Graph Augmentation**: :obj:`dig.auggraph`
 * **Graph Generation**: :obj:`dig.ggraph`
 * **Self-supervised Learning on Graphs**: :obj:`dig.sslgraph`
 * **Explainability of Graph Neural Networks**: :obj:`dig.xgraph`
@@ -11,6 +12,7 @@ DIG includes unified implementations of **data interfaces**, **common algorithms
 
 We provide a hands-on tutorial for each direction to help you to get started with DIG: 
 
+* `Tutorial for Graph Augmentation <https://diveintographs.readthedocs.io/en/latest/tutorials/auggraph.html>`_
 * `Tutorial for Graph Generation <https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html>`_
 * `Tutorial for Self-supervised Learning on Graphs <https://diveintographs.readthedocs.io/en/latest/tutorials/sslgraph.html>`_
 * `Tutorial for Explainability of Graph Neural Networks <https://diveintographs.readthedocs.io/en/latest/tutorials/subgraphx.html>`_
