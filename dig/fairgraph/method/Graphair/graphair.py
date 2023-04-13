@@ -9,7 +9,7 @@ class Graphair(nn.Module):
     r'''
         Implementation of Graphair from the paper `"LEARNING FAIR GRAPH REPRESENTATIONS VIA AUTOMATED DATA AUGMENTATIONS`"
     '''
-    def __init__(self, aug_model, f_encoder, sens_model, lr = 1e-4, weight_decay = 1e-5, alpha = 20, beta = 0.9, gamma = 0.7, lam = 1, dataset = 'nba', batch_size = None, num_hidden = 64, num_proj_hidden = 64):
+    def __init__(self, aug_model, f_encoder, sens_model, lr = 1e-4, weight_decay = 1e-5, alpha = 20, beta = 0.9, gamma = 0.7, lam = 1, dataset = 'POKEC', batch_size = None, num_hidden = 64, num_proj_hidden = 64):
         super(Graphair, self).__init__()
         self.aug_model = aug_model
         self.f_encoder = f_encoder
@@ -38,7 +38,7 @@ class Graphair(nn.Module):
         self.fc2 = torch.nn.Linear(num_proj_hidden, num_hidden)
     
     def projection(self, z):
-        z = F.elu(self.fc1(z)) # TODO: is this supposed to be elu? paper does not mention anything about the actiavation here.
+        z = F.elu(self.fc1(z))
         return self.fc2(z)
     
     def info_nce_loss_2views(self, features):
@@ -93,14 +93,6 @@ class Graphair(nn.Module):
                 adj_aug, x_aug, adj_logits = self.aug_model(adj, x[node_subgraph], adj_orig = edge_label)
                 edge_loss = norm_w * F.binary_cross_entropy_with_logits(adj_logits, edge_label)
 
-
-                # TODO: is the following really necessary?
-
-                # if (self.aug_model.Aaug) and (not self.aug_model.Aaug.gae):
-                #     mu = self.aug_model.Aaug.mean
-                #     lgstd = self.aug_model.Aaug.logstd
-                #     kl_divergence = 0.5/adj_logits.size(0) * (1 + 2*lgstd - mu**2 - torch.exp(2*lgstd)).sum(1).mean()
-                #     edge_loss -= kl_divergence
 
                 feat_loss =  self.criterion_recons(x_aug, x[node_subgraph])
                 recons_loss =  edge_loss + self.beta * feat_loss
@@ -159,13 +151,6 @@ class Graphair(nn.Module):
             ## update encoder
             edge_loss = norm_w * F.binary_cross_entropy_with_logits(adj_logits, edge_label)
 
-            # TODO: again, is the following really necessary?
-
-            # if (self.aug_model.Aaug) and (not self.aug_model.Aaug.gae):
-            #         mu = self.aug_model.Aaug.mean
-            #         lgstd = self.aug_model.Aaug.logstd
-            #         kl_divergence = 0.5/adj_logits.size(0) * (1 + 2*lgstd - mu**2 - torch.exp(2*lgstd)).sum(1).mean()
-            #         edge_loss -= kl_divergence
 
             feat_loss =  self.criterion_recons(x_aug, x[node_subgraph])
             recons_loss =  edge_loss + self.lam * feat_loss

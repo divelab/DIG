@@ -67,3 +67,18 @@ class GCN_Body(nn.Module):
             cnt += 1
             h = (layer(g, h))
         return h
+
+class GCN(nn.Module):
+    def __init__(self, in_feats, n_hidden, out_feats, nclass, dropout = 0.2, nlayer = 2):
+        super(GCN, self).__init__()
+        self.body = GCN_Body(in_feats, n_hidden, out_feats, dropout, nlayer)
+        self.fc = nn.Sequential(
+                nn.Linear(out_feats, n_hidden),
+                nn.ReLU(),
+                nn.Linear(n_hidden, nclass),
+                )
+
+    def forward(self, g, x):
+        h = self.body(g, x)
+        x = self.fc(h)
+        return x , h

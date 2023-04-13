@@ -28,6 +28,7 @@ class POKEC(InMemoryDataset):
             train_test_valid_split (:obj:`List`, optional): A List containing the train, test and validation mask percentages. (default: :obj:`[0.7,0.15,0.15]`)
     '''
     def __init__(self, root='./pokec', transform=None, pre_transform=None, pre_filter=None, train_test_valid_split=[0.7,0.15,0.15]):
+        super().__init__(root, transform, pre_transform, pre_filter)
         self.name = "pokec"
 
         # assert that train_test_valid_split is valid:
