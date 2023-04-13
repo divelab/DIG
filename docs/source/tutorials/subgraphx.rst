@@ -82,6 +82,7 @@ Since the graph model is a two-layer GNN model, the information only aggregates 
     from dig.xgraph.method.subgraphx import PlotUtils
     from dig.xgraph.method.subgraphx import MCTS
     from torch_geometric.utils import to_networkx
+    from torch_geometric.data import Data
 
     subgraph_x, subgraph_edge_index, subset, edge_mask, kwargs = \
         MCTS.__subgraph__(node_idx, data.x, data.edge_index, num_hops=2)
@@ -130,8 +131,7 @@ After MCTS searching and Shapley value computation, the subgraph with the highes
     result = find_closest_node_result(explanation_results[prediction], max_nodes=max_nodes)
 
     plotutils = PlotUtils(dataset_name='ba_shapes')
-    explainer.visualization(explanation_results,
-                            prediction,
+    explainer.visualization(explanation_results[prediction],
                             max_nodes=max_nodes,
                             plot_utils=plotutils,
                             y=data.y)
