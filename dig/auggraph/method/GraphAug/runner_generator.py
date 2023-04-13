@@ -10,6 +10,24 @@ from dig.auggraph.method.GraphAug.constants import *
 
 
 class RunnerGenerator(object):
+    r"""
+    Runs the augmented samples generator model which uses the already trained
+    reward generation model. For a given graph, the model generates an
+    augmented sample and a likelihood that this is a label invariant
+    augmentation. This prediction is then evaluated by the reward generation
+    model and a loss is computed based on these metrics. The loss is then
+    minimized through training. Check
+    :obj:`examples.auggraph.GraphAug.run_generator` for examples on how to
+    run the generator model.
+
+    Args:
+        data_root_path (string): Directory where datasets should be saved.
+        dataset_name (:class:`dig.auggraph.method.GraphAug.constants.enums.DatasetName`):
+            Name of the graph dataset.
+        conf (dict): Hyperparameters for the model. Check
+            :obj:`examples.auggraph.GraphAug.conf.generator_conf` for
+            examples on how to define the conf dictionary for the generator.
+    """
     def __init__(self, data_root_path, dataset_name, conf):
         self.conf = conf
         self._get_dataset(data_root_path, dataset_name)
@@ -104,7 +122,15 @@ class RunnerGenerator(object):
 
         return num_correct / len(self.val_set), total_rewards / len(self.val_set)
 
-    def train(self, results_path, file_name='val_record.txt'):
+    def train_test(self, results_path):
+        r"""
+        This method is used to run the training epochs for the augmented
+        samples generator and validate the epoch parameters.
+
+        Args:
+             results_path (string): Directory where the resulting optimal
+                parameters of the generator model will be saved.
+        """
         self.discriminator, self.generator = self.discriminator.to(self.device), self.generator.to(self.device)
 
         out_path = os.path.join(results_path, self.dataset_name.value)
@@ -116,8 +142,8 @@ class RunnerGenerator(object):
             os.mkdir(model_path)
 
         self.out_path = out_path
-
-        f = open(os.path.join(model_path, file_name), 'a')
+        val_record_file = 'val_record.txt'
+        f = open(os.path.join(model_path, val_record_file), 'a')
         f.write('Generator results for dataset {} using augmentation below\n'.format(self.dataset_name))
         for aug_type in self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS]:
             f.write('{}: {}\n'.format(aug_type, self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS][aug_type]))
@@ -134,7 +160,7 @@ class RunnerGenerator(object):
                 val_acc, avg_reward = self.test()
                 print('Epoch {}, validation accuracy {}, average reward {}'.format(epoch, val_acc, avg_reward))
 
-                f = open(os.path.join(out_path, file_name), 'a')
+                f = open(os.path.join(out_path, val_record_file), 'a')
                 f.write('Epoch {}, validation accuracy {}, average reward {}\n'.format(epoch, val_acc, avg_reward))
                 f.close()
 

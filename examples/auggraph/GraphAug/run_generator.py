@@ -21,4 +21,4 @@ parser.add_argument('--reward_gen_state_path', type=str,
 args = parser.parse_args()
 
 runner = RunnerGenerator(args.data_root_path, dataset_name, conf)
-runner.train(args.generator_results_path)
+runner.train_test(args.generator_results_path)

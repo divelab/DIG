@@ -15,14 +15,16 @@ class RunnerRewardGen(object):
     r"""
     Runs the reward generation model which will be able to distinguish
     between graphs with different labels. Check
-    :obj:`dig.examples.auggraph.GraphAug.run_reward_gen` for examples on how
+    :obj:`examples.auggraph.GraphAug.run_reward_gen` for examples on how
     to run the reward generation model.
 
     Args:
         data_root_path (string): Directory where datasets should be saved.
         dataset_name (:class:`dig.auggraph.method.GraphAug.constants.enums.DatasetName`):
-            Graph dataset name
-        conf: Hyperparameters for the model.
+            Name of the graph dataset.
+        conf (dict): Hyperparameters for the model. Check
+            :obj:`examples.auggraph.GraphAug.conf.reward_gen_conf` for examples
+            on how to define the conf dictionary for the reward generator.
     """
 
     def __init__(self, data_root_path, dataset_name, conf):
