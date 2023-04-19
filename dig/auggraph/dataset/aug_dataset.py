@@ -2,18 +2,16 @@
 
 import random
 import torch
-import numpy as np
 import torch.nn.functional as F
 from torch.utils.data import Dataset
 from torch_geometric.utils import degree
 
 
 class DegreeTrans(object):
-    r"""A temporary test documentation.
-
-    Args:
-        dataset(string, optional): looks good?
-        in_degree: iykyk
+    r"""
+    This class is used to add graph level feature vectors to given sample
+    graphs. These feature vectors depend on vertex degrees across all sample
+    graphs.
     """
     def __init__(self, dataset, in_degree=False):
         self.max_degree = None
@@ -23,9 +21,18 @@ class DegreeTrans(object):
         self._statistic(dataset)
     
     def _statistic(self, dataset):
+        r"""
+        This function computes statistics over all nodes in all sample graphs.
+        These statistics are maximum, mean, and standard deviation.
+
+        Args:
+            dataset (:class:`torch.utils.data.Dataset`): The dataset containing
+            all sample graphs.
+        """
         degs = []
         max_degree = 0
         for data in dataset:
+            print(type(data))
             degs += [degree(data.edge_index[0], dtype=torch.long)]
             max_degree = max(max_degree, degs[-1].max().item())
         
@@ -34,30 +41,60 @@ class DegreeTrans(object):
         self.mean, self.std = deg.mean().item(), deg.std().item()
     
     def __call__(self, data):
+        r"""
+            For a given sample graph, this function adds a graph level feature
+            vector that is a function of degrees of all nodes across all
+            sample graphs.
+
+            Args:
+                data (:class:`torch_geometric.data.data.Data`): Given sample graph.
+        """
         if data.x is not None:
             return data
         if self.max_degree < 1000:
             idx = data.edge_index[1 if self.in_degree else 0]
-            deg = torch.clamp(degree(idx, data.num_nodes, dtype=torch.long), min=0, max=self.max_degree)
+            deg = torch.clamp(degree(idx, data.num_nodes, dtype=torch.long),
+                              min=0, max=self.max_degree)
             deg = F.one_hot(deg, num_classes=self.max_degree + 1).to(torch.float)
             data.x = deg
         else:
             deg = degree(data.edge_index[0], dtype=torch.float)
             deg = (deg - self.mean) / self.std
             data.x = deg.view(-1, 1)
-        
-        return data        
+        return data
 
 
 class AUG_trans(object):
+    r"""
+    This class generates a label invariant augmentation from a given sample.
+
+    Args:
+        augmenter (function): This method generates a label invariant
+            augmentation from a given sample.
+        device (str): The device on which the data will be processed.
+        pre_trans (function, optional): This transformation is applied on the
+            original sample before an augmentation is generated. Default is
+            None.
+        post_trans (function, optional): This transformation is applied on the
+            generated label invariant augmentation. Default is None.
+    """
     def __init__(self, augmenter, device, pre_trans=None, post_trans=None):
         self.augmenter = augmenter
         self.pre_trans = pre_trans
         self.post_trans = post_trans
         self.device = device
-    
+
     def __call__(self, data):
-        # data = data.to(self.device)
+        r"""
+        This is the main function that generates a label invariant
+        augmentation from a given sample.
+
+        Args:
+            data: The given data sample.
+
+        Returns:
+            A label invariant augmentation.
+        """
         if self.pre_trans:
             data = self.pre_trans(data)
         new_data = self.augmenter(data)[0]
@@ -67,45 +104,51 @@ class AUG_trans(object):
 
 
 class Subset(Dataset):
+    r"""
+    This class is used to create of a subset of a dataset.
+
+    Args:
+        subset (:class:`torch.utils.data.Dataset`): The given dataset subset.
+        transform (function, optional): A transformation applied on each
+            sample of the dataset before it will be used. Default is None.
+    """
     def __init__(self, subset, transform=None):
         self.subset = subset
         self.transform = transform
     
     def __getitem__(self, index):
+        r"""
+        This method returns the sample at the given index in the subset.
+
+        Args:
+            index (int): The index in the subset of the required sample.
+        """
         data = self.subset[index]
         if self.transform is not None:
             data = self.transform(data)
         return data
     
     def __len__(self):
+        r"""
+        Returns the number of samples in the subset.
+        """
         return len(self.subset)
 
-
-class DoubleSet(Dataset):
-    def __init__(self, dataset, transform=None):
-        self.dataset = dataset
-        self.transform = transform
-        self.data_len = len(self.dataset)
-    
-    def __getitem__(self, index):
-        anchor_data = self.dataset[index]
-
-        pos_index = random.sample(range(self.data_len), 1)[0]
-        while pos_index == index:
-            pos_index = random.sample(range(self.data_len), 1)[0]
-        pos_data = self.dataset[pos_index]
-        
-        if self.transform is not None:
-            anchor_data, pos_data = self.transform(anchor_data), self.transform(pos_data)
-        
-        lambd = torch.tensor([np.random.beta(1.0, 1.0)])
-        return anchor_data, pos_data, lambd
-    
-    def __len__(self):
-        return self.data_len
-
-
 class TripleSet(Dataset):
+    r"""
+    This class inherits from the :class:`torch.utils.data.Dataset` class and in
+    addition to each anchor sample, it returns a random positive and negative
+    sample from the dataset. A positive sample has the same label as the
+    anchor sample and a negative sample has a different label than the anchor
+    sample.
+
+    Args:
+        dataset (:class:`torch.utils.data.Dataset`): The dataset for which the
+            triple set will be created.
+        transform (function, optional): A transformation that is applied on all
+            original samples. In other words, this transformation is applied
+            to the anchor, positive, and negative sample. Default is None.
+    """
     def __init__(self, dataset, transform=None):
         self.dataset = dataset
         self.transform = transform
@@ -121,6 +164,18 @@ class TripleSet(Dataset):
                 self.label_to_index_list[y].append(i)
 
     def __getitem__(self, index):
+        r"""
+        For a given index, this sample returns the original/anchor sample from
+        the dataset at that index and a corresponding positive, and negative
+        sample.
+
+        Args:
+            index (int): The index of the anchor sample in the dataset.
+
+        Returns:
+            A tuple consisting of the anchor sample, a positive
+            sample, and a negative sample respectively.
+        """
         anchor_data = self.dataset[index]
         anchor_label = int(anchor_data.y.item())
 
@@ -136,9 +191,14 @@ class TripleSet(Dataset):
         pos_data, neg_data = self.dataset[pos_index], self.dataset[neg_index]
 
         if self.transform is not None:
-            anchor_data, pos_data, neg_data = self.transform(anchor_data), self.transform(pos_data), self.transform(neg_data)
+            anchor_data, pos_data, neg_data = self.transform(anchor_data), \
+                self.transform(pos_data), self.transform(neg_data)
         
         return anchor_data, pos_data, neg_data
-    
+
     def __len__(self):
+        r"""
+            Returns:
+                 The number of samples in the original dataset.
+        """
         return len(self.dataset)

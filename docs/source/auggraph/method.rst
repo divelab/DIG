@@ -12,7 +12,6 @@ An augmentation method for graph datasets under :obj:`dig.auggraph.method.GraphA
 implemented from the paper
 `Automated Data Augmentations for Graph Classification <https://arxiv
 .org/abs/2202.13248#>`_.
-.
 
 .. automodule:: dig.auggraph.method.GraphAug
     :members:

@@ -53,10 +53,10 @@ class RunnerGenerator(object):
             self.conf[GENERATOR_PARAMS][AUG_TYPE_PARAMS][AugType.NODE_FM.value][NODE_FEAT_DIM] = in_dim
 
     def _get_model(self):
-        self.discriminator = RewardGenModel(**self.conf[REWARD_GEN_PARAMS])
+        self.reward_generator = RewardGenModel(**self.conf[REWARD_GEN_PARAMS])
         if self.conf[REWARD_GEN_STATE_PATH] is not None:
-            self.discriminator.load_state_dict(torch.load(self.conf[REWARD_GEN_STATE_PATH]))
-        self.discriminator.eval()
+            self.reward_generator.load_state_dict(torch.load(self.conf[REWARD_GEN_STATE_PATH]))
+        self.reward_generator.eval()
         self.generator = Augmenter(**self.conf[GENERATOR_PARAMS])
 
     def _train_epoch(self, loader, optimizer):
@@ -74,7 +74,7 @@ class RunnerGenerator(object):
                 if hasattr(self, 'post_trans'):
                     neg_data = self.post_trans(neg_data)
 
-                neg_out = self.discriminator(anchor_data, neg_data).view(-1)
+                neg_out = self.reward_generator(anchor_data, neg_data).view(-1)
                 rewards = torch.log(neg_out)
                 if self.conf[BASELINE] == BaselineType.MEAN:
                     baseline = torch.mean(rewards)
@@ -115,7 +115,7 @@ class RunnerGenerator(object):
             aug_data, _ = self.generator(data)
 
             data1, data2 = Batch.from_data_list([data]), Batch.from_data_list([aug_data])
-            output = self.discriminator(data1, data2)
+            output = self.reward_generator(data1, data2)
             pred = (output.view(-1) > 0.5).long()
             num_correct += pred.sum().item()
             total_rewards += torch.log(output).view(-1)[0].item()
@@ -131,7 +131,7 @@ class RunnerGenerator(object):
              results_path (string): Directory where the resulting optimal
                 parameters of the generator model will be saved.
         """
-        self.discriminator, self.generator = self.discriminator.to(self.device), self.generator.to(self.device)
+        self.reward_generator, self.generator = self.reward_generator.to(self.device), self.generator.to(self.device)
 
         out_path = os.path.join(results_path, self.dataset_name.value)
         if not os.path.isdir(out_path):

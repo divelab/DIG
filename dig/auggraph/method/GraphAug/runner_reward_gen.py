@@ -100,7 +100,7 @@ class RunnerRewardGen(object):
         Args:
             results_path (string): Directory where the resulting optimal
                 parameters of the reward generation model will be saved.
-            num_save (integer): Number of final epochs for which model
+            num_save (int): Number of final epochs for which model
                 parameters will be saved.
         """
         self.model = self.model.to(self.device)
@@ -120,7 +120,8 @@ class RunnerRewardGen(object):
             self.dataset_name, self.conf[REWARD_GEN_PARAMS]))
         f.close()
 
-        train_loader = DataLoader(self.train_set, batch_size=self.conf[BATCH_SIZE], shuffle=True, num_workers=16)
+        train_loader = DataLoader(self.train_set, batch_size=
+            self.conf[BATCH_SIZE], shuffle=True, num_workers=16)
         val_loader = DataLoader(self.val_set, batch_size=self.conf[BATCH_SIZE], shuffle=True)
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.conf[INITIAL_LR], weight_decay=1e-4)

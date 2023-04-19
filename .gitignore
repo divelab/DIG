@@ -17,5 +17,5 @@ experiment_curve.py
 build/
 **/*.egg-info/
 **/*.egg
-dig/auggraph/dataset/tudataset/*
+dig/auggraph/dataset/tudatasets/*
 examples/auggraph/GraphAug/results
