@@ -1,10 +1,11 @@
+# Author: Youzhi Luo (yzluo@tamu.edu)
+# Updated by: Anmol Anand (aanand@tamu.edu)
+
 import torch
 import random
-import numpy as np
 import torch.nn.functional as F
 from torch.distributions.bernoulli import Bernoulli
 from torch_geometric.data import Data
-from torch_geometric.utils import dropout_adj, to_undirected
 from torch_geometric.utils.dropout import filter_adj
 from torch_geometric.utils.num_nodes import maybe_num_nodes
 from .aug_utils import coalesce

@@ -1,3 +1,6 @@
+# Author: Youzhi Luo (yzluo@tamu.edu)
+# Updated by: Anmol Anand (aanand@tamu.edu)
+
 import copy
 from dig.auggraph.method.GraphAug.constants import *
 

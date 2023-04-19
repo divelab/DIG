@@ -1,3 +1,6 @@
+# Author: Youzhi Luo (yzluo@tamu.edu)
+# Updated by: Anmol Anand (aanand@tamu.edu)
+
 from typing import Union, List, Optional, Tuple
 
 import torch

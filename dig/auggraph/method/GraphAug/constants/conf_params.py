@@ -1,3 +1,6 @@
+# Author: Youzhi Luo (yzluo@tamu.edu)
+# Updated by: Anmol Anand (aanand@tamu.edu)
+
 BATCH_SIZE = 'batch_size'
 INITIAL_LR = 'start_lr'
 GENERATOR_STEPS = 'g_steps'

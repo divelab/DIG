@@ -1,3 +1,6 @@
+# Author: Youzhi Luo (yzluo@tamu.edu)
+# Updated by: Anmol Anand (aanand@tamu.edu)
+
 import argparse
 from dig.auggraph.method.GraphAug.runner_aug_cls import RunnerAugCls
 from dig.auggraph.method.GraphAug.constants import *

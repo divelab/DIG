@@ -1,3 +1,6 @@
+# Author: Youzhi Luo (yzluo@tamu.edu)
+# Updated by: Anmol Anand (aanand@tamu.edu)
+
 import argparse
 from examples.auggraph.GraphAug.conf.generator_conf import generator_conf
 from examples.auggraph.GraphAug.conf.reward_gen_conf import reward_gen_conf
