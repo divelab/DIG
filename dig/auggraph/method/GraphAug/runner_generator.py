@@ -11,12 +11,12 @@ from dig.auggraph.method.GraphAug.constants import *
 
 class RunnerGenerator(object):
     r"""
-    Runs the augmented samples generator model which uses the already trained
-    reward generation model. For a given graph, the model generates an
-    augmented sample and a likelihood that this is a label invariant
-    augmentation. This prediction is then evaluated by the reward generation
-    model and a loss is computed based on these metrics. The loss is then
-    minimized through training. Check
+    Runs the training of an augmented samples generator model which uses the
+    already trained reward generation model. For a given graph, the model
+    generates an augmented sample and a likelihood that this is a label
+    invariant augmentation. This prediction is then evaluated by the reward
+    generation model and a loss is computed based on these metrics. The loss
+    is then minimized through training. Check
     :obj:`examples.auggraph.GraphAug.run_generator` for examples on how to
     run the generator model.
 
@@ -124,8 +124,8 @@ class RunnerGenerator(object):
 
     def train_test(self, results_path):
         r"""
-        This method is used to run the training epochs for the augmented
-        samples generator and validate the epoch parameters.
+        This method is used to run the training for the augmented samples
+        generator and validate the epoch parameters.
 
         Args:
              results_path (string): Directory where the resulting optimal

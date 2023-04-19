@@ -13,8 +13,8 @@ from dig.auggraph.method.GraphAug.constants import *
 
 class RunnerRewardGen(object):
     r"""
-    Runs the reward generation model which will be able to distinguish
-    between graphs with different labels. Check
+    Runs the training of a reward generation model which will be able to
+    distinguish between graphs with different labels. Check
     :obj:`examples.auggraph.GraphAug.run_reward_gen` for examples on how
     to run the reward generation model.
 
@@ -94,7 +94,7 @@ class RunnerRewardGen(object):
 
     def train_test(self, results_path, num_save=30):
         r"""
-        This method is used to run the training epochs for the reward generation
+        This method is used to run the training for the reward generation
         model and validate the epoch parameters.
 
         Args:

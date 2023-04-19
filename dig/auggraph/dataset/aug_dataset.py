@@ -9,9 +9,9 @@ from torch_geometric.utils import degree
 
 class DegreeTrans(object):
     r"""
-    This class is used to add graph level feature vectors to given sample
-    graphs. These feature vectors depend on vertex degrees across all sample
-    graphs.
+    This class is used to add vertex degree based node features to graphs.
+    This is usually used to preprocess the graph datasets that do not have
+    node features.
     """
     def __init__(self, dataset, in_degree=False):
         self.max_degree = None
@@ -42,12 +42,12 @@ class DegreeTrans(object):
     
     def __call__(self, data):
         r"""
-            For a given sample graph, this function adds a graph level feature
-            vector that is a function of degrees of all nodes across all
-            sample graphs.
+            This is the main function that adds vertex degree based node
+            features to the given graph.
 
             Args:
-                data (:class:`torch_geometric.data.data.Data`): Given sample graph.
+                data (:class:`torch_geometric.data.data.Data`): The graph
+                with vertex degrees as node features.
         """
         if data.x is not None:
             return data
@@ -66,17 +66,17 @@ class DegreeTrans(object):
 
 class AUG_trans(object):
     r"""
-    This class generates a label invariant augmentation from a given sample.
+    This class generates an augmentation from a given sample.
 
     Args:
-        augmenter (function): This method generates a label invariant
-            augmentation from a given sample.
+        augmenter (function): This method generates an augmentation from the
+            given sample.
         device (str): The device on which the data will be processed.
         pre_trans (function, optional): This transformation is applied on the
             original sample before an augmentation is generated. Default is
             None.
         post_trans (function, optional): This transformation is applied on the
-            generated label invariant augmentation. Default is None.
+            generated augmented sample. Default is None.
     """
     def __init__(self, augmenter, device, pre_trans=None, post_trans=None):
         self.augmenter = augmenter
@@ -86,14 +86,13 @@ class AUG_trans(object):
 
     def __call__(self, data):
         r"""
-        This is the main function that generates a label invariant
-        augmentation from a given sample.
+        This is the main function that generates an augmentation from a given
+        sample.
 
         Args:
             data: The given data sample.
-
         Returns:
-            A label invariant augmentation.
+            A transformed graph.
         """
         if self.pre_trans:
             data = self.pre_trans(data)
