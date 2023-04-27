@@ -2,15 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import scipy.sparse as sp
-from utils import scipysp_to_pytorchsp
 import numpy as np
 
-class Graphair(nn.Module):
+class graphair(nn.Module):
     r'''
         Implementation of Graphair from the paper `"LEARNING FAIR GRAPH REPRESENTATIONS VIA AUTOMATED DATA AUGMENTATIONS`"
     '''
     def __init__(self, aug_model, f_encoder, sens_model, lr = 1e-4, weight_decay = 1e-5, alpha = 20, beta = 0.9, gamma = 0.7, lam = 1, dataset = 'POKEC', batch_size = None, num_hidden = 64, num_proj_hidden = 64):
-        super(Graphair, self).__init__()
+        super(graphair, self).__init__()
         self.aug_model = aug_model
         self.f_encoder = f_encoder
         self.sens_model = sens_model

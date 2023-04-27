@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import pyro
-from GCN import GCN_Body
+from .GCN import GCN_Body
 
 
 
