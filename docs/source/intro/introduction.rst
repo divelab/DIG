@@ -3,6 +3,7 @@ Introduction
 
 DIG includes unified implementations of **data interfaces**, **common algorithms**, and **evaluation metrics** for several advanced tasks. Our goal is to enable researchers to easily implement and benchmark algorithms. Currently, we consider the following research directions.
 
+* **Graph Augmentation**: :obj:`dig.auggraph`
 * **Graph Generation**: :obj:`dig.ggraph`
 * **Self-supervised Learning on Graphs**: :obj:`dig.sslgraph`
 * **Explainability of Graph Neural Networks**: :obj:`dig.xgraph`

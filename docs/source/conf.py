@@ -20,6 +20,8 @@ import sphinx_rtd_theme
 sys.path.insert(0,'..')
 sys.path.insert(0,'../..')
 
+import dig.auggraph.dataset
+import dig.auggraph.method
 import dig.sslgraph.dataset
 import dig.sslgraph.method
 import dig.sslgraph.utils
