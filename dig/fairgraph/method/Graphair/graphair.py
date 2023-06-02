@@ -7,7 +7,7 @@ from dig.fairgraph.utils.utils import scipysp_to_pytorchsp,accuracy,fair_metric
 
 class graphair(nn.Module):
     r'''
-        Implementation of Graphair from the paper `"LEARNING FAIR GRAPH REPRESENTATIONS VIA AUTOMATED DATA AUGMENTATIONS`"
+        Implementation of Graphair network from the paper `"LEARNING FAIR GRAPH REPRESENTATIONS VIA AUTOMATED DATA AUGMENTATIONS`"
     '''
     def __init__(self, aug_model, f_encoder, sens_model, classifier_model, lr = 1e-4, weight_decay = 1e-5, alpha = 20, beta = 0.9, gamma = 0.7, lam = 1, dataset = 'POKEC', batch_size = None, num_hidden = 64, num_proj_hidden = 64):
         super(graphair, self).__init__()

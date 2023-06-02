@@ -8,7 +8,7 @@ from .GCN import GCN_Body
 
 class aug_module(torch.nn.Module):
     r'''
-        The Augmentation module decribed in the paper `"LEARNING FAIR GRAPH REPRESENTATIONS VIA AUTOMATED DATA AUGMENTATIONS`"
+        This class implements the Augmentation module decribed in the paper `"LEARNING FAIR GRAPH REPRESENTATIONS VIA AUTOMATED DATA AUGMENTATIONS`"
     '''
     def __init__(self, features, n_hidden=64, temperature=1) -> None:
         super(aug_module,self).__init__()
@@ -56,7 +56,7 @@ class aug_module(torch.nn.Module):
 # TODO: Make MLPA and MLPX configurable. Currently they are both two layer MLP networks.
 class MLPA(torch.nn.Module):
     r'''
-        The Multi layer perceptron used for edge perturbation.
+        Implements the MLP used for edge perturbation.
     '''
 
     def __init__(self, in_feats, dim_h, dim_z):
@@ -77,7 +77,7 @@ class MLPA(torch.nn.Module):
 
 class MLPX(torch.nn.Module):
     r'''
-        The Multi layer perceptron used for node feature masking.
+        Implements the MLP used for node feature masking.
     '''
 
     def __init__(self, in_feats, n_hidden, out_feats, dropout):

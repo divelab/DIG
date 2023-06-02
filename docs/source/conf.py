@@ -41,6 +41,7 @@ import dig.threedgraph.dataset
 import dig.threedgraph.method
 import dig.threedgraph.utils
 import dig.threedgraph.evaluation
+import dig.fairgraph.method
 
 # -- Project information -----------------------------------------------------
 
