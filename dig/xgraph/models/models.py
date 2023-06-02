@@ -309,7 +309,9 @@ class GCNConv(gnn.GCNConv):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.__explain_flow__ = False
         self.edge_weight = None
+        self.layer_edge_mask = None
         self.weight = nn.Parameter(self.lin.weight.data.T.clone().detach())
 
     def forward(self, x: Tensor, edge_index: Adj,
@@ -392,6 +394,15 @@ class GCNConv(gnn.GCNConv):
                     edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
+            elif self.__explain_flow__:
+                edge_mask = self.layer_edge_mask
+                # Some ops add self-loops to `edge_index`. We need to do the
+                # same for `edge_mask` (but do not train those).
+                if out.size(self.node_dim) != edge_mask.size(0):
+                    loop = edge_mask.new_ones(size[0])
+                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                assert out.size(self.node_dim) == edge_mask.size(0)
+                out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 
             aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
             out = self.aggregate(out, **aggr_kwargs)
@@ -405,7 +416,9 @@ class GINConv(gnn.GINConv):
     def __init__(self, nn: Callable, eps: float = 0., train_eps: bool = False,
                  **kwargs):
         super().__init__(nn, eps, train_eps, **kwargs)
+        self.__explain_flow__ = False
         self.edge_weight = None
+        self.layer_edge_mask = None
         self.fc_steps = None
         self.reweight = None
 
@@ -511,6 +524,15 @@ class GINConv(gnn.GINConv):
             # message passing computation scheme.
             if self._explain:
                 edge_mask = self.__edge_mask__
+                # Some ops add self-loops to `edge_index`. We need to do the
+                # same for `edge_mask` (but do not train those).
+                if out.size(self.node_dim) != edge_mask.size(0):
+                    loop = edge_mask.new_ones(size[0])
+                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                assert out.size(self.node_dim) == edge_mask.size(0)
+                out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
+            elif self.__explain_flow__:
+                edge_mask = self.layer_edge_mask
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):
@@ -686,7 +708,9 @@ class GCNConv_mask(gnn.GCNConv):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.__explain_flow__ = False
         self.edge_weight = None
+        self.layer_edge_mask = None
         self.weight = nn.Parameter(self.lin.weight.data.T.clone().detach())
 
     def forward(self, x: Tensor, edge_index: Adj,
@@ -769,6 +793,15 @@ class GCNConv_mask(gnn.GCNConv):
                     edge_mask = torch.cat([edge_mask, loop], dim=0)
                 assert out.size(self.node_dim) == edge_mask.size(0)
                 out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
+            elif self.__explain_flow__:
+                edge_mask = self.layer_edge_mask
+                # Some ops add self-loops to `edge_index`. We need to do the
+                # same for `edge_mask` (but do not train those).
+                if out.size(self.node_dim) != edge_mask.size(0):
+                    loop = edge_mask.new_ones(size[0])
+                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                assert out.size(self.node_dim) == edge_mask.size(0)
+                out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
 
             aggr_kwargs = self.inspector.distribute('aggregate', coll_dict)
             out = self.aggregate(out, **aggr_kwargs)
@@ -782,7 +815,9 @@ class GINConv_mask(gnn.GINConv):
     def __init__(self, nn: Callable, eps: float = 0., train_eps: bool = False,
                  **kwargs):
         super().__init__(nn, eps, train_eps, **kwargs)
+        self.__explain_flow__ = False
         self.edge_weight = None
+        self.layer_edge_mask = None
         self.fc_steps = None
         self.reweight = None
 
@@ -888,6 +923,15 @@ class GINConv_mask(gnn.GINConv):
             # message passing computation scheme.
             if self._explain:
                 edge_mask = self.__edge_mask__
+                # Some ops add self-loops to `edge_index`. We need to do the
+                # same for `edge_mask` (but do not train those).
+                if out.size(self.node_dim) != edge_mask.size(0):
+                    loop = edge_mask.new_ones(size[0])
+                    edge_mask = torch.cat([edge_mask, loop], dim=0)
+                assert out.size(self.node_dim) == edge_mask.size(0)
+                out = out * edge_mask.view([-1] + [1] * (out.dim() - 1))
+            elif self.__explain_flow__:
+                edge_mask = self.layer_edge_mask
                 # Some ops add self-loops to `edge_index`. We need to do the
                 # same for `edge_mask` (but do not train those).
                 if out.size(self.node_dim) != edge_mask.size(0):

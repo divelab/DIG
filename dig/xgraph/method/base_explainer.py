@@ -141,6 +141,14 @@ class ExplainerBase(nn.Module):
 
         return trans_mask
 
+    def batch_input(self, x, edge_index, batch_size):
+        batch_x = x.repeat(batch_size, 1)
+        batch_batch = torch.arange(batch_size, device=self.device).unsqueeze(1).repeat(1, self.num_nodes).view(-1)
+        batch_edge_batch = torch.arange(batch_size, device=self.device).unsqueeze(1).repeat(1, self.num_edges).view(-1)
+        batch_edge_index = edge_index.repeat(1, batch_size) + batch_edge_batch * self.num_nodes
+        batch = Batch(x=batch_x, edge_index=batch_edge_index, batch=batch_batch)
+        return batch
+
     def visualize_graph(self, node_idx: int, edge_index: Tensor, edge_mask: Tensor, y: Tensor = None,
                         threshold: float = None, nolabel: bool = True, **kwargs) -> Tuple[Axes, nx.DiGraph]:
         r"""Visualizes the subgraph around :attr:`node_idx` given an edge mask
@@ -472,3 +480,19 @@ class WalkBase(ExplainerBase):
         def __exit__(self, *args):
             for idx, module in enumerate(self.cls.mp_layers):
                 module._explain = False
+
+    class temp_mask(object):
+
+        def __init__(self, cls, temp_edge_mask):
+            self.cls = cls
+            self.temp_edge_mask = temp_edge_mask
+
+        def __enter__(self):
+
+            for idx, module in enumerate(self.cls.mp_layers):
+                module.__explain_flow__ = True
+                module.layer_edge_mask = self.temp_edge_mask[idx]
+
+        def __exit__(self, *args):
+            for idx, module in enumerate(self.cls.mp_layers):
+                module.__explain_flow__ = False

@@ -170,7 +170,7 @@ class GNNExplainer(ExplainerBase):
 
                     edge_masks.append(edge_mask)
 
-        hard_edge_masks = [self.control_sparsity(mask, sparsity=kwargs.get('sparsity'))
+        hard_edge_masks = [self.control_sparsity(mask, sparsity=kwargs.get('sparsity')).sigmoid()
                            for mask in edge_masks]
 
         with torch.no_grad():

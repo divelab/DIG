@@ -31,7 +31,7 @@
 <!--- [![Contributors][contributor-image]][contributor-url] -->
 
 
-**[Documentation](https://diveintographs.readthedocs.io)** | **[Paper [JMLR]](https://www.jmlr.org/papers/v22/21-0343.html)** | **[Tutorials](https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html#)** | **[Benchmarks](https://github.com/divelab/DIG/tree/dig-stable/benchmarks)** |  **[Examples](https://github.com/divelab/DIG/tree/dig-stable/examples)** | **[Join the DIG slack community now!:fire:](https://join.slack.com/t/dive-into-graphs/shared_invite/zt-1i9kn731c-RhLA1zcEGHXbIToxdVqo0g)**
+**[Documentation](https://diveintographs.readthedocs.io)** | **[Paper [JMLR]](https://www.jmlr.org/papers/v22/21-0343.html)** | **[Tutorials](https://diveintographs.readthedocs.io/en/latest/tutorials/graphdf.html#)** | **[Benchmarks](https://github.com/divelab/DIG/tree/dig-stable/benchmarks)** |  **[Examples](https://github.com/divelab/DIG/tree/dig-stable/examples)** | **[Colab Demo](https://colab.research.google.com/drive/1eM1vcjcMLbT9om15Env8F-s265GSm4qI?usp=sharing)** | **[slack community:fire:](https://join.slack.com/t/dive-into-graphs/shared_invite/zt-1i9kn731c-RhLA1zcEGHXbIToxdVqo0g)**
 
 *DIG: Dive into Graphs* is a turnkey library for graph deep learning research.
 
@@ -55,7 +55,7 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 
 
 <p align="center">
-<img src="https://github.com/divelab/DIG/blob/dig-stable/imgs/DIG-overview.png" width="700" class="center" alt="logo"/>
+<img src="https://github.com/divelab/DIG/blob/dig-stable/docs/imgs/DIG-overview.png" width="700" class="center" alt="logo"/>
     <br/>
 </p>
 
@@ -101,7 +101,7 @@ run3d.run(device, train_dataset, valid_dataset, test_dataset, model, loss_func, 
 
 * [Graph Generation](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph): [`JT-VAE`](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/JTVAE), [`GraphAF`](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/GraphAF), [`GraphDF`](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/GraphDF), [`GraphEBM`](https://github.com/divelab/DIG/tree/dig-stable/examples/ggraph/GraphEBM).
 * [Self-supervised Learning on Graphs](https://github.com/divelab/DIG/tree/dig-stable/examples/sslgraph): [`InfoGraph`](https://github.com/divelab/DIG/blob/dig-stable/examples/sslgraph/example_infograph.ipynb), [`GRACE`](https://github.com/divelab/DIG/blob/dig-stable/examples/sslgraph/example_grace.ipynb), [`MVGRL`](https://github.com/divelab/DIG/blob/dig-stable/examples/sslgraph/example_mvgrl.ipynb), [`GraphCL`](https://github.com/divelab/DIG/blob/dig-stable/examples/sslgraph/example_graphcl.ipynb), [`LaGraph (v1 supported)`](https://github.com/divelab/DIG/tree/dig/examples/sslgraph/LaGraph).
-* [Explainability of Graph Neural Networks](https://github.com/divelab/DIG/tree/dig-stable/examples/xgraph): [`DeepLIFT`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/deeplift.ipynb), [`GNN-LRP`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/gnn_lrp.ipynb), [`GNNExplainer`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/gnnexplainer.ipynb), [`GradCAM`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/gradcam.ipynb), [`PGExplainer`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/pgexplainer.ipynb), [`SubgraphX`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/subgraphx.ipynb).
+* [Explainability of Graph Neural Networks](https://github.com/divelab/DIG/tree/dig-stable/examples/xgraph): [`DeepLIFT`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/deeplift.ipynb), [`GNN-LRP`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/gnn_lrp.ipynb), [`FlowX`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/flowx.ipynb), [`GNNExplainer`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/gnnexplainer.ipynb), [`GradCAM`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/gradcam.ipynb), [`PGExplainer`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/pgexplainer.ipynb), [`SubgraphX`](https://github.com/divelab/DIG/blob/dig-stable/examples/xgraph/subgraphx.ipynb).
 * [Deep Learning on 3D Graphs](https://github.com/divelab/DIG/tree/dig-stable/examples/threedgraph): [`SchNet`](https://github.com/divelab/DIG/blob/dig-stable/examples/threedgraph/threedgraph.ipynb), [`DimeNet++`](https://github.com/divelab/DIG/blob/dig-stable/examples/threedgraph/threedgraph.ipynb), [`SphereNet`](https://github.com/divelab/DIG/blob/dig-stable/examples/threedgraph/threedgraph.ipynb).
 * [Graph OOD (GOOD) datasets](https://github.com/divelab/DIG/tree/dig-stable/examples/oodgraph): `GOODHIV`, `GOODPCBA`, `GOODZINC`, `GOODCMNIST`, `GOODMotif`, `GOODCora`, `GOODArxiv`, `GOODCBAS`.
 
