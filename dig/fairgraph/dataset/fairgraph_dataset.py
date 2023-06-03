@@ -1,4 +1,4 @@
-from torch_geometric.data import InMemoryDataset, download_url, Data
+from torch_geometric.data import InMemoryDataset
 import torch
 import numpy as np
 import os
@@ -11,11 +11,11 @@ from graphsaint.minibatch import Minibatch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class POKEC(InMemoryDataset):
-    r'''
-        `Pockec <https://snap.stanford.edu/data/soc-pokec.html>` is a social network dataset.
+    r"""Pockec is a social network dataset. Two `different datasets <https://github.com/EnyanDai/FairGNN/tree/main/dataset/pokec>`_ (namely pockec_z and pockec_n) are sampled
+        from the original `Pockec dataset <https://snap.stanford.edu/data/soc-pokec.html>`_.
 
         Args:
-            root (string, optional): Root directory where the dataset should be saved. (default: :obj:`./pokec`)
+            root (str, optional): Root directory where the dataset should be saved. (default: :obj:`./pokec`)
             transform (callable, optional): A function/transform that takes in an
                 :obj:`torch_geometric.data.Data` object and returns a transformed
                 version. The data object will be transformed before every access.
@@ -28,11 +28,22 @@ class POKEC(InMemoryDataset):
                 :obj:`torch_geometric.data.Data` object and returns a boolean
                 value, indicating whether the data object should be included in the
                 final dataset. (default: :obj:`None`)
-            train_test_valid_split (:obj:`List`, optional): A List containing the train, test and validation mask percentages. (default: :obj:`[0.7,0.15,0.15]`)
-    '''
-    def __init__(self, root='./pokec', transform=None, pre_transform=None, pre_filter=None, train_test_valid_split=[0.7,0.15,0.15], batch_size=1000):
-        self.name = "POKEC"
-        self.dataset = 'region_job'
+            batch_size (int, optional): The batch size used for minibatch creation. Defaults to 1_000
+            dataset_sample (str, optional): The sample (should be one of `pockec_z` or `pockec_n`) to be used in choosing the POKEC dataset. Defaults to `pockec_z`
+        
+        :raise: Exception: 
+            When invalid dataset_sample is provided. 
+
+    """
+    def __init__(self, root='./pokec', transform=None, pre_transform=None, pre_filter=None, batch_size=1_000, dataset_sample='pockec_z'):
+        self.name = "POKEC_Z"
+        self.dataset_sample = dataset_sample
+        if self.dataset_sample=='pockec_z':
+            self.dataset = 'region_job'
+        elif self.dataset_sample=='pockec_n':
+            self.dataset = 'region_job_2'
+        else:
+            raise Exception('Invalid dataset sample! Should be one of pockec_z or pockec_n')
         self.sens_attr = "region"
         self.predict_attr = "I_am_working_in_field"
         self.label_number = 50000
@@ -40,31 +51,19 @@ class POKEC(InMemoryDataset):
         self.seed = 20
         self.test_idx=False
         self.batch_size = batch_size
-
-        # assert that train_test_valid_split is valid:
-        assert len(train_test_valid_split)==3
-        assert math.isclose(sum(train_test_valid_split),1.)
-
-        [self.train_mask_split,self.test_mask_split,self.valid_mask_split] = train_test_valid_split
         
         super(POKEC, self).__init__(root, transform, pre_transform, pre_filter)
         # self.adj,self.features,self.sens,self.idx_sens_train,self.minibatch = torch.load(self.processed_paths[0])
     
     @property
     def raw_file_names(self):
-        return ["region_job.csv","region_job_relationship.txt","region_job.embedding"]
+        return [f"{self.dataset}.csv",f"{self.dataset}_relationship.txt",f"{self.dataset}.embedding"]
 
     @property
     def processed_file_names(self):
         return ["pokec.pt"]
 
     def download(self):
-        # Download to `self.raw_dir`.
-        # temporarlity retreiving dataset csv file path from direct path
-        # ideally should be fetched from DIG storage repository
-        # download_url(os.environ.get('POKEC__REGION_JOB'),self.raw_dir)
-        # download_url(os.environ.get('POKEC__REGION_JOB_EMBEDDING'),self.raw_dir)
-        # download_url(os.environ.get('POKEC__REGION_JOB_RELATIONSHIOP'),self.raw_dir)
         pass
 
     def create_minibatch(self):
@@ -76,9 +75,6 @@ class POKEC(InMemoryDataset):
         self.minibatch.set_sampler(train_phase)
 
     def read_graph(self):
-        """
-        Returns .
-        """
         print(f'Loading {self.dataset} dataset from {self.raw_paths[0]}')
         # raw_paths[0] will be region_job.csv
         idx_features_labels = pd.read_csv(os.path.join(os.getcwd(),self.raw_paths[0]))
@@ -169,16 +165,16 @@ class POKEC(InMemoryDataset):
         # print(f'Saved to {self.processed_paths[0]}')
 
     def describe(self):
-        print("Pokec Pyg Dataset")
+        print(f"Pokec {self.dataset_sample} Pyg Dataset")
         print("Nodes:", len(self.data.x), "Edges:", len(self.data.edge_index[0]))
 
 
 class NBA(InMemoryDataset):
     r'''
-        `Pockec <https://snap.stanford.edu/data/soc-pokec.html>` is a social network dataset.
+        `NBA <https://github.com/EnyanDai/FairGNN/tree/main/dataset/NBA>` is an NBA on court performance dataset along salary, social engagement etc.
 
         Args:
-            root (string, optional): Root directory where the dataset should be saved. (default: :obj:`./pokec`)
+            root (str, optional): Root directory where the dataset should be saved. (default: :obj:`./nba`)
             transform (callable, optional): A function/transform that takes in an
                 :obj:`torch_geometric.data.Data` object and returns a transformed
                 version. The data object will be transformed before every access.
@@ -191,9 +187,8 @@ class NBA(InMemoryDataset):
                 :obj:`torch_geometric.data.Data` object and returns a boolean
                 value, indicating whether the data object should be included in the
                 final dataset. (default: :obj:`None`)
-            train_test_valid_split (:obj:`List`, optional): A List containing the train, test and validation mask percentages. (default: :obj:`[0.7,0.15,0.15]`)
     '''
-    def __init__(self, root='./nba', transform=None, pre_transform=None, pre_filter=None, train_test_valid_split=[0.7,0.15,0.15], batch_size=1000):
+    def __init__(self, root='./nba', transform=None, pre_transform=None, pre_filter=None):
         self.name = "NBA"
         self.dataset = 'nba'
         self.sens_attr = "country"
@@ -202,13 +197,6 @@ class NBA(InMemoryDataset):
         self.sens_number = 500
         self.seed = 20
         self.test_idx=True
-        self.batch_size = batch_size
-
-        # assert that train_test_valid_split is valid:
-        assert len(train_test_valid_split)==3
-        assert math.isclose(sum(train_test_valid_split),1.)
-
-        [self.train_mask_split,self.test_mask_split,self.valid_mask_split] = train_test_valid_split
         
         super(NBA, self).__init__(root, transform, pre_transform, pre_filter)
         # self.adj,self.features,self.sens,self.idx_sens_train,self.minibatch = torch.load(self.processed_paths[0])
@@ -222,12 +210,6 @@ class NBA(InMemoryDataset):
         return ["nba.pt"]
 
     def download(self):
-        # Download to `self.raw_dir`.
-        # temporarlity retreiving dataset csv file path from direct path
-        # ideally should be fetched from DIG storage repository
-        # download_url(os.environ.get('POKEC__REGION_JOB'),self.raw_dir)
-        # download_url(os.environ.get('POKEC__REGION_JOB_EMBEDDING'),self.raw_dir)
-        # download_url(os.environ.get('POKEC__REGION_JOB_RELATIONSHIOP'),self.raw_dir)
         pass
 
     def read_graph(self):

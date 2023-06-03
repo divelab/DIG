@@ -3,7 +3,7 @@ from dig.fairgraph.dataset import POKEC, NBA
 import torch
 
 # Load the dataset and split
-pokec = POKEC()
+pokec = POKEC(dataset_sample='pockec_z') # you may also choose 'pockec_n'
 
 # Train and evaluate
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

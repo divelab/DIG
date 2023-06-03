@@ -4,7 +4,7 @@ import torch
 
 
 # # Load the dataset and split
-# pokec = POKEC()
+# pokec = POKEC(dataset_sample='pockec_n')
 
 # # Define model, loss, and evaluation
 
@@ -26,5 +26,5 @@ nba = NBA()
 # Train and evaluate
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 run_fairgraph = run()
-run_fairgraph.run(device,dataset=nba,model='Graphair',epochs=2_000,test_epochs=1_000,batch_size=100,
+run_fairgraph.run(device,dataset=nba,model='Graphair',epochs=2_000,test_epochs=1_000,
             lr=1e-4,weight_decay=1e-5)

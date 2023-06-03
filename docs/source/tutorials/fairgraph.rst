@@ -39,7 +39,7 @@ Finally, we train the model and print test results.
 
 .. code-block ::
 
-    run_fairgraph.run(device,dataset=nba,model='Graphair',epochs=2_000,test_epochs=1_000,batch_size=100,
+    run_fairgraph.run(device,dataset=nba,model='Graphair',epochs=2_000,test_epochs=1_000,
             lr=1e-4,weight_decay=1e-5)
 
 Output:

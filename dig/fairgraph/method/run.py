@@ -34,7 +34,7 @@ class run():
         dataset_name = dataset.name
 
         features = dataset.features
-        if dataset_name=='POKEC':
+        if dataset_name=='POKEC_Z' or dataset_name=='POKEC_N':
             minibatch = dataset.minibatch
         sens = dataset.sens
         adj = dataset.adj
@@ -48,7 +48,7 @@ class run():
             classifier_model = Classifier(input_dim=64,hidden_dim=64)
             model = graphair(aug_model=aug_model,f_encoder=f_encoder,sens_model=sens_model,classifier_model=classifier_model, lr=lr,weight_decay=weight_decay,batch_size=batch_size,dataset=dataset_name).to(device)
         
-        if dataset_name=='POKEC':
+        if dataset_name=='POKEC_Z' or dataset_name=='POKEC_N':
             # call fit_batch_GraphSAINT
             st_time = time.time()
             model.fit_batch_GraphSAINT(epochs=epochs,adj=adj, x=features,sens=sens,idx_sens = idx_sens,minibatch=minibatch, warmup=0, adv_epoches=1)
