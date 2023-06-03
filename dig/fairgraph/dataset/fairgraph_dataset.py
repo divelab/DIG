@@ -1,8 +1,6 @@
-from torch_geometric.data import InMemoryDataset
 import torch
 import numpy as np
 import os
-import math
 import pandas as pd
 import scipy.sparse as sp
 import random
@@ -10,32 +8,25 @@ from graphsaint.minibatch import Minibatch
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-class POKEC(InMemoryDataset):
+class POKEC():
     r"""Pockec is a social network dataset. Two `different datasets <https://github.com/EnyanDai/FairGNN/tree/main/dataset/pokec>`_ (namely pockec_z and pockec_n) are sampled
         from the original `Pockec dataset <https://snap.stanford.edu/data/soc-pokec.html>`_.
 
-        Args:
-            root (str, optional): Root directory where the dataset should be saved. (default: :obj:`./pokec`)
-            transform (callable, optional): A function/transform that takes in an
-                :obj:`torch_geometric.data.Data` object and returns a transformed
-                version. The data object will be transformed before every access.
-                (default: :obj:`None`)
-            pre_transform (callable, optional): A function/transform that takes in
-                an :obj:`torch_geometric.data.Data` object and returns a
-                transformed version. The data object will be transformed before
-                being saved to disk. (default: :obj:`None`)
-            pre_filter (callable, optional): A function that takes in an
-                :obj:`torch_geometric.data.Data` object and returns a boolean
-                value, indicating whether the data object should be included in the
-                final dataset. (default: :obj:`None`)
-            batch_size (int, optional): The batch size used for minibatch creation. Defaults to 1_000
-            dataset_sample (str, optional): The sample (should be one of `pockec_z` or `pockec_n`) to be used in choosing the POKEC dataset. Defaults to `pockec_z`
+        
+        :param root: Root directory where the dataset should be saved, defaults to :obj:`pokec/`
+        :type root: (str, optional)
+        
+        :param batch_size: The batch size used for minibatch creation, defaults to 1_000
+        :type batch_size: (int, optional)
+
+        :param dataset_sample: The sample (should be one of `pockec_z` or `pockec_n`) to be used in choosing the POKEC dataset. Defaults to `pockec_z`
+        :type dataset_sample: (str, optional)
         
         :raise: Exception: 
             When invalid dataset_sample is provided. 
 
     """
-    def __init__(self, root='./pokec', transform=None, pre_transform=None, pre_filter=None, batch_size=1_000, dataset_sample='pockec_z'):
+    def __init__(self, root='pokec/', batch_size=1_000, dataset_sample='pockec_z'):
         self.name = "POKEC_Z"
         self.dataset_sample = dataset_sample
         if self.dataset_sample=='pockec_z':
@@ -51,20 +42,12 @@ class POKEC(InMemoryDataset):
         self.seed = 20
         self.test_idx=False
         self.batch_size = batch_size
-        
-        super(POKEC, self).__init__(root, transform, pre_transform, pre_filter)
-        # self.adj,self.features,self.sens,self.idx_sens_train,self.minibatch = torch.load(self.processed_paths[0])
+        self.data_path = os.path.join(os.path.dirname(__file__),root)
+        self.process()
     
     @property
-    def raw_file_names(self):
+    def raw_paths(self):
         return [f"{self.dataset}.csv",f"{self.dataset}_relationship.txt",f"{self.dataset}.embedding"]
-
-    @property
-    def processed_file_names(self):
-        return ["pokec.pt"]
-
-    def download(self):
-        pass
 
     def create_minibatch(self):
         ids = np.arange(self.features.shape[0])
@@ -75,9 +58,9 @@ class POKEC(InMemoryDataset):
         self.minibatch.set_sampler(train_phase)
 
     def read_graph(self):
-        print(f'Loading {self.dataset} dataset from {self.raw_paths[0]}')
+        print(f'Loading {self.dataset} dataset from {self.data_path+self.raw_paths[0]}')
         # raw_paths[0] will be region_job.csv
-        idx_features_labels = pd.read_csv(os.path.join(os.getcwd(),self.raw_paths[0]))
+        idx_features_labels = pd.read_csv(os.path.join(os.getcwd(),self.data_path+self.raw_paths[0]))
         header = list(idx_features_labels.columns)
         header.remove("user_id")
 
@@ -93,7 +76,7 @@ class POKEC(InMemoryDataset):
         idx = np.array(idx_features_labels["user_id"], dtype=int)
         idx_map = {j: i for i, j in enumerate(idx)}
         # raw_paths[1] will be region_relationship.txt
-        edges_unordered = np.genfromtxt(os.path.join(os.getcwd(),self.raw_paths[1]), dtype=int)
+        edges_unordered = np.genfromtxt(os.path.join(os.getcwd(),self.data_path+self.raw_paths[1]), dtype=int)
 
         edges = np.array(list(map(idx_map.get, edges_unordered.flatten())),
                         dtype=int).reshape(edges_unordered.shape)
@@ -160,35 +143,16 @@ class POKEC(InMemoryDataset):
         self.adj = adj
 
         self.create_minibatch()
-        
-        # torch.save((self.adj,self.features,self.sens,self.idx_sens_train,self.minibatch),self.processed_paths[0])
-        # print(f'Saved to {self.processed_paths[0]}')
-
-    def describe(self):
-        print(f"Pokec {self.dataset_sample} Pyg Dataset")
-        print("Nodes:", len(self.data.x), "Edges:", len(self.data.edge_index[0]))
 
 
-class NBA(InMemoryDataset):
+class NBA():
     r'''
-        `NBA <https://github.com/EnyanDai/FairGNN/tree/main/dataset/NBA>` is an NBA on court performance dataset along salary, social engagement etc.
+        `NBA <https://github.com/EnyanDai/FairGNN/tree/main/dataset/NBA>`_ is an NBA on court performance dataset along salary, social engagement etc.
 
         Args:
-            root (str, optional): Root directory where the dataset should be saved. (default: :obj:`./nba`)
-            transform (callable, optional): A function/transform that takes in an
-                :obj:`torch_geometric.data.Data` object and returns a transformed
-                version. The data object will be transformed before every access.
-                (default: :obj:`None`)
-            pre_transform (callable, optional): A function/transform that takes in
-                an :obj:`torch_geometric.data.Data` object and returns a
-                transformed version. The data object will be transformed before
-                being saved to disk. (default: :obj:`None`)
-            pre_filter (callable, optional): A function that takes in an
-                :obj:`torch_geometric.data.Data` object and returns a boolean
-                value, indicating whether the data object should be included in the
-                final dataset. (default: :obj:`None`)
+            root (str, optional): Root directory where the dataset is found. (default: :obj:`nba/`)
     '''
-    def __init__(self, root='./nba', transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root='nba/'):
         self.name = "NBA"
         self.dataset = 'nba'
         self.sens_attr = "country"
@@ -197,28 +161,16 @@ class NBA(InMemoryDataset):
         self.sens_number = 500
         self.seed = 20
         self.test_idx=True
-        
-        super(NBA, self).__init__(root, transform, pre_transform, pre_filter)
-        # self.adj,self.features,self.sens,self.idx_sens_train,self.minibatch = torch.load(self.processed_paths[0])
-    
+        self.data_path = os.path.join(os.path.dirname(__file__),root)
+        self.process()
+
     @property
-    def raw_file_names(self):
+    def raw_paths(self):
         return ["nba.csv","nba_relationship.txt","nba.embedding"]
 
-    @property
-    def processed_file_names(self):
-        return ["nba.pt"]
-
-    def download(self):
-        pass
-
     def read_graph(self):
-        """
-        Returns .
-        """
-        print(f'Loading {self.dataset} dataset from {self.raw_paths[0]}')
-        # raw_paths[0] will be region_job.csv
-        idx_features_labels = pd.read_csv(os.path.join(os.getcwd(),self.raw_paths[0]))
+        print(f'Loading {self.dataset} dataset from {self.data_path+self.raw_paths[0]}')
+        idx_features_labels = pd.read_csv(os.path.join(os.getcwd(),self.data_path+self.raw_paths[0]))
         header = list(idx_features_labels.columns)
         header.remove("user_id")
 
@@ -234,7 +186,7 @@ class NBA(InMemoryDataset):
         idx = np.array(idx_features_labels["user_id"], dtype=int)
         idx_map = {j: i for i, j in enumerate(idx)}
         # raw_paths[1] will be nba_relationship.txt
-        edges_unordered = np.genfromtxt(os.path.join(os.getcwd(),self.raw_paths[1]), dtype=int)
+        edges_unordered = np.genfromtxt(os.path.join(os.getcwd(),self.data_path+self.raw_paths[1]), dtype=int)
 
         edges = np.array(list(map(idx_map.get, edges_unordered.flatten())),
                         dtype=int).reshape(edges_unordered.shape)
@@ -299,10 +251,3 @@ class NBA(InMemoryDataset):
         self.idx_sens_train = idx_sens_train.long().cuda()
 
         self.adj = adj
-        
-        # torch.save((self.adj,self.features,self.sens,self.idx_sens_train,self.minibatch),self.processed_paths[0])
-        # print(f'Saved to {self.processed_paths[0]}')
-
-    def describe(self):
-        print("NBA Dataset")
-        print("Nodes:", len(self.data.x), "Edges:", len(self.data.edge_index[0]))

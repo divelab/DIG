@@ -1,9 +1,6 @@
 from .Graphair import graphair,aug_module,GCN,GCN_Body,Classifier
-from dig.fairgraph.dataset.fairgraph_dataset import POKEC, NBA
-import torch
 
 import time
-import os
 
 class run():
     r"""
@@ -21,7 +18,7 @@ class run():
         Args:
             device (:obj:`torch.device`): Device for computation.
             model (str, optional): Defaults to `"Graphair`".
-            dataset (:obj:`torch_geometric.data.InMemoryDataset`): The dataset to train on. Should be one of :obj:`dig.fairgraph.dataset.fairgraph_dataset.POKEC` or :obj:`dig.fairgraph.dataset.fairgraph_dataset.NBA`.
+            dataset (:obj:`object`): The dataset to train on. Should be one of :obj:`dig.fairgraph.dataset.fairgraph_dataset.POKEC` or :obj:`dig.fairgraph.dataset.fairgraph_dataset.NBA`.
             epochs (int, optional): Number of epochs to train on. Defaults to 10_000.
             test_epochs (int, optional): Number of epochs to train the classifier while running evaluation. Defaults to 1_000.
             batch_size (int, optional): Number of samples in each minibatch in the training. Defaults to 1_000.

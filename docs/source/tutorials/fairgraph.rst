@@ -46,29 +46,20 @@ Output:
 
 .. parsed-literal::
 
-    =====Epoch 1 {'Train': 0.8305539944409076, 'Validation': 0.7885677814483643, 'Test': 0.7943109273910522}
-    =====Epoch 2 {'Train': 0.3417653005923415, 'Validation': 0.16290859878063202, 'Test': 0.16250823438167572}
-    =====Epoch 3 {'Train': 0.2626579807482881, 'Validation': 0.10924234241247177, 'Test': 0.1091669574379921}
-    =====Epoch 4 {'Train': 0.2185871605092249, 'Validation': 0.1412947177886963, 'Test': 0.14113298058509827}
-    =====Epoch 5 {'Train': 0.18415136586759867, 'Validation': 0.08948442339897156, 'Test': 0.08791808038949966}
-    =====Epoch 6 {'Train': 0.17059671088246983, 'Validation': 0.10857655853033066, 'Test': 0.1086759939789772}
-    =====Epoch 7 {'Train': 0.15622219235277093, 'Validation': 0.08192159235477448, 'Test': 0.08170071989297867}
-    =====Epoch 8 {'Train': 0.1442768630192958, 'Validation': 0.08120342344045639, 'Test': 0.08138693124055862}
-    =====Epoch 9 {'Train': 0.13906806218478485, 'Validation': 0.07339970022439957, 'Test': 0.0732196718454361}
-    =====Epoch 10 {'Train': 0.12617339688792625, 'Validation': 0.11456501483917236, 'Test': 0.11438193917274475}
-    =====Epoch 11 {'Train': 0.12321726725571651, 'Validation': 0.0715189278125763, 'Test': 0.07092428207397461}
-    =====Epoch 12 {'Train': 0.11304465457233598, 'Validation': 0.1164650246500969, 'Test': 0.11696784943342209}
-    =====Epoch 13 {'Train': 0.11311055924429181, 'Validation': 0.1142609491944313, 'Test': 0.11372711509466171}
-    =====Epoch 14 {'Train': 0.1103381712277869, 'Validation': 0.05894898623228073, 'Test': 0.05792950466275215}
-    =====Epoch 15 {'Train': 0.09813584842398945, 'Validation': 0.13913576304912567, 'Test': 0.1383834183216095}
-    =====Epoch 16 {'Train': 0.05428033658000465, 'Validation': 0.06030373275279999, 'Test': 0.059175316244363785}
-    =====Epoch 17 {'Train': 0.054203004988561614, 'Validation': 0.03810606151819229, 'Test': 0.03703922778367996}
-    =====Epoch 18 {'Train': 0.0530719623151666, 'Validation': 0.04359658062458038, 'Test': 0.043418560177087784}
-    =====Epoch 19 {'Train': 0.05202796294149651, 'Validation': 0.04247582331299782, 'Test': 0.04204947501420975}
-    =====Epoch 20 {'Train': 0.04962607438894397, 'Validation': 0.04090351238846779, 'Test': 0.040894996374845505}
-
-    Best validation MAE so far: 0.03810606151819229
-    Test MAE when got best validation result: 0.03703922778367996
+    Epoch: 0001 sens loss: 0.7270 contrastive loss: 7.0441 edge reconstruction loss: 0.7703 feature reconstruction loss: 0.3733
+    Epoch: 0002 sens loss: 0.7262 contrastive loss: 6.9677 edge reconstruction loss: 0.7623 feature reconstruction loss: 0.3744
+    Epoch: 0003 sens loss: 0.7247 contrastive loss: 7.0342 edge reconstruction loss: 0.7506 feature reconstruction loss: 0.3740
+    Epoch: 0004 sens loss: 0.7235 contrastive loss: 6.9492 edge reconstruction loss: 0.7338 feature reconstruction loss: 0.3749
+    Epoch: 0005 sens loss: 0.7238 contrastive loss: 6.9471 edge reconstruction loss: 0.7283 feature reconstruction loss: 0.3743
+    Epoch: 0006 sens loss: 0.7231 contrastive loss: 6.9312 edge reconstruction loss: 0.7163 feature reconstruction loss: 0.3712
+    Epoch: 0007 sens loss: 0.7219 contrastive loss: 6.9485 edge reconstruction loss: 0.7051 feature reconstruction loss: 0.3767
+    Epoch: 0008 sens loss: 0.7214 contrastive loss: 6.9033 edge reconstruction loss: 0.6952 feature reconstruction loss: 0.3702
+    Epoch: 0009 sens loss: 0.7204 contrastive loss: 6.8884 edge reconstruction loss: 0.6845 feature reconstruction loss: 0.3696
+    Epoch: 0010 sens loss: 0.7194 contrastive loss: 6.9383 edge reconstruction loss: 0.6713 feature reconstruction loss: 0.3743
+    Epoch: 0011 sens loss: 0.7188 contrastive loss: 6.9409 edge reconstruction loss: 0.6686 feature reconstruction loss: 0.3717
+    Epoch: 0012 sens loss: 0.7186 contrastive loss: 6.9375 edge reconstruction loss: 0.6573 feature reconstruction loss: 0.3735
+    Epoch: 0013 sens loss: 0.7182 contrastive loss: 6.9316 edge reconstruction loss: 0.6492 feature reconstruction loss: 0.3717
+    .....
 
 
 

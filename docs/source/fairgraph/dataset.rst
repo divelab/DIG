@@ -14,7 +14,6 @@ A graph dataset with sensitive attributes based on the polish social network des
 
 .. automodule:: dig.fairgraph.dataset.fairgraph_dataset.POKEC
     :members:
-    :special-members:
     :autosummary:
     :autosummary-no-nesting:
 
@@ -23,10 +22,8 @@ NBA
 
 .. currentmodule:: dig.fairgraph.dataset.fairgraph_dataset.NBA
 
-A graph dataset with sensitive attributes based on the NBA player performance described `here <https://www.kaggle.com/datasets/noahgift/social-power-nba>`_.
+A graph dataset with sensitive attributes based on the NBA player performance as mentioned at `this page <https://www.kaggle.com/datasets/noahgift/social-power-nba>`_.
 
 .. automodule:: dig.fairgraph.dataset.fairgraph_dataset.NBA
     :members:
-    :special-members:
     :autosummary:
-    :autosummary-no-nesting:
