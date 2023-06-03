@@ -7,7 +7,7 @@ import os
 
 class run():
     r"""
-    The base script for running different Graphair methods.
+    Class that instantiates Graphair model and implements method to train and evaluate.
     """
 
     def __init__(self):
@@ -15,18 +15,18 @@ class run():
 
     def run(self,device,dataset,model='Graphair',epochs=10_000,test_epochs=1_000,batch_size=1_000,
             lr=1e-4,weight_decay=1e-5):
-        r""" The run script for training and validation
+        r""" Runs training and evaluation for a fairgraph model on the given dataset.
+        Check :obj:`examples.fairgraph.Graphair.run_graphair_nba` for examples on how to run the Graphair model.
 
         Args:
-            device (torch.device): Device for computation.
-            model (str, optional): Should be one of the Graphair, FairGraph, FairAug, GCA, Grace. Defaults to Graphair.
-            dataset (str, optional): The dataset to train on. Should be one of POKEC or NBA.
+            device (:obj:`torch.device`): Device for computation.
+            model (str, optional): Defaults to `"Graphair`".
+            dataset (:obj:`torch_geometric.data.InMemoryDataset`): The dataset to train on. Should be one of :obj:`dig.fairgraph.dataset.fairgraph_dataset.POKEC` or :obj:`dig.fairgraph.dataset.fairgraph_dataset.NBA`.
             epochs (int, optional): Number of epochs to train on. Defaults to 10_000.
+            test_epochs (int, optional): Number of epochs to train the classifier while running evaluation. Defaults to 1_000.
             batch_size (int, optional): Number of samples in each minibatch in the training. Defaults to 1_000.
             lr (float, optional): Learning rate. Defaults to 1e-4.
-            weight_decay (float, optional): Weight decay factor for regularization term. Defaults to 1e-5.
-            save_dir (str, optional): The path to save trained models. If set to :obj:`''`, will not save the model. Defaults to ''.
-            log_dir (str, optional): The path to save log files. If set to :obj:`''`, will not save the log files. Defaults to ''.
+            weight_decay (float, optional): Weight decay factor for regularization. Defaults to 1e-5.
         """
 
         # Train script

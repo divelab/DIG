@@ -4,7 +4,7 @@ dig.fairgraph.method
 .. contents:: Fairgraph Methods
     :local:
 
-GraphAug
+Graphair
 --------
 .. currentmodule:: dig.fairgraph.method.Graphair
 
@@ -13,6 +13,17 @@ implemented from the paper
 `LEARNING FAIR GRAPH REPRESENTATIONS VIA AUTOMATED DATA AUGMENTATIONS <https://openreview.net/forum?id=1_OGWcP1s9w>`_.
 
 .. automodule:: dig.fairgraph.method.Graphair
+    :members:
+    :special-members:
+    :autosummary:
+    :autosummary-no-nesting:
+
+Run Fairgraph
+-------------
+
+.. currentmodule:: dig.fairgraph.method.run
+
+.. automodule:: dig.fairgraph.method.run
     :members:
     :special-members:
     :autosummary:
