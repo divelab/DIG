@@ -5,9 +5,6 @@ from torch.nn import init
 import torch
 
 class GCNLayer(nn.Module):
-    r"""
-        Implementation of one layer of GCN described in the paper `Semi-Supervised Classification with Graph Convolutional Networks`
-    """
     def __init__(self, input_dim, output_dim, activation = F.relu, dropout = None, bias=True):
         super(GCNLayer, self).__init__()
         self.W = nn.Parameter(torch.FloatTensor(input_dim, output_dim))
@@ -41,9 +38,6 @@ class GCNLayer(nn.Module):
         return x
 
 class GCN_Body(nn.Module):
-    r'''
-        This is a utility class to build multilayer GCN model
-    '''
     def __init__(self, in_feats, n_hidden, out_feats, dropout, nlayer):
         super(GCN_Body, self).__init__()
         self.layers = nn.ModuleList()
@@ -69,9 +63,6 @@ class GCN_Body(nn.Module):
         return h
 
 class GCN(nn.Module):
-    r'''
-        This class implements a multilayer GCN followed by an MLP.
-    '''
     def __init__(self, in_feats, n_hidden, out_feats, nclass, dropout = 0.2, nlayer = 2):
         super(GCN, self).__init__()
         self.body = GCN_Body(in_feats, n_hidden, out_feats, dropout, nlayer)

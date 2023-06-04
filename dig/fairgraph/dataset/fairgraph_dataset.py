@@ -12,19 +12,17 @@ class POKEC():
     r"""Pockec is a social network dataset. Two `different datasets <https://github.com/EnyanDai/FairGNN/tree/main/dataset/pokec>`_ (namely pockec_z and pockec_n) are sampled
         from the original `Pockec dataset <https://snap.stanford.edu/data/soc-pokec.html>`_.
 
-        
-        :param root: Root directory where the dataset should be saved, defaults to :obj:`pokec/`
-        :type root: (str, optional)
+        :param root: The relative path to root directory where the dataset is found, defaults to :obj:`pokec/`
+        :type root: str, optional
         
         :param batch_size: The batch size used for minibatch creation, defaults to 1_000
-        :type batch_size: (int, optional)
+        :type batch_size: int, optional
 
         :param dataset_sample: The sample (should be one of `pockec_z` or `pockec_n`) to be used in choosing the POKEC dataset. Defaults to `pockec_z`
-        :type dataset_sample: (str, optional)
+        :type dataset_sample: str, optional
         
-        :raise: Exception: 
-            When invalid dataset_sample is provided. 
-
+        :raises: :obj:`Exception`
+            When invalid dataset_sample is provided.
     """
     def __init__(self, root='pokec/', batch_size=1_000, dataset_sample='pockec_z'):
         self.name = "POKEC_Z"
@@ -149,8 +147,8 @@ class NBA():
     r'''
         `NBA <https://github.com/EnyanDai/FairGNN/tree/main/dataset/NBA>`_ is an NBA on court performance dataset along salary, social engagement etc.
 
-        Args:
-            root (str, optional): Root directory where the dataset is found. (default: :obj:`nba/`)
+        :param root: The relative path to root directory where the dataset is found, defaults to :obj:`nba/`
+        :type root: str, optional
     '''
     def __init__(self, root='nba/'):
         self.name = "NBA"

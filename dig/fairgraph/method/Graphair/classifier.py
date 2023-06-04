@@ -2,9 +2,6 @@ import torch
 import torch.nn as nn
 
 class Classifier(nn.Module):
-    r"""
-        Implementation of classifier for sensitive attribute prediction
-    """
     def __init__(self, input_dim, hidden_dim) -> None:
         super(Classifier,self).__init__()
         self.model = nn.Sequential(

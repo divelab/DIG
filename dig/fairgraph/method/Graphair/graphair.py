@@ -7,7 +7,50 @@ from dig.fairgraph.utils.utils import scipysp_to_pytorchsp,accuracy,fair_metric
 
 class graphair(nn.Module):
     r'''
-        Implementation of Graphair network from the paper `"LEARNING FAIR GRAPH REPRESENTATIONS VIA AUTOMATED DATA AUGMENTATIONS`"
+        This class implements the Graphair model
+
+        :param aug_model: The augmentation model g described in the `paper <https://openreview.net/forum?id=1_OGWcP1s9w>`_ used for automated graph augmentations
+        :type aug_model: :obj:`torch.nn.Module`
+
+        :param f_encoder: The represnetation encoder f described in the `paper <https://openreview.net/forum?id=1_OGWcP1s9w>`_ used for contrastive learning
+        :type f_encoder: :obj:`torch.nn.Module`
+
+        :param sens_model: The adversary model k described in the `paper <https://openreview.net/forum?id=1_OGWcP1s9w>`_ used for adversarial learning
+        :type sens_model: :obj:`torch.nn.Module`
+
+        :param classifier_model: The classifier used to predict the sensitive label of nodes on the augmented graph data.
+        :type classifier_model: :obj:`torch.nn.Module`
+
+        :param lr: Learning rate for aug_model, f_encoder and sens_model. Defaults to 1e-4
+        :type lr: float,optional
+
+        :param weight_decay: Weight decay for regularization. Defaults to 1e-5
+        :type weight_decay: float,optional
+
+        :param alpha: The hyperparameter alpha used in the `paper <https://openreview.net/forum?id=1_OGWcP1s9w>`_ to scale adversarial loss component. Defaults to 20.0
+        :type alpha: float,optional
+
+        :param beta: The hyperparameter beta used in the `paper <https://openreview.net/forum?id=1_OGWcP1s9w>`_ to scale contrastive loss component. Defaults to 0.9
+        :type beta: float,optional
+
+        :param gamma: The hyperparameter gamma used in the `paper <https://openreview.net/forum?id=1_OGWcP1s9w>`_ to scale reconstruction loss component. Defaults to 0.7
+        :type gamma: float,optional
+
+        :param lam: The hyperparameter lambda used in the `paper <https://openreview.net/forum?id=1_OGWcP1s9w>`_ to compute reconstruction loss component. Defaults to 1.0
+        :type lam: float,optional
+
+        :param dataset: The name of the dataset being used. Used only for the model's output path. Defaults to 'POKEC'
+        :type dataset: str,optional
+
+        :param batch_size: The batch size paramter used for minibatch creation. Used only for the model's output path. Defaults to None
+        :type batch_size: int,optional
+
+        :param num_hidden: The input dimension for the MLP networks used in the model. Defaults to 64
+        :type num_hidden: int,optional
+
+        :param num_proj_hidden: The output dimension for the MLP networks used in the model. Defaults to 64
+        :type num_proj_hidden: int,optional
+
     '''
     def __init__(self, aug_model, f_encoder, sens_model, classifier_model, lr = 1e-4, weight_decay = 1e-5, alpha = 20, beta = 0.9, gamma = 0.7, lam = 1, dataset = 'POKEC', batch_size = None, num_hidden = 64, num_proj_hidden = 64):
         super(graphair, self).__init__()
