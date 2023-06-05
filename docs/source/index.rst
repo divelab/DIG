@@ -121,8 +121,8 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
    :maxdepth: 1
    :caption: Fair graph representation
 
-   fairgraph/method
    fairgraph/dataset
+   fairgraph/method
 
 .. toctree::
    :glob:
