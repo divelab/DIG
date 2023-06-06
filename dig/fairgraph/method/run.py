@@ -67,13 +67,5 @@ class run():
 
 
         # Test script
-        if model=='Graphair':
-            aug_model = aug_module(features, n_hidden=64, temperature=1).to(device)
-            f_encoder = GCN_Body(in_feats = features.shape[1], n_hidden = 64, out_feats = 64, dropout = 0.1, nlayer = 2).to(device)
-            sens_model = GCN(in_feats = features.shape[1], n_hidden = 64, out_feats = 64, nclass = 1).to(device)
-            classifier_model = Classifier(input_dim=64,hidden_dim=64)
-            model = graphair(aug_model=aug_model,f_encoder=f_encoder,sens_model=sens_model,classifier_model=classifier_model,lr=lr,weight_decay=weight_decay,dataset=dataset_name).to(device)
-        
-        # call test
         model.test(adj=adj,features=features,labels=dataset.labels,epochs=test_epochs,idx_train=dataset.idx_train,idx_val=dataset.idx_val,idx_test=dataset.idx_test,sens=sens)
 
