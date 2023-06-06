@@ -43,6 +43,7 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
    tutorials/subgraphx
    tutorials/threedgraph
    tutorials/oodgraph
+   tutorials/fairgraph
 
 
 .. toctree::
@@ -115,6 +116,13 @@ If you are working or plan to work on research in graph deep learning, DIG enabl
 
    oodgraph/good
 
+.. toctree::
+   :glob:
+   :maxdepth: 1
+   :caption: Fair graph representation
+
+   fairgraph/dataset
+   fairgraph/method
 
 .. toctree::
    :glob:
