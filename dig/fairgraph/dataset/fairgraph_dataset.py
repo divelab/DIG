@@ -4,61 +4,65 @@ import os
 import pandas as pd
 import scipy.sparse as sp
 import random
-from graphsaint.minibatch import Minibatch
+from torch_geometric.data import download_url
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class POKEC():
-    r"""Pockec is a social network dataset. Two `different datasets <https://github.com/EnyanDai/FairGNN/tree/main/dataset/pokec>`_ (namely pockec_z and pockec_n) are sampled
-        from the original `Pockec dataset <https://snap.stanford.edu/data/soc-pokec.html>`_.
+    r"""Pokec is a social network dataset. Two `different datasets <https://github.com/EnyanDai/FairGNN/tree/main/dataset/pokec>`_ (namely pokec_z and pokec_n) are sampled
+        from the original `Pokec dataset <https://snap.stanford.edu/data/soc-pokec.html>`_.
 
-        :param root: The relative path to root directory where the dataset is found, defaults to :obj:`pokec/`
+        :param data_path: The url where the dataset is found, defaults to :obj:`https://github.com/divelab/DIG_storage/raw/main/fairgraph/datasets/pockec/`
+        :type data_path: str, optional
+
+        :param root: The path to root directory where the dataset is saved, defaults to :obj:`./dataset/pokec`
         :type root: str, optional
-        
-        :param batch_size: The batch size used for minibatch creation, defaults to 1_000
-        :type batch_size: int, optional
 
-        :param dataset_sample: The sample (should be one of `pockec_z` or `pockec_n`) to be used in choosing the POKEC dataset. Defaults to `pockec_z`
+        :param dataset_sample: The sample (should be one of `pokec_z` or `pokec_n`) to be used in choosing the POKEC dataset. Defaults to `pokec_z`
         :type dataset_sample: str, optional
         
         :raises: :obj:`Exception`
             When invalid dataset_sample is provided.
     """
-    def __init__(self, root='pokec/', batch_size=1_000, dataset_sample='pockec_z'):
+    def __init__(self, 
+                data_path='https://github.com/divelab/DIG_storage/raw/main/fairgraph/datasets/pockec/',
+                root='./dataset/pokec',
+                dataset_sample='pokec_z'):
         self.name = "POKEC_Z"
+        self.root = root
         self.dataset_sample = dataset_sample
-        if self.dataset_sample=='pockec_z':
+        if self.dataset_sample=='pokec_z':
             self.dataset = 'region_job'
-        elif self.dataset_sample=='pockec_n':
+        elif self.dataset_sample=='pokec_n':
             self.dataset = 'region_job_2'
         else:
-            raise Exception('Invalid dataset sample! Should be one of pockec_z or pockec_n')
+            raise Exception('Invalid dataset sample! Should be one of pokec_z or pokec_n')
         self.sens_attr = "region"
         self.predict_attr = "I_am_working_in_field"
         self.label_number = 50000
         self.sens_number = 20000
         self.seed = 20
         self.test_idx=False
-        self.batch_size = batch_size
-        self.data_path = os.path.join(os.path.dirname(__file__),root)
+        self.data_path = data_path
         self.process()
     
     @property
     def raw_paths(self):
         return [f"{self.dataset}.csv",f"{self.dataset}_relationship.txt",f"{self.dataset}.embedding"]
-
-    def create_minibatch(self):
-        ids = np.arange(self.features.shape[0])
-        role = {'tr':ids.copy(), 'va': ids.copy(), 'te':ids.copy()}
-        train_params = {'sample_coverage': 500}
-        train_phase = {'sampler': 'rw', 'num_root': self.batch_size, 'depth': 3, 'end':30}
-        self.minibatch = Minibatch(self.adj, self.adj,role, train_params)
-        self.minibatch.set_sampler(train_phase)
+    
+    def download(self):
+        print('downloading raw files from:', self.data_path)
+        if not os.path.exists(self.root):
+            os.makedirs(self.root)
+        
+        for raw_path in self.raw_paths:
+            download_url(self.data_path+raw_path,self.root)
 
     def read_graph(self):
-        print(f'Loading {self.dataset} dataset from {self.data_path+self.raw_paths[0]}')
+        self.download()
+        print(f'Loading {self.dataset} dataset from {os.path.abspath(self.root+"/"+self.raw_paths[0])}')
         # raw_paths[0] will be region_job.csv
-        idx_features_labels = pd.read_csv(os.path.join(os.getcwd(),self.data_path+self.raw_paths[0]))
+        idx_features_labels = pd.read_csv(os.path.abspath(self.root+"/"+self.raw_paths[0]))
         header = list(idx_features_labels.columns)
         header.remove("user_id")
 
@@ -74,7 +78,7 @@ class POKEC():
         idx = np.array(idx_features_labels["user_id"], dtype=int)
         idx_map = {j: i for i, j in enumerate(idx)}
         # raw_paths[1] will be region_relationship.txt
-        edges_unordered = np.genfromtxt(os.path.join(os.getcwd(),self.data_path+self.raw_paths[1]), dtype=int)
+        edges_unordered = np.genfromtxt(os.path.abspath(self.root+"/"+self.raw_paths[1]), dtype=int)
 
         edges = np.array(list(map(idx_map.get, edges_unordered.flatten())),
                         dtype=int).reshape(edges_unordered.shape)
@@ -140,18 +144,21 @@ class POKEC():
 
         self.adj = adj
 
-        self.create_minibatch()
-
-
 class NBA():
     r'''
         `NBA <https://github.com/EnyanDai/FairGNN/tree/main/dataset/NBA>`_ is an NBA on court performance dataset along salary, social engagement etc.
 
-        :param root: The relative path to root directory where the dataset is found, defaults to :obj:`nba/`
+        :param data_path: The url where the dataset is found, defaults to :obj:`https://github.com/divelab/DIG_storage/raw/main/fairgraph/datasets/nba/`
+        :type data_path: str, optional
+
+        :param root: The path to root directory where the dataset is saved, defaults to :obj:`./dataset/nba`
         :type root: str, optional
     '''
-    def __init__(self, root='nba/'):
+    def __init__(self, 
+                data_path='https://github.com/divelab/DIG_storage/raw/main/fairgraph/datasets/nba/',
+                root='./dataset/nba'):
         self.name = "NBA"
+        self.root = root
         self.dataset = 'nba'
         self.sens_attr = "country"
         self.predict_attr = "SALARY"
@@ -159,16 +166,25 @@ class NBA():
         self.sens_number = 500
         self.seed = 20
         self.test_idx=True
-        self.data_path = os.path.join(os.path.dirname(__file__),root)
+        self.data_path = data_path
         self.process()
 
     @property
     def raw_paths(self):
         return ["nba.csv","nba_relationship.txt","nba.embedding"]
+    
+    def download(self):
+        print('downloading raw files from:', self.data_path)
+        if not os.path.exists(self.root):
+            os.makedirs(self.root)
+        
+        for raw_path in self.raw_paths:
+            download_url(self.data_path+raw_path,self.root)
 
     def read_graph(self):
-        print(f'Loading {self.dataset} dataset from {self.data_path+self.raw_paths[0]}')
-        idx_features_labels = pd.read_csv(os.path.join(os.getcwd(),self.data_path+self.raw_paths[0]))
+        self.download()
+        print(f'Loading {self.dataset} dataset from {os.path.abspath(self.root+"/"+self.raw_paths[0])}')
+        idx_features_labels = pd.read_csv(os.path.abspath(self.root+"/"+self.raw_paths[0]))
         header = list(idx_features_labels.columns)
         header.remove("user_id")
 
@@ -184,7 +200,7 @@ class NBA():
         idx = np.array(idx_features_labels["user_id"], dtype=int)
         idx_map = {j: i for i, j in enumerate(idx)}
         # raw_paths[1] will be nba_relationship.txt
-        edges_unordered = np.genfromtxt(os.path.join(os.getcwd(),self.data_path+self.raw_paths[1]), dtype=int)
+        edges_unordered = np.genfromtxt(os.path.abspath(self.root+"/"+self.raw_paths[1]), dtype=int)
 
         edges = np.array(list(map(idx_map.get, edges_unordered.flatten())),
                         dtype=int).reshape(edges_unordered.shape)

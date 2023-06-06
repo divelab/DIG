@@ -10,7 +10,7 @@ class run():
     def __init__(self):
         pass
 
-    def run(self,device,dataset,model='Graphair',epochs=10_000,test_epochs=1_000,batch_size=1_000,
+    def run(self,device,dataset,model='Graphair',epochs=10_000,test_epochs=1_000,
             lr=1e-4,weight_decay=1e-5):
         r""" This method runs training and evaluation for a fairgraph model on the given dataset.
         Check :obj:`examples.fairgraph.Graphair.run_graphair_nba.py` for examples on how to run the Graphair model.
@@ -31,9 +31,6 @@ class run():
         :param test_epochs: Number of epochs to train the classifier while running evaluation. Defaults to 1_000.
         :type test_epochs: int,optional
 
-        :param batch_size: Number of samples in each minibatch in the training. Defaults to 1_000.
-        :type batch_size: int,optional
-
         :param lr: Learning rate. Defaults to 1e-4.
         :type lr: float,optional
 
@@ -49,8 +46,6 @@ class run():
         dataset_name = dataset.name
 
         features = dataset.features
-        if dataset_name=='POKEC_Z' or dataset_name=='POKEC_N':
-            minibatch = dataset.minibatch
         sens = dataset.sens
         adj = dataset.adj
         idx_sens = dataset.idx_sens_train
@@ -61,22 +56,14 @@ class run():
             f_encoder = GCN_Body(in_feats = features.shape[1], n_hidden = 64, out_feats = 64, dropout = 0.1, nlayer = 2).to(device)
             sens_model = GCN(in_feats = features.shape[1], n_hidden = 64, out_feats = 64, nclass = 1).to(device)
             classifier_model = Classifier(input_dim=64,hidden_dim=64)
-            model = graphair(aug_model=aug_model,f_encoder=f_encoder,sens_model=sens_model,classifier_model=classifier_model, lr=lr,weight_decay=weight_decay,batch_size=batch_size,dataset=dataset_name).to(device)
+            model = graphair(aug_model=aug_model,f_encoder=f_encoder,sens_model=sens_model,classifier_model=classifier_model, lr=lr,weight_decay=weight_decay,dataset=dataset_name).to(device)
         else:
             raise Exception('At this moment, only Graphair is supported!')
         
-        if dataset_name=='POKEC_Z' or dataset_name=='POKEC_N':
-            # call fit_batch_GraphSAINT
-            st_time = time.time()
-            model.fit_batch_GraphSAINT(epochs=epochs,adj=adj, x=features,sens=sens,idx_sens = idx_sens,minibatch=minibatch, warmup=0, adv_epoches=1)
-            print("Training time: ", time.time() - st_time)
-
-        
-        if dataset_name=='NBA':
-            # call fit_whole
-            st_time = time.time()
-            model.fit_whole(epochs=epochs,adj=adj, x=features,sens=sens,idx_sens = idx_sens,warmup=0, adv_epoches=1)
-            print("Training time: ", time.time() - st_time)
+        # call fit_whole
+        st_time = time.time()
+        model.fit_whole(epochs=epochs,adj=adj, x=features,sens=sens,idx_sens = idx_sens,warmup=0, adv_epoches=1)
+        print("Training time: ", time.time() - st_time)
 
 
         # Test script
@@ -85,7 +72,7 @@ class run():
             f_encoder = GCN_Body(in_feats = features.shape[1], n_hidden = 64, out_feats = 64, dropout = 0.1, nlayer = 2).to(device)
             sens_model = GCN(in_feats = features.shape[1], n_hidden = 64, out_feats = 64, nclass = 1).to(device)
             classifier_model = Classifier(input_dim=64,hidden_dim=64)
-            model = graphair(aug_model=aug_model,f_encoder=f_encoder,sens_model=sens_model,classifier_model=classifier_model,lr=lr,weight_decay=weight_decay,batch_size=batch_size,dataset=dataset_name).to(device)
+            model = graphair(aug_model=aug_model,f_encoder=f_encoder,sens_model=sens_model,classifier_model=classifier_model,lr=lr,weight_decay=weight_decay,dataset=dataset_name).to(device)
         
         # call test
         model.test(adj=adj,features=features,labels=dataset.labels,epochs=test_epochs,idx_train=dataset.idx_train,idx_val=dataset.idx_val,idx_test=dataset.idx_test,sens=sens)
