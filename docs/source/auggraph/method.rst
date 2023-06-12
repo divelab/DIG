@@ -18,3 +18,15 @@ implemented from the paper
     :special-members:
     :autosummary:
     :autosummary-no-nesting:
+
+S-Mixup
+--------
+.. currentmodule:: dig.auggraph.method.SMixup
+
+The S-Mixup from the `"Graph Mixup with Soft Alignments" <https://icml.cc/virtual/2023/poster/24930>`_ paper.
+
+.. automodule:: dig.auggraph.method.SMixup
+    :members:
+    :special-members:
+    :autosummary:
+    :autosummary-no-nesting:
