@@ -52,6 +52,8 @@ It includes unified implementations of **data interfaces**, **common algorithms*
 * **Explainability of Graph Neural Networks**: `dig.xgraph`
 * **Deep Learning on 3D Graphs**: `dig.threedgraph`
 * **Graph OOD**: `dig.oodgraph`
+* **Graph Augmentation**: `dig.auggraph`
+* **Fair Graph Learning**: `dig.fairgraph`
 
 
 <p align="center">
