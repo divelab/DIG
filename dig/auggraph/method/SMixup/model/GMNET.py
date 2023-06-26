@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_scatter import scatter
 from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool, GINConv
-from ogb.graphproppred.mol_encoder import AtomEncoder,BondEncoder
 
 class Readout(nn.Module):
     def __init__(self, node_feat_dim, node_hiddens, graph_hiddens, use_gate=True, pool_type='add'):
@@ -152,10 +151,8 @@ class GMNet(nn.Module):
     def __init__(self, in_dim, num_layers, hidden, pool_type='sum', use_gate=True, node_update_type='residual', layer_norm=False, ogb = False):
         super(GMNet, self).__init__()
         
-        if (ogb):
-            self.embedding = AtomEncoder(hidden)
-        else:
-            self.embedding = nn.Sequential(
+
+        self.embedding = nn.Sequential(
                 nn.Linear(in_dim, hidden),
             )
 
