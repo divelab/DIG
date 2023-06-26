@@ -27,3 +27,5 @@ dependencies:
     - sympy
     - pyscf>=1.7.6
     - hydra-core
+    - pygmtools
+    - pyro-ppl
