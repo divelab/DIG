@@ -111,8 +111,8 @@ class GraphEBM(Generator):
                         neg_adj.grad.data.clamp_(-0.01, 0.01)
 
 
-                    neg_x.data.add_(neg_x.grad.data, alpha=ld_step_size)
-                    neg_adj.data.add_(neg_adj.grad.data, alpha=ld_step_size)
+                    neg_x.data.add_(neg_x.grad.data, alpha=-ld_step_size)
+                    neg_adj.data.add_(neg_adj.grad.data, alpha=-ld_step_size)
 
                     neg_x.grad.detach_()
                     neg_x.grad.zero_()
@@ -301,8 +301,8 @@ class GraphEBM(Generator):
                         neg_adj.grad.data.clamp_(-0.01, 0.01)
 
 
-                    neg_x.data.add_(neg_x.grad.data, alpha=ld_step_size)
-                    neg_adj.data.add_(neg_adj.grad.data, alpha=ld_step_size)
+                    neg_x.data.add_(neg_x.grad.data, alpha=-ld_step_size)
+                    neg_adj.data.add_(neg_adj.grad.data, alpha=-ld_step_size)
 
                     neg_x.grad.detach_()
                     neg_x.grad.zero_()
