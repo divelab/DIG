@@ -39,9 +39,9 @@
 
 ## Why DIG?
 
-The key difference with current graph deep learning libraries, such as PyTorch Geometric (PyG) and Deep Graph Library (DGL), is that, while PyG and DGL support basic graph deep learning operations, DIG provides a unified testbed for higher level, research-oriented graph deep learning tasks, such as graph generation, self-supervised learning, explainability, 3D graphs, and graph out-of-distribution.
+The key difference with current graph deep learning libraries, such as PyTorch Geometric (PyG) and Deep Graph Library (DGL), is that, while PyG and DGL support basic graph deep learning operations, DIG provides a unified testbed for higher-level, research-oriented graph deep learning tasks, such as graph generation, self-supervised learning, explainability, 3D graphs, and graph out-of-distribution.
 
-If you are working or plan to work on research in graph deep learning, DIG enables you to develop your own methods within our extensible framework, and compare with current baseline methods using common datasets and evaluation metrics without extra efforts.
+If you are working or plan to work on research in graph deep learning, DIG enables you to develop your own methods within our extensible framework, and compare with current baseline methods using common datasets and evaluation metrics without extra effort.
 
 ## Overview
 
@@ -179,6 +179,11 @@ Please cite our [paper](https://jmlr.org/papers/v22/21-0343.html) if you find *D
 ## The Team
 
 *DIG: Dive into Graphs* is developed by [DIVE](https://github.com/divelab/)@TAMU. Contributors are Meng Liu*, Youzhi Luo*, Limei Wang*, Yaochen Xie*, Hao Yuan*, Shurui Gui*, Haiyang Yu*, Zhao Xu, Jingtun Zhang, Yi Liu, Keqiang Yan, Haoran Liu, Cong Fu, Bora Oztekin, Xuan Zhang, and Shuiwang Ji.
+
+## Acknowledgments
+
+This work was supported in part by National Science Foundation grants IIS-2006861, IIS-1955189, IIS-1908220, IIS-1908198, DBI-2028361, and DBI-1922969.
+
 
 ## Contact
 
