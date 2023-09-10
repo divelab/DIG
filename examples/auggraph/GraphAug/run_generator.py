@@ -22,6 +22,7 @@ parser.add_argument('--reward_gen_state_path', type=str,
                     default='./results/reward_gen_results/{}/{}/{}.pt'.format(dataset_name.value, model_type.value, str(last_checkpoint).zfill(4)),
                     help='File path for final training state of reward generation model')
 args = parser.parse_args()
+conf[REWARD_GEN_STATE_PATH] = args.reward_gen_state_path
 
 runner = RunnerGenerator(args.data_root_path, dataset_name, conf)
 runner.train_test(args.generator_results_path)
