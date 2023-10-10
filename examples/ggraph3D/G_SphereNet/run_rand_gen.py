@@ -1,6 +1,7 @@
 import json
 import pickle
 import argparse
+import torch
 from torch.utils.data import DataLoader
 from dig.ggraph3D.dataset import QM93DGEN, collate_fn
 from dig.ggraph3D.method import G_SphereNet
@@ -26,7 +27,8 @@ if args.train:
     loader = DataLoader(train_set, batch_size=conf['batch_size'], shuffle=True, collate_fn=collate_fn)
     runner.train(loader, lr=conf['lr'], wd=conf['weight_decay'], max_epochs=conf['max_epochs'], model_conf_dict=conf['model'], checkpoint_path=None, save_interval=conf['save_interval'], save_dir='rand_gen')
 else:
-    mol_dicts = runner.generate(model_conf_dict=conf['model'], checkpoint_path=args.model_path, n_mols=args.num_mols, chunk_size=conf['chunk_size'], num_min_node=conf['num_min_node'], num_max_node=conf['num_max_node'], temperature=conf['temperature'], focus_th=conf['focus_th'])
+    with torch.no_grad():
+        mol_dicts = runner.generate(model_conf_dict=conf['model'], checkpoint_path=args.model_path, n_mols=args.num_mols, chunk_size=conf['chunk_size'], num_min_node=conf['num_min_node'], num_max_node=conf['num_max_node'], temperature=conf['temperature'], focus_th=conf['focus_th'])
     evaluator = RandGenEvaluator()
 
     print('Evaluating chemical validity...')
