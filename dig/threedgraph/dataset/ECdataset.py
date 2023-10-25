@@ -111,11 +111,11 @@ class ECdataset(InMemoryDataset):
 
         # five side chain torsion angles
         # We only consider the first four torsion angles in side chains since only the amino acid arginine has five side chain torsion angles, and the fifth angle is close to 0.
-        angle1 = torch.unsqueeze(self.compute_diherals(v1, v2, v3),1)
-        angle2 = torch.unsqueeze(self.compute_diherals(v2, v3, v4),1)
-        angle3 = torch.unsqueeze(self.compute_diherals(v3, v4, v5),1)
-        angle4 = torch.unsqueeze(self.compute_diherals(v4, v5, v6),1)
-        angle5 = torch.unsqueeze(self.compute_diherals(v5, v6, v7),1)
+        angle1 = torch.unsqueeze(self.compute_dihedrals(v1, v2, v3),1)
+        angle2 = torch.unsqueeze(self.compute_dihedrals(v2, v3, v4),1)
+        angle3 = torch.unsqueeze(self.compute_dihedrals(v3, v4, v5),1)
+        angle4 = torch.unsqueeze(self.compute_dihedrals(v4, v5, v6),1)
+        angle5 = torch.unsqueeze(self.compute_dihedrals(v5, v6, v7),1)
 
         side_chain_angles = torch.cat((angle1, angle2, angle3, angle4),1)
         side_chain_embs = torch.cat((torch.sin(side_chain_angles), torch.cos(side_chain_angles)),1)
@@ -138,7 +138,7 @@ class ECdataset(InMemoryDataset):
         u1 = U[1:-1]
         u2 = U[2:]
 
-        angle = self.compute_diherals(u0, u1, u2)
+        angle = self.compute_dihedrals(u0, u1, u2)
         
         # add phi[0], psi[-1], omega[-1] with value 0
         angle = F.pad(angle, [1, 2]) 
@@ -147,7 +147,7 @@ class ECdataset(InMemoryDataset):
         return angle_features
 
     
-    def compute_diherals(self, v1, v2, v3):
+    def compute_dihedrals(self, v1, v2, v3):
         n1 = torch.cross(v1, v2)
         n2 = torch.cross(v2, v3)
         a = (n1 * n2).sum(dim=-1)
