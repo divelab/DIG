@@ -51,17 +51,21 @@ class ResidualLayer(torch.nn.Module):
 
 
 class init(torch.nn.Module):
-    def __init__(self, num_radial, hidden_channels, act=swish, use_node_features=True):
+    def __init__(self, num_radial, hidden_channels, act=swish, use_node_features=True, use_extra_node_feature=False):
         super(init, self).__init__()
         self.act = act
         self.use_node_features = use_node_features
+        self.use_extra_node_feature = use_extra_node_feature
         if self.use_node_features:
             self.emb = Embedding(95, hidden_channels)
         else: # option to use no node features and a learned embedding vector for each node instead
             self.node_embedding = nn.Parameter(torch.empty((hidden_channels,)))
             nn.init.normal_(self.node_embedding)
         self.lin_rbf_0 = Linear(num_radial, hidden_channels)
-        self.lin = Linear(3 * hidden_channels, hidden_channels)
+        if self.use_extra_node_feature:
+            self.lin = Linear(5 * hidden_channels, hidden_channels)
+        else:
+            self.lin = Linear(3 * hidden_channels, hidden_channels)
         self.lin_rbf_1 = nn.Linear(num_radial, hidden_channels, bias=False)
         self.reset_parameters()
 
@@ -72,12 +76,14 @@ class init(torch.nn.Module):
         self.lin.reset_parameters()
         glorot_orthogonal(self.lin_rbf_1.weight, scale=2.0)
 
-    def forward(self, x, emb, i, j):
+    def forward(self, x, node_feature, emb, i, j):
         rbf,_,_ = emb
         if self.use_node_features:
             x = self.emb(x)
         else:
             x = self.node_embedding[None, :].expand(x.shape[0], -1)
+        if node_feature != None and self.use_extra_node_feature:
+            x = torch.cat((x, node_feature), 1)
         rbf0 = self.act(self.lin_rbf_0(rbf))
         e1 = self.act(self.lin(torch.cat([x[i], x[j], rbf0], dim=-1)))
         e2 = self.lin_rbf_1(rbf) * e1
@@ -250,13 +256,17 @@ class SphereNet(torch.nn.Module):
         basis_emb_size_dist=8, basis_emb_size_angle=8, basis_emb_size_torsion=8, out_emb_channels=256,
         num_spherical=7, num_radial=6, envelope_exponent=5,
         num_before_skip=1, num_after_skip=2, num_output_layers=3,
-        act=swish, output_init='GlorotOrthogonal', use_node_features=True):
+        act=swish, output_init='GlorotOrthogonal', use_node_features=True, use_extra_node_feature=False, extra_node_feature_dim=1):
         super(SphereNet, self).__init__()
 
         self.cutoff = cutoff
         self.energy_and_force = energy_and_force
+        self.use_extra_node_feature = use_extra_node_feature
 
-        self.init_e = init(num_radial, hidden_channels, act, use_node_features=use_node_features)
+        if use_extra_node_feature:
+            self.extra_emb = Linear(extra_node_feature_dim, hidden_channels)
+
+        self.init_e = init(num_radial, hidden_channels, act, use_node_features=use_node_features, use_extra_node_feature=use_extra_node_feature)
         self.init_v = update_v(hidden_channels, out_emb_channels, out_channels, num_output_layers, act, output_init)
         self.init_u = update_u()
         self.emb = emb(num_spherical, num_radial, self.cutoff, envelope_exponent)
@@ -272,6 +282,8 @@ class SphereNet(torch.nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
+        if self.use_extra_node_feature:
+            self.extra_emb.reset_parameters()
         self.init_e.reset_parameters()
         self.init_v.reset_parameters()
         self.emb.reset_parameters()
@@ -283,6 +295,10 @@ class SphereNet(torch.nn.Module):
 
     def forward(self, batch_data):
         z, pos, batch = batch_data.z, batch_data.pos, batch_data.batch
+        if self.use_extra_node_feature and batch_data.node_feature != None:
+            extra_node_feature = self.extra_emb(batch_data.node_feature)
+        else:
+            extra_node_feature = None
         if self.energy_and_force:
             pos.requires_grad_()
         edge_index = radius_graph(pos, r=self.cutoff, batch=batch)
@@ -292,7 +308,7 @@ class SphereNet(torch.nn.Module):
         emb = self.emb(dist, angle, torsion, idx_kj)
 
         #Initialize edge, node, graph features
-        e = self.init_e(z, emb, i, j)
+        e = self.init_e(z, extra_node_feature, emb, i, j)
         v = self.init_v(e, i)
         u = self.init_u(torch.zeros_like(scatter(v, batch, dim=0)), v, batch) #scatter(v, batch, dim=0)
 
