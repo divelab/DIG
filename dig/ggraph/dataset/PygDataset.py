@@ -168,7 +168,7 @@ class PygDataset(InMemoryDataset):
         if hasattr(self.data, '__num_nodes__'):
             data.num_nodes = self.data.__num_nodes__[idx]
 
-        for key in self.data.keys:
+        for key in self.data.keys():
             item, slices = self.data[key], self.slices[key]
             if torch.is_tensor(item):
                 s = list(repeat(slice(None), item.dim()))
