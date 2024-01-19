@@ -35,6 +35,7 @@ class POKEC():
             self.dataset = 'region_job'
         elif self.dataset_sample=='pokec_n':
             self.dataset = 'region_job_2'
+            self.name = "POKEC_N"
         else:
             raise Exception('Invalid dataset sample! Should be one of pokec_z or pokec_n')
         self.sens_attr = "region"
