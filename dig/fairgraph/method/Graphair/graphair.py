@@ -3,7 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import scipy.sparse as sp
 import numpy as np
+import torch_scatter
 from dig.fairgraph.utils.utils import scipysp_to_pytorchsp,accuracy,fair_metric
+from torch_geometric.loader import GraphSAINTRandomWalkSampler
+from torch_geometric.data import Data
+from torch_geometric.utils import from_scipy_sparse_matrix, to_dense_adj, to_torch_sparse_tensor, to_edge_index, add_remaining_self_loops
 
 class graphair(nn.Module):
     r'''
@@ -49,7 +53,7 @@ class graphair(nn.Module):
         :type num_proj_hidden: int,optional
 
     '''
-    def __init__(self, aug_model, f_encoder, sens_model, classifier_model, lr = 1e-4, weight_decay = 1e-5, alpha = 20, beta = 0.9, gamma = 0.7, lam = 1, dataset = 'POKEC', num_hidden = 64, num_proj_hidden = 64):
+    def __init__(self, aug_model, f_encoder, sens_model, classifier_model, lr = 1e-4, weight_decay = 1e-5, alpha = 10.0, beta = 0.1, gamma = 0.5, lam = 0.5, dataset = 'POKEC', num_hidden = 64, num_proj_hidden = 64):
         super(graphair, self).__init__()
         self.aug_model = aug_model
         self.f_encoder = f_encoder
@@ -65,14 +69,13 @@ class graphair(nn.Module):
         self.criterion_cont= nn.CrossEntropyLoss()
         self.criterion_recons = nn.MSELoss()
 
-        self.optimizer_s = torch.optim.Adam(self.sens_model.parameters(), lr = 1e-4, weight_decay = 1e-5)
+        self.optimizer_s = torch.optim.Adam(self.sens_model.parameters(), lr = 1e-3, weight_decay = 1e-5)
 
         FG_params = [{'params': self.aug_model.parameters(), 'lr': 1e-4} ,  {'params':self.f_encoder.parameters()}]
-        self.optimizer = torch.optim.Adam(FG_params, lr = lr, weight_decay = weight_decay)
+        self.optimizer = torch.optim.Adam(FG_params, lr = 1e-3, weight_decay = weight_decay)
 
         self.optimizer_aug = torch.optim.Adam(self.aug_model.parameters(), lr = 1e-3, weight_decay = weight_decay)
-        self.optimizer_enc = torch.optim.Adam(self.f_encoder.parameters(), lr = lr, weight_decay = weight_decay)
-
+        self.optimizer_enc = torch.optim.Adam(self.f_encoder.parameters(), lr = 1e-3, weight_decay = weight_decay)
 
         self.fc1 = torch.nn.Linear(num_hidden, num_proj_hidden)
         self.fc2 = torch.nn.Linear(num_proj_hidden, num_hidden)
@@ -141,8 +144,6 @@ class graphair(nn.Module):
 
         adj = adj_norm.cuda()
         
-        best_contras = float("inf")
-        
         if warmup:
             for _ in range(warmup):
                 adj_aug, x_aug, adj_logits = self.aug_model(adj, x, adj_orig = adj_orig.cuda())
@@ -210,6 +211,135 @@ class graphair(nn.Module):
         self.save_path = "./checkpoint/graphair_{}_alpha{}_beta{}_gamma{}_lambda{}".format(self.dataset, self.alpha, self.beta, self.gamma, self.lam)
         torch.save(self.state_dict(),self.save_path)
     
+    def fit_batch(self, epochs, adj, x,sens,idx_sens,warmup=None, adv_epoches=1):
+
+        assert sp.issparse(adj)
+        if not isinstance(adj, sp.coo_matrix):
+            adj = sp.coo_matrix(adj)
+        adj.setdiag(1)
+        adj_orig = sp.csr_matrix(adj)
+        norm_w = adj_orig.shape[0]**2 / float((adj_orig.shape[0]**2 - adj_orig.sum()) * 2)
+        
+        idx_sens = idx_sens.cpu().numpy()
+        sens_mask = np.zeros((x.shape[0],1))
+        sens_mask[idx_sens] = 1.0
+        sens_mask = torch.from_numpy(sens_mask)
+        
+        edge_index, _ = from_scipy_sparse_matrix(adj)
+
+        miniBatchLoader = GraphSAINTRandomWalkSampler(Data(x=x, edge_index=edge_index, sens = sens, sens_mask = sens_mask), 
+                                                        batch_size = 1000, 
+                                                        walk_length = 3, 
+                                                        sample_coverage = 500, 
+                                                        num_workers = 0,
+                                                        save_dir = "./checkpoint/{}".format(self.dataset))
+        
+        def normalize_adjacency(adj):
+            # Calculate the degrees
+            row, col = adj.indices()
+            edge_weight = adj.values() if adj.values() is not None else torch.ones(row.size(0))
+            degree = torch_scatter.scatter_add(edge_weight, row, dim=0, dim_size=adj.size(0))
+
+            # Inverse square root of degree matrix
+            degree_inv_sqrt = degree.pow(-0.5)
+            degree_inv_sqrt[degree_inv_sqrt == float('inf')] = 0
+
+            # Normalize
+            row_inv = degree_inv_sqrt[row]
+            col_inv = degree_inv_sqrt[col]
+            norm_edge_weight = edge_weight * row_inv * col_inv
+
+            # Create the normalized sparse tensor
+            adj_norm = torch.sparse.FloatTensor(torch.stack([row, col]), norm_edge_weight, adj.size())
+            return adj_norm
+
+        if warmup:
+            for _ in range(warmup):
+                for data in miniBatchLoader:
+                    data = data.cuda()
+                    edge_index,_ = add_remaining_self_loops(data.edge_index)
+                    sub_adj = normalize_adjacency(to_torch_sparse_tensor(edge_index)).cuda()
+                    sub_adj_dense = to_dense_adj(edge_index = edge_index, max_num_nodes = data.x.shape[0])[0].float()
+                    adj_aug, x_aug, adj_logits = self.aug_model(sub_adj, data.x, adj_orig = sub_adj_dense)  
+
+                    edge_loss = norm_w * F.binary_cross_entropy_with_logits(adj_logits, sub_adj_dense)
+                    
+                    feat_loss =  self.criterion_recons(x_aug, data.x)
+                    recons_loss =  edge_loss + self.lam * feat_loss
+
+                    self.optimizer_aug.zero_grad()
+                    with torch.autograd.set_detect_anomaly(True):
+                        recons_loss.backward(retain_graph=True)
+                    self.optimizer_aug.step()
+
+                    print(
+                    'edge reconstruction loss: {:.4f}'.format(edge_loss.item()),
+                    'feature reconstruction loss: {:.4f}'.format(feat_loss.item()),
+                    )
+        
+
+        for epoch_counter in range(epochs):
+            for data in miniBatchLoader:
+                data = data.cuda()
+
+                ### generate fair view
+                edge_index,_ = add_remaining_self_loops(data.edge_index)
+                sub_adj = normalize_adjacency(to_torch_sparse_tensor(edge_index)).cuda()
+              
+                sub_adj_dense = to_dense_adj(edge_index = edge_index, max_num_nodes = data.x.shape[0])[0].float()
+                adj_aug, x_aug, adj_logits = self.aug_model(sub_adj, data.x, adj_orig = sub_adj_dense)  
+
+
+                ### extract node representations
+                h = self.projection(self.f_encoder(sub_adj, data.x))
+                h_prime = self.projection(self.f_encoder(adj_aug, x_aug))
+
+                ### update sens model
+                adj_aug_nograd = adj_aug.detach()
+                x_aug_nograd = x_aug.detach()
+
+                mask = (data.sens_mask == 1.0).squeeze()
+
+                if (epoch_counter == 0):
+                    sens_epoches = adv_epoches * 10
+                else:
+                    sens_epoches = adv_epoches
+                for _ in range(sens_epoches):
+
+                    s_pred , _  = self.sens_model(adj_aug_nograd, x_aug_nograd)
+                    senloss = torch.nn.BCEWithLogitsLoss(weight=data.node_norm, reduction='sum')(s_pred[mask].squeeze(), data.sens[mask].float())
+                     
+                    self.optimizer_s.zero_grad()
+                    senloss.backward()
+                    self.optimizer_s.step()
+
+                s_pred , _  = self.sens_model(adj_aug, x_aug)
+                senloss = torch.nn.BCEWithLogitsLoss(weight=data.node_norm, reduction='sum')(s_pred[mask].squeeze(), data.sens[mask].float())
+                    
+                ## update aug model
+                logits, labels = self.info_nce_loss_2views(torch.cat((h, h_prime), dim = 0))
+                contrastive_loss = (nn.CrossEntropyLoss(reduction='none')(logits, labels) * data.node_norm.repeat(2)).sum()
+                
+                ## update encoder
+                edge_loss = norm_w * F.binary_cross_entropy_with_logits(adj_logits, sub_adj_dense)    
+
+                feat_loss =  self.criterion_recons(x_aug, data.x)
+                recons_loss =  edge_loss + self.lam * feat_loss
+                loss = self.beta * contrastive_loss + self.gamma * recons_loss - self.alpha * senloss
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+            print('Epoch: {:04d}'.format(epoch_counter+1),
+            'sens loss: {:.4f}'.format(senloss.item()),
+            'contrastive loss: {:.4f}'.format(contrastive_loss.item()),
+            'edge reconstruction loss: {:.4f}'.format(edge_loss.item()),
+            'feature reconstruction loss: {:.4f}'.format(feat_loss.item()),
+            )
+
+        self.save_path = "./checkpoint/graphair_{}".format(self.dataset)
+        torch.save(self.state_dict(),self.save_path)
+    
 
     def test(self,adj,features,labels,epochs,idx_train,idx_val,idx_test,sens):
         h = self.forward(adj,features)
@@ -223,6 +353,7 @@ class graphair(nn.Module):
             torch.manual_seed(i *10)
             np.random.seed(i *10)
 
+            self.classifier.reset_parameters()
             # train classifier
             best_acc = 0.0
             best_test = 0.0

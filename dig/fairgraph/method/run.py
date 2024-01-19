@@ -60,12 +60,16 @@ class run():
         else:
             raise Exception('At this moment, only Graphair is supported!')
         
-        # call fit_whole
-        st_time = time.time()
-        model.fit_whole(epochs=epochs,adj=adj, x=features,sens=sens,idx_sens = idx_sens,warmup=0, adv_epoches=1)
-        print("Training time: ", time.time() - st_time)
-
+        if dataset_name == "NBA":
+            # call fit_whole
+            st_time = time.time()
+            model.fit_whole(epochs=epochs,adj=adj, x=features,sens=sens,idx_sens = idx_sens,warmup=50, adv_epoches=1)
+            print("Training time: ", time.time() - st_time)
+        else:
+            # call fit_batch
+            st_time = time.time()
+            model.fit_batch(epochs=epochs,adj=adj, x=features,sens=sens,idx_sens = idx_sens,warmup=50, adv_epoches=1)
+            print("Training time: ", time.time() - st_time)
 
         # Test script
         model.test(adj=adj,features=features,labels=dataset.labels,epochs=test_epochs,idx_train=dataset.idx_train,idx_val=dataset.idx_val,idx_test=dataset.idx_test,sens=sens)
-

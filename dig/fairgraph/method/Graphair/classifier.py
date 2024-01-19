@@ -13,3 +13,8 @@ class Classifier(nn.Module):
     def forward(self,h):
         return self.model(h)
 
+    def reset_parameters(self) -> None:
+        for layer in self.model:
+            if isinstance(layer, nn.Linear):
+                layer.reset_parameters()
+
