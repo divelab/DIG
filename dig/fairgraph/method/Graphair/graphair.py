@@ -7,7 +7,7 @@ import torch_scatter
 from dig.fairgraph.utils.utils import scipysp_to_pytorchsp,accuracy,fair_metric
 from torch_geometric.loader import GraphSAINTRandomWalkSampler
 from torch_geometric.data import Data
-from torch_geometric.utils import from_scipy_sparse_matrix, to_dense_adj, to_torch_sparse_tensor, to_edge_index, add_remaining_self_loops
+from torch_geometric.utils import from_scipy_sparse_matrix, to_dense_adj, to_torch_sparse_tensor, to_edge_index, add_remaining_self_loops, to_undirected
 
 class graphair(nn.Module):
     r'''
@@ -257,7 +257,7 @@ class graphair(nn.Module):
             for _ in range(warmup):
                 for data in miniBatchLoader:
                     data = data.cuda()
-                    edge_index,_ = add_remaining_self_loops(data.edge_index)
+                    edge_index,_ = add_remaining_self_loops(to_undirected(data.edge_index))
                     sub_adj = normalize_adjacency(to_torch_sparse_tensor(edge_index)).cuda()
                     sub_adj_dense = to_dense_adj(edge_index = edge_index, max_num_nodes = data.x.shape[0])[0].float()
                     adj_aug, x_aug, adj_logits = self.aug_model(sub_adj, data.x, adj_orig = sub_adj_dense)  
@@ -283,7 +283,7 @@ class graphair(nn.Module):
                 data = data.cuda()
 
                 ### generate fair view
-                edge_index,_ = add_remaining_self_loops(data.edge_index)
+                edge_index,_ = add_remaining_self_loops(to_undirected(data.edge_index))
                 sub_adj = normalize_adjacency(to_torch_sparse_tensor(edge_index)).cuda()
               
                 sub_adj_dense = to_dense_adj(edge_index = edge_index, max_num_nodes = data.x.shape[0])[0].float()
