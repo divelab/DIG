@@ -39,6 +39,8 @@ class FlowX(WalkBase):
     }
 
     def __init__(self, model, epochs=500, lr=3e-1, explain_graph=False, molecule=False):
+        raise Exception(
+            'This version of FlowX is deprecated. Please use the latest version in https://github.com/CM-BF/FlowX.')
         # def __init__(self, model, epochs=500, lr=1e-1, explain_graph=False, molecule=False):
         super().__init__(model=model, epochs=epochs, lr=lr, explain_graph=explain_graph, molecule=molecule)
 
