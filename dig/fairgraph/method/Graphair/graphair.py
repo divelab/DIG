@@ -210,7 +210,8 @@ class graphair(nn.Module):
 
         self.save_path = "./checkpoint/graphair_{}_alpha{}_beta{}_gamma{}_lambda{}".format(self.dataset, self.alpha, self.beta, self.gamma, self.lam)
         torch.save(self.state_dict(),self.save_path)
-    
+
+    ## Due to the license issue, we re-implement the batch training code using pyg.loader.GraphSAINTRandomWalkSampler instead of directly using GraphSAINT code in the original code. 
     def fit_batch(self, epochs, adj, x,sens,idx_sens,warmup=None, adv_epoches=1):
 
         assert sp.issparse(adj)
