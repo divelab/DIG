@@ -166,7 +166,7 @@ class NBA():
         self.label_number = 100
         self.sens_number = 500
         self.seed = 20
-        self.test_idx=True
+        self.test_idx=False
         self.data_path = data_path
         self.process()
 
