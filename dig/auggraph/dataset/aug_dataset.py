@@ -183,9 +183,9 @@ class TripleSet(Dataset):
         while pos_index == index:
             pos_index = random.sample(self.label_to_index_list[anchor_label], 1)[0]
         
-        neg_label = random.sample(self.label_to_index_list.keys(), 1)[0]
+        neg_label = random.sample(list(self.label_to_index_list.keys()), 1)[0]
         while neg_label == anchor_label:
-            neg_label = random.sample(self.label_to_index_list.keys(), 1)[0]
+            neg_label = random.sample(list(self.label_to_index_list.keys()), 1)[0]
         neg_index = random.sample(self.label_to_index_list[neg_label], 1)[0]
 
         pos_data, neg_data = self.dataset[pos_index], self.dataset[neg_index]
