@@ -131,7 +131,7 @@ class update_e(torch.nn.Module):
         glorot_orthogonal(self.lin_rbf.weight, scale=2.0)
 
     def forward(self, x, emb, idx_kj, idx_ji):
-        rbf0, sbf = emb
+        rbf0, sbf = emb ## e_{SBF}(d,tau) = sqrt(2/c^3 j_{l+1}^{3}....
         x1,_ = x
 
         x_ji = self.act(self.lin_ji(x1))
