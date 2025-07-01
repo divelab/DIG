@@ -32,7 +32,9 @@ class EdgePerturbation():
 
         if self.drop:
             idx_remain = dropout_adj(data.edge_index, p=self.ratio)[0]
-
+        else:
+            idx_remain = data.edge_index
+            
         if self.add:
             idx_add = torch.randint(node_num, (2, perturb_num), device=device)
 
